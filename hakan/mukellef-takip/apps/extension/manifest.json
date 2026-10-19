@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Mükellef Takip – GİB/SGK Aktarıcı",
+  "version": "0.3.0",
+  "description": "Açık olan GİB e-Beyanname / e-Tebligat veya SGK e-Bildirge sayfasındaki listeyi, sizin onayınızla Mükellef Takip'e aktarır. Şifre görmez, GİB'e veya SGK'ya kendisi istek atmaz.",
+  "action": {
+    "default_title": "GİB/SGK sayfasını Mükellef Takip'e aktar",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:4000/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ]
+}
