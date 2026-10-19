@@ -1,0 +1,3 @@
+[functions.gib-account]
+# JWT doğrulaması index.ts içinde auth.getUser ile zorunludur.
+verify_jwt = false

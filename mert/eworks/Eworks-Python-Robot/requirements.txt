@@ -1,0 +1,9 @@
+supabase>=2,<3
+python-dotenv>=1,<2
+pytesseract>=0.3,<1
+pillow>=12,<13
+playwright>=1.49,<2
+tzdata>=2025.1
+requests>=2,<3
+opencv-python>=4.10,<5
+numpy>=2,<3
