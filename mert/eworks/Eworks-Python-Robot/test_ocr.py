@@ -24,6 +24,24 @@ def result(text='', confidence=0):
 
 
 class OcrTests(unittest.TestCase):
+    def test_low_confidence_never_fills_a_guess(self):
+        with patch('gib_automation.pytesseract.image_to_data', return_value=result('WRONG', 15)):
+            self.assertEqual(read_captcha_suggestion(synthetic_image()), '')
+
+    def test_disagreeing_high_confidence_results_are_rejected(self):
+        with patch('gib_automation.pytesseract.image_to_data', side_effect=[
+                result('AB7X2', 95), result('AB7X2', 96),
+                result('ZZ9Y1', 97), result('AB7X2', 95)]):
+            self.assertEqual(read_captcha_suggestion(synthetic_image(), min_agreement=2), '')
+
+    def test_two_matching_confident_reads_required(self):
+        with patch('gib_automation.pytesseract.image_to_data', side_effect=[
+                result('AB7X2', 95), result('AB7X2', 96), result(), result()]):
+            self.assertEqual(read_captcha_suggestion(synthetic_image(), min_agreement=2), 'AB7X2')
+        with patch('gib_automation.pytesseract.image_to_data', side_effect=[
+                result('AB7X2', 95), result(), result(), result()]):
+            self.assertEqual(read_captcha_suggestion(synthetic_image(), min_agreement=2), '')
+
     def test_binary_images_remove_long_line_but_keep_foreground(self):
         variants = list(captcha_image_variants(synthetic_image()))
         self.assertEqual(len(variants), 4)

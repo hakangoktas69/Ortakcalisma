@@ -1,3 +1,7 @@
+# Güncel çalışma durumu — 19 Ekim 2026
+
+Yerel ddddocr motoru ve tek seferlik otomatik Giriş Yap akışı için paket kökündeki `../README.md` dosyasını okuyun. Bu dosyanın aşağıdaki bölümleri tarihsel notlardır; OCR'ın kapalı veya girişin yalnızca elle olduğuna ilişkin eski ifadeler güncel portal akışı için geçerli değildir. Güncel ekleme: captcha_assist.py, local_ocr.py, local_ocr_worker.py ve requirements-ocr.txt. Otomatik giriş/güncelleme uçtan uca canlı testi henüz doğrulanmadı.
+
 # Eworks Python robotu — üç modül
 
 ## OCR yardımcı katmanı

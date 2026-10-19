@@ -35,3 +35,7 @@ venv/
 node_modules/
 runtime/
 *.zip
+
+# Isolated OCR engine and diagnostic logs
+.ocr-venv/
+*.stderr

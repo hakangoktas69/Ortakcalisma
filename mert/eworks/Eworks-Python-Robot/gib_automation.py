@@ -22,7 +22,7 @@ from logger_service import LoggerService
 FIELDS = ("taxNumber", "identityNumber", "name", "taxOffice", "number",
           "date", "service", "registeredAt", "type")
 ConfirmCaptcha = Callable[[Page, str], Awaitable[bool]]
-OCR_CONFIG = ('--psm 6 --oem 3 -c tessedit_char_whitelist='
+OCR_CONFIG = ('--psm 7 --oem 3 -c tessedit_char_whitelist='
               '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 
 
@@ -43,8 +43,9 @@ def captcha_image_variants(image_bytes: bytes):
         rgb = np.asarray(Image.alpha_composite(background, rgba).convert('RGB'))
     gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
     gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
-    # OTSU ilk adaydır; diğerleri farklı kontrast ve yerel eşikleme kullanır.
-    for alpha, offset in ((1.0, None), (1.2, 7), (1.5, 11), (0.85, 3)):
+    # Tek tip temizleme harfleri bozabilir; özgün ve onarılmış adayları da koru.
+    for mode, alpha, offset in (('clean', 1.0, None), ('original', 1.0, None),
+                                ('inpaint', 1.0, None), ('adaptive', 1.2, 7)):
         contrast = cv2.convertScaleAbs(gray, alpha=alpha)
         if offset is None:
             _, foreground = cv2.threshold(contrast, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
@@ -56,6 +57,17 @@ def captcha_image_variants(image_bytes: bytes):
                                      cv2.getStructuringElement(cv2.MORPH_RECT, (max(30, w//3), 1)))
         vertical = cv2.morphologyEx(foreground, cv2.MORPH_OPEN,
                                    cv2.getStructuringElement(cv2.MORPH_RECT, (1, max(30, int(h*.9)))))
+        if mode in ('original', 'adaptive'):
+            yield cv2.copyMakeBorder(cv2.bitwise_not(foreground), 12, 12, 12, 12,
+                                     cv2.BORDER_CONSTANT, value=255)
+            continue
+        if mode == 'inpaint':
+            # Çizgiyi doğrudan silmek yerine gri görüntüde komşu piksellerle onar.
+            mask = cv2.bitwise_or(horizontal, vertical)
+            repaired = cv2.inpaint(contrast, mask, 3, cv2.INPAINT_TELEA)
+            _, binary = cv2.threshold(repaired, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+            yield cv2.copyMakeBorder(binary, 12, 12, 12, 12, cv2.BORDER_CONSTANT, value=255)
+            continue
         cleaned = cv2.bitwise_and(foreground, cv2.bitwise_not(cv2.bitwise_or(horizontal, vertical)))
         cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
         cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
@@ -66,15 +78,18 @@ def captcha_image_variants(image_bytes: bytes):
 
 
 def read_captcha_suggestion(image_bytes: bytes, *, max_attempts=4,
-                            min_confidence=70.0, expected_length=None) -> str:
+                            min_confidence=70.0, expected_length=None,
+                            min_agreement=1) -> str:
     """Yerel OCR önerisi. Yeni CAPTCHA istemez; giriş veya ağ denemesi yapmaz."""
     if type(max_attempts) is not int or not 1 <= max_attempts <= 4:
         raise ValueError('OCR deneme sayısı 1–4 arasında olmalı.')
     if not 0 <= min_confidence <= 100:
         raise ValueError('OCR güven eşiği geçersiz.')
+    if type(min_agreement) is not int or not 1 <= min_agreement <= max_attempts:
+        raise ValueError('OCR tutarlılık sayısı deneme sınırı içinde olmalı.')
     if expected_length is not None and (type(expected_length) is not int or not 1 <= expected_length <= 16):
         raise ValueError('Beklenen karakter sayısı geçersiz.')
-    best_text, best_confidence = '', -1.0
+    votes = {}
     for attempt, variant in enumerate(captcha_image_variants(image_bytes)):
         if attempt >= max_attempts:
             break
@@ -91,14 +106,19 @@ def read_captcha_suggestion(image_bytes: bytes, *, max_attempts=4,
                     continue
             elif not 4 <= len(text) <= 8:
                 continue
-            confidence = sum(len(t)*c for t,c in tokens)/len(text)
-            if confidence > best_confidence:
-                best_text, best_confidence = text, confidence
+            confidence = min(c for _, c in tokens)
             if confidence >= min_confidence:
-                break
+                votes[text] = votes.get(text, 0) + 1
+                if min_agreement == 1:
+                    return text
         except (RuntimeError, OSError, KeyError, ValueError, TypeError):
             continue
-    return best_text
+    # Birden fazla yüksek güvenli sonuç varsa tahminle alan doldurulmaz.
+    if len(votes) == 1:
+        text, count = next(iter(votes.items()))
+        if count >= min_agreement:
+            return text
+    return ''
 
 
 @dataclass(frozen=True)

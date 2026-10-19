@@ -15,6 +15,7 @@ from urllib.parse import urlsplit
 from playwright.async_api import async_playwright, Error as BrowserError
 from gib_automation import FIELDS, GibSelectors, scrape_contract_table
 from cloud_credentials import fetch_credentials, fill_gib_credentials
+from captcha_assist import CaptchaAssist
 
 HEADERS = (
     'Mükellef Vergi Kimlik Numarası', 'Mükellef TC Kimlik Numarası',
@@ -160,6 +161,7 @@ async def run(folder, access_token=''):
             context = await browser.new_context()
             context.set_default_timeout(15000)
             page = await context.new_page()
+            captcha_assist = CaptchaAssist(auto_login=True)
             await page.goto('https://dijital.gib.gov.tr/portal/login', wait_until='domcontentloaded')
             report(folder, 'awaiting_user', 'Açılan Chrome’da müşavir hesabıyla giriş ve güvenlik kodunu tamamlayın. Robot görünen GİB menülerinden sözleşme listesine ilerlemeyi deneyecek. Menü bulunamazsa listeyi elle açabilirsiniz.')
             ready = folder / 'ready.json'
@@ -175,7 +177,16 @@ async def run(folder, access_token=''):
                     navigation_version = reload_navigation_if_changed(navigation_version)
                     await navigation_adapter.focus_requested(context)
                     if credentials and await fill_gib_credentials(page, credentials):
-                        report(folder, 'awaiting_user', 'GİB kullanıcı adı ve şifre Supabase’den dolduruldu. Güvenlik kodunu kendiniz girip Giriş Yap’a basın. Şifre yerel dosyaya kaydedilmedi.')
+                        report(folder, 'awaiting_user', 'GİB giriş bilgileri dolduruldu. OCR kodu okuyabilirse otomatik giriş bir kez denenecek. Şifre yerel dosyaya kaydedilmedi.')
+                    try:
+                        captcha_message = await captcha_assist.suggest(page)
+                        if captcha_message:
+                            report(folder, 'awaiting_user', captcha_message)
+                    except Exception:
+                        # OCR yardımcıdır; başarısızlık giriş veya liste okumayı durdurmaz.
+                        message = captcha_assist.notice('error', 'OCR/giriş adımı tamamlanamadı. GİB ekranını kontrol edin; otomatik yeniden gönderim yapılmadı.')
+                        if message:
+                            report(folder, 'awaiting_user', message)
                     found = await discover(context)
                     if found is not None:
                         frame, config = found
@@ -201,7 +212,7 @@ async def run(folder, access_token=''):
                         moved = await advance_navigation(context, visited, diagnostics)
                         (folder/'navigation-diagnostics.json').write_text(json.dumps(diagnostics,ensure_ascii=False),encoding='utf-8')
                         if moved:
-                            report(folder, 'awaiting_user', 'GİB menüsünde ilerleniyor: '+moved+'. Giriş ve güvenlik kodu kullanıcıya aittir.')
+                            report(folder, 'awaiting_user', 'GİB menüsünde ilerleniyor: '+moved+'. Sözleşme listesi bekleniyor.')
                 except ValueError as exc:
                     report(folder, 'awaiting_user', str(exc))
                 except BrowserError as exc:

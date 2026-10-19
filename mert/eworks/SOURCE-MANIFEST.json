@@ -1,5 +1,9 @@
 [
   {
+    "path": ".gitignore",
+    "sha256": "865caaae374e5e263dd98ca564a711129410424061bf436888275dff721190b5"
+  },
+  {
     "path": "Eworks-Portal/Baslat.ps1",
     "sha256": "0b376f3000a67e903f2d01713ca703a8fd0d562d37d854333b08c3f5280d3574"
   },
@@ -12,28 +16,20 @@
     "sha256": "392fb4bef3133231297df2a1402d5158afa9383aa182539620ed61aea031ac74"
   },
   {
-    "path": "Eworks-Portal/yerel-sunucu.py",
-    "sha256": "e3173851926ea1642327c31e2ca0c09cba88fe6f79a2113b2b422df01f1af96a"
+    "path": "Eworks-Portal/GIB-Canli-Akis.md",
+    "sha256": "2e562cc7b5ae8059fc0f8fd81dfc411ebe7cfaef009623a3a0950eff0e743d26"
+  },
+  {
+    "path": "Eworks-Portal/Kullanim.md",
+    "sha256": "d7cf9e30306f89eac31cedf2d6a44a92f092d7a6b8929a471c31d3e8ef840c28"
+  },
+  {
+    "path": "Eworks-Portal/requirements.txt",
+    "sha256": "ace0fa5678c45e11973a0ed43023360383275b542304dbbae6a407415d0aeaff"
   },
   {
     "path": "Eworks-Portal/robot-config.json",
     "sha256": "80c99d56e3aecc4deeab43e8c07f4e06d365c5e9383821344d4c9d0fcf6747a1"
-  },
-  {
-    "path": "Eworks-Portal/supabase-kurulum.sql",
-    "sha256": "f3d2957b0be9eb47d21efdd07df2cb1570c4332044738ab7a0202ff4302521fd"
-  },
-  {
-    "path": "Eworks-Portal/supabase-gib-vault.sql",
-    "sha256": "74679e9ccd7c80244fef3a32978adfa26ff164430e5da94ab0a6e5aaf9b2b813"
-  },
-  {
-    "path": "Eworks-Portal/supabase-firma-gib-vault.sql",
-    "sha256": "21c5ef6845870dd300f084dadf3b720513bc8c3dafcf401a1104e635ddef2a95"
-  },
-  {
-    "path": "Eworks-Portal/test-demo-cleanup.cjs",
-    "sha256": "d964856edef5564503aa545249af3b33e94f4b76c36af5caf29e3c6c76f01534"
   },
   {
     "path": "Eworks-Portal/supabase/config.toml",
@@ -42,6 +38,42 @@
   {
     "path": "Eworks-Portal/supabase/functions/gib-account/index.ts",
     "sha256": "f5d4580c4019db8e7d23ec7264748a49e3c82dd5282ec36e7cdbe830ebd4d45c"
+  },
+  {
+    "path": "Eworks-Portal/supabase-firma-gib-vault.sql",
+    "sha256": "21c5ef6845870dd300f084dadf3b720513bc8c3dafcf401a1104e635ddef2a95"
+  },
+  {
+    "path": "Eworks-Portal/Supabase-GIB-Hesap-Kurulum.md",
+    "sha256": "68b064e7b6a6bd3daf8083d3282cfe8ba38098fcf78a1bb6d1cab36ebd1d240c"
+  },
+  {
+    "path": "Eworks-Portal/supabase-gib-vault.sql",
+    "sha256": "74679e9ccd7c80244fef3a32978adfa26ff164430e5da94ab0a6e5aaf9b2b813"
+  },
+  {
+    "path": "Eworks-Portal/Supabase-Kullanim.md",
+    "sha256": "d265141bdc36cf55f245cda1b14c7bd120781e3c8ce94e592edbb33efb89d66e"
+  },
+  {
+    "path": "Eworks-Portal/supabase-kurulum.sql",
+    "sha256": "f3d2957b0be9eb47d21efdd07df2cb1570c4332044738ab7a0202ff4302521fd"
+  },
+  {
+    "path": "Eworks-Portal/test-demo-cleanup.cjs",
+    "sha256": "d964856edef5564503aa545249af3b33e94f4b76c36af5caf29e3c6c76f01534"
+  },
+  {
+    "path": "Eworks-Portal/yerel-sunucu.py",
+    "sha256": "e3173851926ea1642327c31e2ca0c09cba88fe6f79a2113b2b422df01f1af96a"
+  },
+  {
+    "path": "Eworks-Python-Robot/.env.example",
+    "sha256": "19aa36def8dc162e04f7c7e7eeeb848b2023dc47eeb8298b53198cbf28e2ab62"
+  },
+  {
+    "path": "Eworks-Python-Robot/captcha_assist.py",
+    "sha256": "8c443115f25157f9e4c1ee7236cea464a021b3a17194c04d0c5c9211364c33b7"
   },
   {
     "path": "Eworks-Python-Robot/cloud_credentials.py",
@@ -53,11 +85,19 @@
   },
   {
     "path": "Eworks-Python-Robot/gib_automation.py",
-    "sha256": "0363cd3f897635323bf8393cd4e5cac210a6a664c1d21d8e4b850933e565acd0"
+    "sha256": "740fc2fc6fda4175fc64766a986c72775f98a719ba654f9a0074cba6ac1c8d1d"
   },
   {
     "path": "Eworks-Python-Robot/gib_sozlesmeler-kurulum.sql",
     "sha256": "a26b28e2efc93ce3b1d68d3008a7cc0f50af3d73c5b7934ec977f75eb315c10a"
+  },
+  {
+    "path": "Eworks-Python-Robot/local_ocr.py",
+    "sha256": "82acdc20055cd3bb1fc6533e8f570b8d4f128f370fa2af0921193378cc799375"
+  },
+  {
+    "path": "Eworks-Python-Robot/local_ocr_worker.py",
+    "sha256": "aa5af512d917efbfcc21c4dc200ec5bc62ad90e828c22054a881643339db8141"
   },
   {
     "path": "Eworks-Python-Robot/logger_service.py",
@@ -73,7 +113,15 @@
   },
   {
     "path": "Eworks-Python-Robot/portal_worker.py",
-    "sha256": "58927bc05c9f992469a850d32f77c0695b7c5703826e6fa5c8506a7bd772de19"
+    "sha256": "deba88d167cdbb77c5c3e6165caab68aa5c4394b2a98aa29896ac825152dfcd9"
+  },
+  {
+    "path": "Eworks-Python-Robot/README.md",
+    "sha256": "66be909b05a61ca526bb6890adc85e01f2b9b8e9a0ecc53ce268106a4f8d24ce"
+  },
+  {
+    "path": "Eworks-Python-Robot/requirements-ocr.txt",
+    "sha256": "a2d9deccf69c12aa5c66e40e4637e4db0d10cfc3285b34b55637a2c3b7b65e8b"
   },
   {
     "path": "Eworks-Python-Robot/requirements.txt",
@@ -82,6 +130,10 @@
   {
     "path": "Eworks-Python-Robot/sistem_loglari-kurulum.sql",
     "sha256": "bfd55f4d29f90cfb0bf1492a0454f7f7e191f46a313d4dfef3f6e3b54e3ea5b5"
+  },
+  {
+    "path": "Eworks-Python-Robot/test_captcha_assist.py",
+    "sha256": "ce923a861a5776027cd123bea9f56bbdd0b161352a2bd412af6116d4454f1215"
   },
   {
     "path": "Eworks-Python-Robot/test_cloud_credentials.py",
@@ -96,6 +148,10 @@
     "sha256": "44bda58d42cb833e2d6bfd5995289030807548a570a3cb87b8688b766f0d92f9"
   },
   {
+    "path": "Eworks-Python-Robot/test_local_ocr.py",
+    "sha256": "5663b66a10cafac88b2795f9efdb7e038dc5187d1f83ab601d0570bc38368051"
+  },
+  {
     "path": "Eworks-Python-Robot/test_login_confirmation.py",
     "sha256": "6c491717577e45fb106b881b15ea011130d3397ea46c0ad91f6c9043c677d2f7"
   },
@@ -105,7 +161,7 @@
   },
   {
     "path": "Eworks-Python-Robot/test_ocr.py",
-    "sha256": "ddd54413b43e6bae58e3026004fa157d1ee995783e37a83f998e132668685efd"
+    "sha256": "5e46afdf769f2a4466488765fb0499ca4af5070c287b09a59a4ee0156bc01273"
   },
   {
     "path": "Eworks-Python-Robot/test_portal_bridge.py",
@@ -120,23 +176,7 @@
     "sha256": "10d7d5f961e29ff206f7ce1cbf71e49ef58beec079401fafe086df1fd5ff5c69"
   },
   {
-    "path": "Eworks-Portal/GIB-Canli-Akis.md",
-    "sha256": "2e562cc7b5ae8059fc0f8fd81dfc411ebe7cfaef009623a3a0950eff0e743d26"
-  },
-  {
-    "path": "Eworks-Portal/Kullanim.md",
-    "sha256": "d7cf9e30306f89eac31cedf2d6a44a92f092d7a6b8929a471c31d3e8ef840c28"
-  },
-  {
-    "path": "Eworks-Portal/Supabase-GIB-Hesap-Kurulum.md",
-    "sha256": "68b064e7b6a6bd3daf8083d3282cfe8ba38098fcf78a1bb6d1cab36ebd1d240c"
-  },
-  {
-    "path": "Eworks-Portal/Supabase-Kullanim.md",
-    "sha256": "d265141bdc36cf55f245cda1b14c7bd120781e3c8ce94e592edbb33efb89d66e"
-  },
-  {
-    "path": "Eworks-Python-Robot/README.md",
-    "sha256": "aaa81313a07442176cbce8ae1ed59331276bf800ae8d99a2ddd7a4a30f483226"
+    "path": "README.md",
+    "sha256": "bf1e49b539447156f3417cd4e9d63d1a94326e9546af824716127783f24af9aa"
   }
 ]
