@@ -355,3 +355,27 @@
 .dark .shadow-xl {
   --tw-shadow-color: oklch(0% 0 0 / 0.5);
 }
+
+/*
+ * Geniş tablolar (.table-scroll kabı): laptop altı ekranlarda yatay kayar; ilk sütun (mükellef / kişi)
+ * sabit kalır, böylece kaydırırken satırın kime ait olduğu görünür. Renkler tema değişkenlerinden:
+ * koyu temada da doğru. Bkz. apps/web/e2e/pages.spec.ts (taşma ve kırpılma testi).
+ */
+@media (max-width: 1023px) {
+  .table-scroll table :is(th, td):first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: min(11rem, 45vw);
+    max-width: 55vw;
+    background-color: var(--color-white);
+    box-shadow: 1px 0 0 var(--color-slate-200);
+  }
+  /* Diğer sütunlar satır kırmaz: tablo sıkışmak yerine düzgün satırlarla yatay kayar */
+  .table-scroll table :is(th, td):not(:first-child) {
+    white-space: nowrap;
+  }
+  .table-scroll thead :is(th, td):first-child {
+    background-color: var(--color-slate-50);
+  }
+}

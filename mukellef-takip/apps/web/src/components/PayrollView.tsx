@@ -144,7 +144,7 @@ function ImportModal({ period, onClose, onDone }: { period: string; onClose: () 
             <Download size={13} /> Örnek şablon
           </button>
         </p>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <label className="text-sm sm:col-span-2">
             <span className="mb-1 block text-slate-600">Firma</span>
             <select
@@ -345,7 +345,7 @@ function RunDetail({ id, onClose, onDeleted }: { id: string; onClose: () => void
           Sadece uyarılı personeli göster ({run.warningCount})
         </label>
       )}
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+      <div className="table-scroll overflow-x-auto rounded-lg border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
             <tr>
@@ -475,7 +475,7 @@ export default function PayrollView() {
         />
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="table-scroll overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
             <tr>

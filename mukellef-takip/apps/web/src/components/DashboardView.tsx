@@ -173,7 +173,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Card title="Yapılacaklar">
           {tasks.length === 0 ? (
             <p className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -254,7 +254,7 @@ export default function DashboardPage() {
         <Metric label="e-Tebligat (bu ay)" value={String(data.eTebligat.month)} sub={`bu yıl toplam ${data.eTebligat.year}`} href="/tebligat" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Card
           title={`Beyanname durumu · ${b.periodLabel}`}
           action={

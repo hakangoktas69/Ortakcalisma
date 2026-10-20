@@ -239,7 +239,7 @@ export default function SgkView() {
               </button>
             ))}
           </div>
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <div className="table-scroll overflow-x-auto rounded-xl border border-slate-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                 <tr>
@@ -335,7 +335,7 @@ export default function SgkView() {
             {employment.filter((e) => e.type === "EXIT").length} çıkış. Bu ekran SGK&apos;ya verilmiş bildirgeleri
             okur; bildirge göndermez.
           </p>
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <div className="table-scroll overflow-x-auto rounded-xl border border-slate-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                 <tr>
@@ -404,7 +404,7 @@ export default function SgkView() {
               <option value={24}>Son 24 ay</option>
             </select>
           </div>
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <div className="table-scroll overflow-x-auto rounded-xl border border-slate-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                 <tr>
@@ -470,7 +470,7 @@ export default function SgkView() {
           >
             <Plus size={16} /> İşyeri / şube ekle
           </button>
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <div className="table-scroll overflow-x-auto rounded-xl border border-slate-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                 <tr>

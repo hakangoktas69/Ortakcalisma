@@ -3,6 +3,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import type { AppConfig } from '../config/config.js';
 import { runWithDbContext } from '../database/tenant-context.js';
+import { PrismaExceptionFilter } from './prisma-exception.filter.js';
 
 /** HTTP uygulamasının güvenlik ve istek ayarları (main.ts ve e2e testleri aynı kurulumu kullanır). */
 export function configureApp(app: NestExpressApplication, config: AppConfig) {
@@ -26,4 +27,5 @@ export function configureApp(app: NestExpressApplication, config: AppConfig) {
     origin: [config.WEB_ORIGIN, config.EXTENSION_ID ? `chrome-extension://${config.EXTENSION_ID}` : /^chrome-extension:\/\/[a-p]{32}$/],
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+  app.useGlobalFilters(new PrismaExceptionFilter());
 }

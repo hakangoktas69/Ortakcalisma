@@ -3,3 +3,4 @@
 *.hcl text eol=lf
 Caddyfile text eol=lf
 *.Dockerfile text eol=lf
+.githooks/* text eol=lf

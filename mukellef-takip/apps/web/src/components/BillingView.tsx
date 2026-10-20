@@ -190,7 +190,7 @@ export default function BillingView({ returnStatus }: { returnStatus?: string })
       {msg && <p className={`rounded-lg px-3 py-2 text-sm ${msgClass[msg.kind]}`}>{msg.text}</p>}
 
       {sub && (
-        <section className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-3">
+        <section className="grid grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-3">
           <div>
             <p className="text-xs uppercase text-slate-500">Paket</p>
             <p className="text-lg font-bold">{sub.planName}</p>
@@ -257,7 +257,7 @@ export default function BillingView({ returnStatus }: { returnStatus?: string })
             ))}
           </div>
         </div>
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {data.plans.map((p) => {
             const price = p.prices.find((x) => x.months === months)!;
             const current = sub?.plan === p.key;
@@ -386,7 +386,7 @@ function ProfileForm({ onSaved }: { onSaved: () => void }) {
   }
 
   return (
-    <form onSubmit={save} className="mt-4 grid gap-3 sm:grid-cols-2">
+    <form onSubmit={save} className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
       {field("billingName", "Unvan / ad soyad", { span: true })}
       {field("billingContactName", "Yetkili kişi (ad soyad)", { placeholder: "Ayşe Yılmaz" })}
       {field("billingTaxNumber", "VKN / TCKN")}

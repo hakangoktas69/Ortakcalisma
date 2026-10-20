@@ -16,6 +16,8 @@ export const configSchema = z.object({
   LOG_LEVEL: mode(['fatal', 'error', 'warn', 'info', 'debug', 'trace'], 'info'),
 
   LOG_PRETTY: z.enum(['true', 'false']).default('false'),
+  /** Hız sınırı. Yalnız NODE_ENV=test iken kapatılabilir (regresyon testleri). */
+  RATE_LIMIT: z.enum(['on', 'off']).default('on'),
 
   /** Uygulama rolüyle bağlantı (RLS'e tabi, tablo sahibi değil). Migration ayrı rolle çalışır. */
   DATABASE_URL: z.string().min(1, 'DATABASE_URL tanımlı değil'),
@@ -93,6 +95,7 @@ export function checkSecurity(c: AppConfig): { errors: string[]; warnings: strin
   const demo = c.DEMO_MODE === 'true';
   const problem = (msg: string) => (prod ? errors : warnings).push(msg);
 
+  if (c.RATE_LIMIT === 'off' && c.NODE_ENV !== 'test') errors.push('RATE_LIMIT=off yalnız test ortamında kullanılabilir');
   if (isWeak(c.JWT_SECRET)) problem('JWT_SECRET zayıf: en az 32 karakter rastgele bir değer olmalı (openssl rand -base64 48)');
   if (c.KMS_PROVIDER === 'local') {
     if (!c.VAULT_KEY) errors.push('KMS_PROVIDER=local iken VAULT_KEY tanımlı olmalı');

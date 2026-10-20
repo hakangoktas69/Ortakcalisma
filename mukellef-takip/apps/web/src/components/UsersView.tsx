@@ -173,7 +173,7 @@ export default function UsersView() {
       {policy && <PolicyCard policy={policy} onChange={setPolicy} />}
 
       {adding && (
-        <form onSubmit={create} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-4">
+        <form onSubmit={create} className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-4">
           <input required placeholder="Ad Soyad" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} className="rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-1" />
           <input required type="email" placeholder="E-posta" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-2" />
           <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as UserRow["role"] })} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
@@ -187,7 +187,7 @@ export default function UsersView() {
       {temp && <TempPassword who={temp.who} password={temp.password} onClose={() => setTemp(null)} />}
       {msg && <p className={`rounded-lg px-3 py-2 text-sm ${msg.kind === "ok" ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700"}`}>{msg.text}</p>}
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="table-scroll overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
             <tr>

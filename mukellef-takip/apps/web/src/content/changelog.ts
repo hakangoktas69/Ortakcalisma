@@ -15,6 +15,17 @@ export const CHANGE_KIND_LABEL: Record<ChangeKind, string> = { new: "Yeni", impr
 
 export const CHANGELOG: ChangeEntry[] = [
   {
+    id: "2026-10-20-mobil-uyum",
+    date: "2026-10-20",
+    title: "Telefon ve tablet uyumu",
+    summary: "Portal telefon, tablet, laptop ve büyük ekranlarda düzgün görünür.",
+    changes: [
+      { kind: "improved", text: "Telefonda iş kutusu ve genel bakış ekrana sığar; kesilen içerik kalmadı.", href: "/" },
+      { kind: "improved", text: "Geniş tablolar küçük ekranda yana kayar; firma / kişi sütunu sabit kalır." },
+      { kind: "fixed", text: "Tablette hesap menüsü içeriğin arkasında kalıyordu; düzeltildi." },
+    ],
+  },
+  {
     id: "2026-10-20-veri-guvenligi",
     date: "2026-10-20",
     title: "Veri güvenliği güçlendirildi",

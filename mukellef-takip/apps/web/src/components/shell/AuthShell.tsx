@@ -10,7 +10,7 @@ const POINTS = [
 /** Giriş ve şifre ekranları: solda marka paneli, sağda form */
 export function AuthShell({ children, wide = false }: { children: React.ReactNode; wide?: boolean }) {
   return (
-    <main className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+    <main className="grid grid-cols-1 min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       <section className="ink relative hidden overflow-hidden bg-ink-900 p-12 text-white lg:flex lg:flex-col">
         <div
           className="pointer-events-none absolute -top-40 -right-40 size-[520px] rounded-full opacity-40 blur-3xl"

@@ -248,7 +248,7 @@ function KdvDetail({ companyId, period, onClose }: { companyId: string; period: 
           <X size={16} />
         </button>
       </div>
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <Bucket title="Satışlar (kesilen)" b={data.sales} vatLabel="Hesaplanan KDV" />
         <Bucket title="Alışlar (gelen)" b={data.purchases} vatLabel="KDV" />
       </div>
@@ -417,7 +417,7 @@ export default function InvoicesView() {
       {tab === "kdv" && (
         <>
           {detailFor && <KdvDetail key={`${detailFor}-${period}`} companyId={detailFor} period={period} onClose={() => setDetailFor(null)} />}
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <div className="table-scroll overflow-x-auto rounded-xl border border-slate-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                 <tr>
@@ -539,7 +539,7 @@ export default function InvoicesView() {
               className="ml-auto w-64 rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
             />
           </form>
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <div className="table-scroll overflow-x-auto rounded-xl border border-slate-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                 <tr>

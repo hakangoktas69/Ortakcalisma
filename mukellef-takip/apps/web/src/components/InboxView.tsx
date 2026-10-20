@@ -434,7 +434,7 @@ export default function InboxView() {
         )}
       </div>
 
-      <div className="grid h-[calc(100vh-11rem)] min-h-[520px] overflow-hidden rounded-2xl border border-slate-200 bg-white lg:grid-cols-[208px_minmax(0,1fr)_minmax(0,440px)]">
+      <div className="grid grid-cols-1 h-[calc(100vh-11rem)] min-h-[520px] overflow-hidden rounded-2xl border border-slate-200 bg-white lg:grid-cols-[208px_minmax(0,1fr)_minmax(0,440px)]">
         {/* Klasörler */}
         <nav aria-label="Klasörler" className="hidden flex-col gap-0.5 border-r border-slate-200 bg-slate-50/60 p-3 lg:flex">
           {folders.map((f) => (

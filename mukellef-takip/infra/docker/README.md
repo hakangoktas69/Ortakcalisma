@@ -30,7 +30,9 @@ Bütün sistem container'larla çalışır. Topoloji geliştirmede ve üretimde 
 ## Geliştirme
 
 ```bash
-npm run stack:dev        # sırları üretir, imajları derler, yığını açar → http://localhost:8080
+npm run stack:dev        # sırlar → npm run verify (testler) → kapılı imajlar → yığın → arayüz testleri → http://localhost:8080
+npm run verify           # yalnız doğrulama (izole test yığını: compose.test.yml); ayrıntı docs/ai/testing.md
+npm run test:ui          # yığın ayaktayken 4 ekranda arayüz testleri
 npm run stack:logs
 npm run stack:down       # verileri silmek için: docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml down -v
 ```

@@ -24,7 +24,10 @@
     "arch:check": "depcruise src --config .dependency-cruiser.cjs",
     "start:worker": "node dist/worker",
     "start:worker:dev": "nest start --watch --entryFile worker",
-    "db:migrate": "prisma migrate deploy"
+    "db:migrate": "prisma migrate deploy",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:e2e:cov": "vitest run --config ./vitest.config.e2e.ts --coverage",
+    "prebuild": "npm run lint && npm run arch:check && npm run typecheck && npm run test:cov"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",

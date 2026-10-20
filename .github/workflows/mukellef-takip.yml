@@ -21,8 +21,8 @@ defaults:
     working-directory: mukellef-takip
 
 jobs:
-  api:
-    name: API — lint, mimari, birim ve e2e testler, derleme
+  verify:
+    name: Doğrulama — lint, katman kuralları, tip denetimi, birim + API regresyon testleri (kapsam eşikli)
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -46,34 +46,35 @@ jobs:
       - run: npx prisma generate
         working-directory: mukellef-takip/apps/api
         env: { DATABASE_URL: 'postgresql://x:x@localhost:5432/x' }
-      - run: npm run lint -w api
-      - run: npm run arch:check -w api
-      - run: npx tsc --noEmit -p tsconfig.json
-        working-directory: mukellef-takip/apps/api
-      - run: npm test -w api
-      - name: e2e (büro izolasyonu, RLS, oturum)
-        run: npm run test:e2e -w api
+      - name: npm run verify:ci (yerelde npm run verify ile aynı adımlar)
+        run: npm run verify:ci
         env:
           E2E_ADMIN_DATABASE_URL: postgresql://postgres:ci@localhost:5432/postgres
           E2E_REDIS_URL: redis://localhost:6379
-      - run: npm run build -w api
+          NEXT_TELEMETRY_DISABLED: '1'
+      - name: Derleme (prebuild kapıları dahil)
+        run: npm run build -w api && npm run build -w web
       - name: Bağımlılık açıkları (yüksek ve üstü)
         run: npm audit --omit=dev --audit-level=high
 
-  web:
-    name: Web — lint ve üretim derlemesi
+  ui:
+    name: Arayüz regresyonu — 4 ekran boyutu (Playwright, Docker yığınına karşı)
     runs-on: ubuntu-latest
+    needs: [verify]
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-node@v7.1.0
+        with: { node-version: 24.22.0 }
+      - run: node infra/docker/scripts/generate-secrets.mjs
+      - run: docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml up -d --build
+      - run: node infra/docker/scripts/ui-test.mjs
+      - if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          node-version: 24.22.0
-          cache: npm
-          cache-dependency-path: mukellef-takip/package-lock.json
-      - run: npm ci --no-audit --no-fund
-      - run: npm run lint -w web
-      - run: npm run build -w web
-        env: { NEXT_TELEMETRY_DISABLED: '1' }
+          name: playwright-report
+          path: mukellef-takip/apps/web/playwright-report
+      - if: always()
+        run: docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml down -v
 
   secrets:
     name: Sır taraması (gitleaks)
@@ -88,7 +89,7 @@ jobs:
   images:
     name: Docker imajları ve güvenlik taraması (Trivy)
     runs-on: ubuntu-latest
-    needs: [api, web]
+    needs: [verify, ui]
     strategy:
       matrix:
         include:

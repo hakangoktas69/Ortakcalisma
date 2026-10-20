@@ -257,7 +257,8 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen">
-      <aside className="sticky top-0 hidden h-screen w-[68px] shrink-0 md:block">
+      {/* sticky kendi yığın bağlamını kurar: menü açılır pencereleri içeriğin üstünde kalsın diye z-30 */}
+      <aside className="sticky top-0 z-30 hidden h-screen w-[68px] shrink-0 md:block">
         <Rail me={me} onLogout={logout} />
       </aside>
 

@@ -12,6 +12,7 @@ Bu dosya ve aşağıda içe aktarılan belgeler takımın ortak Claude bağlamı
 - @docs/ai/tech-stack.md — korunan / onaylı / yasaklı teknolojiler
 - @docs/ai/security-kvkk.md — veri sınıflandırması, şifreleme, saklama/imha, tehdit modeli
 - @docs/ai/conventions.md — kod, test, migration, dil, commit kuralları
+- @docs/ai/testing.md — test katmanları, kapsam eşikleri, derleme kapıları (her değişiklikte uy)
 - @docs/ai/roadmap.md — fazlar ve **şu anki durum** (işe başlamadan bak)
 - Mimari kararlar: `docs/adr/` · API uçları ve entegrasyon ayrıntıları: `README.md`
 
@@ -30,12 +31,14 @@ docs/           ai/ (Claude bağlamı), adr/ (karar kayıtları)
 
 ```bash
 npm install
-npm run stack:dev          # Docker: postgres, redis, openbao, api, worker, web (mock dış servisler)
+npm run verify             # tam doğrulama (izole Docker): lint, tip, birim + API regresyon — her derlemeden önce
+npm run stack:dev          # verify → kapılı imajlar → yığın → 4 ekranda arayüz testleri (http://localhost:8080)
 # veya yalnız altyapı + yerelde uygulama:
 npm run db:up && npm run dev:api && npm run dev:web
-npm test -w api            # birim testler (vitest)
-npm run test:e2e -w api    # e2e (tenant izolasyonu vb., Docker gerekir)
-npm run lint -w api && npm run arch:check -w api   # oxlint + dependency-cruiser katman kuralları
+npm test                   # birim testleri (api kapsam eşikli + web)
+npm run test:e2e           # API regresyon (gerçek PostgreSQL/Redis; Testcontainers ya da E2E_* adresleri)
+npm run test:ui            # arayüz regresyonu (yığın ayaktayken)
+npm run lint && npm run typecheck
 ```
 
 ## Pazarlıksız kurallar (ihlal eden değişiklik yapma; gerekiyorsa önce kullanıcıya sor)
@@ -49,6 +52,8 @@ npm run lint -w api && npm run arch:check -w api   # oxlint + dependency-cruiser
 7. **Katman kuralı:** `domain` Nest/Prisma import etmez; context'ler birbirine yalnız `index.ts` üzerinden erişir; yan etkiler domain event ile. `npm run arch:check` yeşil olmalı.
 8. **HTTP sözleşmesi:** Mevcut route ve yanıt şekilleri web + eklenti tarafından kullanılır; kırıcı değişiklik `packages/contracts` güncellemesi ve istemci değişikliğiyle birlikte yapılır.
 9. Tutar, kota, lisans gibi kararlar **sunucuda** hesaplanır; istemciden gelen değere güvenilmez.
+10. **Testsiz değişiklik yok:** yeni uç → e2e (büro izolasyonu dahil), yeni kural → birim, yeni sayfa → `PANEL_ROUTES`. Kapsam eşiklerini düşürme; `npm run verify` yeşil olmadan derleme/dağıtım yapılmaz (docs/ai/testing.md).
+11. **Duyarlı arayüz:** telefon 375 → büyük ekran 1920 desteklenir; kurallar `apps/web/CLAUDE.md`, sınaması `apps/web/e2e`.
 
 ## Dil ve üslup
 

@@ -1,0 +1,31 @@
+# Doğrulama yığını (geçici): `npm run verify` kullanır; veriler tmpfs'te, iş bitince silinir.
+# Geliştirme/üretim yığınından tamamen ayrıdır (ayrı proje adı, ayrı ağ, host'a port yok).
+name: mukellef-takip-test
+
+services:
+  test-postgres:
+    image: postgres:17.11-alpine
+    environment:
+      POSTGRES_PASSWORD: test
+    tmpfs: ["/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      retries: 30
+
+  test-redis:
+    image: redis:7.4.11-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 30
+
+  verify:
+    build: { context: ../.., dockerfile: infra/docker/test.Dockerfile, target: verify }
+    image: mukellef-takip/verify:local
+    environment:
+      E2E_ADMIN_DATABASE_URL: postgresql://postgres:test@test-postgres:5432/postgres
+      E2E_REDIS_URL: redis://test-redis:6379
+    depends_on:
+      test-postgres: { condition: service_healthy }
+      test-redis: { condition: service_healthy }

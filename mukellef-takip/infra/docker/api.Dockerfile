@@ -16,7 +16,8 @@ FROM deps AS build
 COPY apps/api apps/api
 WORKDIR /app/apps/api
 # prisma generate yalnız şemayı okur; gerçek adres çalışma anında secret'tan gelir
-RUN DATABASE_URL="postgresql://derleme:derleme@localhost:5432/derleme" npx prisma generate && npx nest build
+# npm run build → prebuild: lint, katman kuralları, tip denetimi, birim testleri (kapsam eşikli). Testler geçmezse imaj oluşmaz.
+RUN DATABASE_URL="postgresql://derleme:derleme@localhost:5432/derleme" npx prisma generate && npm run build
 
 # Migration (+ geliştirmede demo verisi): Prisma CLI ve tsx gerektiği için derleme bağımlılıklarıyla
 FROM build AS migrate

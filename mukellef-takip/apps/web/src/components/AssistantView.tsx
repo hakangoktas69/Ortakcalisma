@@ -257,7 +257,7 @@ export default function AssistantView() {
       )}
       {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-      <div className="grid gap-4 lg:grid-cols-[16rem_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[16rem_minmax(0,1fr)]">
         <aside className="space-y-2">
           <button
             onClick={newChat}
@@ -296,7 +296,7 @@ export default function AssistantView() {
             {messages.length === 0 && (
               <div className="space-y-3 py-6 text-center">
                 <p className="text-sm text-slate-500">Örnek sorular</p>
-                <div className="mx-auto grid max-w-2xl gap-2 sm:grid-cols-2">
+                <div className="mx-auto grid grid-cols-1 max-w-2xl gap-2 sm:grid-cols-2">
                   {EXAMPLES.map((q) => (
                     <button
                       key={q}

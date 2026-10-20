@@ -19,6 +19,8 @@ export const RATE_LIMITS = {
     ThrottlerModule.forRootAsync({
       useFactory: () => ({
         throttlers: [{ name: 'default', limit: 300, ttl: 60_000 }],
+        // Yalnız test ortamında kapatılabilir (config.ts bunu üretimde reddeder)
+        skipIf: () => process.env.NODE_ENV === 'test' && process.env.RATE_LIMIT === 'off',
         storage: process.env.NODE_ENV === 'test' ? undefined : RedisThrottlerStorage.fromUrl(process.env.REDIS_URL ?? 'redis://localhost:6379'),
       }),
     }),

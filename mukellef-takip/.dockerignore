@@ -15,3 +15,5 @@ infra/docker/backups
 docs
 apps/extension
 apps/mobile
+**/test-results
+**/playwright-report

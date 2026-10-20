@@ -59,7 +59,7 @@ function PasswordSection() {
   return (
     <form onSubmit={save} className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
       <h2 className="font-semibold">Şifre değiştir</h2>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="text-sm">
           <span className="font-medium">Mevcut şifre</span>
           <input type="password" required autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} className={input} />
@@ -178,7 +178,7 @@ export function TwoFactorSection({ me, onChanged, onDone }: { me: Me; onChanged:
       )}
 
       {setup && (
-        <form onSubmit={enable} className="grid gap-4 sm:grid-cols-[auto_1fr]">
+        <form onSubmit={enable} className="grid grid-cols-1 gap-4 sm:grid-cols-[auto_minmax(0,1fr)]">
           {/* eslint-disable-next-line @next/next/no-img-element -- sunucunun ürettiği data: URL */}
           <img src={setup.qrDataUrl} alt="Doğrulayıcı uygulamayla okutulacak QR kod" width={180} height={180} className="rounded-lg border border-slate-200" />
           <div className="space-y-2 text-sm">
@@ -205,7 +205,7 @@ export function TwoFactorSection({ me, onChanged, onDone }: { me: Me; onChanged:
       {me.twoFactorEnabled && !recovery && !me.twoFactorRequired && (
         <form onSubmit={disable} className="space-y-2 border-t border-slate-100 pt-3">
           <p className="text-sm text-slate-600">Kalan kurtarma kodu: <b>{me.recoveryCodesLeft}</b>. Kapatmak için şifreniz ve güncel kod gerekir.</p>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <input type="password" required placeholder="Şifre" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={input} />
             <input required placeholder="6 haneli kod" inputMode="numeric" value={code} onChange={(e) => setCode(e.target.value.replace(/[^\d ]/g, "").slice(0, 7))} className={input} />
           </div>

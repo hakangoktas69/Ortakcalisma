@@ -138,7 +138,7 @@ export default function PetitionsView() {
         <p className={`rounded-lg px-3 py-2 text-sm ${msg.kind === "ok" ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700"}`}>{msg.text}</p>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
         <aside className="space-y-4">
           <section className="rounded-xl border border-slate-200 bg-white p-3">
             <h2 className="mb-2 px-1 text-xs font-bold uppercase text-slate-500">Şablonlar</h2>
@@ -183,7 +183,7 @@ export default function PetitionsView() {
         </aside>
 
         <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="text-sm">
               <span className="font-medium">Şablon</span>
               <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
@@ -205,7 +205,7 @@ export default function PetitionsView() {
           </div>
 
           {prepared && !editing && (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {prepared.fields.map((f) => (
                 <label key={f.key} className={`text-sm ${f.multiline ? "sm:col-span-2" : ""}`}>
                   <span className="font-medium">

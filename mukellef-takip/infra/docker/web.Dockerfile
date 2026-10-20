@@ -16,7 +16,8 @@ WORKDIR /app/apps/web
 # Tarayıcı API'ye aynı adres üzerinden (Caddy /api → api) ulaşır: CORS ve üçüncü taraf çerez gerekmez
 ARG NEXT_PUBLIC_API_URL=/api
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} NEXT_TELEMETRY_DISABLED=1
-RUN npx next build
+# npm run build → prebuild: tip denetimi, lint, birim testleri. Testler geçmezse imaj oluşmaz.
+RUN npm run build
 
 FROM ${NODE_IMAGE} AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends tini && rm -rf /var/lib/apt/lists/*

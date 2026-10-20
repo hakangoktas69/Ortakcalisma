@@ -62,3 +62,10 @@ describe('boş değerler', () => {
     expect(c.SGK_MODE).toBe('mock');
   });
 });
+
+describe('hız sınırı', () => {
+  it('RATE_LIMIT=off yalnız test ortamında kabul edilir', () => {
+    expect(loadConfig(base({ NODE_ENV: 'test', RATE_LIMIT: 'off' }), quiet).RATE_LIMIT).toBe('off');
+    expect(() => loadConfig(base({ RATE_LIMIT: 'off' }), quiet)).toThrow(/RATE_LIMIT=off/);
+  });
+});

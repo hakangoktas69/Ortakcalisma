@@ -69,7 +69,7 @@ export default function ReportsView() {
         <p className={`rounded-lg px-3 py-2 text-sm ${msg.kind === "ok" ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700"}`}>{msg.text}</p>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {REPORTS.map((r) => (
           <section key={r.kind} className="flex flex-col rounded-xl border border-slate-200 bg-white p-4">
             <div className="flex items-start gap-3">

@@ -93,7 +93,7 @@ export default function CompaniesPage({ initialQuery = "" }: { initialQuery?: st
       )}
 
       {showForm && (
-        <form onSubmit={create} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-5">
+        <form onSubmit={create} className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-5">
           <input
             required
             placeholder="Unvan / Ad Soyad"
@@ -151,7 +151,7 @@ export default function CompaniesPage({ initialQuery = "" }: { initialQuery?: st
         </select>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="table-scroll overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
             <tr>
