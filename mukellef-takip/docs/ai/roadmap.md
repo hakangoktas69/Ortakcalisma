@@ -8,6 +8,7 @@ Kararlar: modüler monolit, Expo mobil, Türkiye'de VM/on-prem. Gerekçeler `doc
 
 ### Faz 0 — Claude bağlamı ve dokümanlar ✅
 - [x] `CLAUDE.md`, `docs/ai/*`, `docs/adr/*`, `apps/*/CLAUDE.md`, `.claude/settings.json`, repo kökü `CLAUDE.md`
+- [x] Ekip hafızası (2026-10-20): `docs/ai/memory/` otomatik hafıza dizini (SessionStart kancası), `memory:check` (verify + CI), `/hafiza` ve `/oryantasyon` becerileri, Obsidian kasası `docs/`
 
 ### Faz 1 — Docker yığını + hızlı güvenlik ✅
 - [x] `infra/docker`: api (api/worker/migrate hedefleri), web (standalone), compose dev/prod, Caddy (TLS/HSTS), OpenBao (Raft), şifreli yedek, Docker secrets, iç ağlar, salt okunur/ayrıcalıksız container'lar
@@ -37,6 +38,14 @@ Kararlar: modüler monolit, Expo mobil, Türkiye'de VM/on-prem. Gerekçeler `doc
 - [ ] Kişisel veri dışa aktarma / silme talebi aracı (KVKK md.11)
 - [ ] Web'den yönetici için asistan onayı ve oturum listesi ekranları (API hazır)
 
+### Regresyon testleri ve duyarlı arayüz ✅ (2026-10-20)
+- [x] API: 13 context'in 98 ucu için e2e regresyon (gerçek PostgreSQL/RLS + Redis), worker, iyzico (sahte sunucu), hız sınırı; birim testleri SOAP/WhatsApp/KMS/log/filtre
+- [x] Kapsam eşikleri (birim saf katmanlar fn %95, e2e fn %90); prebuild kapıları; Docker imajları testlerden geçmeden oluşmaz
+- [x] `npm run verify` (izole Docker, Node 24), `stack:dev` → arayüz testleri, CI: verify → ui → images, isteğe bağlı pre-push kancası
+- [x] Web: Playwright 4 ekran (telefon/tablet/laptop/büyük) sayfa + akış testleri; vitest birim
+- [x] Duyarlı düzeltmeler: 20 ızgaraya temel sütun, iş kutusu/genel bakış telefonda, tablolarda sabit ilk sütun, tablette hesap menüsü katmanı
+- [ ] Görsel karşılaştırma (ekran görüntüsü farkı) — tasarım oturunca
+
 ### Faz 3 — Web (sonraki tur)
 - [ ] `src/features/<context>/` yapısı, TanStack Query, contracts tipleri
 - [ ] BFF + HttpOnly çerez oturum; `localStorage` token kaldırılır; `ACCESS_TOKEN_TTL=15m`
@@ -61,6 +70,7 @@ Import düzeyinde ihlal yok (`arch:check`). Aşağıdakiler başka context'in **
 
 ## Bilinen açıklar / notlar
 
+- `tebligat.imported` ve `sgk.reports.received` olayları verinin yazıldığı transaction'ın dışında yayınlanıyor (çökme anında bildirim kaybolabilir); düzeltme ve diğer taktik borçlar: [docs/03-taktiksel-tasarim/06-taktik-borc.md](../03-taktiksel-tasarim/06-taktik-borc.md).
 - `npm audit`: exceljs → uuid (orta seviye, kullandığımız yol etkilenmiyor); exceljs güncellemesi izlenecek.
 - Migration SQL dosyaları depoda LF, Windows çalışma ağacında CRLF: Prisma checksum'ı dosyaya bağlı olduğundan farklı işletim sistemlerinden aynı veritabanına migration uygulamayın (Docker `migrate` servisi kullanın).
 - `hkazaz/docker/hakan` eski Docker denemesi; yerini `infra/docker` aldı (o klasör başka ekip üyesine ait, değiştirilmedi).

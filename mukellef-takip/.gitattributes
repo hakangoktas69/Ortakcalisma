@@ -4,3 +4,6 @@
 Caddyfile text eol=lf
 *.Dockerfile text eol=lf
 .githooks/* text eol=lf
+
+# Ekip hafızası dizini: aynı anda eklenen satırlar birleşsin (mükerrer satırı check-memory yakalar)
+docs/ai/memory/MEMORY.md merge=union

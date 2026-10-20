@@ -42,6 +42,8 @@ jobs:
           node-version: 24.22.0
           cache: npm
           cache-dependency-path: mukellef-takip/package-lock.json
+      - name: Ekip hafızası denetimi (docs/ai/memory — biçim, indeks, kişisel veri/sır)
+        run: node tools/claude/check-memory.mjs
       - run: npm ci --no-audit --no-fund
       - run: npx prisma generate
         working-directory: mukellef-takip/apps/api

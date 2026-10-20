@@ -2,7 +2,8 @@
 
 Mali müşavirler için mükellef takip portalı. Kişisel veri ve kurum şifresi işlediği için KVKK ve GİB/SGK gereği yüksek güvenlikli tasarlanmıştır.
 
-**Mimari, güvenlik kuralları ve yol haritası:** [CLAUDE.md](CLAUDE.md) ve [docs/ai/](docs/ai/) (karar kayıtları: [docs/adr/](docs/adr/)). Docker ile çalıştırma ve işletim: [infra/docker/README.md](infra/docker/README.md).
+**Geliştirici belgeleri (junior / senior / mimar okuma yollarıyla):** [docs/README.md](docs/README.md) — iş alanı, DDD bağlam haritası, 13 bounded context, taktiksel tasarım, mimari, tarifler.
+**Mimari, güvenlik kuralları ve yol haritası (kısa):** [CLAUDE.md](CLAUDE.md) ve [docs/ai/](docs/ai/) (karar kayıtları: [docs/adr/](docs/adr/)). Docker ile çalıştırma ve işletim: [infra/docker/README.md](infra/docker/README.md).
 
 ## Yapı
 
@@ -14,7 +15,7 @@ apps/
   mobile/     (Faz 4) Expo — henüz kod yok
   extension/  Chrome eklentisi: GİB/SGK sayfasından aktarma (bkz. apps/extension/README.md)
 infra/docker/ Dockerfile'lar, compose (dev / prod), Caddy, OpenBao, yedek
-docs/         ai/ (Claude ve ekip bağlamı), adr/ (mimari kararlar)
+docs/         README.md (geliştirici belgeleri dizini), 00–05 numaralı bölümler, ai/ (Claude ve ekip bağlamı), adr/ (mimari kararlar)
 ```
 
 ### Arayüz

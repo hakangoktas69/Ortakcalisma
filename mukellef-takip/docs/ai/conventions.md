@@ -16,10 +16,11 @@
 - Dış servis = port (application) + gerçek istemci + `mock` istemci (infrastructure); `*_MODE` env ile seçilir (`off|mock|live`).
 
 ## Test
+Ayrıntılı strateji, eşikler ve kapılar: `testing.md`.
 - Birim: `domain` kuralları ve parser'lar için zorunlu. Vitest, dosya yanında `*.spec.ts`.
 - e2e: `apps/api/test/*.e2e-spec.ts`; tenant izolasyonu, auth, aktarım, ödeme callback.
 - Gerçek kişisel veri test fixture'ına girmez (`test-tckn.ts` gibi geçerli ama sahte üretici kullan).
-- Değişiklik sonrası: `npm test -w api`, `npm run lint -w api`, `npm run arch:check -w api`; web için `npm run lint -w web` ve `npm run build -w web`.
+- Değişiklik sonrası: `npm run verify` (izole Docker yığınında her şey); arayüz değiştiyse ayrıca `npm run test:ui`.
 
 ## Veritabanı / migration
 - `apps/api` içinde `npx prisma migrate dev --name <kisa_ad>`; migration dosyası elle düzenlenebilir (RLS, REVOKE, backfill SQL).

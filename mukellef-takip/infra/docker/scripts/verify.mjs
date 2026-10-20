@@ -12,6 +12,12 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const compose = ['compose', '-f', join(root, 'infra', 'docker', 'compose.test.yml')];
 const docker = (...args) => spawnSync('docker', [...compose, ...args], { stdio: 'inherit', cwd: root }).status ?? 1;
 
+// docs/ Docker bağlamına girmediği için ekip hafızası denetimi yerelde (yalnız Node yerleşikleri) koşar
+if (spawnSync(process.execPath, [join(root, 'tools', 'claude', 'check-memory.mjs')], { stdio: 'inherit' }).status !== 0) {
+  console.log('✖ Doğrulama başarısız — ekip hafızası (docs/ai/memory) denetimi');
+  process.exit(1);
+}
+
 console.log('▶ Doğrulama: statik kontroller, birim ve API regresyon testleri (izole test yığını)');
 let code = 1;
 try {

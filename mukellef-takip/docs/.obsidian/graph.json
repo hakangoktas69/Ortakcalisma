@@ -1,0 +1,13 @@
+{
+  "showTags": false,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "colorGroups": [
+    { "query": "path:ai/memory", "color": { "a": 1, "rgb": 15105570 } },
+    { "query": "path:ai", "color": { "a": 1, "rgb": 3381759 } },
+    { "query": "path:adr", "color": { "a": 1, "rgb": 10181046 } },
+    { "query": "path:02-baglamlar", "color": { "a": 1, "rgb": 3066993 } },
+    { "query": "path:05-gelistirici-rehberi", "color": { "a": 1, "rgb": 15844367 } }
+  ]
+}

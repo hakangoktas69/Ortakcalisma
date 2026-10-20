@@ -5,3 +5,14 @@ dist/
 .env.local
 *.log
 *.tsbuildinfo
+
+# Claude Code: kişiye özel ayar ve notlar (ekip hafızası docs/ai/memory'de, git'e girer)
+.claude/settings.local.json
+CLAUDE.local.md
+**/CLAUDE.local.md
+
+# Obsidian kasası (docs/): yalnız ortak ayarlar paylaşılır, çalışma alanı ve eklenti durumu kişiseldir
+docs/.obsidian/*
+!docs/.obsidian/app.json
+!docs/.obsidian/core-plugins.json
+!docs/.obsidian/graph.json

@@ -15,6 +15,18 @@ Bu dosya ve aşağıda içe aktarılan belgeler takımın ortak Claude bağlamı
 - @docs/ai/testing.md — test katmanları, kapsam eşikleri, derleme kapıları (her değişiklikte uy)
 - @docs/ai/roadmap.md — fazlar ve **şu anki durum** (işe başlamadan bak)
 - Mimari kararlar: `docs/adr/` · API uçları ve entegrasyon ayrıntıları: `README.md`
+- Geliştirici belgeleri (DDD stratejik/taktiksel tasarım, bağlam sayfaları, tarifler, tuzaklar): `docs/README.md` — bir bağlamda çalışmadan önce `docs/02-baglamlar/<context>.md`'yi, yeni uç/olay/tablo/context eklerken `docs/05-gelistirici-rehberi/02-tarifler.md`'yi oku. Kural, uç, olay veya sınır değişirse ilgili bağlam sayfasını aynı değişiklikte güncelle; borç kapanırsa `docs/03-taktiksel-tasarim/06-taktik-borc.md`'den sil.
+
+## Ekip hafızası
+
+Otomatik hafıza dizini `docs/ai/memory/`'dir; git'e girer ve ekipçe paylaşılır. Yönlendirmeyi SessionStart kancası `tools/claude/session-start.mjs` yapar: `.claude/settings.local.json` dosyasına `autoMemoryDirectory` yazar. Ayrıntı: `docs/05-gelistirici-rehberi/05-claude-code.md`.
+
+- **Oturum başında:** bağlamda ekip hafızasının `MEMORY.md` içeriği yoksa (kanca çalışmamış, ilk oturum, kancalar kapalı) önce `docs/ai/memory/MEMORY.md`'yi oku. Ardından konuyla ilgili kayıtları aç; kullanıcıya kancanın çalışmadığını bir kez söyle.
+
+- Önce doğru katmanı seç: kalıcı kural → `docs/ai/*.md`, karar → ADR, bağlam bilgisi → `docs/02-baglamlar/`, tuzak → `04-tuzaklar.md`. Hafızaya yalnız öğrenilmiş ve kodda görünmeyen bilgi yazılır; türü `feedback`, `project` ya da `reference` olur.
+- **Kişiye özel tercih (`user` türü) ekip hafızasına yazılmaz** → `CLAUDE.local.md` (gitignore'da).
+- Kişisel veri, sır, gerçek mükellef veya büro bilgisi hafızaya yazılmaz. Yazdıktan sonra `npm run memory:check` çalıştır.
+- Kayıtlar `[[dosya-adı]]` ile bağlanır (Obsidian kasası: `docs/`). Beceriler: `/hafiza` (kaydet, aktar, denetle), `/oryantasyon` (yeni geliştirici).
 
 ## Yapı
 
@@ -24,7 +36,8 @@ apps/web        Next.js 16 App Router + Tailwind 4                              
 apps/mobile     (Faz 4) Expo / React Native — henüz kod yok                                   → apps/mobile/CLAUDE.md
 apps/extension  Chrome MV3 eklentisi: kullanıcının açtığı GİB/SGK sayfasındaki tabloyu API'ye gönderir
 infra/docker    Dockerfile'lar ve compose (dev / prod)
-docs/           ai/ (Claude bağlamı), adr/ (karar kayıtları)
+docs/           ai/ (Claude bağlamı), ai/memory/ (ekip hafızası), adr/ (karar kayıtları) — Obsidian kasası
+tools/claude    Claude Code kancası ve ekip hafızası denetimi
 ```
 
 ## Çalıştırma

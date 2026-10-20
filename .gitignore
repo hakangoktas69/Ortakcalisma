@@ -1,0 +1,5 @@
+# Claude Code: kişiye özel ayar ve not dosyaları (ekip bağlamı CLAUDE.md, .claude/settings.json ve mukellef-takip/docs/ai/memory'de)
+.claude/settings.local.json
+**/.claude/settings.local.json
+CLAUDE.local.md
+**/CLAUDE.local.md

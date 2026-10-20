@@ -1,5 +1,7 @@
 # Mimari
 
+> Kısa özet. Ayrıntılı anlatım (katmanlar, yapı taşları, outbox, tutarlılık, taktik borç): [docs/03-taktiksel-tasarim/](../03-taktiksel-tasarim/01-katmanlar.md), çalışma zamanı ve veri modeli: [docs/04-mimari/](../04-mimari/01-calisma-zamani.md).
+
 ## Genel görünüm
 
 ```

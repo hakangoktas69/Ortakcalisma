@@ -12,3 +12,5 @@ Mali müşavir portalı üzerinde çalışan ekip üyelerinin klasörleri. Her k
 
 Bir projede çalışırken o projenin `CLAUDE.md`'si ve `docs/ai/` belgeleri esastır (proje klasöründe çalışıldığında otomatik yüklenir).
 Ortak kural: sır, `.env`, kişisel veri (TCKN, gerçek mükellef bilgisi) commit edilmez.
+
+**Ekip hafızası:** Claude Code'un otomatik hafızası, kök `.claude/settings.json`'daki SessionStart kancasıyla `mukellef-takip/docs/ai/memory/` dizinine yönlendirilir ve git ile paylaşılır (rehber: `mukellef-takip/docs/05-gelistirici-rehberi/05-claude-code.md`). Başka bir klasör (`mert/eworks` vb.) için öğrenilen bilgi o klasörün kendi `CLAUDE.md`'sine aittir; ekip hafızasına yazacaksan kaydın başında hangi klasöre ait olduğunu belirt. Kişiye özel tercihler `CLAUDE.local.md`'ye yazılır (gitignore'da). Bağlamda ekip hafızası yoksa mukellef-takip işine başlamadan `mukellef-takip/docs/ai/memory/MEMORY.md`'yi oku.
