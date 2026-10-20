@@ -3,7 +3,9 @@
   "private": true,
   "workspaces": [
     "apps/api",
-    "apps/web"
+    "apps/web",
+    "satis/api",
+    "satis/web"
   ],
   "scripts": {
     "secrets:init": "node infra/docker/scripts/generate-secrets.mjs",
@@ -17,14 +19,17 @@
     "dev:api": "npm run start:dev -w api",
     "dev:worker": "npm run start:worker:dev -w api",
     "dev:web": "npm run dev -w web",
-    "test": "npm run test:cov -w api && npm run test -w web",
-    "lint": "npm run lint -w api && npm run arch:check -w api && npm run lint -w web",
-    "typecheck": "npm run typecheck -w api && npm run typecheck -w web",
-    "test:e2e": "npm run test:e2e:cov -w api",
+    "dev:satis-api": "npm run start:dev -w satis-api",
+    "dev:satis-web": "npm run dev -w satis-web",
+    "satis:kullanici": "npm run kullanici:ekle -w satis-api --",
+    "test": "npm run test:cov -w api && npm run test -w web && npm run test:cov -w satis-api && npm run test -w satis-web",
+    "lint": "npm run lint -w api && npm run arch:check -w api && npm run lint -w web && npm run lint -w satis-api && npm run lint -w satis-web",
+    "typecheck": "npm run typecheck -w api && npm run typecheck -w web && npm run typecheck -w satis-api && npm run typecheck -w satis-web",
+    "test:e2e": "npm run test:e2e:cov -w api && npm run test:e2e -w satis-api",
     "test:ui": "node infra/docker/scripts/ui-test.mjs",
     "verify:ci": "npm run lint && npm run typecheck && npm test && npm run test:e2e",
     "verify": "node infra/docker/scripts/verify.mjs",
-    "build": "npm run verify && npm run build -w api && npm run build -w web",
+    "build": "npm run verify && npm run build -w api && npm run build -w web && npm run build -w satis-api && npm run build -w satis-web",
     "hooks:install": "git config core.hooksPath mukellef-takip/.githooks && echo push öncesi doğrulama kancası kuruldu",
     "memory:check": "node tools/claude/check-memory.mjs"
   }

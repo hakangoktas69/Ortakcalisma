@@ -91,6 +91,7 @@
 | Dış kanalda kişisel veri yok | `modules/notifications/application/event-handlers.ts` (`externalBody`), `notifications.service.ts` (`deliver`) |
 | Yurt dışı aktarım onayı (asistan) | `modules/assistant/application/assistant.service.ts` (`ASSISTANT_CONSENT_REQUIRED`) |
 | İzolasyon testleri | `apps/api/test/security.e2e-spec.ts` |
+| Satış modülü yetki sınırı (mükellef verisine erişim yok, ayrı rol/anahtar) | migration `20261021090000_satis_modulu` (`sales_grant_access()`), `satis/api`, `satis/api/test/security.e2e-spec.ts`, docs/adr/0009 |
 
 Ek kurallar:
 - **Outbox olay yükü** uygulama içi bildirimi oluşturacak kadar veri taşıyabilir (ör. çalışan adı); işlenen olaylar 7 gün sonra silinir. Yüke T.C. kimlik no, sağlık ayrıntısı veya şifre konmaz.

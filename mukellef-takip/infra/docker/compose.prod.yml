@@ -41,6 +41,11 @@ services:
       SITE_ADDRESS: ${DOMAIN}
     ports: ["80:80", "443:443"]
 
+  satis-api:
+    environment:
+      NODE_ENV: production
+      WEB_ORIGIN: https://${DOMAIN}
+
   api:
     environment: *prod-env
     secrets: [openbao_token, openbao_wrapped_dek]

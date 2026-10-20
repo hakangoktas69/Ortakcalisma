@@ -1,0 +1,55 @@
+// Context: sales — satış modülü (satis/api). Müşavir API'si bu tablolara erişemez (migration: satis_modulu).
+// Tablolar tek migration geçmişi için burada; kodu satis/ altında.
+
+// Satış ekibi kullanıcısı. Büro kullanıcılarından (User) ayrıdır: bir büro hesabı hiçbir yolla satış yetkisi kazanamaz.
+// İki adımlı doğrulama zorunludur; kurulmadan oturum açılmaz.
+model SalesUser {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  passwordHash       String
+  fullName           String
+  isActive           Boolean   @default(true)
+  mustChangePassword Boolean   @default(true)
+  sessionVersion     Int       @default(0)
+  lastLoginAt        DateTime?
+  failedLogins       Int       @default(0)
+  lockedUntil        DateTime?
+  // TOTP gizli anahtarı SATIS_VAULT_KEY ile şifreli (müşavir API'sinin anahtarından ayrı)
+  totpSecretEnc      String?
+  totpEnabledAt      DateTime?
+  totpLastStep       Int?
+  recoveryCodeHashes String[]  @default([])
+  createdById        String?
+  createdAt          DateTime  @default(now())
+}
+
+// Satış ekibinin büro hakkında tuttuğu bilgi: yetkili kişi, kim açtı, dondurma durumu.
+model SalesAccount {
+  tenantId     String    @id
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contactName  String
+  contactEmail String
+  contactPhone String?   // E.164, başında + olmadan (905xxxxxxxxx); satış dışı açılmış eski bürolarda boş olabilir
+  createdById  String?   // satış dışı açılmış eski bürolarda boş
+  createdAt    DateTime  @default(now())
+  // Deneme bitişi: lisans bu tarihten ileri uzatılmadıysa büro "deneme" sayılır
+  trialEndsAt  DateTime?
+  // Dondurulunca büronun aktif kullanıcıları kapatılır; açılınca yalnız bu listedekiler geri açılır
+  suspendedAt      DateTime?
+  suspendedUserIds String[]  @default([])
+}
+
+// Satış işlemleri kaydı (hash zinciri, yalnız ekleme). Büroyu etkileyen işlem ayrıca büronun AuditLog'una da yazılır.
+model SalesAuditLog {
+  id          String   @id @default(cuid())
+  salesUserId String?
+  action      String   // "sales.office.create", "sales.user.login" …
+  target      String?  // tenantId veya satış kullanıcısı kimliği
+  detail      Json?
+  createdAt   DateTime @default(now())
+  seq         BigInt   @unique @default(autoincrement())
+  prevHash    String?
+  hash        String?
+
+  @@index([target, createdAt])
+}

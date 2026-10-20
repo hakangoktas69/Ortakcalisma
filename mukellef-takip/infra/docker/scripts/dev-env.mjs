@@ -8,6 +8,17 @@ import { fileURLToPath } from 'node:url';
 const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'secrets');
 const s = (n) => readFileSync(join(dir, n), 'utf8').trim();
 const local = (url) => url.replace('@postgres:', '@127.0.0.1:').replace('@redis:', '@127.0.0.1:');
+
+// Satış API'si ayrı rol ve ayrı anahtarlarla çalışır: node dev-env.mjs satis > satis/api/.env
+if (process.argv[2] === 'satis') {
+  console.log(`# satis/api/.env (yalnız geliştirme) — ekran: npm run dev:satis-web → http://localhost:3100/satis
+DATABASE_URL="${local(s('satis_database_url'))}"
+JWT_SECRET="${s('satis_jwt_secret')}"
+VAULT_KEY="${s('satis_vault_key')}"
+WEB_ORIGIN="http://localhost:3100"`);
+  process.exit(0);
+}
+
 console.log(`# apps/api/.env (yalnız geliştirme)
 DATABASE_URL="${local(s('database_url'))}"
 # Migration ve seed tablo sahibi rolüyle: DATABASE_URL="$MIGRATE_DATABASE_URL" npx prisma migrate deploy

@@ -40,6 +40,7 @@
 | `notifications` | Uygulama içi bildirim, WhatsApp, hatırlatıcılar | `Notification`, `NotificationRead`, `NotificationDelivery` | — | yukarıdaki tüm bildirim eventleri |
 | `workspace` | İş kutusu, dashboard, CSV raporlar | `InboxSnooze` | — | — (query facade'ları kullanır) |
 | `data-intake` | Eklenti sayfa aktarımı → context komutları | — | — | — |
+| `sales` (ayrı uygulama: `satis/api`) | Satış ekibi: müşavir (büro) hesabı açma, lisans, dondurma, şifre/2FA sıfırlama | `SalesUser`, `SalesAccount`, `SalesAuditLog`; `Tenant`/`User`/`Subscription`'a ayrı DB rolüyle yazar | — | — |
 
 Altyapı (`platform`) ve `shared-kernel` context değildir; bkz. `architecture.md`.
 

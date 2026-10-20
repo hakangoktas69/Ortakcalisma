@@ -22,6 +22,7 @@ model Tenant {
   notifications Notification[]
   assistantConversations AssistantConversation[]
   inboxSnoozes  InboxSnooze[]
+  salesAccount  SalesAccount? // Satış modülünün kaydı (satis/api); müşavir API'si okuyamaz
 
   // Güvenlik politikası: açıksa iki adımlı doğrulaması olmayan kullanıcı kurulumu yapmadan portalı kullanamaz
   require2fa    Boolean       @default(false)

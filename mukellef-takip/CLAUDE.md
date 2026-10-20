@@ -35,6 +35,7 @@ apps/api        NestJS 12 modüler monolit (HTTP: src/main.ts, kuyruk/zamanlayı
 apps/web        Next.js 16 App Router + Tailwind 4                                             → apps/web/CLAUDE.md
 apps/mobile     (Faz 4) Expo / React Native — henüz kod yok                                   → apps/mobile/CLAUDE.md
 apps/extension  Chrome MV3 eklentisi: kullanıcının açtığı GİB/SGK sayfasındaki tabloyu API'ye gönderir
+satis/          Satış portalı (ayrı uygulama, ayrı DB rolü): api/ NestJS /api/satis, web/ Next.js /satis   → satis/CLAUDE.md
 infra/docker    Dockerfile'lar ve compose (dev / prod)
 docs/           ai/ (Claude bağlamı), ai/memory/ (ekip hafızası), adr/ (karar kayıtları) — Obsidian kasası
 tools/claude    Claude Code kancası ve ekip hafızası denetimi

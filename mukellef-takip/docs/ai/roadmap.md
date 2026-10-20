@@ -46,6 +46,16 @@ Kararlar: modüler monolit, Expo mobil, Türkiye'de VM/on-prem. Gerekçeler `doc
 - [x] Duyarlı düzeltmeler: 20 ızgaraya temel sütun, iş kutusu/genel bakış telefonda, tablolarda sabit ilk sütun, tablette hesap menüsü katmanı
 - [ ] Görsel karşılaştırma (ekran görüntüsü farkı) — tasarım oturunca
 
+### Satış modülü (2026-10-20, docs/adr/0009) — Hakan Göktaş
+- [x] `satis/api` + `satis/web` ayrı uygulama, ayrı imaj; Caddy `/satis`, `/api/satis`
+- [x] `SalesUser` / `SalesAccount` / `SalesAuditLog`, `sales_user` rolü ve yetki sınırı (migration `satis_modulu`), `app_user` satış tablolarını göremez
+- [x] Zorunlu 2FA, çerez oturum, CSRF; yeni müşavir (büro + yönetici + deneme), lisans uzatma, dondurma, şifre/2FA sıfırlama, satış ekibi
+- [x] Birim + e2e (giriş akışı, büro işlemleri, veritabanı yetki sınırları)
+- [ ] GİB kullanıcı bilgisi — ekip kararı (kural 3)
+- [ ] Satış anahtarı üretimde OpenBao'dan
+- [ ] Bayi portalı (bayi yalnız kendi müşavirleri), sistem yönetimi portalı (koyu gri)
+- [ ] Satış ekranı için Playwright arayüz testleri (4 ekran)
+
 ### Faz 3 — Web (sonraki tur)
 - [ ] `src/features/<context>/` yapısı, TanStack Query, contracts tipleri
 - [ ] BFF + HttpOnly çerez oturum; `localStorage` token kaldırılır; `ACCESS_TOKEN_TTL=15m`

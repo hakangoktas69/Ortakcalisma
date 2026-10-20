@@ -8,6 +8,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
+COPY satis/api/package.json satis/api/
+COPY satis/web/package.json satis/web/
 RUN npm ci -w web --include-workspace-root --no-audit --no-fund
 
 FROM deps AS build
