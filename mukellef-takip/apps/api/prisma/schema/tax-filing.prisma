@@ -1,0 +1,78 @@
+// Context: tax-filing (docs/ai/bounded-contexts.md)
+
+enum DeclarationType {
+  KDV1          // Katma Değer Vergisi (aylık)
+  MUHSGK        // Muhtasar ve Prim Hizmet (aylık)
+  DAMGA         // Damga Vergisi (aylık)
+  GECICI_VERGI  // Geçici Vergi (üç aylık; 1.–3. dönem)
+  YILLIK_GELIR  // Yıllık Gelir Vergisi
+  KURUMLAR      // Kurumlar Vergisi
+}
+
+enum DeclarationSource {
+  MANUAL  // Kullanıcı elle işaretledi
+  GIB       // GİB'den çekildi (demo modunda sahte)
+  EXTENSION // Kullanıcı GİB sayfasını tarayıcı eklentisiyle aktardı
+}
+
+// Verilmiş beyanname. period: aylık "2026-09", üç aylık "2026-Q3", yıllık "2026"
+model Declaration {
+  id            String            @id @default(cuid())
+  companyId     String
+  company       Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type          DeclarationType
+  period        String
+  filedAt       DateTime
+  accrualAmount Decimal?          @db.Decimal(14, 2) // Tahakkuk tutarı (TL)
+  referenceNo   String?           // GİB beyanname / tahakkuk numarası
+  source        DeclarationSource
+  note          String?
+  createdById   String?
+  createdAt     DateTime          @default(now())
+
+  @@unique([companyId, type, period])
+  @@index([type, period])
+}
+
+enum EDefterPreference {
+  MONTHLY   // Aylık yükleme
+  QUARTERLY // Geçici vergi dönemleri bazında yükleme
+}
+
+// e-Defter berat yüklemesi. period: aylık "2026-03" / dönemsel "2026-Q1".
+// dueDateOverride: GİB süre uzatımı veya kuralın tarih veremediği dönemler (Ekim–Aralık) için elle girilen son gün.
+model EDefterBerat {
+  id              String    @id @default(cuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  period          String
+  uploadedAt      DateTime?
+  dueDateOverride DateTime?
+  note            String?
+  updatedById     String?
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([companyId, period])
+}
+
+// Vergi takvimi (tüm bürolar için ortak)
+model TaxCalendarEvent {
+  id           String         @id @default(cuid())
+  title        String         // "Eylül 2026 Dönemine Ait KDV Beyannamesi"
+  dueDate      DateTime
+  appliesTo    CompanyType[]  // boşsa herkes için
+  createdAt    DateTime       @default(now())
+
+  @@index([dueDate])
+}
+
+// Firmanın vermekle yükümlü olduğu beyannameler (firma türüne göre varsayılanla başlar, düzenlenebilir)
+model CompanyObligation {
+  id        String          @id @default(cuid())
+  companyId String
+  company   Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type      DeclarationType
+  active    Boolean         @default(true)
+
+  @@unique([companyId, type])
+}

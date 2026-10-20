@@ -1,0 +1,40 @@
+// Context: taxpayers (docs/ai/bounded-contexts.md)
+
+enum CompanyType {
+  SIRKET      // Şirket (bilanço)
+  SAHIS       // Şahıs (işletme)
+  BASIT_USUL  // Basit usul
+}
+
+// Mükellef (firma) kartı
+model Company {
+  id         String      @id @default(cuid())
+  tenantId   String
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title      String      // Unvan / ad soyad
+  taxNumber  String      // VKN (10 hane) veya TCKN (11 hane)
+  taxOffice  String?
+  type       CompanyType
+  isActive   Boolean     @default(true)
+  phone      String?
+  email      String?
+  notes      String?
+  createdAt  DateTime    @default(now())
+  tebligats  ETebligat[]
+
+  // e-Defter: firma e-Defter kullanıyor mu, berat yükleme tercihi (GİB'deki seçimle aynı olmalı)
+  eDefterEnabled    Boolean           @default(false)
+  eDefterPreference EDefterPreference @default(MONTHLY)
+  eDefterBerats     EDefterBerat[]
+  petitions         Petition[]
+  updatedAt  DateTime    @updatedAt
+  sgkWorkplaces SgkWorkplace[]
+  obligations   CompanyObligation[]
+  declarations  Declaration[]
+  invoices      Invoice[]
+  payrollRuns   PayrollRun[]
+
+  @@unique([tenantId, taxNumber])
+  @@index([tenantId])
+}
+

@@ -1,0 +1,6 @@
+*
+!mert/eworks/Eworks-Portal
+!mert/eworks/Eworks-Python-Robot
+!hkazaz/docker/mert/run_portal.py
+**/.env
+**/__pycache__

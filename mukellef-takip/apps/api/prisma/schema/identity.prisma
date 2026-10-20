@@ -1,0 +1,114 @@
+// Context: identity (docs/ai/bounded-contexts.md)
+
+// Mali müşavir bürosu (her büro ayrı bir müşteri / tenant)
+model Tenant {
+  id           String        @id @default(cuid())
+  name         String
+  createdAt    DateTime      @default(now())
+  users        User[]
+  companies    Company[]
+  subscription Subscription?
+  payments     Payment[]
+
+  // Fatura bilgileri (ödeme sağlayıcısına alıcı bilgisi olarak gönderilir)
+  billingName        String? // Unvan / ad soyad
+  billingContactName String? // Yetkili kişi (iyzico alıcı adı-soyadı)
+  billingTaxNumber   String? // VKN / TCKN
+  billingTaxOffice   String?
+  billingAddress     String?
+  billingCity        String?
+  billingEmail       String?
+  billingPhone       String? // +905xxxxxxxxx
+  notifications Notification[]
+  assistantConversations AssistantConversation[]
+  inboxSnoozes  InboxSnooze[]
+
+  // Güvenlik politikası: açıksa iki adımlı doğrulaması olmayan kullanıcı kurulumu yapmadan portalı kullanamaz
+  require2fa    Boolean       @default(false)
+
+  // KVKK md.9: asistan soruları yurt dışındaki servise gider; yönetici açık onay vermeden asistan çalışmaz
+  assistantConsentAt   DateTime?
+  assistantConsentById String?
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  role         UserRole @default(STAFF)
+  createdAt    DateTime @default(now())
+
+  isActive           Boolean   @default(true)
+  mustChangePassword Boolean   @default(false) // Yönetici geçici şifre verdiyse ilk girişte değiştirilir
+  // Oturum sürümü: şifre değişimi, devre dışı bırakma, 2FA değişikliğinde artar; eski JWT'ler geçersizleşir
+  sessionVersion     Int       @default(0)
+  lastLoginAt        DateTime?
+  // Art arda hatalı giriş kilidi (veritabanında: yeniden başlatmada ve birden fazla sunucuda da geçerli)
+  failedLogins       Int       @default(0)
+  lockedUntil        DateTime?
+
+  // İki adımlı doğrulama (TOTP). Gizli anahtar VaultService ile şifreli.
+  totpSecretEnc      String?   // Kurulum sırasında da tutulur; totpEnabledAt dolunca etkin sayılır
+  totpEnabledAt      DateTime?
+  totpLastStep       Int?      // Aynı kodun ikinci kez kullanılmasını engeller
+  recoveryCodeHashes String[]  @default([]) // Tek kullanımlık kurtarma kodlarının SHA-256 özetleri
+
+  // WhatsApp bildirimi: sadece kullanıcı telefonunu girip açık rıza verdiyse gönderilir
+  phone              String?   // E.164, başında + olmadan (905xxxxxxxxx)
+  whatsappEnabled    Boolean   @default(false)
+  whatsappOptInAt    DateTime? // Rıza verildiği an (WhatsApp politikası gereği saklanır)
+  notifyCategories   NotificationCategory[] @default([TEBLIGAT, SGK_RAPOR, BEYANNAME_SON_GUN, BEYANNAME_GECIKTI, EDEFTER])
+
+  notificationReads  NotificationRead[]
+  deliveries         NotificationDelivery[]
+  assistantConversations AssistantConversation[]
+  sessions           Session[]
+}
+
+// Tarayıcı eklentisi gibi istemciler için kapsamı dar, iptal edilebilir anahtar.
+// Anahtarın kendisi saklanmaz, sadece SHA-256 özeti tutulur; oluşturulurken bir kez gösterilir.
+model ApiToken {
+  id         String    @id @default(cuid())
+  tenantId   String
+  userId     String
+  name       String
+  tokenHash  String    @unique
+  prefix     String    // Listede ayırt etmek için ilk karakterler ("mt_ab12…")
+  scopes     String[]  // ör. ["declarations:import"]
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  expiresAt  DateTime? // Boşsa eski (süresiz) anahtar; yeni anahtarlar süreli üretilir
+  createdAt  DateTime  @default(now())
+
+  @@index([tenantId])
+}
+
+// Cihaz oturumu ve dönen yenileme anahtarı (docs/adr/0006). Anahtarın kendisi saklanmaz, SHA-256 özeti tutulur.
+// Her yenilemede aynı ailede (familyId) yeni satır açılır; kullanılmış satır tekrar gelirse aile iptal edilir.
+model Session {
+  id             String    @id @default(cuid())
+  tenantId       String
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId       String
+  tokenHash      String    @unique
+  sessionVersion Int       // Kullanıcının sessionVersion'ı değişince (şifre/2FA) yenileme reddedilir
+  userAgent      String?
+  createdAt      DateTime  @default(now())
+  lastUsedAt     DateTime?
+  expiresAt      DateTime
+  replacedAt     DateTime? // Bu anahtarla yenilendi (tek kullanımlık)
+  revokedAt      DateTime?
+  revokeReason   String?   // logout | user | reuse | admin
+
+  @@index([familyId])
+  @@index([userId, createdAt])
+}

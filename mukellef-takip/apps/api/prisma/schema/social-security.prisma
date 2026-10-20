@@ -1,0 +1,145 @@
+// Context: social-security (docs/ai/bounded-contexts.md)
+
+enum SyncStatus {
+  NEVER
+  RUNNING
+  OK
+  ERROR
+}
+
+// SGK işyeri / şube
+model SgkWorkplace {
+  id           String  @id @default(cuid())
+  companyId    String
+  company      Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  registryNo   String  // İşyeri sicil numarası
+  name         String?
+  isBranch     Boolean @default(false)
+
+  // Vizite web servisi giriş bilgileri. Şifre AES-256-GCM ile şifreli tutulur
+  // ve API yanıtlarında asla dönmez (bkz. VaultService).
+  viziteUsername      String?   // Vizite kullanıcı kodu (T.C. kimlik no)
+  viziteWorkplaceCode String?   // Vizite işyeri kodu (4 hane)
+  viziteSecretEnc     String?
+  credentialsUpdatedAt DateTime?
+
+  lastSyncAt     DateTime?
+  lastSyncStatus SyncStatus @default(NEVER)
+  lastSyncError  String?
+
+  // 4A işe giriş/işten ayrılış (Sigortalı Tescil) giriş bilgileri. Vizite'den ayrı şifrelerdir:
+  // e-Bildirge kullanıcı adı + sistem şifresi + işyeri şifresi. Şifreler AES-256-GCM ile şifreli.
+  tescilUsername             String?
+  tescilSystemPasswordEnc    String?
+  tescilWorkplacePasswordEnc String?
+  tescilCredentialsUpdatedAt DateTime?
+
+  tescilLastSyncAt     DateTime?
+  tescilLastSyncStatus SyncStatus @default(NEVER)
+  tescilLastSyncError  String?
+
+  reports    SgkReport[]
+  employment EmploymentEvent[]
+  bildirges  EBildirgeDocument[]
+  payrollRuns PayrollRun[]
+
+  @@index([companyId])
+}
+
+enum ReportStatus {
+  PENDING   // İşverenin çalışmazlık bildirimi bekleniyor
+  APPROVED  // Çalışmazlık bildirimi yapıldı (SGK'da onaylı)
+}
+
+// Vizite (e-Rapor) — SGK raporAramaTarihile / onayliRaporlarTarihile verileri
+model SgkReport {
+  id            String       @id @default(cuid())
+  workplaceId   String
+  workplace     SgkWorkplace @relation(fields: [workplaceId], references: [id], onDelete: Cascade)
+  medulaRaporId String
+  // Kişisel veri (KVKK): kimlik alanları şifreli + arama/tekillik için HMAC özeti (platform/crypto/personal-data.ts).
+  // tckn/fullName düz kolonları yalnız eski kayıtlar içindir; worker backfill işi şifreleyip boşaltır.
+  tckn          String?
+  fullName      String?
+  tcknEnc       String?
+  tcknHash      String?
+  fullNameEnc   String?
+  vaka          Int          // 1 İş kazası, 2 Meslek hastalığı, 3 Hastalık, 4 Analık
+  vakaAdi       String?
+  policlinicDate DateTime?
+  startDate     DateTime?
+  endDate       DateTime?
+  workControlDate DateTime?  // İş başı kontrol tarihi
+  sgkStatusCode String?      // RAPORDURUMU
+  facilityName  String?
+  status        ReportStatus @default(PENDING)
+  approvedAt    DateTime?
+  raw           Json?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([workplaceId, medulaRaporId])
+  @@index([workplaceId, status])
+}
+
+enum EmploymentEventType {
+  ENTRY // İşe giriş bildirgesi
+  EXIT  // İşten ayrılış bildirgesi
+}
+
+// SGK'ya verilmiş 4A işe giriş / işten ayrılış bildirgeleri (şimdilik sadece okunur)
+model EmploymentEvent {
+  id             String              @id @default(cuid())
+  workplaceId    String
+  workplace      SgkWorkplace        @relation(fields: [workplaceId], references: [id], onDelete: Cascade)
+  type           EmploymentEventType
+  // Kişisel veri (KVKK): kimlik alanları şifreli + arama/tekillik için HMAC özeti (platform/crypto/personal-data.ts).
+  // tckn/fullName düz kolonları yalnız eski kayıtlar içindir; worker backfill işi şifreleyip boşaltır.
+  tckn           String?
+  fullName       String?
+  tcknEnc        String?
+  tcknHash       String?
+  fullNameEnc    String?
+  eventDate      DateTime            // Giriş veya ayrılış tarihi
+  insuranceType  String?             // Sigortalı türü kodu (0: Tüm sigorta kolları, 2: Emekli, 7: Çırak …)
+  occupationCode String?             // Meslek kodu (ISCO-08)
+  exitReasonCode String?             // İşten ayrılış nedeni kodu (sadece EXIT)
+  exitReason     String?
+  referenceNo    String?             // SGK referans / belge numarası
+  raw            Json?
+  createdAt      DateTime            @default(now())
+
+  @@unique([workplaceId, type, tckn, eventDate])
+  @@unique([workplaceId, type, tcknHash, eventDate])
+  @@index([workplaceId, type, eventDate])
+}
+
+enum EBildirgeSource {
+  EXTENSION // SGK sayfasından eklentiyle aktarıldı
+  DEMO
+}
+
+// SGK e-Bildirge'de onaylanmış aylık prim ve hizmet belgeleri (sayfadan okunur).
+// Aynı dönem ve işyerinde belge türü + kanun no + mahiyet (asıl/ek/iptal) bir belgeyi tanımlar.
+model EBildirgeDocument {
+  id            String          @id @default(cuid())
+  workplaceId   String
+  workplace     SgkWorkplace    @relation(fields: [workplaceId], references: [id], onDelete: Cascade)
+  period        String          // "2026-09"
+  documentType  String          // Belge türü kodu, ör. "01"
+  lawNo         String          // Kanun no, ör. "05510"; yoksa "-"
+  kind          String          // Mahiyet: ASIL | EK | IPTAL
+  insuredCount  Int?            // Sigortalı sayısı
+  totalDays     Int?            // Toplam prim ödeme günü
+  premiumBase   Decimal?        @db.Decimal(14, 2) // Prime esas kazanç
+  accrualAmount Decimal?        @db.Decimal(14, 2) // Tahakkuk / prim tutarı
+  approvedAt    DateTime?
+  referenceNo   String?
+  source        EBildirgeSource
+  raw           Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@unique([workplaceId, period, documentType, lawNo, kind])
+  @@index([workplaceId, period])
+}

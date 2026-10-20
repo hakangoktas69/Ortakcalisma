@@ -1,0 +1,69 @@
+// Context: notifications (docs/ai/bounded-contexts.md)
+
+enum NotificationCategory {
+  TEBLIGAT           // Yeni e-tebligat / tebliğ sayılma tarihi yaklaşıyor
+  SGK_RAPOR          // Onay bekleyen e-Rapor
+  BEYANNAME_SON_GUN  // Son günü yaklaşan, verilmemiş beyanname
+  BEYANNAME_GECIKTI  // Son günü geçmiş beyanname
+  EDEFTER            // e-Defter berat son günü yaklaşıyor / geçti
+  SISTEM             // Senkron hataları, duyurular
+}
+
+model Notification {
+  id        String               @id @default(cuid())
+  tenantId  String
+  tenant    Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category  NotificationCategory @default(SISTEM)
+  title     String
+  body      String?
+  link      String?              // Portal içi yol, ör. "/tebligat"
+  // Dış kanala (WhatsApp, yurt dışı) giden gövde: kişisel veri içermez. Boşsa dış kanala yalnız başlık gider.
+  externalBody String?
+  // Aynı olay için ikinci bildirim üretilmez (ör. "deadline:KDV1:2026-09:3gun")
+  dedupeKey String?
+  createdAt DateTime             @default(now())
+
+  reads      NotificationRead[]
+  deliveries NotificationDelivery[]
+
+  @@unique([tenantId, dedupeKey])
+  @@index([tenantId, createdAt])
+}
+
+// Okunma kullanıcı bazındadır: bir personelin okuması diğerleri için okundu saymaz
+model NotificationRead {
+  notificationId String
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt         DateTime     @default(now())
+
+  @@id([notificationId, userId])
+}
+
+enum DeliveryChannel {
+  WHATSAPP
+}
+
+enum DeliveryStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+// Dış kanallara (WhatsApp) gönderim kaydı
+model NotificationDelivery {
+  id                String          @id @default(cuid())
+  notificationId    String
+  notification      Notification    @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel           DeliveryChannel
+  status            DeliveryStatus  @default(QUEUED)
+  providerMessageId String?
+  error             String?
+  sentAt            DateTime?
+  createdAt         DateTime        @default(now())
+
+  @@unique([notificationId, userId, channel])
+}

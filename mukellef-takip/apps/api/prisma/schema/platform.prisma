@@ -1,0 +1,37 @@
+// Platform: denetim kaydı, outbox (docs/ai/architecture.md)
+
+// Hassas işlemlerin izi: şifre çözme, şifre değişikliği, SGK'ya yazma işlemleri, kişisel veri okuma.
+// Değiştirilemez: uygulama rolünün UPDATE/DELETE yetkisi yoktur; büro başına hash zinciri kurcalamayı gösterir.
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String?  // null ise sistem (zamanlanmış iş)
+  action    String   // "vizite.credentials.update", "vizite.credentials.decrypt", "vizite.report.approve"
+  target    String?
+  detail    Json?
+  createdAt DateTime @default(now())
+
+  // hash = SHA-256(prevHash | kanonik içerik); prevHash aynı büronun bir önceki kaydının hash'i
+  seq       BigInt   @unique @default(autoincrement())
+  prevHash  String?
+  hash      String?
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, seq])
+}
+
+// Transactional outbox (docs/adr/0003): komut kendi verisiyle aynı transaction'da olay yazar,
+// worker'daki dağıtıcı abonelere iletir (en az bir kez; aboneler idempotent).
+model OutboxEvent {
+  id          String    @id @default(cuid())
+  tenantId    String
+  type        String    // "tebligat.imported", "sgk.reports.received", "billing.license.extended"
+  payload     Json
+  createdAt   DateTime  @default(now())
+  availableAt DateTime  @default(now()) // Hata sonrası yeniden deneme zamanı
+  attempts    Int       @default(0)
+  processedAt DateTime?
+  lastError   String?
+
+  @@index([processedAt, availableAt])
+}

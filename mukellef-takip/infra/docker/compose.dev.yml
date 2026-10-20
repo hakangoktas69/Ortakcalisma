@@ -1,0 +1,53 @@
+# Yerel geliştirme / demo: http://localhost:8080 (Caddy). Dış servisler demo modunda; anahtar yerel (VAULT_KEY).
+# PostgreSQL ve Redis yalnız 127.0.0.1'e açılır (yerel araçlar ve `npm run dev:api` için).
+services:
+  caddy:
+    environment:
+      # Port 80, her host adı (localhost, 127.0.0.1, LAN IP): yalnız geliştirme
+      SITE_ADDRESS: ":80"
+    ports: ["127.0.0.1:8080:80"]
+
+  api:
+    environment: &dev-env
+      NODE_ENV: development
+      LOG_LEVEL: info
+      WEB_ORIGIN: http://localhost:8080
+      API_PUBLIC_URL: http://localhost:8080/api
+      KMS_PROVIDER: local
+      VAULT_KEY_FILE: /run/secrets/vault_key
+      IYZICO_API_KEY_FILE: /run/secrets/iyzico_api_key
+      IYZICO_SECRET_KEY_FILE: /run/secrets/iyzico_secret_key
+      WHATSAPP_ACCESS_TOKEN_FILE: /run/secrets/whatsapp_access_token
+      ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
+      SGK_MODE: mock
+      GIB_MODE: mock
+      WHATSAPP_MODE: mock
+      BILLING_PROVIDER: demo
+      ASSISTANT_MODE: mock
+    secrets: [vault_key]
+
+  worker:
+    environment: *dev-env
+    secrets: [vault_key]
+
+  migrate:
+    environment:
+      SEED_DEMO: "true"
+      VAULT_KEY_FILE: /run/secrets/vault_key
+    secrets: [vault_key]
+
+  # İç ağlar (internal) port yayımlayamaz: yerel araçlar için ek ağ, yalnız 127.0.0.1
+  postgres:
+    ports: ["127.0.0.1:5432:5432"]
+    networks: [data, devhost]
+
+  redis:
+    ports: ["127.0.0.1:6379:6379"]
+    networks: [app, devhost]
+
+networks:
+  devhost: {}
+
+secrets:
+  # Yalnız geliştirme: yerel şifreleme anahtarı (üretimde OpenBao)
+  vault_key: { file: ./secrets/vault_key }

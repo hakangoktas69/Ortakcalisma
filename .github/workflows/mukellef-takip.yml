@@ -1,0 +1,126 @@
+# Mükellef Takip (mukellef-takip) sürekli entegrasyon: kalite, güvenlik, imajlar.
+# Kurallar: mukellef-takip/docs/ai/conventions.md
+name: mukellef-takip
+
+on:
+  push:
+    branches: [main]
+    paths: ['mukellef-takip/**', '.github/workflows/mukellef-takip.yml']
+  pull_request:
+    paths: ['mukellef-takip/**', '.github/workflows/mukellef-takip.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mukellef-takip-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: mukellef-takip
+
+jobs:
+  api:
+    name: API — lint, mimari, birim ve e2e testler, derleme
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.11-alpine
+        env:
+          POSTGRES_PASSWORD: ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
+      redis:
+        image: redis:7.4.11-alpine
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24.22.0
+          cache: npm
+          cache-dependency-path: mukellef-takip/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npx prisma generate
+        working-directory: mukellef-takip/apps/api
+        env: { DATABASE_URL: 'postgresql://x:x@localhost:5432/x' }
+      - run: npm run lint -w api
+      - run: npm run arch:check -w api
+      - run: npx tsc --noEmit -p tsconfig.json
+        working-directory: mukellef-takip/apps/api
+      - run: npm test -w api
+      - name: e2e (büro izolasyonu, RLS, oturum)
+        run: npm run test:e2e -w api
+        env:
+          E2E_ADMIN_DATABASE_URL: postgresql://postgres:ci@localhost:5432/postgres
+          E2E_REDIS_URL: redis://localhost:6379
+      - run: npm run build -w api
+      - name: Bağımlılık açıkları (yüksek ve üstü)
+        run: npm audit --omit=dev --audit-level=high
+
+  web:
+    name: Web — lint ve üretim derlemesi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24.22.0
+          cache: npm
+          cache-dependency-path: mukellef-takip/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint -w web
+      - run: npm run build -w web
+        env: { NEXT_TELEMETRY_DISABLED: '1' }
+
+  secrets:
+    name: Sır taraması (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  images:
+    name: Docker imajları ve güvenlik taraması (Trivy)
+    runs-on: ubuntu-latest
+    needs: [api, web]
+    strategy:
+      matrix:
+        include:
+          - { name: api, dockerfile: infra/docker/api.Dockerfile, target: runtime }
+          - { name: web, dockerfile: infra/docker/web.Dockerfile, target: runtime }
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: docker/setup-buildx-action@v4.4.1
+      - uses: docker/build-push-action@v7.4.0
+        with:
+          context: mukellef-takip
+          file: mukellef-takip/${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          tags: mukellef-takip/${{ matrix.name }}:ci
+          load: true
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+      - name: Trivy (kritik/yüksek açıkta başarısız)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: mukellef-takip/${{ matrix.name }}:ci
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+      - name: SBOM (CycloneDX)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: mukellef-takip/${{ matrix.name }}:ci
+          format: cyclonedx
+          output: sbom-${{ matrix.name }}.cdx.json
+          exit-code: '0'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.name }}
+          path: sbom-${{ matrix.name }}.cdx.json

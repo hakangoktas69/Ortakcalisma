@@ -1,0 +1,41 @@
+// Context: assistant (docs/ai/bounded-contexts.md)
+
+// Faz 6: Uzmana Sor / yapay zekâ asistanı. Sadece genel mevzuat soruları; mesajlar yapay zekâ servisine
+// gönderilmeden önce kimlik/vergi/sicil numarası, IBAN, e-posta ve telefon maskelenir ve veritabanına da
+// maskelenmiş hâliyle yazılır.
+enum AssistantRole {
+  USER
+  ASSISTANT
+}
+
+model AssistantConversation {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages  AssistantMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model AssistantMessage {
+  id             String                @id @default(cuid())
+  conversationId String
+  conversation   AssistantConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  tenantId       String                // Günlük kota sayımı için
+  role           AssistantRole
+  content        String
+  redactions     Json?                 // { tckn: 1, iban: 1 } gibi: maskelenen bilgi türleri
+  sources        Json?                 // Web aramasıyla bulunan kaynaklar [{ url, title }]
+  model          String?
+  inputTokens    Int?
+  outputTokens   Int?
+  createdAt      DateTime              @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([tenantId, role, createdAt])
+}

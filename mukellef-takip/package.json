@@ -1,0 +1,23 @@
+{
+  "name": "mukellef-takip",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "secrets:init": "node infra/docker/scripts/generate-secrets.mjs",
+    "stack:dev": "npm run secrets:init && docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml up -d --build",
+    "stack:down": "docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml down",
+    "stack:logs": "docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml logs -f --tail=100",
+    "stack:prod": "docker compose -f infra/docker/compose.yml -f infra/docker/compose.prod.yml --env-file infra/docker/.env up -d --build",
+    "db:up": "npm run secrets:init && docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml up -d postgres redis",
+    "db:down": "docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml stop postgres redis",
+    "dev:env": "node infra/docker/scripts/dev-env.mjs",
+    "dev:api": "npm run start:dev -w api",
+    "dev:worker": "npm run start:worker:dev -w api",
+    "dev:web": "npm run dev -w web",
+    "test": "npm test -w api",
+    "lint": "npm run lint -w api && npm run arch:check -w api && npm run lint -w web"
+  }
+}

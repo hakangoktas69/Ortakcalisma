@@ -1,0 +1,43 @@
+# Tek giriş noktası. /api → API, geri kalan → web. Aynı köken: tarayıcıda CORS ve üçüncü taraf çerez gerekmez.
+# SITE_ADDRESS: üretimde alan adı (otomatik TLS), geliştirmede http://localhost:80.
+# Kurum iç ağında genel ACME kullanılamıyorsa: site bloğuna `tls /etc/caddy/cert.pem /etc/caddy/key.pem` ekleyin.
+{
+	admin off
+	servers {
+		# Yavaş istemci saldırılarına karşı zaman aşımları
+		timeouts {
+			read_header 10s
+			idle 2m
+		}
+	}
+}
+
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+		-Server
+		-X-Powered-By
+	}
+
+	# Fatura ZIP'leri istek başına en fazla 25 MB (apps/api/src/modules/invoicing)
+	request_body {
+		max_size 30MB
+	}
+
+	handle /api/* {
+		reverse_proxy api:4000 {
+			header_up X-Request-Id {http.request.uuid}
+		}
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+
+	# Erişim günlüğü yazılmaz: adres satırında kişisel veri (ör. arama sorgusu) olabilir; API kendi günlüğünü redakte eder.
+}

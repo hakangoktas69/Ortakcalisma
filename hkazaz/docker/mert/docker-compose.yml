@@ -1,0 +1,20 @@
+# Eworks (mert) — portal + yerel köprü. Supabase ayrıca `npx supabase start` ile Docker'da çalışır.
+# Doğrudan çalıştırmak yerine baslat.ps1 kullanın (Supabase'i açar, anahtarları .env'e yazar).
+# Portal: http://127.0.0.1:8765/eworks-tasarim.html
+name: mert-eworks
+
+services:
+  portal:
+    build:
+      # Bağlam depo kökü; portal.Dockerfile.dockerignore yalnızca gereken dosyaları alır
+      context: ../../..
+      dockerfile: hkazaz/docker/mert/portal.Dockerfile
+    environment:
+      SUPABASE_KEY: ${SUPABASE_KEY:?baslat.ps1 ile çalıştırın}
+      BROWSER_SUPABASE_URL: http://127.0.0.1:55321
+      SERVER_SUPABASE_URL: http://host.docker.internal:55321
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      # yerel-sunucu.py Host başlığını 127.0.0.1:8765 / localhost:8765 olarak bekler
+      - "127.0.0.1:8765:8765"

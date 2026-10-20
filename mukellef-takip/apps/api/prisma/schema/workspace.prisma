@@ -1,0 +1,15 @@
+// Context: workspace (docs/ai/bounded-contexts.md)
+
+// İş kutusu: bir iş (ör. "decl:<firma>:KDV1:2026-09") büro genelinde belirli bir tarihe kadar ertelenebilir.
+// İşlerin kendisi saklanmaz; her açılışta beyanname, tebligat, SGK, e-Defter ve bordro verisinden üretilir.
+model InboxSnooze {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  key       String
+  until     DateTime
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, key])
+}

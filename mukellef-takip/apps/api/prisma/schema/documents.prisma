@@ -1,0 +1,31 @@
+// Context: documents (docs/ai/bounded-contexts.md)
+
+// Dilekçe şablonu. tenantId boşsa sistemin hazır şablonudur; büro kendi şablonlarını ekleyebilir.
+// body içindeki {{alan}} yer tutucuları belge üretilirken doldurulur.
+model PetitionTemplate {
+  id        String     @id @default(cuid())
+  tenantId  String?
+  title     String
+  category  String     // "Vergi dairesi", "SGK", "Genel"
+  body      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  petitions Petition[]
+
+  @@index([tenantId])
+}
+
+// Üretilmiş dilekçe (geçmiş/arşiv)
+model Petition {
+  id          String            @id @default(cuid())
+  companyId   String
+  company     Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  templateId  String?
+  template    PetitionTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  title       String
+  content     String            // Kullanıcının son düzenlediği tam metin
+  createdById String
+  createdAt   DateTime          @default(now())
+
+  @@index([companyId, createdAt])
+}

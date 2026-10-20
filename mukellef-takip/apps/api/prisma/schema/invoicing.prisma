@@ -1,0 +1,43 @@
+// Context: invoicing (docs/ai/bounded-contexts.md)
+
+// Faz 5c: e-Fatura / e-Arşiv faturaları. Kaynak: mükellefin entegratöründen dışa aktarılan UBL-TR XML (veya ZIP)
+// dosyaları; ileride entegratör API'si. Tutarlar belge para biriminde; TL karşılığı için exchangeRate kullanılır.
+enum InvoiceDirection {
+  OUTGOING // Mükellefin kestiği (satış)
+  INCOMING // Mükellefe kesilen (alış)
+}
+
+enum InvoiceSource {
+  UBL_UPLOAD
+  DEMO
+}
+
+model Invoice {
+  id                    String           @id @default(cuid())
+  companyId             String
+  company               Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  direction             InvoiceDirection
+  uuid                  String           // ETTN
+  number                String           // Fatura no (ör. ABC2026000000123)
+  issueDate             DateTime         @db.Date
+  period                String           // YYYY-MM (düzenleme tarihine göre)
+  profile               String           // TEMELFATURA, TICARIFATURA, EARSIVFATURA, IHRACAT…
+  invoiceType           String           // SATIS, IADE, TEVKIFAT, ISTISNA, OZELMATRAH, IHRACKAYITLI…
+  counterpartyTaxNumber String?
+  counterpartyName      String?
+  currency              String           @default("TRY")
+  exchangeRate          Decimal?         @db.Decimal(14, 6)
+  lineExtensionAmount   Decimal          @db.Decimal(16, 2) // Mal/hizmet toplamı
+  taxExclusiveAmount    Decimal          @db.Decimal(16, 2) // Vergiler hariç (matrah)
+  taxInclusiveAmount    Decimal          @db.Decimal(16, 2)
+  payableAmount         Decimal          @db.Decimal(16, 2)
+  vatAmount             Decimal          @db.Decimal(16, 2) // KDV (vergi kodu 0015) toplamı
+  withholdingAmount     Decimal          @default(0) @db.Decimal(16, 2) // KDV tevkifatı
+  taxes                 Json             // [{ code, name, rate, base, amount }]
+  lineCount             Int
+  source                InvoiceSource
+  createdAt             DateTime         @default(now())
+
+  @@unique([companyId, direction, uuid])
+  @@index([companyId, period])
+}

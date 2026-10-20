@@ -1,0 +1,28 @@
+// Context: tebligat (docs/ai/bounded-contexts.md)
+
+enum TebligatSource {
+  EXTENSION // GİB sayfasından eklentiyle aktarıldı
+  DEMO
+}
+
+// GİB e-Tebligat. Elektronik tebligat, muhatabın elektronik adresine ulaştığı tarihi izleyen
+// 5. günün sonunda tebliğ edilmiş sayılır (VUK 107/A); süreler bu tarihten başlar.
+model ETebligat {
+  id             String         @id @default(cuid())
+  companyId      String
+  company        Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  documentNo     String         // Belge / tebligat numarası (yoksa içerikten türetilen anahtar)
+  sender         String?        // Gönderen birim (ör. "Kadıköy Vergi Dairesi Müdürlüğü")
+  subject        String?        // Konu / belge türü (ör. "Vergi/Ceza İhbarnamesi")
+  deliveredAt    DateTime       // Elektronik adrese ulaşma (gönderim) tarihi
+  deemedServedAt DateTime       // Tebliğ edilmiş sayılma tarihi (ulaşmayı izleyen 5. gün sonu)
+  readAtGib      DateTime?      // GİB'de okunma tarihi (sayfada görünüyorsa)
+  reviewedAt     DateTime?      // Büroda incelendi olarak işaretlenme
+  reviewedById   String?
+  source         TebligatSource
+  raw            Json?
+  createdAt      DateTime       @default(now())
+
+  @@unique([companyId, documentNo])
+  @@index([companyId, deliveredAt])
+}

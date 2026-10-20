@@ -1,0 +1,4 @@
+# Sırlar, yedekler ve kuruluma özel ayarlar asla git'e girmez
+secrets/
+backups/
+.env

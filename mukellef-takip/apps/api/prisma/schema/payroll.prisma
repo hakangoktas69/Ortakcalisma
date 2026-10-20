@@ -1,0 +1,66 @@
+// Context: payroll (docs/ai/bounded-contexts.md)
+
+// Faz 5d: bordro takibi. Kaynak: bordro programının personel bazlı Excel/CSV çıktısı (programdan bağımsız,
+// başlıktan tanınır). Portal bordro hesaplamaz; programın sonucunu saklar ve e-Bildirge ile karşılaştırır.
+enum PayrollSource {
+  EXCEL_UPLOAD
+  DEMO
+}
+
+model PayrollRun {
+  id                   String        @id @default(cuid())
+  companyId            String
+  company              Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  workplaceId          String?
+  workplace            SgkWorkplace? @relation(fields: [workplaceId], references: [id], onDelete: SetNull)
+  workplaceKey         String        // workplaceId ?? "" (tekillik için; Postgres NULL'ları eşit saymaz)
+  period               String        // YYYY-MM
+  source               PayrollSource
+  fileName             String?
+  employeeCount        Int
+  totalDays            Int
+  gross                Decimal       @db.Decimal(16, 2)
+  sgkBase              Decimal       @db.Decimal(16, 2) // Prime esas kazanç (PEK)
+  employeeSgk          Decimal       @db.Decimal(16, 2)
+  employeeUnemployment Decimal       @db.Decimal(16, 2)
+  employerSgk          Decimal?      @db.Decimal(16, 2)
+  employerUnemployment Decimal?      @db.Decimal(16, 2)
+  incomeTax            Decimal       @db.Decimal(16, 2)
+  stampTax             Decimal       @db.Decimal(16, 2)
+  net                  Decimal       @db.Decimal(16, 2)
+  warningCount         Int           @default(0)
+  uploadedById         String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  lines                PayrollLine[]
+
+  @@unique([companyId, workplaceKey, period])
+  @@index([period])
+}
+
+model PayrollLine {
+  id                   String     @id @default(cuid())
+  runId                String
+  run                  PayrollRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  // Kişisel veri (KVKK): kimlik alanları şifreli + arama/tekillik için HMAC özeti (platform/crypto/personal-data.ts).
+  // tckn/fullName düz kolonları yalnız eski kayıtlar içindir; worker backfill işi şifreleyip boşaltır.
+  tckn                 String?
+  fullName             String?
+  tcknEnc              String?
+  tcknHash             String?
+  fullNameEnc          String?
+  days                 Int
+  gross                Decimal    @db.Decimal(14, 2)
+  sgkBase              Decimal    @db.Decimal(14, 2)
+  employeeSgk          Decimal    @db.Decimal(14, 2)
+  employeeUnemployment Decimal    @db.Decimal(14, 2)
+  employerSgk          Decimal?   @db.Decimal(14, 2)
+  employerUnemployment Decimal?   @db.Decimal(14, 2)
+  incomeTaxBase        Decimal?   @db.Decimal(14, 2)
+  incomeTax            Decimal    @db.Decimal(14, 2)
+  stampTax             Decimal    @db.Decimal(14, 2)
+  net                  Decimal    @db.Decimal(14, 2)
+  warnings             String[]   @default([])
+
+  @@index([runId])
+}

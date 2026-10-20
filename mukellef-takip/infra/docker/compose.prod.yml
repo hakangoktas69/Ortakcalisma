@@ -1,0 +1,91 @@
+# Üretim (Türkiye'de VM / on-prem). Kurulum ve işletim: infra/docker/README.md
+#   docker compose -f infra/docker/compose.yml -f infra/docker/compose.prod.yml --env-file infra/docker/.env up -d --build
+# - Caddy otomatik TLS ve HSTS.
+# - Veri anahtarı OpenBao Transit'te (KMS_PROVIDER=openbao); kurum şifreleri ve kişisel veri kolonları ona bağlı.
+# - Günlük şifreli yedek BACKUP_DIR'e; o dizin kurum dışına (off-site) senkronlanmalı.
+
+x-hardening-prod: &hardening-prod
+  restart: unless-stopped
+  read_only: true
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: ["ALL"]
+  tmpfs: ["/tmp"]
+
+x-prod-env: &prod-env
+  NODE_ENV: production
+  LOG_LEVEL: info
+  WEB_ORIGIN: https://${DOMAIN:?DOMAIN tanımlı olmalı}
+  API_PUBLIC_URL: https://${DOMAIN}/api
+  EXTENSION_ID: ${EXTENSION_ID:-}
+  KMS_PROVIDER: openbao
+  OPENBAO_ADDR: http://openbao:8200
+  OPENBAO_TOKEN_FILE: /run/secrets/openbao_token
+  OPENBAO_WRAPPED_DEK_FILE: /run/secrets/openbao_wrapped_dek
+  IYZICO_API_KEY_FILE: /run/secrets/iyzico_api_key
+  IYZICO_SECRET_KEY_FILE: /run/secrets/iyzico_secret_key
+  WHATSAPP_ACCESS_TOKEN_FILE: /run/secrets/whatsapp_access_token
+  ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
+  SGK_MODE: ${SGK_MODE:-mock}
+  GIB_MODE: ${GIB_MODE:-mock}
+  WHATSAPP_MODE: ${WHATSAPP_MODE:-off}
+  WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+  WHATSAPP_GRAPH_VERSION: ${WHATSAPP_GRAPH_VERSION:-}
+  BILLING_PROVIDER: ${BILLING_PROVIDER:-iyzico}
+  IYZICO_BASE_URL: ${IYZICO_BASE_URL:-https://api.iyzipay.com}
+  ASSISTANT_MODE: ${ASSISTANT_MODE:-off}
+  DEMO_MODE: ${DEMO_MODE:-false}
+
+services:
+  caddy:
+    environment:
+      SITE_ADDRESS: ${DOMAIN}
+    ports: ["80:80", "443:443"]
+
+  api:
+    environment: *prod-env
+    secrets: [openbao_token, openbao_wrapped_dek]
+    depends_on:
+      openbao: { condition: service_started }
+
+  worker:
+    environment: *prod-env
+    secrets: [openbao_token, openbao_wrapped_dek]
+    depends_on:
+      openbao: { condition: service_started }
+
+  openbao:
+    <<: *hardening-prod
+    image: openbao/openbao:2.7.1
+    # Giriş betiği (chown/setcap) atlanır: bao doğrudan ayrıcalıksız openbao kullanıcısıyla çalışır (mlock kapalı, bkz. config.hcl)
+    entrypoint: ["bao"]
+    command: ["server", "-config=/openbao/config/config.hcl"]
+    user: openbao
+    volumes:
+      - ./openbao/config.hcl:/openbao/config/config.hcl:ro
+      - openbao-data:/openbao/file
+    networks: [app]
+
+  backup:
+    <<: *hardening-prod
+    build: { context: ., dockerfile: backup.Dockerfile }
+    image: mukellef-takip/backup:local
+    environment:
+      PGHOST: postgres
+      PGUSER: mukellef_owner
+      PGDATABASE: mukellef
+      BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS:-24}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+    secrets: [owner_password, backup_passphrase]
+    volumes:
+      - ${BACKUP_DIR:-./backups}:/backups
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [data]
+
+volumes:
+  openbao-data:
+
+secrets:
+  openbao_token: { file: ./secrets/openbao_token }
+  openbao_wrapped_dek: { file: ./secrets/openbao_wrapped_dek }
+  backup_passphrase: { file: ./secrets/backup_passphrase }

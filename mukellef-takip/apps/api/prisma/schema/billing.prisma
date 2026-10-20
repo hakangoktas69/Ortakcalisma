@@ -1,0 +1,40 @@
+// Context: billing (docs/ai/bounded-contexts.md)
+
+// Lisans ve firma kotası ("Lisans: 359 gün", "Kota: 126/126")
+model Subscription {
+  id           String   @id @default(cuid())
+  tenantId     String   @unique
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan         String   @default("standart")
+  companyQuota Int      @default(50)
+  expiresAt    DateTime
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+// Lisans ödemesi. Tutar sunucuda paket tablosundan hesaplanır; istemciden gelen tutara güvenilmez.
+model Payment {
+  id          String        @id @default(cuid())
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan        String
+  months      Int
+  amount      Decimal       @db.Decimal(12, 2)
+  currency    String        @default("TRY")
+  status      PaymentStatus @default(PENDING)
+  provider    String        // "demo", "iyzico", "paytr"…
+  providerRef String?       // Sağlayıcının ödeme numarası (iyzico paymentId)
+  // iyzico ödeme formu token'ı: geri dönüşte ödeme bununla bulunur ve iyzico'ya sorulur
+  providerToken String?     @unique
+  fraudStatus   Int?        // iyzico: 1 onaylı, 0 incelemede, -1 reddedildi
+  createdById String
+  createdAt   DateTime      @default(now())
+  paidAt      DateTime?
+  error       String?
+
+  @@index([tenantId, createdAt])
+}
