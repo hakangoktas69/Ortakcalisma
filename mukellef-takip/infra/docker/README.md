@@ -5,10 +5,10 @@ Bütün sistem container'larla çalışır. Topoloji geliştirmede ve üretimde 
 ```
 İnternet ──443──► caddy ──/api──► api ──┬──► postgres (RLS)        [data ağı, internal]
                     │                   ├──► redis                 [app ağı, internal]
-                    └──────────► web    └──► openbao (yalnız üretim)
+                    └──────────► web    └──► openbao (yalnız canlı)
                                  worker ──► postgres, redis, openbao
                                  migrate (tek seferlik) ──► postgres
-                                 backup (yalnız üretim) ──► postgres → şifreli dosya
+                                 backup (yalnız canlı) ──► postgres → şifreli dosya
 ```
 
 - Yalnız **caddy** host'a port açar. `app` ve `data` ağları `internal`: dışarıya çıkamaz, dışarıdan girilemez.
@@ -17,15 +17,27 @@ Bütün sistem container'larla çalışır. Topoloji geliştirmede ve üretimde 
 - Veritabanı rolleri: `mukellef_app` (API/worker, RLS'e tabi, tablo sahibi değil), `mukellef_owner` (migration ve yedek), `postgres` (yalnız yönetim). Ayrıntı: `postgres/init/01-roles.sh`.
 - İmaj sürümleri sabittir (`node:24.22.0-slim`, `postgres:17.11-alpine`, `redis:7.4.11-alpine`, `caddy:2.11.7-alpine`, `openbao/openbao:2.7.1`). Güncellemeyi bilinçli yapın; CI Trivy ile tarar.
 
-| Dosya | İçerik |
-|---|---|
-| `compose.yml` | Temel yığın (her ortam) |
-| `compose.dev.yml` | Geliştirme: http://localhost:8080, demo servisler, yerel anahtar, demo verisi |
-| `compose.prod.yml` | Üretim: alan adı + TLS, OpenBao, yedek |
-| `api.Dockerfile` | API imajı (hedefler: `runtime` → api/worker, `migrate`) |
-| `web.Dockerfile` | Next.js standalone |
-| `scripts/generate-secrets.mjs` | Eksik sırları üretir (var olanlara dokunmaz) |
-| `scripts/openbao-init.mjs` | OpenBao ilk kurulumu |
+Projedeki bütün Docker dosyaları bu klasördedir; derleme bağlamı her zaman proje köküdür ve tek ignore dosyası kökteki `.dockerignore`'dur.
+
+| Dosya | İçerik | Kullanan |
+|---|---|---|
+| `compose.yml` | Temel yığın (her ortam); tek başına kullanılmaz | `stack:dev`, `stack:prod`, `db:up` |
+| `compose.dev.yml` | Geliştirme katmanı: http://localhost:8080, demo servisler, yerel anahtar, demo verisi | `npm run stack:dev` |
+| `compose.prod.yml` | Canlı katmanı: alan adı + TLS, OpenBao, yedek | `npm run stack:prod` |
+| `compose.test.yml` | Geçici doğrulama yığını (veri tmpfs'te, host'a port yok) | `npm run verify` |
+| `compose.demo.yml` | **Tek başına** demo yığını: yalnız Docker, http://localhost:3000 ([Demo](#demo)) | `npm run stack:demo` |
+| `api.Dockerfile` | API imajı, hedefler: `runtime` (api: `dist/main.js`, worker: `dist/worker.js`) ve `migrate` (şema + demo verisi, tek seferlik). Derlemede lint, mimari kurallar, tip ve birim testleri koşar | compose.yml, compose.demo.yml |
+| `web.Dockerfile` | Next.js standalone canlı derlemesi; API'ye aynı köken `/api` üzerinden (Caddy) | compose.yml, compose.demo.yml |
+| `test.Dockerfile` | Hedefler: `verify` (lint, tip, birim, e2e) ve `ui` (Playwright, 4 ekran boyutu) | `verify`, `test:ui` |
+| `backup.Dockerfile` | Şifreli `pg_dump` yedeği (`backup/backup.sh`) | compose.prod.yml |
+| `migrate-entrypoint.sh` | `migrate` container'ının giriş betiği | api.Dockerfile |
+| `caddy/Caddyfile` | Tek giriş: `/api/*` → api, geri kalan → web | tüm yığınlar |
+| `postgres/init/01-roles.sh` | İlk kurulumda veritabanı rolleri | tüm yığınlar |
+| `scripts/generate-secrets.mjs` | Eksik sırları üretir (var olanlara dokunmaz) | `secrets:init` |
+| `scripts/openbao-init.mjs` | OpenBao ilk kurulumu | canlı |
+| `scripts/verify.mjs`, `ui-test.mjs`, `dev-env.mjs` | Doğrulama kapısı, arayüz testleri, yerel `.env` üretimi | npm betikleri |
+
+**`migrate` servisi:** API ve worker açılmadan önce bir kez çalışır, şemayı günceller (`prisma migrate deploy`), `SEED_DEMO=true` ve veritabanı boşsa demo verisini yükler, sonra çıkar ("Exited (0)" normaldir). Tablo sahibi `mukellef_owner` rolüyle bağlanır; API/worker bu role erişmez, şemayı değiştiremez. Başarısız olursa api ve worker başlamaz: `… logs migrate`.
 
 ## Geliştirme
 
@@ -48,7 +60,40 @@ cd apps/api && DATABASE_URL="$(grep MIGRATE_DATABASE_URL .env | cut -d'"' -f2)" 
 npm run dev:api   # ayrı terminalde: npm run dev:worker, npm run dev:web
 ```
 
-## Üretim kurulumu (Türkiye'de VM / on-prem)
+## Demo
+
+Sistemi denemek veya göstermek için; **yalnız Docker** yeter (npm, yerel Node, sır üretimi gerekmez). Geliştirme/üretimle aynı Dockerfile'lar, Caddy ve veritabanı rolleri kullanılır, RLS etkindir.
+
+```bash
+# proje kökünden (mukellef-takip)
+docker compose -f infra/docker/compose.demo.yml up -d --build     # veya: npm run stack:demo
+docker compose -f infra/docker/compose.demo.yml ps                # api "healthy", migrate "Exited (0)" → hazır
+```
+
+- Adres: **http://localhost:3000** (API: http://localhost:3000/api, sağlık: `/api/health`). Yalnız `127.0.0.1`'e açılır.
+- Giriş: `demo@mukellef.test` / `Demo1234!` · `personel@mukellef.test` / `Personel2026`
+- İlk derleme birkaç dakika sürer (imaj derlemesinde lint ve birim testleri koşar; testler geçmezse imaj oluşmaz).
+- Geliştirme yığınıyla (`mukellef-takip`, :8080) aynı anda çalışabilir: proje adı, imaj etiketleri, port ve veritabanı ayrıdır.
+
+```bash
+DC="docker compose -f infra/docker/compose.demo.yml"
+$DC logs -f api worker          # loglar
+$DC up -d --build               # kod değişti: yeniden derle
+$DC exec postgres psql -U postgres -d mukellef
+$DC down                        # durdur (veri kalır)   — veya: npm run stack:demo:down
+$DC down -v                     # durdur ve demo verisini sıfırla (sonraki açılışta yeniden yüklenir)
+```
+
+**Geliştirme yığınından farkı:** sırlar `compose.demo.yml` içinde açık yazılıdır (yalnız yerel demo; başka yerde kullanmayın), container sertleştirmesi (salt okunur FS, iç ağlar, `cap_drop`) yoktur, Redis şifresizdir ve ayrı doğrulama (`npm run verify`) ile arayüz testleri koşmaz. **Gerçek veriyle kullanmayın**; güvenlik davranışını denerken `npm run stack:dev` kullanın.
+
+| Belirti | Çözüm |
+|---|---|
+| `port is already allocated` (3000) | Portu tutan süreci kapatın (ör. `npm run dev:web`). |
+| api/worker başlamıyor | `$DC logs migrate` — migration hatası; api ve worker migration bitmeden açılmaz. |
+| İmaj derlenmiyor (lint/test) | Hata koddadır; `npm run verify` ile aynı kapıyı yerelde koşup düzeltin. |
+| Giriş başarısız | Eski demo verisi kalmış olabilir: `$DC down -v` ve yeniden başlatın. |
+
+## Canlı kurulumu (Türkiye'de VM / on-prem)
 
 Ön koşullar: Docker Engine + Compose eklentisi, alan adının DNS kaydı sunucuyu gösteriyor, 80/443 açık, **swap kapalı veya şifreli** (OpenBao anahtarları bellekte tutar), disk şifrelemesi (LUKS) önerilir.
 

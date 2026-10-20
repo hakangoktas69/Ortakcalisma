@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// OpenBao ilk kurulumu (üretim). Kullanım (proje kökünde, yığın ayaktayken):
+// OpenBao ilk kurulumu (canlı). Kullanım (proje kökünde, yığın ayaktayken):
 //   node infra/docker/scripts/openbao-init.mjs
 // - Kasayı kurar ve açar, Transit anahtarını ve uygulama politikasını oluşturur.
 // - Uygulama anahtarını ve sarılmış veri anahtarını infra/docker/secrets/ altına yazar.
