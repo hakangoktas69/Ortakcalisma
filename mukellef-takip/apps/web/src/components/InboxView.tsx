@@ -24,13 +24,14 @@ import { api, formatDate, type InboxItem, type InboxKind, type InboxResponse } f
 
 type Folder = "all" | "late" | "soon" | "snoozed";
 
-const KIND: Record<InboxKind, { label: string; icon: LucideIcon }> = {
-  declaration: { label: "Beyanname", icon: FileText },
-  tebligat: { label: "e-Tebligat", icon: Mail },
-  report: { label: "e-Rapor", icon: Stethoscope },
-  berat: { label: "e-Defter", icon: BookCheck },
-  payroll: { label: "Bordro", icon: Wallet },
-  license: { label: "Lisans", icon: CreditCard },
+// Her iş türünün kendi rengi: liste simgesi, tür etiketi ve ayrıntı başlığında aynı renk
+const KIND: Record<InboxKind, { label: string; icon: LucideIcon; chip: string; solid: string }> = {
+  declaration: { label: "Beyanname", icon: FileText, chip: "bg-indigo-50 text-indigo-700", solid: "bg-indigo-600 text-white" },
+  tebligat: { label: "e-Tebligat", icon: Mail, chip: "bg-orange-50 text-orange-700", solid: "bg-orange-500 text-white" },
+  report: { label: "e-Rapor", icon: Stethoscope, chip: "bg-rose-50 text-rose-700", solid: "bg-rose-500 text-white" },
+  berat: { label: "e-Defter", icon: BookCheck, chip: "bg-teal-50 text-teal-700", solid: "bg-teal-600 text-white" },
+  payroll: { label: "Bordro", icon: Wallet, chip: "bg-violet-50 text-violet-700", solid: "bg-violet-600 text-white" },
+  license: { label: "Lisans", icon: CreditCard, chip: "bg-amber-50 text-amber-800", solid: "bg-amber-500 text-white" },
 };
 const KIND_ORDER: InboxKind[] = ["declaration", "tebligat", "report", "berat", "payroll", "license"];
 
@@ -261,7 +262,9 @@ function Detail({
       </div>
       <div className="flex-1 overflow-y-auto px-6 py-5">
         <p className="flex items-center gap-2 text-xs font-medium text-slate-500">
-          <k.icon size={14} /> {k.label}
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold ${k.chip}`}>
+            <k.icon size={13} /> {k.label}
+          </span>
           {item.severity === "late" && <span className="rounded-full bg-red-50 px-2 py-0.5 font-semibold text-red-700">Gecikti</span>}
           {item.severity === "soon" && <span className="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-800">Yaklaşıyor</span>}
         </p>
@@ -434,68 +437,66 @@ export default function InboxView() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 h-[calc(100vh-11rem)] min-h-[520px] overflow-hidden rounded-2xl border border-slate-200 bg-white lg:grid-cols-[208px_minmax(0,1fr)_minmax(0,440px)]">
-        {/* Klasörler */}
-        <nav aria-label="Klasörler" className="hidden flex-col gap-0.5 border-r border-slate-200 bg-slate-50/60 p-3 lg:flex">
-          {folders.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setFolder(f.id)}
-              className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm ${folder === f.id ? "bg-white font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200" : "text-slate-600 hover:bg-white"}`}
-            >
-              <f.icon size={16} className={f.tone ?? "text-slate-500"} />
-              <span className="flex-1 text-left">{f.label}</span>
-              <span className="text-xs text-slate-500 tabular-nums">{f.count}</span>
-            </button>
-          ))}
-          <p className="mt-4 mb-1 px-2.5 text-[11px] font-semibold tracking-wide text-slate-400 uppercase">Türe göre</p>
+      {/* Araç çubuğu: klasör sekmeleri, arama ve renkli tür etiketleri */}
+      <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <div role="tablist" aria-label="Klasörler" className="flex gap-1 overflow-x-auto rounded-xl bg-slate-100 p-1">
+            {folders.map((f) => (
+              <button
+                key={f.id}
+                role="tab"
+                aria-selected={folder === f.id}
+                onClick={() => setFolder(f.id)}
+                className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm ${
+                  folder === f.id ? "bg-white font-semibold text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <f.icon size={15} className={f.tone ?? "text-slate-500"} />
+                {f.label}
+                <span className={`rounded-full px-1.5 text-xs tabular-nums ${folder === f.id ? "bg-slate-100 text-slate-700" : "text-slate-500"}`}>{f.count}</span>
+              </button>
+            ))}
+          </div>
+          <label className="ml-auto flex h-10 w-full items-center gap-2 rounded-xl border border-slate-200 px-3 focus-within:border-brand-400 sm:w-72">
+            <Search size={15} className="text-slate-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Mükellef, VKN veya iş ara"
+              className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
+              aria-label="İşlerde ara"
+            />
+          </label>
+        </div>
+        <div className="flex flex-wrap gap-1.5" aria-label="Türe göre süz">
           <button
             onClick={() => setKind("")}
-            className={`rounded-lg px-2.5 py-1.5 text-left text-sm ${kind === "" ? "font-semibold text-slate-900" : "text-slate-600 hover:bg-white"}`}
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${kind === "" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
           >
             Hepsi
           </button>
           {KIND_ORDER.filter((kk) => c.byKind[kk] > 0 || kind === kk).map((kk) => {
             const K = KIND[kk];
+            const on = kind === kk;
             return (
               <button
                 key={kk}
-                onClick={() => setKind(kind === kk ? "" : kk)}
-                className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm ${kind === kk ? "bg-white font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200" : "text-slate-600 hover:bg-white"}`}
+                onClick={() => setKind(on ? "" : kk)}
+                aria-pressed={on}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 transition ${on ? `${K.solid} ring-transparent` : `${K.chip} ring-transparent hover:ring-current`}`}
               >
-                <K.icon size={15} className="text-slate-500" />
-                <span className="flex-1 text-left">{K.label}</span>
-                <span className="text-xs text-slate-500 tabular-nums">{c.byKind[kk]}</span>
+                <K.icon size={13} />
+                {K.label}
+                <span className="tabular-nums opacity-80">{c.byKind[kk]}</span>
               </button>
             );
           })}
-        </nav>
+        </div>
+      </div>
 
+      <div className="grid grid-cols-1 h-[calc(100vh-15.5rem)] min-h-[480px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)]">
         {/* Liste */}
         <section className={`flex min-h-0 flex-col border-r border-slate-200 ${mobileDetail ? "hidden lg:flex" : "flex"}`} aria-label="İşler">
-          <div className="space-y-2 border-b border-slate-200 p-3">
-            <label className="flex h-9 items-center gap-2 rounded-lg bg-slate-100 px-3">
-              <Search size={15} className="text-slate-400" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Mükellef, VKN veya iş ara"
-                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
-                aria-label="İşlerde ara"
-              />
-            </label>
-            <div className="flex gap-1.5 overflow-x-auto lg:hidden">
-              {folders.map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => setFolder(f.id)}
-                  className={`shrink-0 rounded-full px-3 py-1 text-xs ${folder === f.id ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}
-                >
-                  {f.label} {f.count}
-                </button>
-              ))}
-            </div>
-          </div>
           <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto">
             {visible.length === 0 && (
               <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center text-sm text-slate-500">
@@ -525,7 +526,15 @@ export default function InboxView() {
                     className={`relative flex w-full gap-3 border-b border-slate-100 px-4 py-3 text-left ${active ? "bg-brand-50" : "hover:bg-slate-50"}`}
                   >
                     {active && <span className="absolute inset-y-0 left-0 w-[3px] bg-brand-600" />}
-                    <K.icon size={16} className={`mt-0.5 shrink-0 ${i.severity === "late" ? "text-red-500" : i.severity === "soon" ? "text-amber-500" : "text-slate-400"}`} />
+                    <span className={`relative mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl ${K.chip}`}>
+                      <K.icon size={17} />
+                      {i.severity !== "normal" && (
+                        <span
+                          className={`absolute -top-0.5 -right-0.5 size-2.5 rounded-full ring-2 ring-white ${i.severity === "late" ? "bg-red-500" : "bg-amber-400"}`}
+                          aria-label={i.severity === "late" ? "Gecikti" : "Yaklaşıyor"}
+                        />
+                      )}
+                    </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-baseline justify-between gap-2">
                         <span className="truncate text-sm font-semibold text-slate-900">{i.company?.title ?? i.title}</span>

@@ -23,10 +23,11 @@ test.describe("giriş", () => {
   });
 });
 
-test("ana menüyle gezinme (telefonda çekmece, büyük ekranda yan menü)", async ({ page }, info) => {
+test("ana menüyle gezinme (telefon ve tablette çekmece, laptop ve büyük ekranda üst menü)", async ({ page }, info) => {
   const problems = watch(page);
   await page.goto("/");
-  if (info.project.name === "telefon") {
+  // Üst menü lg (1024) altında sığmaz; orada menü düğmesi çekmeceyi açar
+  if (info.project.name === "telefon" || info.project.name === "tablet") {
     await page.getByRole("button", { name: "Menüyü aç" }).click();
     const drawer = page.getByRole("dialog", { name: "Menü" });
     await expect(drawer).toBeVisible();

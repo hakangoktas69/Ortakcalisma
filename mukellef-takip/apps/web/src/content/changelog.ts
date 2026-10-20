@@ -39,6 +39,17 @@ export const CHANGELOG: ChangeEntry[] = [
     ],
   },
   {
+    id: "2026-10-19-ust-menu",
+    date: "2026-10-19",
+    title: "Üst menü ve renkli iş türleri",
+    summary: "Menü sayfanın üstüne taşındı; iş kutusunda her iş türü kendi rengiyle görünüyor.",
+    changes: [
+      { kind: "improved", text: "Renkli üst menü; Beyan, SGK ve Muhasebe modülleri açılır gruplarda. Yardım, bildirimler ve hesap menüsü sağ üstte." },
+      { kind: "improved", text: "İş kutusunda klasörler sekme, iş türleri renkli etiket oldu; liste daha geniş.", href: "/" },
+      { kind: "improved", text: "Beyanname, tebligat, e-rapor, e-Defter ve bordro işleri kendi renkleriyle ayırt ediliyor." },
+    ],
+  },
+  {
     id: "2026-10-19-2fa-zorunlu",
     date: "2026-10-19",
     title: "İki adımlı doğrulama zorunluluğu",

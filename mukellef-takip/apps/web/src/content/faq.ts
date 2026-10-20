@@ -38,7 +38,7 @@ export const FAQ: FaqSection[] = [
           "Açılış sayfası. Beyanname, e-tebligat, e-rapor, e-Defter beratı, bordro ve lisanstan gelen açık işleri tek listede, en acil olan üstte gösterir.",
           "Bir işe tıklayınca sağda ayrıntısı ve doğrudan işlem düğmesi açılır (ör. \"Verildi olarak işaretle\", \"İncelendi\"). İş ilgili ekranda tamamlandığında listeden kendiliğinden düşer.",
           "Bir işi şimdi yapamayacaksanız \"Sonra hatırlat\" ile yarına, 3 gün sonrasına veya gelecek haftaya erteleyebilirsiniz; erteleme bütün büro için geçerlidir. Klavyede ↑ ↓ tuşlarıyla işler arasında gezebilirsiniz.",
-          "Sayılar ve grafiklerle özet görmek için sol menüdeki Genel bakış sayfasını açın.",
+          "Sayılar ve grafiklerle özet görmek için üst menüdeki Genel bakış sayfasını açın.",
         ],
         link: { href: "/", label: "İş kutusu" },
       },
@@ -53,7 +53,7 @@ export const FAQ: FaqSection[] = [
       {
         id: "tema",
         q: "Koyu temaya nasıl geçerim?",
-        a: ["Sol alttaki yuvarlak hesap simgenize tıklayın; açılan menüden Açık, Sistem (bilgisayarınızın ayarını izler) veya Koyu seçin. Varsayılan açık temadır; seçiminiz bu tarayıcıda hatırlanır."],
+        a: ["Sağ üstteki yuvarlak hesap simgenize (adınızın baş harfleri) tıklayın; açılan menüden Açık, Sistem (bilgisayarınızın ayarını izler) veya Koyu seçin. Varsayılan açık temadır; seçiminiz bu tarayıcıda hatırlanır."],
       },
       {
         id: "demo-modu",

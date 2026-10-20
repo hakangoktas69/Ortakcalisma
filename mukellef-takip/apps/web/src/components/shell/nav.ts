@@ -35,6 +35,8 @@ export interface NavGroup {
   /** Grubun nerede gösterileceği: sol ikon şeridi, yardım menüsü ya da hesap menüsü */
   area: "rail" | "help" | "account";
   title: string | null;
+  /** Üst menüde açılır grup olarak gösterilecekse grubun kısa adı; yoksa öğeler doğrudan bağlantıdır */
+  menu?: string;
   items: NavItem[];
 }
 
@@ -51,6 +53,7 @@ export const NAV: NavGroup[] = [
   {
     area: "rail",
     title: "Beyan ve tebligat",
+    menu: "Beyan",
     items: [
       { href: "/beyanname", label: "Beyannameler", icon: FileText, keywords: "e-beyanname kdv muhtasar kontrol" },
       { href: "/tebligat", label: "e-Tebligat", icon: Mail, keywords: "tebligat gib" },
@@ -60,6 +63,7 @@ export const NAV: NavGroup[] = [
   {
     area: "rail",
     title: "SGK ve personel",
+    menu: "SGK",
     items: [
       { href: "/sgk", label: "SGK", icon: ShieldCheck, keywords: "vizite rapor işe giriş çıkış e-bildirge" },
       { href: "/bordro", label: "Bordro", icon: Wallet, keywords: "maaş ücret mutabakat" },
@@ -68,6 +72,7 @@ export const NAV: NavGroup[] = [
   {
     area: "rail",
     title: "Muhasebe",
+    menu: "Muhasebe",
     items: [
       { href: "/faturalar", label: "Faturalar", icon: ReceiptText, keywords: "e-fatura e-arşiv kdv ubl" },
       { href: "/raporlar", label: "Raporlar", icon: FileSpreadsheet, keywords: "csv excel dışa aktar" },
