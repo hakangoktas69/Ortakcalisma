@@ -29,7 +29,7 @@ Eşikler mevcut seviyenin hemen altındadır; yeni kod testsiz eklenirse düşer
 | `npm run verify` | derlemeden / dağıtımdan önce | izole Docker test yığınında (Node 24, geçici PostgreSQL + Redis): statik + birim + **API regresyon** (eşikli). Yerel Node sürümünden bağımsız |
 | `npm run build` (kök) | yerel tam derleme | `verify` + iki uygulamanın kapılı derlemesi |
 | `npm run stack:dev` | geliştirme yığını | `verify` → imajlar (kapılı) → yığın → `test:ui` (4 ekranda arayüz) |
-| `npm run stack:prod` | üretim dağıtımı | `verify` → imajlar (kapılı) → yığın |
+| `npm run stack:prod` | canlı dağıtımı | `verify` → imajlar (kapılı) → yığın |
 | `npm run test:ui` | yığın ayaktayken | Playwright container'ı, yığının iç ağı üzerinden; rapor `apps/web/playwright-report/` |
 | `npm run hooks:install` (isteğe bağlı) | bir kez | `git push` öncesi, `mukellef-takip/` değiştiyse `verify` |
 | CI (`.github/workflows/mukellef-takip.yml`) | her push / PR | `verify:ci` → arayüz testleri → imaj + Trivy |
@@ -42,7 +42,7 @@ Eşikler mevcut seviyenin hemen altındadır; yeni kod testsiz eklenirse düşer
 4. Yeni **sayfa** → `apps/web/e2e/support.ts` içindeki `PANEL_ROUTES`'a ekleyin; dört ekranda otomatik sınanır.
 5. Yeni **worker işi / olay abonesi** → `test/worker.e2e-spec.ts`.
 6. Test verisinde gerçek kişisel veri yok: `makeTckn()` ile geçerli ama sahte T.C. no.
-7. Bir testi geçirmek için üretim kodunda test kısayolu açmayın; tek istisna `RATE_LIMIT=off` (config yalnız `NODE_ENV=test`'te kabul eder) — hız sınırı `throttle.e2e-spec.ts`'te açık sınanır.
+7. Bir testi geçirmek için canlı kodunda test kısayolu açmayın; tek istisna `RATE_LIMIT=off` (config yalnız `NODE_ENV=test`'te kabul eder) — hız sınırı `throttle.e2e-spec.ts`'te açık sınanır.
 
 ## Bu testlerin yakaladığı gerçek hatalar (örnek)
 

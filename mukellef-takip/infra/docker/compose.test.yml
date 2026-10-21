@@ -1,5 +1,5 @@
 # Doğrulama yığını (geçici): `npm run verify` kullanır; veriler tmpfs'te, iş bitince silinir.
-# Geliştirme/üretim yığınından tamamen ayrıdır (ayrı proje adı, ayrı ağ, host'a port yok).
+# Geliştirme/canlı yığınından tamamen ayrıdır (ayrı proje adı, ayrı ağ, host'a port yok).
 name: mukellef-takip-test
 
 services:
@@ -21,7 +21,12 @@ services:
       retries: 30
 
   verify:
-    build: { context: ../.., dockerfile: infra/docker/test.Dockerfile, target: verify }
+    build:
+      {
+        context: ../..,
+        dockerfile: infra/docker/test.Dockerfile,
+        target: verify,
+      }
     image: mukellef-takip/verify:local
     environment:
       E2E_ADMIN_DATABASE_URL: postgresql://postgres:test@test-postgres:5432/postgres

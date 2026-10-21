@@ -29,7 +29,7 @@ Yeni bağımlılık eklemeden önce burada "onaylı" listede olup olmadığına 
 | — | helmet, `@nestjs/throttler` (Redis) | Başlıklar, brute force | 1 |
 | — | Caddy (TLS, HSTS) | Tek giriş noktası | 1 |
 | — | Transactional outbox (kendi tablo + dağıtıcı) | Context'ler arası güvenilir yan etki | 2 |
-| `next dev` ile Docker | `next build` + `output: 'standalone'` | Üretim performansı, küçük imaj | 1 |
+| `next dev` ile Docker | `next build` + `output: 'standalone'` | Canlı performansı, küçük imaj | 1 |
 | — | Şifreli `pg_dump` yedeği (backup servisi) + off-site senkron | Felaket kurtarma (MinIO resmi imaj yayımlamadığı için kullanılmadı) | 1 |
 | — | GitHub Actions: lint, test, build, arch, gitleaks, Trivy | | 1 |
 

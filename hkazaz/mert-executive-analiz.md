@@ -13,28 +13,28 @@ Temel değer önerisi: Müşavirin GİB'deki tüm mükellef sözleşmelerini **t
 
 ## 2. Bugün çalışan ve çalışmayan kısımlar
 
-| Alan | Durum |
-|---|---|
-| Supabase hesabıyla giriş, verinin bulutta saklanması | ✅ Çalışıyor (sürüm kontrollü kayıt) |
-| GİB sözleşme listesinin robotla aktarılması | ✅ **Canlı GİB'de doğrulandı** (17.10.2026: 274 sözleşme okundu ve Supabase'e kaydedildi) |
-| GİB şifresinin Supabase Vault'ta saklanması | ✅ Kurulum yapıldı · ⏳ Şifrenin doldurulması uçtan uca doğrulanmadı |
-| CAPTCHA | Kullanıcı elle giriyor (bilerek). OCR modülü hazır ama devrede değil |
-| Firma bazlı GİB hesapları | ❌ Taslak, test edilmedi, kurulmadı |
-| e-Beyanname, SGK, e-Defter, Faturalar, Ödeme, Raporlar, Dilekçeler, Kullanıcılar | 🟡 **Arayüz tasarımı var, arka uç bağlantısı yok** (ekranlar boş ya da "kontrol edilmedi" görünüyor) |
-| e-Tebligat / e-Fatura / e-İrsaliye belge adaptörleri | ❌ Başlanmadı |
-| İnternet üzerinden yayın | ❌ Yalnızca yerel bilgisayarda (127.0.0.1) çalışıyor; internete açılması güvenli değil (dokümanda açıkça yazıyor) |
+| Alan                                                                             | Durum                                                                                                             |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Supabase hesabıyla giriş, verinin bulutta saklanması                             | ✅ Çalışıyor (sürüm kontrollü kayıt)                                                                              |
+| GİB sözleşme listesinin robotla aktarılması                                      | ✅ **Canlı GİB'de doğrulandı** (17.10.2026: 274 sözleşme okundu ve Supabase'e kaydedildi)                         |
+| GİB şifresinin Supabase Vault'ta saklanması                                      | ✅ Kurulum yapıldı · ⏳ Şifrenin doldurulması uçtan uca doğrulanmadı                                              |
+| CAPTCHA                                                                          | Kullanıcı elle giriyor (bilerek). OCR modülü hazır ama devrede değil                                              |
+| Firma bazlı GİB hesapları                                                        | ❌ Taslak, test edilmedi, kurulmadı                                                                               |
+| e-Beyanname, SGK, e-Defter, Faturalar, Ödeme, Raporlar, Dilekçeler, Kullanıcılar | 🟡 **Arayüz tasarımı var, arka uç bağlantısı yok** (ekranlar boş ya da "kontrol edilmedi" görünüyor)              |
+| e-Tebligat / e-Fatura / e-İrsaliye belge adaptörleri                             | ❌ Başlanmadı                                                                                                     |
+| İnternet üzerinden yayın                                                         | ❌ Yalnızca yerel bilgisayarda (127.0.0.1) çalışıyor; internete açılması güvenli değil (dokümanda açıkça yazıyor) |
 
 **Özet:** Eworks, tek bir iş akışını (GİB sözleşme listesinin aktarımı) **gerçek GİB ortamında kanıtlamış** bir pilot. Bu, ekipteki diğer projelerde henüz yapılamamış bir şey. Bunun dışındaki modüller şimdilik tasarım prototipi aşamasında.
 
 ## 3. Ölçek göstergeleri
 
-| Gösterge | Değer |
-|---|---|
-| Portal (tek HTML dosyası) | ~1.070 satır / ~208 KB |
-| Python robotu (üretim kodu) | ~1.150 satır (6 modül) |
-| Supabase SQL + Edge Function | ~290 satır |
-| Otomatik testler | 10 test dosyası, ~54 test/kontrol |
-| Menüde tasarlanan ekran | ~40 alt sayfa (çoğu prototip) |
+| Gösterge                     | Değer                             |
+| ---------------------------- | --------------------------------- |
+| Portal (tek HTML dosyası)    | ~1.070 satır / ~208 KB            |
+| Python robotu (canlı kodu)   | ~1.150 satır (6 modül)            |
+| Supabase SQL + Edge Function | ~290 satır                        |
+| Otomatik testler             | 10 test dosyası, ~54 test/kontrol |
+| Menüde tasarlanan ekran      | ~40 alt sayfa (çoğu prototip)     |
 
 ## 4. Güçlü yönler
 
@@ -46,25 +46,25 @@ Temel değer önerisi: Müşavirin GİB'deki tüm mükellef sözleşmelerini **t
 
 ## 5. Riskler ve açık noktalar
 
-| Risk | Etki | Açıklama / Öneri |
-|---|---|---|
-| **GİB şifresinin saklanması** | Yüksek (hukuki ve güven) | Şifre Supabase Vault'ta şifreli duruyor, ancak dokümanın kendisi belirtiyor: proje yöneticisine karşı uçtan uca şifreleme değil. Müşterilere açıkça anlatılmalı ve KVKK/sözleşme kapsamına alınmalı. |
-| **Robot yalnızca müşavirin bilgisayarında çalışıyor** | Yüksek (ölçeklenme) | Bulutta çalışması için uzaktan tarayıcı ve CAPTCHA'nın kullanıcıya iletilmesi gerekiyor. Bu ayrı ve zor bir mühendislik işi. |
-| **GİB arayüzü değişirse robot durur** | Orta | Menü ve tablo tanıma, ekrandaki metinlere bağlı. Bakım ihtiyacı sürekli olacak. |
-| **Tek kullanıcılı veri modeli** | Orta | Her hesabın tüm verisi tek bir JSON belgesinde (en fazla 5 MB). Bir büroda birden fazla personelin birlikte çalışması ve büyük portföyler için yeniden tasarım gerekir. |
-| **Modüllerin çoğu yalnızca arayüz** | Orta | Demo sırasında "hazır" izlenimi verebilir. Ürün kapsamı anlatılırken dikkat edilmeli. |
-| **Gelir modeli yok** | Orta | Lisans/ödeme altyapısı tasarlanmamış. |
-| **Kurulum karmaşık** | Orta | Python, Playwright, Chromium, Tesseract, Supabase SQL ve Edge Function kurulumu gerekiyor. Son kullanıcıya kurdurulması zor. |
+| Risk                                                  | Etki                     | Açıklama / Öneri                                                                                                                                                                                     |
+| ----------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **GİB şifresinin saklanması**                         | Yüksek (hukuki ve güven) | Şifre Supabase Vault'ta şifreli duruyor, ancak dokümanın kendisi belirtiyor: proje yöneticisine karşı uçtan uca şifreleme değil. Müşterilere açıkça anlatılmalı ve KVKK/sözleşme kapsamına alınmalı. |
+| **Robot yalnızca müşavirin bilgisayarında çalışıyor** | Yüksek (ölçeklenme)      | Bulutta çalışması için uzaktan tarayıcı ve CAPTCHA'nın kullanıcıya iletilmesi gerekiyor. Bu ayrı ve zor bir mühendislik işi.                                                                         |
+| **GİB arayüzü değişirse robot durur**                 | Orta                     | Menü ve tablo tanıma, ekrandaki metinlere bağlı. Bakım ihtiyacı sürekli olacak.                                                                                                                      |
+| **Tek kullanıcılı veri modeli**                       | Orta                     | Her hesabın tüm verisi tek bir JSON belgesinde (en fazla 5 MB). Bir büroda birden fazla personelin birlikte çalışması ve büyük portföyler için yeniden tasarım gerekir.                              |
+| **Modüllerin çoğu yalnızca arayüz**                   | Orta                     | Demo sırasında "hazır" izlenimi verebilir. Ürün kapsamı anlatılırken dikkat edilmeli.                                                                                                                |
+| **Gelir modeli yok**                                  | Orta                     | Lisans/ödeme altyapısı tasarlanmamış.                                                                                                                                                                |
+| **Kurulum karmaşık**                                  | Orta                     | Python, Playwright, Chromium, Tesseract, Supabase SQL ve Edge Function kurulumu gerekiyor. Son kullanıcıya kurdurulması zor.                                                                         |
 
 ## 6. Ekipteki diğer çalışmayla ilişki (`hakan/mukellef-takip`)
 
-| Konu | Eworks (mert) | Mükellef Takip (hakan) |
-|---|---|---|
-| Güçlü olduğu yer | **Canlı GİB otomasyonu kanıtlandı** | Geniş ve çalışan iş modülleri (beyanname kontrolü, SGK, fatura, bordro, ödeme, AI) |
-| GİB'e erişim | Robot giriş yapar, gezinir, okur | Kullanıcı kendisi açar, eklenti yalnızca tabloyu okur |
-| GİB şifresi | Vault'ta saklanır | Hiç saklanmaz |
-| Altyapı | Supabase + yerel Python | Kendi sunucusu (NestJS + PostgreSQL) |
-| Canlıda doğrulama | Sözleşme listesi ✅ | GİB/SGK tarafında henüz yok |
+| Konu              | Eworks (mert)                       | Mükellef Takip (hakan)                                                             |
+| ----------------- | ----------------------------------- | ---------------------------------------------------------------------------------- |
+| Güçlü olduğu yer  | **Canlı GİB otomasyonu kanıtlandı** | Geniş ve çalışan iş modülleri (beyanname kontrolü, SGK, fatura, bordro, ödeme, AI) |
+| GİB'e erişim      | Robot giriş yapar, gezinir, okur    | Kullanıcı kendisi açar, eklenti yalnızca tabloyu okur                              |
+| GİB şifresi       | Vault'ta saklanır                   | Hiç saklanmaz                                                                      |
+| Altyapı           | Supabase + yerel Python             | Kendi sunucusu (NestJS + PostgreSQL)                                               |
+| Canlıda doğrulama | Sözleşme listesi ✅                 | GİB/SGK tarafında henüz yok                                                        |
 
 İki proje birbirini tamamlıyor. Eworks'ün kanıtlanmış GİB okuma becerisi, Mükellef Takip'in iş modüllerine **ek bir veri kaynağı** olarak bağlanabilir. Ortak ürün kararı verilirken şu sorular netleşmeli:
 

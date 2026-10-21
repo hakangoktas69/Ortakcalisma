@@ -13,6 +13,8 @@
     "stack:down": "docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml down",
     "stack:logs": "docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml logs -f --tail=100",
     "stack:prod": "npm run verify && docker compose -f infra/docker/compose.yml -f infra/docker/compose.prod.yml --env-file infra/docker/.env up -d --build",
+    "stack:demo": "docker compose -f infra/docker/compose.demo.yml up -d --build",
+    "stack:demo:down": "docker compose -f infra/docker/compose.demo.yml down",
     "db:up": "npm run secrets:init && docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml up -d postgres redis",
     "db:down": "docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml stop postgres redis",
     "dev:env": "node infra/docker/scripts/dev-env.mjs",
