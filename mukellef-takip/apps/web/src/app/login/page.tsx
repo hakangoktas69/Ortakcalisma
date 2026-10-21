@@ -1,6 +1,8 @@
 "use client";
 
 import { AuthShell } from "@/components/shell/AuthShell";
+import { PasswordInput } from "@/components/PasswordInput";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, setToken } from "@/lib/api";
@@ -71,8 +73,13 @@ export default function LoginPage() {
             </label>
             <label className="block">
               <span className="text-sm font-medium">Şifre</span>
-              <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={input} />
+              <PasswordInput required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={input} />
             </label>
+            <div className="-mt-2 text-right">
+              <Link href="/sifremi-unuttum" className="text-xs font-semibold text-brand-700 hover:underline">
+                Şifremi unuttum
+              </Link>
+            </div>
           </>
         ) : (
           <>

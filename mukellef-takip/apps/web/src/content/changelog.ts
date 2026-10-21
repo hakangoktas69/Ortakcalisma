@@ -15,6 +15,16 @@ export const CHANGE_KIND_LABEL: Record<ChangeKind, string> = { new: "Yeni", impr
 
 export const CHANGELOG: ChangeEntry[] = [
   {
+    id: "2026-10-21-sifremi-unuttum",
+    date: "2026-10-21",
+    title: "Şifremi unuttum",
+    summary: "Şifrenizi unuttuğunuzda e-posta ya da cep telefonunuza gelen kodla yenileyebilirsiniz.",
+    changes: [
+      { kind: "new", text: "Giriş ekranında \"Şifremi unuttum\": e-posta ya da cep telefonu numarasına 6 haneli kod, ardından yeni şifre.", href: "/sss#sifre-unuttum" },
+      { kind: "improved", text: "Şifre kutularında göster / gizle düğmesi: yazdığınızı kontrol edebilirsiniz." },
+    ],
+  },
+  {
     id: "2026-10-20-mobil-uyum",
     date: "2026-10-20",
     title: "Telefon ve tablet uyumu",

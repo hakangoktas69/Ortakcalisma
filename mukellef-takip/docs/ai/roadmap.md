@@ -87,4 +87,4 @@ Import düzeyinde ihlal yok (`arch:check`). Aşağıdakiler başka context'in **
 
 ## Ürün tarafında açık işler (README'den)
 
-iyzico canlı; SGK 4A canlı istemci; SGK canlı pilot; eklentinin gerçek GİB sayfasında doğrulanması + resmi tatil/süre uzatımı takvimi; Meta WhatsApp canlı; e-Fatura entegratör API'si; gerçek bordro çıktılarıyla doğrulama; Claude API canlı + KVKK metni.
+iyzico canlı; SGK 4A canlı istemci; SGK canlı pilot; eklentinin gerçek GİB sayfasında doğrulanması + resmi tatil/süre uzatımı takvimi; Meta WhatsApp canlı; e-Fatura entegratör API'si; gerçek bordro çıktılarıyla doğrulama; Claude API canlı + KVKK metni; "Şifremi unuttum" için e-posta (SMTP) ve SMS sağlayıcısı (`identity/infrastructure/reset-code.sender.ts`, şu an yalnız mock/off).

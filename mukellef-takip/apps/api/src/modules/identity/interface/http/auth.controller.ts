@@ -6,6 +6,7 @@ import { PrismaService } from '../../../../platform/database/prisma.service.js';
 import { AuthGuard, CurrentUser, type AuthUser } from './auth.guard.js';
 import { AuthService } from '../../application/auth.service.js';
 import { SessionService } from '../../application/session.service.js';
+import { PasswordResetService } from '../../application/password-reset.service.js';
 
 class LoginDto {
   @IsEmail()
@@ -32,6 +33,16 @@ class RefreshDto {
   @IsString() @MaxLength(200) refreshToken: string;
 }
 
+class ResetRequestDto {
+  /** E-posta ya da cep telefonu */
+  @IsString() @MinLength(3) @MaxLength(200) identifier: string;
+}
+
+class ResetConfirmDto extends ResetRequestDto {
+  @Matches(/^\s*\d{3}\s?\d{3}\s*$/, { message: 'Kod 6 haneli olmalı' }) code: string;
+  @IsString() @MaxLength(200) newPassword: string;
+}
+
 class CodeDto {
   @Matches(/^\s*\d{3}\s?\d{3}\s*$/, { message: 'Kod 6 haneli olmalı' }) code: string;
 }
@@ -46,7 +57,24 @@ export class AuthController {
     private readonly prisma: PrismaService,
     private readonly auth: AuthService,
     private readonly sessions: SessionService,
+    private readonly passwordReset: PasswordResetService,
   ) {}
+
+  /** Şifremi unuttum, 1. adım: e-posta ya da telefona kod. Kayıtlı olup olmadığı belli edilmez. */
+  @Post('password-reset/request')
+  @Throttle(RATE_LIMITS.auth)
+  @HttpCode(200)
+  requestPasswordReset(@Body() dto: ResetRequestDto) {
+    return this.passwordReset.request(dto.identifier);
+  }
+
+  /** Şifremi unuttum, 2. adım: kod + yeni şifre. Açık oturumlar düşer; 2FA açıksa girişte yine istenir. */
+  @Post('password-reset/confirm')
+  @Throttle(RATE_LIMITS.auth)
+  @HttpCode(200)
+  confirmPasswordReset(@Body() dto: ResetConfirmDto) {
+    return this.passwordReset.confirm(dto.identifier, dto.code, dto.newPassword);
+  }
 
   /** 2FA kapalıysa { accessToken }, açıksa { mfaRequired: true, mfaToken } döner. */
   @Post('login')

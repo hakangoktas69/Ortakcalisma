@@ -221,7 +221,8 @@ export const FAQ: FaqSection[] = [
         q: "Şifremi unuttum ya da hesabım kilitlendi.",
         a: [
           "Art arda 5 hatalı denemeden sonra hesap 15 dakika kilitlenir; süre dolunca tekrar deneyebilirsiniz.",
-          "Şifrenizi unuttuysanız büronuzun yöneticisi Kullanıcılar sayfasından size geçici şifre verebilir. İlk girişte yeni şifrenizi belirlemeniz istenir.",
+          "Şifrenizi unuttuysanız giriş ekranındaki \"Şifremi unuttum\" bağlantısına tıklayın; hesabınızdaki e-posta adresini ya da cep telefonu numarasını yazın. Gelen 6 haneli kodla (10 dakika geçerli) yeni şifrenizi belirlersiniz. Diğer cihazlardaki oturumlarınız kapanır; iki adımlı doğrulama açıksa girişte telefonunuzdaki kod yine istenir.",
+          "Kod gelmezse büronuzun yöneticisi Kullanıcılar sayfasından size geçici şifre verebilir. İlk girişte yeni şifrenizi belirlemeniz istenir.",
         ],
       },
       {

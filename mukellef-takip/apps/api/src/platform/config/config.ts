@@ -53,6 +53,9 @@ export const configSchema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
   WHATSAPP_ACCESS_TOKEN: z.string().optional(),
   WHATSAPP_TEMPLATE: z.string().optional(),
+  /** "Şifremi unuttum" kodunun gönderimi. mock: gönderilmez, geliştirmede ekranda gösterilir. off: özellik kapalı.
+   *  Gerçek e-posta / SMS sağlayıcısı seçilince buraya eklenir (docs/ai/roadmap.md). */
+  PASSWORD_RESET_MODE: mode(['off', 'mock'], 'off'),
   BILLING_PROVIDER: mode(['demo', 'iyzico'], 'demo'),
   IYZICO_API_KEY: z.string().optional(),
   IYZICO_SECRET_KEY: z.string().optional(),
@@ -109,6 +112,8 @@ export function checkSecurity(c: AppConfig): { errors: string[]; warnings: strin
     if (!c.API_PUBLIC_URL.startsWith('https://')) problem('Üretimde API_PUBLIC_URL https olmalı');
     // Demo ödeme sağlayıcısı lisansı ücretsiz uzatır: gerçek kurulumda kabul edilmez
     if (c.BILLING_PROVIDER === 'demo' && !demo) errors.push('Üretimde BILLING_PROVIDER=demo kullanılamaz (tanıtım kurulumu için DEMO_MODE=true)');
+    // Deneme modunda kod hiç gitmez: gerçek kurulumda şifre sıfırlama kullanılamaz hâle gelir
+    if (c.PASSWORD_RESET_MODE === 'mock' && !demo) errors.push('Üretimde PASSWORD_RESET_MODE=mock kullanılamaz (off ya da gerçek sağlayıcı)');
     if (!c.EXTENSION_ID) warnings.push('EXTENSION_ID tanımlı değil: CORS her Chrome eklentisine açık');
   }
   if (c.BILLING_PROVIDER === 'iyzico' && (!c.IYZICO_API_KEY || !c.IYZICO_SECRET_KEY)) errors.push('BILLING_PROVIDER=iyzico iken IYZICO_API_KEY ve IYZICO_SECRET_KEY tanımlı olmalı');

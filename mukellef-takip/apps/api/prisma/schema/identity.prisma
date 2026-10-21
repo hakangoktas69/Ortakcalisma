@@ -62,6 +62,13 @@ model User {
   totpLastStep       Int?      // Aynı kodun ikinci kez kullanılmasını engeller
   recoveryCodeHashes String[]  @default([]) // Tek kullanımlık kurtarma kodlarının SHA-256 özetleri
 
+  // "Şifremi unuttum": e-posta ya da SMS ile giden 6 haneli kod. Kodun kendisi değil HMAC özeti saklanır;
+  // 10 dakika geçerli, en fazla 5 deneme. Şifre değişince alanlar temizlenir.
+  passwordResetHash     String?
+  passwordResetExpires  DateTime?
+  passwordResetAttempts Int       @default(0)
+  passwordResetSentAt   DateTime? // Aynı kişiye 60 saniyede bir kod
+
   // WhatsApp bildirimi: sadece kullanıcı telefonunu girip açık rıza verdiyse gönderilir
   phone              String?   // E.164, başında + olmadan (905xxxxxxxxx)
   whatsappEnabled    Boolean   @default(false)

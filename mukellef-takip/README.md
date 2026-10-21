@@ -47,6 +47,7 @@ Kontroller: `npm test` (birim), `npm run test:e2e -w api` (büro izolasyonu, RLS
 |---|---|---|
 | POST | `/api/auth/login` | E-posta + şifre → `{ accessToken, refreshToken }`; 2FA açıksa `{ mfaRequired, mfaToken }` (5 dk). IP başına dakikada 10 deneme |
 | POST | `/api/auth/login/2fa` | Doğrulayıcı kodu veya kurtarma kodu → `{ accessToken, refreshToken }` |
+| POST | `/api/auth/password-reset/request` · `/confirm` | Şifremi unuttum: e-posta ya da cep telefonuna 6 haneli kod (10 dk, 5 deneme) → yeni şifre; oturumlar düşer, 2FA korunur. `PASSWORD_RESET_MODE=mock` iken kod gönderilmez, geliştirmede yanıtta döner (doğrulanmadı: gerçek e-posta/SMS sağlayıcısı yok) |
 | POST | `/api/auth/refresh` | Yenileme anahtarı → yeni erişim + yenileme anahtarı (tek kullanımlık; tekrar kullanılırsa bütün oturum ailesi kapanır) |
 | POST | `/api/auth/logout` | Bu cihazın oturumunu kapatır |
 | GET / DELETE | `/api/auth/sessions` | Açık cihaz oturumları / `/:id` uzaktan kapatma |
