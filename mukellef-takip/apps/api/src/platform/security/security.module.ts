@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { RedisThrottlerStorage } from './redis-throttler.storage.js';
+import { rateLimitMessage } from './rate-limit-message.js';
 
 /**
  * İstek hız sınırları (IP başına). Varsayılan: dakikada 300 istek.
@@ -19,6 +20,7 @@ export const RATE_LIMITS = {
     ThrottlerModule.forRootAsync({
       useFactory: () => ({
         throttlers: [{ name: 'default', limit: 300, ttl: 60_000 }],
+        errorMessage: (_ctx, detail) => rateLimitMessage(detail),
         // Yalnız test ortamında kapatılabilir (config.ts bunu üretimde reddeder)
         skipIf: () => process.env.NODE_ENV === 'test' && process.env.RATE_LIMIT === 'off',
         storage: process.env.NODE_ENV === 'test' ? undefined : RedisThrottlerStorage.fromUrl(process.env.REDIS_URL ?? 'redis://localhost:6379'),

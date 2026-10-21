@@ -18,7 +18,7 @@ const EMPTY = { officeName: "", contactName: "", email: "", phone: "", plan: "ba
 
 /**
  * Yeni müşavir kaydı. Bilgiler müşavirden ya da satış ekibinden gelir; kayıttan sonra geçici şifre bir kez gösterilir,
- * kurulum günü müşaviri arayıp verilir. Müşavir ilk girişte şifresini değiştirir ve iki adımlı doğrulamayı kurar.
+ * kurulum günü müşaviri arayıp verilir. Müşavir ilk girişte şifresini değiştirir; iki adımlı doğrulama isteğe bağlıdır.
  */
 export default function NewOfficePage() {
   const [form, setForm] = useState(EMPTY);
@@ -66,7 +66,7 @@ export default function NewOfficePage() {
           </dd>
         </dl>
         <p className="mt-5 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          Geçici şifre bir daha gösterilmez. Kurulum günü müşaviri arayıp iletin; ilk girişte kendi şifresini belirleyip iki adımlı doğrulamayı kuracak.
+          Geçici şifre bir daha gösterilmez. Kurulum günü müşaviri arayıp iletin; ilk girişte kendi şifresini belirleyecek. İki adımlı doğrulamayı kurmasını önerin; kurmazsa girişte güvenlik kodu sorulur.
           Şifre kaybolursa büro sayfasından sıfırlayabilirsiniz.
         </p>
         <div className="mt-6 flex flex-wrap gap-2">

@@ -10,10 +10,13 @@ afterAll(() => t?.close());
 
 describe('hız sınırı', () => {
   it('girişte dakikada 10 denemeden sonra 429 döner ve blok sürer', async () => {
-    const codes: number[] = [];
-    for (let i = 0; i < 12; i++) codes.push((await t.http().post('/api/auth/login').send({ email: 'yok@mukellef.test', password: 'x' })).status);
+    const res = [];
+    for (let i = 0; i < 12; i++) res.push(await t.http().post('/api/auth/login').send({ email: 'yok@mukellef.test', password: 'x' }));
+    const codes = res.map((r) => r.status);
     expect(codes.slice(0, 10).every((c) => c === 401)).toBe(true);
     expect(codes.slice(10)).toEqual([429, 429]);
+    // Kullanıcı kütüphanenin İngilizce metnini değil, kalan süreyi içeren Türkçe mesajı görür
+    expect(res[11].body.message).toBe('Çok fazla deneme yaptınız. Güvenliğiniz için 15 dakika sonra tekrar deneyin.');
   });
 
   it('sağlık ucu sınırdan muaf', async () => {

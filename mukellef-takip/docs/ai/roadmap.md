@@ -55,6 +55,8 @@ Kararlar: modüler monolit, Expo mobil, Türkiye'de VM/on-prem. Gerekçeler `doc
 - [ ] Satış anahtarı üretimde OpenBao'dan
 - [ ] Bayi portalı (bayi yalnız kendi müşavirleri), sistem yönetimi portalı (koyu gri)
 - [ ] Satış ekranı için Playwright arayüz testleri (4 ekran)
+- [x] 2FA başta isteğe bağlı (Hakan, 2026-10-21): satıştan açılan büroda `require2fa=false`; 2FA'sı kapalı hesaba girişte resimli güvenlik kodu (`identity/infrastructure/captcha.store.ts`, svg-captcha, Redis)
+- [ ] Arayüz testlerinde güvenlik kodu açıkken giriş (şu an compose.dev'de `CAPTCHA_MODE=off`)
 
 ### Faz 3 — Web (sonraki tur)
 - [ ] `src/features/<context>/` yapısı, TanStack Query, contracts tipleri
@@ -87,4 +89,4 @@ Import düzeyinde ihlal yok (`arch:check`). Aşağıdakiler başka context'in **
 
 ## Ürün tarafında açık işler (README'den)
 
-iyzico canlı; SGK 4A canlı istemci; SGK canlı pilot; eklentinin gerçek GİB sayfasında doğrulanması + resmi tatil/süre uzatımı takvimi; Meta WhatsApp canlı; e-Fatura entegratör API'si; gerçek bordro çıktılarıyla doğrulama; Claude API canlı + KVKK metni.
+iyzico canlı; SGK 4A canlı istemci; SGK canlı pilot; eklentinin gerçek GİB sayfasında doğrulanması + resmi tatil/süre uzatımı takvimi; Meta WhatsApp canlı; e-Fatura entegratör API'si; gerçek bordro çıktılarıyla doğrulama; Claude API canlı + KVKK metni; "Şifremi unuttum" için e-posta (SMTP) ve SMS sağlayıcısı (`identity/infrastructure/reset-code.sender.ts`, şu an yalnız mock/off).

@@ -43,6 +43,9 @@ export async function bootApp(env: Record<string, string> = {}): Promise<TestApp
     SGK_MODE: 'mock',
     GIB_MODE: 'mock',
     WHATSAPP_MODE: 'mock',
+    PASSWORD_RESET_MODE: 'mock',
+    // Güvenlik kodu ayrı dosyada (captcha.e2e-spec.ts) açık olarak sınanır
+    CAPTCHA_MODE: 'off',
     BILLING_PROVIDER: 'demo',
     ASSISTANT_MODE: 'mock',
     LOG_LEVEL: 'error',

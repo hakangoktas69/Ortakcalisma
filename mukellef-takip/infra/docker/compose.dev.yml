@@ -28,6 +28,10 @@ services:
       SGK_MODE: mock
       GIB_MODE: mock
       WHATSAPP_MODE: mock
+      PASSWORD_RESET_MODE: mock
+      # Arayüz testleri (npm run test:ui) bu yığına demo hesabıyla girer; güvenlik kodu burada kapalı.
+      # Kodu denemek için: npm run dev:api (varsayılan açık). Üretimde kapatılamaz (config.ts).
+      CAPTCHA_MODE: "off"
       BILLING_PROVIDER: demo
       ASSISTANT_MODE: mock
     secrets: [vault_key]

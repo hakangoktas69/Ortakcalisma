@@ -30,6 +30,7 @@ WEB_ORIGIN="http://localhost:3000"
 SGK_MODE="mock"
 GIB_MODE="mock"
 WHATSAPP_MODE="mock"
+PASSWORD_RESET_MODE="mock"
 BILLING_PROVIDER="demo"
 ASSISTANT_MODE="mock"
 LOG_PRETTY="true"`);

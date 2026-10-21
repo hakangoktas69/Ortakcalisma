@@ -14,7 +14,7 @@ satis/
 |---|---|
 | Giriş (`/satis/giris`) | E-posta + şifre → iki adımlı doğrulama (zorunlu; ilk girişte QR ile kurulur, kurtarma kodları bir kez gösterilir). Geçici şifreyle girilirse önce şifre değiştirilir. |
 | Bürolar (`/satis`) | Tüm müşavir büroları: yetkili, telefon, durum (deneme / aktif / süresi doldu / donduruldu), lisans bitişi, mükellef **sayısı**. Arama ve durum süzgeci. |
-| Yeni müşavir (`/satis/yeni`) | Büro adı, müşavirin adı soyadı, telefon, e-posta, paket, deneme süresi (varsayılan 14 gün). Büro + yönetici kullanıcı + deneme lisansı birlikte açılır; geçici şifre **bir kez** gösterilir. Müşavir ilk girişte şifresini değiştirir ve iki adımlı doğrulamayı kurar (büroda zorunlu). |
+| Yeni müşavir (`/satis/yeni`) | Büro adı, müşavirin adı soyadı, telefon, e-posta, paket, deneme süresi (varsayılan 14 gün). Büro + yönetici kullanıcı + deneme lisansı birlikte açılır; geçici şifre **bir kez** gösterilir. Müşavir ilk girişte şifresini değiştirir. İki adımlı doğrulama başta isteğe bağlıdır (kurmayan müşavir girişte resimli güvenlik kodu yazar); zorunluluk büro politikasıyla sonra açılır. |
 | Büro (`/satis/buro/:id`) | Bilgileri düzenleme, lisans uzatma (ay ya da gün, paket değişikliği), dondurma / açma, büro kullanıcısının şifresini ya da iki adımlı doğrulamasını sıfırlama, satış işlem geçmişi. Mükellef verisi görünmez. |
 | Satış ekibi (`/satis/ekip`) | Ekip arkadaşı ekleme (geçici şifre), kapatma, şifre / 2FA sıfırlama. |
 

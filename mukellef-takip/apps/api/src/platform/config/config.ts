@@ -18,6 +18,8 @@ export const configSchema = z.object({
   LOG_PRETTY: z.enum(['true', 'false']).default('false'),
   /** Hız sınırı. Yalnız NODE_ENV=test iken kapatılabilir (regresyon testleri). */
   RATE_LIMIT: z.enum(['on', 'off']).default('on'),
+  /** Girişte resimli güvenlik kodu (2FA'sı kapalı hesaplar). off: yalnız test ve yerel arayüz test yığını; üretimde kapatılamaz. */
+  CAPTCHA_MODE: z.enum(['on', 'off']).default('on'),
 
   /** Uygulama rolüyle bağlantı (RLS'e tabi, tablo sahibi değil). Migration ayrı rolle çalışır. */
   DATABASE_URL: z.string().min(1, 'DATABASE_URL tanımlı değil'),
@@ -53,6 +55,9 @@ export const configSchema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
   WHATSAPP_ACCESS_TOKEN: z.string().optional(),
   WHATSAPP_TEMPLATE: z.string().optional(),
+  /** "Şifremi unuttum" kodunun gönderimi. mock: gönderilmez, geliştirmede ekranda gösterilir. off: özellik kapalı.
+   *  Gerçek e-posta / SMS sağlayıcısı seçilince buraya eklenir (docs/ai/roadmap.md). */
+  PASSWORD_RESET_MODE: mode(['off', 'mock'], 'off'),
   BILLING_PROVIDER: mode(['demo', 'iyzico'], 'demo'),
   IYZICO_API_KEY: z.string().optional(),
   IYZICO_SECRET_KEY: z.string().optional(),
@@ -96,6 +101,8 @@ export function checkSecurity(c: AppConfig): { errors: string[]; warnings: strin
   const problem = (msg: string) => (prod ? errors : warnings).push(msg);
 
   if (c.RATE_LIMIT === 'off' && c.NODE_ENV !== 'test') errors.push('RATE_LIMIT=off yalnız test ortamında kullanılabilir');
+  // Arayüz testleri (npm run test:ui) geliştirme yığınına karşı koşar: orada kapatılabilir, üretimde asla
+  if (c.CAPTCHA_MODE === 'off') problem('CAPTCHA_MODE=off: girişte güvenlik kodu istenmiyor (yalnız test / yerel arayüz testi)');
   if (isWeak(c.JWT_SECRET)) problem('JWT_SECRET zayıf: en az 32 karakter rastgele bir değer olmalı (openssl rand -base64 48)');
   if (c.KMS_PROVIDER === 'local') {
     if (!c.VAULT_KEY) errors.push('KMS_PROVIDER=local iken VAULT_KEY tanımlı olmalı');
@@ -109,6 +116,8 @@ export function checkSecurity(c: AppConfig): { errors: string[]; warnings: strin
     if (!c.API_PUBLIC_URL.startsWith('https://')) problem('Üretimde API_PUBLIC_URL https olmalı');
     // Demo ödeme sağlayıcısı lisansı ücretsiz uzatır: gerçek kurulumda kabul edilmez
     if (c.BILLING_PROVIDER === 'demo' && !demo) errors.push('Üretimde BILLING_PROVIDER=demo kullanılamaz (tanıtım kurulumu için DEMO_MODE=true)');
+    // Deneme modunda kod hiç gitmez: gerçek kurulumda şifre sıfırlama kullanılamaz hâle gelir
+    if (c.PASSWORD_RESET_MODE === 'mock' && !demo) errors.push('Üretimde PASSWORD_RESET_MODE=mock kullanılamaz (off ya da gerçek sağlayıcı)');
     if (!c.EXTENSION_ID) warnings.push('EXTENSION_ID tanımlı değil: CORS her Chrome eklentisine açık');
   }
   if (c.BILLING_PROVIDER === 'iyzico' && (!c.IYZICO_API_KEY || !c.IYZICO_SECRET_KEY)) errors.push('BILLING_PROVIDER=iyzico iken IYZICO_API_KEY ve IYZICO_SECRET_KEY tanımlı olmalı');

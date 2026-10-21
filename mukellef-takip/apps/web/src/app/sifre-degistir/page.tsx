@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthShell } from "@/components/shell/AuthShell";
+import { PasswordInput } from "@/components/PasswordInput";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, setToken } from "@/lib/api";
@@ -44,16 +45,16 @@ export default function ChangePasswordPage() {
         </div>
         <label className="block">
           <span className="text-sm font-medium">Geçici (mevcut) şifre</span>
-          <input type="password" required autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} className={input} />
+          <PasswordInput required autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} className={input} />
         </label>
         <label className="block">
           <span className="text-sm font-medium">Yeni şifre</span>
-          <input type="password" required autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} className={input} />
+          <PasswordInput required autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} className={input} />
           <span className="text-xs text-slate-500">En az 10 karakter; harf ve rakam içermeli.</span>
         </label>
         <label className="block">
           <span className="text-sm font-medium">Yeni şifre (tekrar)</span>
-          <input type="password" required autoComplete="new-password" value={again} onChange={(e) => setAgain(e.target.value)} className={input} />
+          <PasswordInput required autoComplete="new-password" value={again} onChange={(e) => setAgain(e.target.value)} className={input} />
         </label>
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         <button disabled={loading} className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-60">

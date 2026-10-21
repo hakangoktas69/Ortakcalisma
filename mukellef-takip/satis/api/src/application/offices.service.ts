@@ -134,8 +134,9 @@ export class OfficesService {
       const t = await tx.tenant.create({
         data: {
           name: officeName,
-          // Müşavir ilk girişte şifresini değiştirir ve iki adımlı doğrulamayı kurar
-          require2fa: true,
+          // İki adımlı doğrulama başta isteğe bağlı (Hakan, 2026-10-21): kurmayan müşavir girişte güvenlik kodu girer.
+          // Zorunluluk sonra büro politikasıyla açılır (müşavir sitesi > Kullanıcılar).
+          require2fa: false,
           billingName: officeName,
           billingContactName: contactName,
           billingEmail: email,

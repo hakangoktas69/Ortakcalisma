@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AuthCard } from "@/components/AuthCard";
+import { PasswordInput } from "@/components/PasswordInput";
 import { btnPrimary, btnSecondary, ErrorBox, input, label } from "@/components/ui";
 import { api, errorText, type Me } from "@/lib/api";
 
@@ -45,19 +46,19 @@ export default function PasswordPage() {
           <label htmlFor="current" className={label}>
             {me?.mustChangePassword ? "Geçici şifre" : "Mevcut şifre"}
           </label>
-          <input id="current" type="password" className={input} autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} required />
+          <PasswordInput id="current" className={input} autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} required />
         </div>
         <div>
           <label htmlFor="next" className={label}>
             Yeni şifre
           </label>
-          <input id="next" type="password" className={input} autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} minLength={10} required />
+          <PasswordInput id="next" className={input} autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} minLength={10} required />
         </div>
         <div>
           <label htmlFor="repeat" className={label}>
             Yeni şifre (tekrar)
           </label>
-          <input id="repeat" type="password" className={input} autoComplete="new-password" value={repeat} onChange={(e) => setRepeat(e.target.value)} required />
+          <PasswordInput id="repeat" className={input} autoComplete="new-password" value={repeat} onChange={(e) => setRepeat(e.target.value)} required />
         </div>
         <ErrorBox message={error} />
         <button className={`${btnPrimary} w-full`} disabled={busy}>

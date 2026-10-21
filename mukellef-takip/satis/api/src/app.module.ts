@@ -6,7 +6,7 @@ import { SalesAuthService } from './application/auth.service.js';
 import { OfficesService } from './application/offices.service.js';
 import { TeamService } from './application/team.service.js';
 import { config } from './config.js';
-import { localKeyRing, VaultService } from './core.js';
+import { localKeyRing, rateLimitMessage, VaultService } from './core.js';
 import { SalesAuditService } from './infrastructure/audit.service.js';
 import { PrismaService } from './infrastructure/prisma.service.js';
 import { AuthController } from './interface/http/auth.controller.js';
@@ -19,7 +19,11 @@ import { TeamController } from './interface/http/team.controller.js';
   imports: [
     JwtModule.registerAsync({ useFactory: () => ({ secret: config().JWT_SECRET }) }),
     // Tek süreç (satış ekibi küçük): sayaç bellekte. Giriş uçları ayrıca dakikada 10 istekle sınırlı.
-    ThrottlerModule.forRoot({ throttlers: [{ name: 'default', limit: 300, ttl: 60_000 }], skipIf: () => config().RATE_LIMIT === 'off' }),
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: 'default', limit: 300, ttl: 60_000 }],
+      skipIf: () => config().RATE_LIMIT === 'off',
+      errorMessage: (_ctx, detail) => rateLimitMessage(detail),
+    }),
   ],
   controllers: [AuthController, OfficesController, TeamController, HealthController],
   providers: [

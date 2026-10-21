@@ -203,6 +203,7 @@ export const FAQ: FaqSection[] = [
         a: [
           "Ayarlar sayfasında güvenlik bölümünden kurulumu başlatın ve telefonunuzdaki doğrulayıcı uygulamayla karekodu okutun.",
           "Size verilen kurtarma kodlarını güvenli bir yere kaydedin. Telefonunuza erişemediğinizde giriş ekranında bu kodlardan birini kullanabilirsiniz; her kod bir kez geçerlidir.",
+          "İki adımlı doğrulama isteğe bağlıdır; büronuzun yöneticisi zorunlu yapabilir. Açık değilse girişte resimdeki güvenlik kodunu yazmanız istenir (otomatik şifre denemelerine karşı). Açtığınızda bu kod sorulmaz.",
         ],
         link: { href: "/ayarlar", label: "Ayarlar" },
       },
@@ -221,7 +222,8 @@ export const FAQ: FaqSection[] = [
         q: "Şifremi unuttum ya da hesabım kilitlendi.",
         a: [
           "Art arda 5 hatalı denemeden sonra hesap 15 dakika kilitlenir; süre dolunca tekrar deneyebilirsiniz.",
-          "Şifrenizi unuttuysanız büronuzun yöneticisi Kullanıcılar sayfasından size geçici şifre verebilir. İlk girişte yeni şifrenizi belirlemeniz istenir.",
+          "Şifrenizi unuttuysanız giriş ekranındaki \"Şifremi unuttum\" bağlantısına tıklayın; hesabınızdaki e-posta adresini ya da cep telefonu numarasını yazın. Gelen 6 haneli kodla (10 dakika geçerli) yeni şifrenizi belirlersiniz. Diğer cihazlardaki oturumlarınız kapanır; iki adımlı doğrulama açıksa girişte telefonunuzdaki kod yine istenir.",
+          "Kod gelmezse büronuzun yöneticisi Kullanıcılar sayfasından size geçici şifre verebilir. İlk girişte yeni şifrenizi belirlemeniz istenir.",
         ],
       },
       {

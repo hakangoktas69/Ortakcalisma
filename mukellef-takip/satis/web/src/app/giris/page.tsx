@@ -4,6 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AuthCard } from "@/components/AuthCard";
+import { PasswordInput } from "@/components/PasswordInput";
 import { btnPrimary, btnSecondary, ErrorBox, input, label } from "@/components/ui";
 import { api, errorText } from "@/lib/api";
 
@@ -178,9 +179,8 @@ export default function LoginPage() {
           <label htmlFor="password" className={label}>
             Şifre
           </label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             className={input}
             autoComplete="current-password"
             value={password}
