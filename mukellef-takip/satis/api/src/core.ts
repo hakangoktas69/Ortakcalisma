@@ -12,6 +12,7 @@ export {
 } from '../../../apps/api/src/modules/identity/domain/totp.js';
 export { auditHash } from '../../../apps/api/src/platform/audit/audit-chain.js';
 export { PrismaExceptionFilter } from '../../../apps/api/src/platform/http/prisma-exception.filter.js';
+export { rateLimitMessage } from '../../../apps/api/src/platform/security/rate-limit-message.js';
 export { VaultService, localKeyRing } from '../../../apps/api/src/platform/crypto/vault.service.js';
 export * from './core-rules.js';
 export { PrismaClient, Prisma } from '../../../apps/api/src/generated/prisma/client.js';
