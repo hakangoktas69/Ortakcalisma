@@ -25,6 +25,8 @@ x-api-env: &api-env
   SGK_MODE: mock
   GIB_MODE: mock
   WHATSAPP_MODE: mock
+  # Şifremi unuttum: kod gönderilmez, ekranda gösterilir
+  PASSWORD_RESET_MODE: mock
   BILLING_PROVIDER: demo
   ASSISTANT_MODE: mock
 
