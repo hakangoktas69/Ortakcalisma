@@ -14,7 +14,7 @@ apps/
   web/        Next.js + Tailwind
   mobile/     (Faz 4) Expo — henüz kod yok
   extension/  Chrome eklentisi: GİB/SGK sayfasından aktarma (bkz. apps/extension/README.md)
-infra/docker/ Dockerfile'lar, compose (dev / prod), Caddy, OpenBao, yedek
+infra/docker/ Bütün Docker dosyaları: Dockerfile'lar, compose (dev / prod / test / demo), Caddy, OpenBao, yedek
 docs/         README.md (geliştirici belgeleri dizini), 00–05 numaralı bölümler, ai/ (Claude ve ekip bağlamı), adr/ (mimari kararlar)
 ```
 
@@ -35,7 +35,9 @@ npm install
 npm run stack:dev     # bütün sistem container'larda → http://localhost:8080 (demo verisiyle)
 ```
 
-Kodu container dışında, sıcak yeniden yüklemeyle geliştirmek için `npm run db:up` + `npm run dev:api` / `dev:worker` / `dev:web` (ayrıntı: [infra/docker/README.md](infra/docker/README.md#geliştirme)). Üretim kurulumu, OpenBao, yedek ve geri yükleme de orada.
+**Hızlı demo (yalnız Docker; npm/Node gerekmez):** `docker compose -f infra/docker/compose.demo.yml up -d --build` (veya `npm run stack:demo`) → http://localhost:3000. Sırları dosyada açık olduğu için gerçek veriyle kullanılmaz; ayrıntı ve farklar: [infra/docker/README.md#demo](infra/docker/README.md#demo).
+
+Kodu container dışında, sıcak yeniden yüklemeyle geliştirmek için `npm run db:up` + `npm run dev:api` / `dev:worker` / `dev:web` (ayrıntı: [infra/docker/README.md](infra/docker/README.md#geliştirme)). Canlı kurulumu, OpenBao, yedek ve geri yükleme de orada.
 
 Demo giriş bilgileri (yönetici ve personel) `apps/api/prisma/seed.ts` dosyasının başında. Seed her çalıştığında veriler sıfırlanır (Docker'da yalnız veritabanı boşken çalışır).
 

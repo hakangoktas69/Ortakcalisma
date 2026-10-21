@@ -28,4 +28,4 @@ Genel kurallar: `../../CLAUDE.md`.
 ## Kurallar
 - Token veya kişisel veri `localStorage`/`sessionStorage`'a yazılmaz (yalnız tema, görülen sürüm notu gibi tercihler).
 - `dangerouslySetInnerHTML` yok. TCKN ekranda maskeli.
-- Üretim imajı `next build` + `output: 'standalone'`; `npm run build -w web` önce tip denetimi (`next typegen`), lint ve birim testlerini çalıştırır (prebuild).
+- Canlı imajı `next build` + `output: 'standalone'`; `npm run build -w web` önce tip denetimi (`next typegen`), lint ve birim testlerini çalıştırır (prebuild).

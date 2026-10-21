@@ -1,4 +1,5 @@
 - [Claude bağlamı depoda](claude-baglami-depoda.md) — kalıcı proje bilgisi CLAUDE.md + docs/ai + bu hafızada, git ile sürümlenir; kişisel tercih buraya yazılmaz
 - [Ekip hafızası düzeni](ekip-hafizasi-duzeni.md) — bu dizin SessionStart kancasıyla otomatik hafıza dizini olur; rehber docs/05-gelistirici-rehberi/05-claude-code.md
 - [DDD yeniden yapılandırma](ddd-yeniden-yapilandirma.md) — Faz 0-2 ve regresyon testleri 2026-10-20'de bitti; sıradaki Faz 3 (web BFF); güncel durum roadmap.md
+- [Docker demo yığını](docker-demo-yigini.md) — tüm Docker dosyaları infra/docker'da; demo = compose.demo.yml / npm run stack:demo (yalnız Docker, :3000, RLS etkin)
 - [Node 24 gerekli](node-24-gerekli.md) — Prisma 7 eski Node'da çalışmaz; yerel Node eskiyse npm/test komutlarını node:24 container'da veya npm run verify ile koş

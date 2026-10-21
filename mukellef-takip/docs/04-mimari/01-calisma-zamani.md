@@ -62,7 +62,7 @@ Tekrarlanan işler BullMQ'da sabit kimlikle kaydedilir: birden çok worker aynı
 ## Yapılandırma ve sırlar
 
 - Tüm ayarlar `apps/api/src/platform/config/config.ts`'te **zod** şemasıyla doğrulanır; geçersiz/zayıf ayarla süreç **açılmaz** (fail-fast). Örnekler: üretimde `KMS_PROVIDER=local` reddedilir, `RATE_LIMIT=off` yalnız `NODE_ENV=test`'te, `BILLING_PROVIDER=demo` üretimde yalnız `DEMO_MODE=true` ile.
-- Sırlar Docker secret dosyalarıdır (`infra/docker/secrets/`, git'e girmez); uygulama `X_FILE` değişkeniyle okur. Üretim: `npm run secrets:init` → `openbao-init`.
+- Sırlar Docker secret dosyalarıdır (`infra/docker/secrets/`, git'e girmez); uygulama `X_FILE` değişkeniyle okur. Canlı: `npm run secrets:init` → `openbao-init`.
 - `.env` dosyaları Claude Code tarafından okunamaz (`.claude/settings.json` `deny`).
 
 ## Derleme hattı

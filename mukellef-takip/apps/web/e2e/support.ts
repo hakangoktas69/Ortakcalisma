@@ -27,7 +27,7 @@ export function watch(page: Page) {
   const problems: string[] = [];
   page.on("pageerror", (e) => problems.push(`Çalışma anı hatası: ${e.message}`));
   page.on("console", (m) => {
-    // COOP uyarısı yalnız https olmayan, localhost dışı test adresinde çıkar (üretim https)
+    // COOP uyarısı yalnız https olmayan, localhost dışı test adresinde çıkar (canlı https)
     if (m.type() === "error" && !/Failed to load resource|Cross-Origin-Opener-Policy/.test(m.text())) problems.push(`Konsol hatası: ${m.text()}`);
   });
   page.on("response", (r) => {

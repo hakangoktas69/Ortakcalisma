@@ -1,4 +1,4 @@
-# Üretim (Türkiye'de VM / on-prem). Kurulum ve işletim: infra/docker/README.md
+# Canlı (Türkiye'de VM / on-prem). Kurulum ve işletim: infra/docker/README.md
 #   docker compose -f infra/docker/compose.yml -f infra/docker/compose.prod.yml --env-file infra/docker/.env up -d --build
 # - Caddy otomatik TLS ve HSTS.
 # - Veri anahtarı OpenBao Transit'te (KMS_PROVIDER=openbao); kurum şifreleri ve kişisel veri kolonları ona bağlı.

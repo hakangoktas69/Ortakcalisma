@@ -1,0 +1,151 @@
+# Mükellef Takip — demo yığını: yalnız Docker yeter (npm, yerel Node, sır üretimi gerekmez). Tek başına kullanılır:
+#   docker compose -f infra/docker/compose.demo.yml up -d --build      → http://localhost:3000
+# Geliştirme/canlı yığınıyla aynı Dockerfile'lar, Caddy ve veritabanı rolleri (RLS etkin). Farklar:
+#   - Sırlar bu dosyada açık yazılı (yalnız yerel demo); sertleştirme (salt okunur FS, iç ağlar) yok.
+#   - Dış servisler demo modunda; derlemede testler koşar ama ayrı doğrulama (npm run verify) ve arayüz testleri koşmaz.
+# Gerçek veriyle KULLANMAYIN. Ayrıntı: infra/docker/README.md#demo
+name: mukellef-takip-demo
+
+x-api-env: &api-env
+  NODE_ENV: development
+  TZ: Europe/Istanbul
+  PORT: "4000"
+  LOG_LEVEL: info
+  # Uygulama rolü: RLS'e tabi, tablo sahibi değil (rol ve parolalar: aşağıdaki configs)
+  DATABASE_URL: postgresql://mukellef_app:demo_app_parola_2026@postgres:5432/mukellef?schema=public
+  REDIS_URL: redis://redis:6379
+  WEB_ORIGIN: http://localhost:3000
+  API_PUBLIC_URL: http://localhost:3000/api
+  TRUST_PROXY_HOPS: "1"
+  # Herkesçe bilinen demo anahtarları (bilerek okunur metin; sır taramasına takılmaz). VAULT_KEY = base64("demo-yerel-anahtar-uretimde-yok!")
+  JWT_SECRET: demo-yalniz-yerel-jwt-anahtari-uretimde-kullanmayin
+  KMS_PROVIDER: local
+  VAULT_KEY: ZGVtby15ZXJlbC1hbmFodGFyLXVyZXRpbWRlLXlvayE=
+  # Dış servisler demo modunda: GİB, SGK, WhatsApp, iyzico, Claude'a bağlanmaz
+  SGK_MODE: mock
+  GIB_MODE: mock
+  WHATSAPP_MODE: mock
+  BILLING_PROVIDER: demo
+  ASSISTANT_MODE: mock
+
+services:
+  # Tek giriş noktası: /api/satis → satis-api, /satis → satis-web, /api → api, geri kalan → web (geliştirme/üretimle aynı Caddyfile)
+  caddy:
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ":80"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    ports: ["127.0.0.1:3000:80"]
+    depends_on:
+      api: { condition: service_healthy }
+      web: { condition: service_healthy }
+      satis-api: { condition: service_healthy }
+      satis-web: { condition: service_healthy }
+
+  web:
+    build: { context: ../.., dockerfile: infra/docker/web.Dockerfile }
+    image: mukellef-takip-demo/web:local
+    restart: unless-stopped
+
+  # Satış portalı (satis/, docs/adr/0009): http://localhost:3000/satis — ilk kullanıcı: infra/docker/README.md#demo
+  satis-web:
+    build: { context: ../.., dockerfile: infra/docker/satis-web.Dockerfile }
+    image: mukellef-takip-demo/satis-web:local
+    restart: unless-stopped
+
+  satis-api:
+    build: { context: ../.., dockerfile: infra/docker/satis-api.Dockerfile, target: runtime }
+    image: mukellef-takip-demo/satis-api:local
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      TZ: Europe/Istanbul
+      PORT: "4100"
+      # Satış rolü (sales_user): yalnız büro hesabı tabloları; müşavir API'sinden ayrı anahtarlar
+      DATABASE_URL: postgresql://mukellef_satis:demo_satis_parola_2026@postgres:5432/mukellef?schema=public
+      JWT_SECRET: demo-yalniz-yerel-satis-jwt-anahtari-uretimde-kullanmayin
+      # base64("demo-satis-anahtari-uretimde-yok")
+      VAULT_KEY: ZGVtby1zYXRpcy1hbmFodGFyaS11cmV0aW1kZS15b2s=
+      WEB_ORIGIN: http://localhost:3000
+      TRUST_PROXY_HOPS: "1"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  api:
+    build:
+      {
+        context: ../..,
+        dockerfile: infra/docker/api.Dockerfile,
+        target: runtime,
+      }
+    image: mukellef-takip-demo/api:local
+    restart: unless-stopped
+    environment: *api-env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_started }
+
+  worker:
+    image: mukellef-takip-demo/api:local
+    # İmajı api servisi derler; uzak depodan çekmeye çalışma
+    pull_policy: never
+    command: ["node", "dist/worker.js"]
+    restart: unless-stopped
+    environment: *api-env
+    healthcheck: { disable: true }
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      api: { condition: service_started }
+
+  # Tek seferlik: şemayı günceller, veritabanı boşsa demo verisini yükler, çıkar
+  migrate:
+    build:
+      {
+        context: ../..,
+        dockerfile: infra/docker/api.Dockerfile,
+        target: migrate,
+      }
+    image: mukellef-takip-demo/migrate:local
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://mukellef_owner:demo_owner_parola_2026@postgres:5432/mukellef?schema=public
+      SEED_DEMO: "true"
+      VAULT_KEY: ZGVtby15ZXJlbC1hbmFodGFyLXVyZXRpbWRlLXlvayE=
+      HOME: /tmp
+      npm_config_cache: /tmp/.npm
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  postgres:
+    image: postgres:17.11-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mukellef
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: demo_postgres_parola_2026
+    # Rol betiği (geliştirme/üretimle aynı) parolaları /run/secrets'tan okur
+    configs:
+      - { source: owner_password, target: /run/secrets/owner_password }
+      - { source: app_password, target: /run/secrets/app_password }
+      - { source: satis_password, target: /run/secrets/satis_password }
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mukellef"]
+      interval: 3s
+      retries: 20
+
+  redis:
+    image: redis:7.4.11-alpine
+    restart: unless-stopped
+
+configs:
+  owner_password: { content: demo_owner_parola_2026 }
+  app_password: { content: demo_app_parola_2026 }
+  satis_password: { content: demo_satis_parola_2026 }
+
+volumes:
+  pgdata:
