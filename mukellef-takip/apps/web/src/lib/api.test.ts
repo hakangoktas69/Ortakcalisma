@@ -66,6 +66,12 @@ describe("api()", () => {
     expect((e as ApiError).status).toBe(500);
     expect((e as ApiError).message).toBe("Bir hata oluştu");
   });
+
+  it("sunucunun hata kodunu taşır (girişte güvenlik kodu istendiğini sayfa bundan anlar)", async () => {
+    vi.stubGlobal("fetch", async () => json(400, { code: "CAPTCHA_REQUIRED", message: "Resimdeki güvenlik kodunu yazın" }));
+    const e = await api("/auth/login").catch((x: unknown) => x);
+    expect(e).toMatchObject({ status: 400, code: "CAPTCHA_REQUIRED", message: "Resimdeki güvenlik kodunu yazın" });
+  });
 });
 
 describe("dosya işlemleri", () => {

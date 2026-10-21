@@ -18,6 +18,8 @@ export const configSchema = z.object({
   LOG_PRETTY: z.enum(['true', 'false']).default('false'),
   /** Hız sınırı. Yalnız NODE_ENV=test iken kapatılabilir (regresyon testleri). */
   RATE_LIMIT: z.enum(['on', 'off']).default('on'),
+  /** Girişte resimli güvenlik kodu (2FA'sı kapalı hesaplar). off: yalnız test ve yerel arayüz test yığını; üretimde kapatılamaz. */
+  CAPTCHA_MODE: z.enum(['on', 'off']).default('on'),
 
   /** Uygulama rolüyle bağlantı (RLS'e tabi, tablo sahibi değil). Migration ayrı rolle çalışır. */
   DATABASE_URL: z.string().min(1, 'DATABASE_URL tanımlı değil'),
@@ -99,6 +101,8 @@ export function checkSecurity(c: AppConfig): { errors: string[]; warnings: strin
   const problem = (msg: string) => (prod ? errors : warnings).push(msg);
 
   if (c.RATE_LIMIT === 'off' && c.NODE_ENV !== 'test') errors.push('RATE_LIMIT=off yalnız test ortamında kullanılabilir');
+  // Arayüz testleri (npm run test:ui) geliştirme yığınına karşı koşar: orada kapatılabilir, üretimde asla
+  if (c.CAPTCHA_MODE === 'off') problem('CAPTCHA_MODE=off: girişte güvenlik kodu istenmiyor (yalnız test / yerel arayüz testi)');
   if (isWeak(c.JWT_SECRET)) problem('JWT_SECRET zayıf: en az 32 karakter rastgele bir değer olmalı (openssl rand -base64 48)');
   if (c.KMS_PROVIDER === 'local') {
     if (!c.VAULT_KEY) errors.push('KMS_PROVIDER=local iken VAULT_KEY tanımlı olmalı');

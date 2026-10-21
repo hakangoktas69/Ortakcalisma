@@ -35,7 +35,8 @@ describe('yeni müşavir (büro) kaydı', () => {
 
     const tenant = await t.db.tenant.findUniqueOrThrow({ where: { id: officeId }, include: { subscription: true, salesAccount: true, users: true } });
     expect(tenant.name).toBe('Yılmaz Mali Müşavirlik');
-    expect(tenant.require2fa).toBe(true);
+    // 2FA başta isteğe bağlı: girişte bariyer yok, güvenlik kodu istenir
+    expect(tenant.require2fa).toBe(false);
     expect(tenant.billingPhone).toBe('+905321234567');
     expect(tenant.subscription?.plan).toBe('baslangic');
     const days = (tenant.subscription!.expiresAt.getTime() - Date.now()) / 86_400_000;

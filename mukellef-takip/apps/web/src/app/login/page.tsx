@@ -2,12 +2,15 @@
 
 import { AuthShell } from "@/components/shell/AuthShell";
 import { PasswordInput } from "@/components/PasswordInput";
+import { RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { api, setToken } from "@/lib/api";
+import { api, ApiError, setToken } from "@/lib/api";
 
 type LoginResult = { accessToken: string; mustChangePassword?: boolean } | { mfaRequired: true; mfaToken: string };
+/** Resimli güvenlik kodu: iki adımlı doğrulaması kapalı hesaplarda sunucu ister (CAPTCHA_REQUIRED) */
+type Captcha = { id: string; svg: string };
 
 const input = "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100";
 
@@ -20,6 +23,13 @@ export default function LoginPage() {
   const [useRecovery, setUseRecovery] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captcha, setCaptcha] = useState<Captcha | null>(null);
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+
+  async function loadCaptcha() {
+    setCaptcha(await api<Captcha>("/auth/captcha"));
+    setCaptchaAnswer("");
+  }
 
   function finish(r: { accessToken: string; mustChangePassword?: boolean }) {
     setToken(r.accessToken);
@@ -32,7 +42,9 @@ export default function LoginPage() {
     setLoading(true);
     try {
       if (!mfaToken) {
-        const r = await api<LoginResult>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
+        const body = captcha ? { email, password, captchaId: captcha.id, captchaAnswer } : { email, password };
+        const r = await api<LoginResult>("/auth/login", { method: "POST", body: JSON.stringify(body) });
+        setCaptcha(null);
         if ("mfaRequired" in r) {
           setMfaToken(r.mfaToken);
           setPassword("");
@@ -46,12 +58,16 @@ export default function LoginPage() {
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Giriş başarısız";
+      const code = err instanceof ApiError ? err.code : undefined;
       // Ara adımın süresi dolduysa baştan başlat
       if (mfaToken && /süresi doldu/.test(msg)) {
         setMfaToken(null);
         setCode("");
       }
-      setError(msg);
+      // Güvenlik kodu tek kullanımlık: istendiğinde, yanlışsa ya da şifre hatalıysa yeni kod gösterilir
+      if (!mfaToken && (code?.startsWith("CAPTCHA_") || captcha)) await loadCaptcha().catch(() => undefined);
+      // İlk istemede kutunun kendisi yeterli açıklama; hata kutusu yalnız gerçek hatada
+      setError(code === "CAPTCHA_REQUIRED" ? null : msg);
     } finally {
       setLoading(false);
     }
@@ -80,6 +96,44 @@ export default function LoginPage() {
                 Şifremi unuttum
               </Link>
             </div>
+            {captcha && (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <span className="text-sm font-medium">Güvenlik kodu</span>
+                <p className="text-xs text-slate-500">Resimdeki harf ve rakamları yazın. İki adımlı doğrulamayı açarsanız bu kod sorulmaz.</p>
+                <div className="mt-2 flex items-center gap-2">
+                  {/* SVG yalnız görüntü olarak gösterilir (img); sayfaya HTML olarak eklenmez */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(captcha.svg)}`}
+                    alt="Güvenlik kodu resmi"
+                    width={160}
+                    height={56}
+                    className="h-14 w-40 rounded-lg border border-slate-200 bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => loadCaptcha().catch(() => undefined)}
+                    className="flex size-10 items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-slate-800"
+                    aria-label="Yeni güvenlik kodu"
+                    title="Okunmuyor mu? Yeni kod"
+                  >
+                    <RefreshCw size={18} />
+                  </button>
+                </div>
+                <input
+                  required
+                  autoFocus
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  maxLength={8}
+                  aria-label="Güvenlik kodu"
+                  value={captchaAnswer}
+                  onChange={(e) => setCaptchaAnswer(e.target.value.toUpperCase())}
+                  className={`${input} text-center text-lg tracking-[0.3em] uppercase`}
+                />
+              </div>
+            )}
           </>
         ) : (
           <>

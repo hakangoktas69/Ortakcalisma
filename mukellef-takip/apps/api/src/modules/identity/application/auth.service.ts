@@ -10,6 +10,8 @@ import { dummyHash, hashPassword, needsRehash, verifyPassword } from '../infrast
 import { SessionService } from './session.service.js';
 import type { AuthUser } from '../interface/http/auth.guard.js';
 import { generateRecoveryCodes, generateSecret, hashRecoveryCode, otpauthUri, verifyTotp } from '../domain/totp.js';
+import { loginNeedsCaptcha } from '../domain/captcha.js';
+import { CaptchaStore } from '../infrastructure/captcha.store.js';
 
 const MAX_FAILED = 5;
 const LOCK_MINUTES = 15;
@@ -49,6 +51,7 @@ export class AuthService {
     private readonly vault: VaultService,
     private readonly audit: AuditService,
     private readonly sessions: SessionService,
+    private readonly captcha: CaptchaStore,
   ) {}
 
   private accessToken(u: { id: string; tenantId: string; role: 'ADMIN' | 'STAFF'; sessionVersion: number }, familyId?: string) {
@@ -96,14 +99,21 @@ export class AuthService {
     if (needsRehash(u.passwordHash)) await this.prisma.user.update({ where: { id: u.id }, data: { passwordHash: await hashPassword(password) } });
   }
 
-  /** 1. adım: e-posta + şifre. 2FA açıksa 5 dakikalık ara token döner. */
-  login(email: string, password: string, meta: LoginMeta = {}) {
+  /** 1. adım: e-posta + şifre (2FA'sı kapalı hesapta güvenlik kodu da). 2FA açıksa 5 dakikalık ara token döner. */
+  login(email: string, password: string, meta: LoginMeta = {}, captcha?: { id?: string; answer?: string }) {
     // Büro henüz bilinmiyor: sorgular sistem bağlamında (RLS dışı), yalnız bu kullanıcıya dokunur
-    return runAsSystem(() => this.loginInner(email, password, meta));
+    return runAsSystem(() => this.loginInner(email, password, meta, captcha));
   }
 
-  private async loginInner(email: string, password: string, meta: LoginMeta) {
+  private async loginInner(email: string, password: string, meta: LoginMeta, captcha?: { id?: string; answer?: string }) {
     const u = await this.prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    // Güvenlik kodu şifreden ÖNCE: kod çözülmeden şifre denenemez. Kayıtsız e-posta da kod ister (aynı yanıt).
+    if (this.captcha.enabled && loginNeedsCaptcha(u)) {
+      if (!captcha?.id || !captcha.answer) throw new BadRequestException({ statusCode: 400, code: 'CAPTCHA_REQUIRED', message: 'Resimdeki güvenlik kodunu yazın' });
+      if (!(await this.captcha.verify(captcha.id, captcha.answer))) {
+        throw new BadRequestException({ statusCode: 400, code: 'CAPTCHA_INVALID', message: 'Güvenlik kodu hatalı ya da süresi dolmuş; yeni kodu yazın' });
+      }
+    }
     // Kullanıcı yoksa da özet doğrula: yanıt süresinden e-postanın kayıtlı olup olmadığı anlaşılmasın
     if (!u) {
       await verifyPassword(await dummyHash(), password);

@@ -203,6 +203,7 @@ export const FAQ: FaqSection[] = [
         a: [
           "Ayarlar sayfasında güvenlik bölümünden kurulumu başlatın ve telefonunuzdaki doğrulayıcı uygulamayla karekodu okutun.",
           "Size verilen kurtarma kodlarını güvenli bir yere kaydedin. Telefonunuza erişemediğinizde giriş ekranında bu kodlardan birini kullanabilirsiniz; her kod bir kez geçerlidir.",
+          "İki adımlı doğrulama isteğe bağlıdır; büronuzun yöneticisi zorunlu yapabilir. Açık değilse girişte resimdeki güvenlik kodunu yazmanız istenir (otomatik şifre denemelerine karşı). Açtığınızda bu kod sorulmaz.",
         ],
         link: { href: "/ayarlar", label: "Ayarlar" },
       },

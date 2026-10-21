@@ -22,6 +22,7 @@ export const CHANGELOG: ChangeEntry[] = [
     changes: [
       { kind: "new", text: "Giriş ekranında \"Şifremi unuttum\": e-posta ya da cep telefonu numarasına 6 haneli kod, ardından yeni şifre.", href: "/sss#sifre-unuttum" },
       { kind: "improved", text: "Şifre kutularında göster / gizle düğmesi: yazdığınızı kontrol edebilirsiniz." },
+      { kind: "new", text: "İki adımlı doğrulaması açık olmayan hesaplarda girişte resimli güvenlik kodu istenir. Doğrulamayı açarsanız sorulmaz.", href: "/sss#iki-adim" },
     ],
   },
   {

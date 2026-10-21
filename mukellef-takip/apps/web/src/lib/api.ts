@@ -12,7 +12,8 @@ export function setToken(token: string | null) {
 }
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  /** code: sunucunun makine okunur hata kodu (ör. CAPTCHA_REQUIRED) */
+  constructor(public status: number, message: string, public code?: string) {
     super(message);
   }
 }
@@ -46,7 +47,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       window.location.href = '/iki-adim';
     }
     const msg = Array.isArray(body.message) ? body.message.join(', ') : body.message;
-    throw new ApiError(res.status, msg ?? 'Bir hata oluştu');
+    throw new ApiError(res.status, msg ?? 'Bir hata oluştu', body.code);
   }
   return res.json();
 }
