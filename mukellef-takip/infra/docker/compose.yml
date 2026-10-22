@@ -1,6 +1,7 @@
 # Mükellef Takip — temel yığın. Tek başına kullanılmaz; compose.dev.yml veya compose.prod.yml ile birleştirilir:
 #   docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml up -d --build
-# Ağlar: edge (caddy, web, api) | app (api, worker, redis, openbao) | data (api, worker, migrate, postgres, backup).
+# Ağlar: edge (caddy, web, api, satis-web, satis-api) | app (api, worker, redis, openbao) | data (api, worker, migrate, postgres, backup, satis-api).
+# Satış modülü (satis/, docs/adr/0009): ayrı imaj, ayrı veritabanı rolü (mukellef_satis), ayrı oturum ve şifreleme anahtarı.
 # Yalnız caddy host'a port açar. Sırlar Docker secrets ile dosyadan okunur (scripts/generate-secrets.mjs).
 name: mukellef-takip
 
@@ -37,6 +38,8 @@ services:
     depends_on:
       api: { condition: service_healthy }
       web: { condition: service_healthy }
+      satis-api: { condition: service_healthy }
+      satis-web: { condition: service_healthy }
     networks: [edge]
 
   web:
@@ -73,6 +76,32 @@ services:
     networks: [app, data]
     deploy: { resources: { limits: { memory: 768m } } }
 
+  # Satış ekibi portalı: /satis (ekran) ve /api/satis (API). Müşavir API'sinin sırlarını almaz.
+  satis-web:
+    <<: *hardening
+    build: { context: ../.., dockerfile: infra/docker/satis-web.Dockerfile }
+    image: mukellef-takip/satis-web:local
+    tmpfs: ["/tmp", "/app/satis/web/.next/cache"]
+    networks: [edge]
+    deploy: { resources: { limits: { memory: 384m } } }
+
+  satis-api:
+    <<: *hardening
+    build: { context: ../.., dockerfile: infra/docker/satis-api.Dockerfile, target: runtime }
+    image: mukellef-takip/satis-api:local
+    environment:
+      TZ: Europe/Istanbul
+      PORT: "4100"
+      DATABASE_URL_FILE: /run/secrets/satis_database_url
+      JWT_SECRET_FILE: /run/secrets/satis_jwt_secret
+      VAULT_KEY_FILE: /run/secrets/satis_vault_key
+      TRUST_PROXY_HOPS: "1"
+    secrets: [satis_database_url, satis_jwt_secret, satis_vault_key]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    networks: [edge, data]
+    deploy: { resources: { limits: { memory: 384m } } }
+
   migrate:
     <<: *hardening
     build: { context: ../.., dockerfile: infra/docker/api.Dockerfile, target: migrate }
@@ -99,7 +128,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --data-checksums"
-    secrets: [postgres_password, owner_password, app_password]
+    secrets: [postgres_password, owner_password, app_password, satis_password]
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
@@ -148,4 +177,8 @@ secrets:
   iyzico_api_key: { file: ./secrets/iyzico_api_key }
   iyzico_secret_key: { file: ./secrets/iyzico_secret_key }
   whatsapp_access_token: { file: ./secrets/whatsapp_access_token }
+  satis_password: { file: ./secrets/satis_password }
+  satis_database_url: { file: ./secrets/satis_database_url }
+  satis_jwt_secret: { file: ./secrets/satis_jwt_secret }
+  satis_vault_key: { file: ./secrets/satis_vault_key }
   anthropic_api_key: { file: ./secrets/anthropic_api_key }

@@ -60,6 +60,28 @@ cd apps/api && DATABASE_URL="$(grep MIGRATE_DATABASE_URL .env | cut -d'"' -f2)" 
 npm run dev:api   # ayrı terminalde: npm run dev:worker, npm run dev:web
 ```
 
+### Satış portalı (satis/, docs/adr/0009)
+
+Yığında `http://localhost:8080/satis`. İlk satış kullanıcısı (sonrakiler portalın "Satış ekibi" ekranından):
+
+```bash
+docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml exec satis-api node dist/satis/api/src/cli/create-user.js ad.soyad@firma.com "Ad Soyad"
+```
+
+Geçici şifre bir kez yazılır; ilk girişte iki adımlı doğrulama kurulur ve şifre değiştirilir. Yerelde container dışında: `satis/README.md`.
+
+Veri dizini satış modülünden **önce** oluşmuşsa (init betiği `mukellef_satis` rolünü açmamışsa) bir kez:
+
+```bash
+docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml exec -T postgres \
+  sh -c 'psql -v ON_ERROR_STOP=1 -U postgres -d mukellef -v pw="$(cat /run/secrets/satis_password)"' <<'SQL'
+CREATE ROLE sales_user NOLOGIN;  -- migration rolü açabildiyse bu satırı atlayın
+CREATE ROLE mukellef_satis LOGIN PASSWORD :'pw' IN ROLE sales_user;
+GRANT CONNECT ON DATABASE mukellef TO mukellef_satis;
+SELECT sales_grant_access();
+SQL
+```
+
 ## Demo
 
 Sistemi denemek veya göstermek için; **yalnız Docker** yeter (npm, yerel Node, sır üretimi gerekmez). Geliştirme/üretimle aynı Dockerfile'lar, Caddy ve veritabanı rolleri kullanılır, RLS etkindir.
@@ -72,6 +94,7 @@ docker compose -f infra/docker/compose.demo.yml ps                # api "healthy
 
 - Adres: **http://localhost:3000** (API: http://localhost:3000/api, sağlık: `/api/health`). Yalnız `127.0.0.1`'e açılır.
 - Giriş: `demo@mukellef.test` / `Demo1234!` · `personel@mukellef.test` / `Personel2026`
+- Satış portalı: **http://localhost:3000/satis**. İlk satış kullanıcısı (geçici şifre bir kez yazılır, ilk girişte 2FA kurulur): `docker compose -f infra/docker/compose.demo.yml exec satis-api node dist/satis/api/src/cli/create-user.js ad@firma.com "Ad Soyad"`
 - İlk derleme birkaç dakika sürer (imaj derlemesinde lint ve birim testleri koşar; testler geçmezse imaj oluşmaz).
 - Geliştirme yığınıyla (`mukellef-takip`, :8080) aynı anda çalışabilir: proje adı, imaj etiketleri, port ve veritabanı ayrıdır.
 

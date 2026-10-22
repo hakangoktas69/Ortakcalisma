@@ -10,6 +10,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
+COPY satis/api/package.json satis/api/
+COPY satis/web/package.json satis/web/
 RUN npm ci -w api --include-workspace-root --no-audit --no-fund
 
 FROM deps AS build
@@ -31,6 +33,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
+COPY satis/api/package.json satis/api/
+COPY satis/web/package.json satis/web/
 RUN npm ci -w api --include-workspace-root --omit=dev --no-audit --no-fund && npm cache clean --force && mkdir -p apps/api/node_modules
 
 FROM ${NODE_IMAGE} AS runtime

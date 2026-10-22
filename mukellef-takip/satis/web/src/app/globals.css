@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* Satış portalı turuncu temalıdır (müşavir portalı mavi, sistem yönetimi koyu gri): hangi portalda olunduğu ilk bakışta anlaşılır. */
+@theme inline {
+  --font-sans: var(--font-jakarta);
+  --color-brand-50: var(--color-orange-50);
+  --color-brand-100: var(--color-orange-100);
+  --color-brand-200: var(--color-orange-200);
+  --color-brand-300: var(--color-orange-300);
+  --color-brand-400: var(--color-orange-400);
+  --color-brand-500: var(--color-orange-500);
+  --color-brand-600: var(--color-orange-600);
+  --color-brand-700: var(--color-orange-700);
+  --color-brand-800: var(--color-orange-800);
+  --color-brand-900: var(--color-orange-900);
+  --color-brand-950: var(--color-orange-950);
+}
+
+/* Satış portalı yalnız açık temadadır; sistem koyu temadaysa tarayıcı zemini koyulaşmasın */
+:root {
+  color-scheme: light;
+}
+
+/* Laptop altı ekranlarda tablo yana kayar, ilk sütun sabit kalır (müşavir portalıyla aynı kural) */
+@media (max-width: 1023px) {
+  .table-scroll th,
+  .table-scroll td {
+    white-space: nowrap;
+  }
+  .table-scroll th:first-child,
+  .table-scroll td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--color-white);
+  }
+}

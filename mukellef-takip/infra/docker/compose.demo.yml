@@ -25,11 +25,13 @@ x-api-env: &api-env
   SGK_MODE: mock
   GIB_MODE: mock
   WHATSAPP_MODE: mock
+  # Şifremi unuttum: kod gönderilmez, ekranda gösterilir
+  PASSWORD_RESET_MODE: mock
   BILLING_PROVIDER: demo
   ASSISTANT_MODE: mock
 
 services:
-  # Tek giriş noktası: /api → api, geri kalan → web (geliştirme/üretimle aynı Caddyfile)
+  # Tek giriş noktası: /api/satis → satis-api, /satis → satis-web, /api → api, geri kalan → web (geliştirme/üretimle aynı Caddyfile)
   caddy:
     image: caddy:2.11.7-alpine
     restart: unless-stopped
@@ -41,11 +43,37 @@ services:
     depends_on:
       api: { condition: service_healthy }
       web: { condition: service_healthy }
+      satis-api: { condition: service_healthy }
+      satis-web: { condition: service_healthy }
 
   web:
     build: { context: ../.., dockerfile: infra/docker/web.Dockerfile }
     image: mukellef-takip-demo/web:local
     restart: unless-stopped
+
+  # Satış portalı (satis/, docs/adr/0009): http://localhost:3000/satis — ilk kullanıcı: infra/docker/README.md#demo
+  satis-web:
+    build: { context: ../.., dockerfile: infra/docker/satis-web.Dockerfile }
+    image: mukellef-takip-demo/satis-web:local
+    restart: unless-stopped
+
+  satis-api:
+    build: { context: ../.., dockerfile: infra/docker/satis-api.Dockerfile, target: runtime }
+    image: mukellef-takip-demo/satis-api:local
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      TZ: Europe/Istanbul
+      PORT: "4100"
+      # Satış rolü (sales_user): yalnız büro hesabı tabloları; müşavir API'sinden ayrı anahtarlar
+      DATABASE_URL: postgresql://mukellef_satis:demo_satis_parola_2026@postgres:5432/mukellef?schema=public
+      JWT_SECRET: demo-yalniz-yerel-satis-jwt-anahtari-uretimde-kullanmayin
+      # base64("demo-satis-anahtari-uretimde-yok")
+      VAULT_KEY: ZGVtby1zYXRpcy1hbmFodGFyaS11cmV0aW1kZS15b2s=
+      WEB_ORIGIN: http://localhost:3000
+      TRUST_PROXY_HOPS: "1"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
 
   api:
     build:
@@ -103,6 +131,7 @@ services:
     configs:
       - { source: owner_password, target: /run/secrets/owner_password }
       - { source: app_password, target: /run/secrets/app_password }
+      - { source: satis_password, target: /run/secrets/satis_password }
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
@@ -118,6 +147,7 @@ services:
 configs:
   owner_password: { content: demo_owner_parola_2026 }
   app_password: { content: demo_app_parola_2026 }
+  satis_password: { content: demo_satis_parola_2026 }
 
 volumes:
   pgdata:

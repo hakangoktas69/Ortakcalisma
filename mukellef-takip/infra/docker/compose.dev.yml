@@ -7,6 +7,12 @@ services:
       SITE_ADDRESS: ":80"
     ports: ["127.0.0.1:8080:80"]
 
+  # Satış portalı: http://localhost:8080/satis (ilk kullanıcı: infra/docker/README.md)
+  satis-api:
+    environment:
+      NODE_ENV: development
+      WEB_ORIGIN: http://localhost:8080
+
   api:
     environment: &dev-env
       NODE_ENV: development
@@ -22,6 +28,10 @@ services:
       SGK_MODE: mock
       GIB_MODE: mock
       WHATSAPP_MODE: mock
+      PASSWORD_RESET_MODE: mock
+      # Arayüz testleri (npm run test:ui) bu yığına demo hesabıyla girer; güvenlik kodu burada kapalı.
+      # Kodu denemek için: npm run dev:api (varsayılan açık). Üretimde kapatılamaz (config.ts).
+      CAPTCHA_MODE: "off"
       BILLING_PROVIDER: demo
       ASSISTANT_MODE: mock
     secrets: [vault_key]

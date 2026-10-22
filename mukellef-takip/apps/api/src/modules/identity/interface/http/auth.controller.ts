@@ -1,11 +1,13 @@
 import { Body, Controller, Delete, Get, Headers, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { RATE_LIMITS } from '../../../../platform/security/security.module.js';
-import { IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 import { PrismaService } from '../../../../platform/database/prisma.service.js';
 import { AuthGuard, CurrentUser, type AuthUser } from './auth.guard.js';
 import { AuthService } from '../../application/auth.service.js';
 import { SessionService } from '../../application/session.service.js';
+import { PasswordResetService } from '../../application/password-reset.service.js';
+import { CaptchaStore } from '../../infrastructure/captcha.store.js';
 
 class LoginDto {
   @IsEmail()
@@ -15,6 +17,10 @@ class LoginDto {
   @MinLength(1)
   @MaxLength(200)
   password: string;
+
+  /** İki adımlı doğrulaması kapalı hesapta: GET /auth/captcha'dan gelen kimlik ve resimdeki kod */
+  @IsOptional() @IsUUID() captchaId?: string;
+  @IsOptional() @IsString() @MaxLength(12) captchaAnswer?: string;
 }
 
 class SecondFactorDto {
@@ -32,6 +38,16 @@ class RefreshDto {
   @IsString() @MaxLength(200) refreshToken: string;
 }
 
+class ResetRequestDto {
+  /** E-posta ya da cep telefonu */
+  @IsString() @MinLength(3) @MaxLength(200) identifier: string;
+}
+
+class ResetConfirmDto extends ResetRequestDto {
+  @Matches(/^\s*\d{3}\s?\d{3}\s*$/, { message: 'Kod 6 haneli olmalı' }) code: string;
+  @IsString() @MaxLength(200) newPassword: string;
+}
+
 class CodeDto {
   @Matches(/^\s*\d{3}\s?\d{3}\s*$/, { message: 'Kod 6 haneli olmalı' }) code: string;
 }
@@ -46,13 +62,41 @@ export class AuthController {
     private readonly prisma: PrismaService,
     private readonly auth: AuthService,
     private readonly sessions: SessionService,
+    private readonly passwordReset: PasswordResetService,
+    private readonly captcha: CaptchaStore,
   ) {}
 
-  /** 2FA kapalıysa { accessToken }, açıksa { mfaRequired: true, mfaToken } döner. */
+  /** Girişte istenecek resimli güvenlik kodu: { id, svg } (5 dk geçerli, tek kullanımlık) */
+  @Get('captcha')
+  @Throttle(RATE_LIMITS.auth)
+  createCaptcha() {
+    return this.captcha.create();
+  }
+
+  /** Şifremi unuttum, 1. adım: e-posta ya da telefona kod. Kayıtlı olup olmadığı belli edilmez. */
+  @Post('password-reset/request')
+  @Throttle(RATE_LIMITS.auth)
+  @HttpCode(200)
+  requestPasswordReset(@Body() dto: ResetRequestDto) {
+    return this.passwordReset.request(dto.identifier);
+  }
+
+  /** Şifremi unuttum, 2. adım: kod + yeni şifre. Açık oturumlar düşer; 2FA açıksa girişte yine istenir. */
+  @Post('password-reset/confirm')
+  @Throttle(RATE_LIMITS.auth)
+  @HttpCode(200)
+  confirmPasswordReset(@Body() dto: ResetConfirmDto) {
+    return this.passwordReset.confirm(dto.identifier, dto.code, dto.newPassword);
+  }
+
+  /**
+   * 2FA kapalıysa { accessToken }, açıksa { mfaRequired: true, mfaToken } döner.
+   * 2FA kapalı (ya da kayıtsız) hesapta önce güvenlik kodu istenir: 400 { code: 'CAPTCHA_REQUIRED' | 'CAPTCHA_INVALID' }.
+   */
   @Post('login')
   @Throttle(RATE_LIMITS.auth)
   login(@Body() dto: LoginDto, @Headers('user-agent') userAgent?: string) {
-    return this.auth.login(dto.email, dto.password, { userAgent });
+    return this.auth.login(dto.email, dto.password, { userAgent }, { id: dto.captchaId, answer: dto.captchaAnswer });
   }
 
   @Post('login/2fa')

@@ -29,6 +29,17 @@
 		max_size 30MB
 	}
 
+	# Satış portalı (satis/): ayrı uygulama. Caddy daha uzun yolu önce eşler; /api/satis müşavir API'sine gitmez.
+	handle /api/satis/* {
+		reverse_proxy satis-api:4100 {
+			header_up X-Request-Id {http.request.uuid}
+		}
+	}
+
+	handle /satis* {
+		reverse_proxy satis-web:3100
+	}
+
 	handle /api/* {
 		reverse_proxy api:4000 {
 			header_up X-Request-Id {http.request.uuid}

@@ -9,8 +9,11 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
+COPY satis/api/package.json satis/api/
+COPY satis/web/package.json satis/web/
 RUN npm ci --no-audit --no-fund
 COPY apps apps
+COPY satis satis
 RUN cd apps/api && DATABASE_URL="postgresql://x:x@localhost:5432/x" npx prisma generate
 ENV CI=1 NEXT_TELEMETRY_DISABLED=1
 CMD ["npm", "run", "verify:ci"]
@@ -21,6 +24,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
+COPY satis/api/package.json satis/api/
+COPY satis/web/package.json satis/web/
 RUN npm ci -w web --include-workspace-root --no-audit --no-fund
 COPY apps/web apps/web
 WORKDIR /app/apps/web
