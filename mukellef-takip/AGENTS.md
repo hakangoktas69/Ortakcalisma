@@ -5,6 +5,9 @@ Kurallar burada **tekrarlanmaz**; kaynak aşağıdaki dosyalardır. Çelişki ol
 
 ## Oturum başında (her seferinde, kod yazmadan önce)
 
+0. **Zorunlu ilk komut**, kullanıcı başka bir şey istese de önce bunu çalıştır ve çıktısına uy (çıktı boşsa ekip değişikliği yoktur):
+   `powershell -NoProfile -ExecutionPolicy Bypass -File tools/ajan/codex.ps1 -Mod guncelle -Ajan`
+   (Windows dışında `pwsh`). Ağ izni yoksa çıktı bunu söyler; kullanıcıdan izin iste ya da `codex.ps1 -Mod guncelle` çalıştırmasını öner.
 1. `CLAUDE.md`'yi (bu dizin) oku. İçindeki `@docs/ai/x.md` satırları içe aktarımdır; o dosyaları da oku: vision, architecture, bounded-contexts, tech-stack, security-kvkk, conventions, testing, roadmap.
 2. Çalıştığın uygulamanın kuralını oku: `apps/api/CLAUDE.md`, `apps/web/CLAUDE.md`.
 3. Ekip hafızası: `docs/ai/memory/MEMORY.md` indeksini oku, konuyla ilgili kayıtları aç. Son değişiklikler:
@@ -28,6 +31,10 @@ Claude'un otomatik hafızası bu dizine yazar; sende otomatik hafıza yok, aynı
 - "Hatırla / hafızaya yaz / aktar / denetle" istenirse `.claude/skills/hafiza/SKILL.md`'yi oku ve adımlarını uygula (Claude'a özgü araç adlarını kendi araçlarınla karşıla). Yeni geliştirici karşılama: `.claude/skills/oryantasyon/SKILL.md`.
 
 ## İşi bitirmeden önce
+
+**Zorunlu:** Kodda (`apps/`, `infra/`, `tools/`) değişiklik yaptıysan, işi bitti saymadan ve commitlemeden önce şunu çalıştır ve çıktısındaki adımların hepsini uygula:
+`powershell -NoProfile -ExecutionPolicy Bypass -File tools/ajan/codex.ps1 -Mod bitir -Ajan`
+Aşağıdaki iki paragraf bu adımların özetidir.
 
 Değişiklik mimariyi, bir kuralı, ucu, olayı, bağlam sınırını veya teknoloji kararını etkilediyse ilgili kaynağı **aynı değişiklikte** güncelle: `CLAUDE.md` / `apps/*/CLAUDE.md`, `docs/ai/*.md`, gerekirse yeni `docs/adr/` kaydı, `docs/02-baglamlar/<context>.md`; durum değiştiyse `docs/ai/roadmap.md`. Bunu atlarsan Claude kullanan ekip üyeleri değişikliği bilmez.
 

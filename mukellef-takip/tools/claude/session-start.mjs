@@ -4,6 +4,7 @@
 //      Claude Code bu ayarı paylaşılan settings.json'dan güvenlik gereği okumaz; yerel ayar her makinede bu kancayla oluşur.
 //   2) Ayar bu oturumda yeni yazıldıysa MEMORY.md'yi bağlama ekler (sonraki oturumlardan itibaren Claude Code kendisi yükler).
 //   3) Kişisel (eski) hafızada kayıt varsa ve son 14 günde ekip hafızası değiştiyse kısa not düşer.
+//   4) Ekipten gelen değişiklikleri tools/ajan/claude.ps1 -Mod guncelle -Ajan ile çeker (yalnız güvenli ileri sarma).
 // Yalnız Node yerleşik modülleri; hata olursa oturumu engellemez (çıkış kodu hep 0).
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -82,6 +83,21 @@ try {
   }
 } catch {
   // ~/.claude/projects yoksa yapılacak bir şey yok.
+}
+
+// 2b) Ekipten gelen değişiklikler: tools/ajan/claude.ps1 -Mod guncelle -Ajan (güvenliyse ileri sarar, değişen bağlamı bildirir)
+try {
+  const shell = process.platform === 'win32' ? 'powershell' : 'pwsh';
+  const script = join(projectRoot, 'tools', 'ajan', 'claude.ps1');
+  const out = execFileSync(shell, ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script, '-Mod', 'guncelle', '-Ajan'], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    timeout: 20000,
+    stdio: ['ignore', 'pipe', 'ignore'],
+  }).trim();
+  if (out) notes.push(out);
+} catch {
+  // PowerShell yoksa ya da ağ zaman aşımına uğradıysa oturumu engelleme.
 }
 
 // 3) Ekip hafızasındaki son değişiklikler (başkalarının öğrendikleri)

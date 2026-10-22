@@ -26,6 +26,7 @@ Otomatik hafıza dizini `docs/ai/memory/`'dir; git'e girer ve ekipçe paylaşıl
 - Önce doğru katmanı seç: kalıcı kural → `docs/ai/*.md`, karar → ADR, bağlam bilgisi → `docs/02-baglamlar/`, tuzak → `04-tuzaklar.md`. Hafızaya yalnız öğrenilmiş ve kodda görünmeyen bilgi yazılır; türü `feedback`, `project` ya da `reference` olur.
 - **Kişiye özel tercih (`user` türü) ekip hafızasına yazılmaz** → `CLAUDE.local.md` (gitignore'da).
 - Kişisel veri, sır, gerçek mükellef veya büro bilgisi hafızaya yazılmaz. Yazdıktan sonra `npm run memory:check` çalıştır.
+- **Ekip senkronu:** SessionStart kancası `tools/ajan/claude.ps1 -Mod guncelle -Ajan` çalıştırır; çıktısı varsa (ekipten gelen değişiklik, değişen bağlam dosyaları) önce ona uy. Stop kancası (`tools/claude/stop-bitir.mjs`) kodda commitlenmemiş değişiklik varken `-Mod bitir -Ajan` adımlarına yönlendirir; iş bitince bu adımları atlama. Codex kullananlar için karşılığı `AGENTS.md`.
 - Kayıtlar `[[dosya-adı]]` ile bağlanır (Obsidian kasası: `docs/`). Beceriler: `/hafiza` (kaydet, aktar, denetle), `/oryantasyon` (yeni geliştirici).
 
 ## Yapı

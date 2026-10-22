@@ -100,6 +100,31 @@ Codex'te Claude'un şu özellikleri yoktur; `AGENTS.md` bunları talimatla karş
 | Otomatik hafıza | kayıt aynı biçimle elle yazılır, `npm run memory:check` çalıştırılır |
 | `/hafiza`, `/oryantasyon` | ilgili `.claude/skills/*/SKILL.md` okunup uygulanır |
 
+### Değişiklikleri araçlar arasında taşıma: `tools/ajan`
+
+Bir ekip üyesinin değişikliği öteki ajana kendiliğinden geçmez. Önce belgeler güncellenir, sonra değişiklik push edilir, öteki üye pull eder ve yeni oturum açar. Bu adımları her araç için bir betik yapar (depo kökünden):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\claude.ps1   # Claude kullanan
+powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\codex.ps1    # Codex kullanan
+```
+
+| Mod | Ne zaman | Ne yapar |
+|---|---|---|
+| `-Mod guncelle` | ekipten değişiklik gelince, işe başlamadan | `git pull`; gelen commitleri ve değişen bağlam dosyalarını listeler. Ajanı, bunları özetleten bir istemle yeni oturumda başlatır. |
+| `-Mod bitir` | iş bitince, push etmeden önce | Belgeleri, hafızayı ve testleri tamamlatan istemi panoya kopyalar; işin yapıldığı oturuma yapıştırılır (`-Yeni` ile yeni oturum açar). |
+
+**Ajanlar betiği kendisi çalıştırır (`-Ajan`).** Bu modda betik oturum başlatmaz ve panoya yazmaz; çıktısı ajana talimattır:
+
+| | Oturum başında (`guncelle -Ajan`) | İş bitince (`bitir -Ajan`) |
+|---|---|---|
+| Claude | SessionStart kancası (`session-start.mjs`) çalıştırır, çıktı bağlama girer | Stop kancası (`tools/claude/stop-bitir.mjs`): kodda (`apps/`, `infra/`, `tools/`) commitlenmemiş değişiklik varken Claude'u durdurmayıp bu adımlara yönlendirir. Aynı dosya kümesi için bir kez; commit edince sıfırlanır. Kapatmak: `AJAN_BITIR=off` ortam değişkeni |
+| Codex | `AGENTS.md`'de zorunlu ilk komut | `AGENTS.md`'de commit öncesi zorunlu komut |
+
+`guncelle -Ajan` yalnız güvenliyse ileri sarar (temiz çalışma ağacı, ayrışmamış dal, `ff-only`). Değilse yalnız haber verir; ajan da kullanıcıya `-Mod guncelle` önerir. Codex'te kanca olmadığı için uyum talimata bağlıdır; ağ izni kapalı bir korumalı alanda `git fetch` yapılamaz ve çıktı bunu söyler.
+
+Mod verilmezse betik sorar. `claude`/`codex` komut satırında yoksa (yalnız VS Code eklentisi kullanılıyorsa) istem panoya kopyalanır. Codex sürümü SessionStart kancası olmadığı için ekip hafızasındaki değişiklikleri de okutur.
+
 Codex'in bağlamı okuyup okumadığını sınamak için oturum başında şunu sorun: "Okuduğun proje kurallarını 5 maddede özetle." Codex'in yazdığı hafıza kayıtları da PR'da ve CI'daki `memory:check` ile denetlenir.
 
 ## Obsidian ile okuma

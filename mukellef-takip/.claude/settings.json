@@ -29,7 +29,18 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/tools/claude/session-start.mjs\"",
-            "timeout": 15
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/claude/stop-bitir.mjs\"",
+            "timeout": 10
           }
         ]
       }
