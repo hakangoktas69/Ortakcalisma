@@ -1,2 +1,0 @@
--r ../Eworks-Python-Robot/requirements.txt
-xlrd>=2,<3
