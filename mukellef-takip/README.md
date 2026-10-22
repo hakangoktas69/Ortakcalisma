@@ -43,6 +43,40 @@ Demo giriş bilgileri (yönetici ve personel) `apps/api/prisma/seed.ts` dosyası
 
 Kontroller: `npm test` (birim), `npm run test:e2e -w api` (büro izolasyonu, RLS, oturum; Docker gerekir), `npm run lint` (oxlint + katman kuralları + web).
 
+## Yapay zekâ ajanlarıyla çalışma (Claude Code / Codex)
+
+Ajan bağlamı depodadır ve git ile paylaşılır: kurallar `CLAUDE.md` + `docs/ai/`, öğrenilenler ekip hafızası `docs/ai/memory/`. Codex aynı dosyalara `AGENTS.md` üzerinden yönlenir. Bir ekip üyesinin değişikliği öteki ajana kendiliğinden geçmez; şu iki komut taşır (depo kökünden):
+
+```powershell
+# Claude kullanıyorsan
+powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\claude.ps1 -Mod guncelle
+powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\claude.ps1 -Mod bitir
+
+# Codex kullanıyorsan
+powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\codex.ps1 -Mod guncelle
+powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\codex.ps1 -Mod bitir
+```
+
+| Komut | Ne zaman | Ne yapar |
+|---|---|---|
+| `-Mod guncelle` | **İşe başlarken:** güne/yeni işe başlamadan, ajanla yeni oturum açmadan önce; ekipten "push ettim" haberi gelince | `git pull`; gelen commitleri ve değişen bağlam dosyalarını (`CLAUDE.md`, `docs/ai`, ADR, hafıza) listeler; ajanı bunları özetleten istemle yeni oturumda başlatır (ajan komut satırında yoksa istem panoya kopyalanır) |
+| `-Mod bitir` | **İş bitince, commit/push'tan önce** | İş bitirme istemini panoya kopyalar; **işi yaptığın oturumdaki** ajana yapıştır. Ajan mimari/kural değiştiyse belgeleri günceller, öğrenileni hafızaya yazar, testleri ekler/revize eder, `memory:check` + `verify` (+ `test:ui`) çalıştırır ve commitler |
+
+Akış:
+
+```
+guncelle → geliştirme (ajanla) → bitir → gözden geçir → git push + PR → ekibe haber → diğerleri guncelle
+```
+
+**Elle çalıştırmak gerekir mi?**
+
+| | Claude | Codex |
+|---|---|---|
+| `guncelle` | Oturum başında kanca otomatik çeker. Elle: ajan "otomatik çekilemedi" derse (yerel değişiklik, ayrışmış dal) | `AGENTS.md` talimatıyla Codex çalıştırır. Elle: Codex atlarsa ya da ağ izni yoksa |
+| `bitir` | Kod değişikliği varken Stop kancası Claude'u bu adımlara yönlendirir. Elle: adımlar eksik kaldıysa | `AGENTS.md`'de commit öncesi zorunlu. Kanca olmadığı için **her işin sonunda elle çalıştırın** |
+
+Ayrıntı: [docs/05-gelistirici-rehberi/05-claude-code.md](docs/05-gelistirici-rehberi/05-claude-code.md).
+
 ## API uçları
 
 | Metot | Yol | Açıklama |
