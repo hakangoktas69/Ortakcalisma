@@ -1,5 +1,0 @@
-{
-  "enabled": true,
-  "mode": "python",
-  "note": "Yerel pilot. Chrome'da giriş ve CAPTCHA kullanıcı tarafından tamamlanır. Gerçek tablo hedefleri ilk canlı testte doğrulanmalıdır. Supabase'e yalnızca portalın mevcut kullanıcı oturumu yazar."
-}

@@ -1,61 +1,38 @@
-# Eworks — paylaşılabilir geliştirme kopyası
+# Eworks entegrasyonları
 
-19 Ekim 2026 tarihinde GİB robotlu portal kaynaklarından hazırlanmış ve yerel OCR/otomatik giriş güncellemesi eklenmiştir. Tamamlanmış ürün değildir. Bu kopya canlı ortama bağlanacak şekilde yapılandırılmamıştır.
+`entegrasyon-1-tarayici/`, developer/network incelemesinden önceki 21 Ekim 2026 ilk entegrasyonunun paylaşım kopyasıdır. Portal ve Python robotu bu dizinin altında birlikte tutulur. İkinci servis denemesi bu dala dahil değildir; yerelde ayrı `02-developer-servis-denemesi` klasöründedir.
 
-## Klasörler
-- Eworks-Portal: kullanıcı girişi, portal, yerel sunucu ve Supabase SQL/Edge Function kaynakları.
-- Eworks-Python-Robot: Python/Playwright robotu, yardımcı modüller ve testler.
+İlk yöntem; GİB sözleşme/e-Beyanname listelerini tarayıcıdan okuma, beyanname ve vergi tahakkuk PDF'lerini indirme, MUHSGK içindeki SGK tahakkuk/hizmet belgelerini Eworks e-Bildirge ekranına kaydetme ve hizmet listesinden çalışan sayısı çıkarma kodlarını içerir. E-Defter menüsü bulunur; tamamlanmış canlı e-Defter aktarımı olarak değerlendirilmemelidir. Toplu taramanın tüm mükelleflerde tamamlandığı iddia edilmez.
+
+## Kaynak doğrulaması
+
+70 kaynak dosyası 21 Ekim envanterinin SHA-256 değerleriyle birebir doğrulandı. Ardından paylaşım kopyasındaki canlı Supabase URL/publishable key sabitleri şablonlarla değiştirildi. Paket dosya özetleri `entegrasyon-1-tarayici/SOURCE-MANIFEST.json` içindedir. PDF.js 6.4.299 ve lisansı yerel PDF görüntüleyici için dahildir.
+
+Mükellef kayıtları, indirilen PDF'ler, iş klasörleri, oturum/token dosyaları, şifreler ve `.env` yüklenmez. Çalışan yerel portal değiştirilmez.
 
 ## Kurulum
-Python 3.13 kullanılmıştır. Paket kökünde sanal ortam oluşturup etkinleştirin:
+
+Python 3.11+ ve Google Chrome gerekir. Paket kökünde:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+cd entegrasyon-1-tarayici
 python -m pip install -r Eworks-Portal/requirements.txt
-python -m playwright install chromium
 ```
 
-## Güncel OCR ve otomatik giriş
-GİB robotuna yerel ddddocr motoru eklendi. Ana robot ortamı etkin durumdayken robot klasöründe ayrı ortam kurun:
+`YOUR_PROJECT.supabase.co` ve `YOUR_SUPABASE_PUBLISHABLE_KEY` şablonlarını kendi projenize göre yapılandırın. HTML portal ve `cloud_credentials.py` dahil bu sabitleri kullanan dosyaları birlikte güncelleyin. Service-role anahtarını tarayıcıya koymayın. Portal SQL, Vault SQL/Edge Function ve `supabase-beyanname-belgeleri.sql` kurulumlarını kendi projenize uygulayın. Ayrıntılar portal dizinindeki Supabase kurulum belgelerindedir.
+
+Yerel OCR için robot dizininde ayrı ortam gerekir:
 
 ```powershell
 cd Eworks-Python-Robot
 python -m venv .ocr-venv
-.\.ocr-venv\Scripts\python.exe -m pip install --only-binary=:all: -r requirements-ocr.txt
+.\.ocr-venv\Scripts\python.exe -m pip install -r requirements-ocr.txt
+cd ..
+python Eworks-Portal/yerel-sunucu.py
 ```
 
-OCR motoru yerel çalışır; görsel veya kod dış hizmete gönderilmez. Tesseract kuruluysa yedek okuyucu olarak kullanılabilir. Robot kodu okuyabilirse resmi giriş sayfasındaki tek görünür etkin Giriş Yap düğmesine bir kez basar. Ek doğrulama/hata durumunda otomatik yeniden giriş denemesi yapmaz. Sonrasında mevcut menü, sözleşme okuma ve Supabase kayıt doğrulaması devam eder. Bu güncelleme e-Fatura/e-İrsaliye gibi yeni veri modülleri eklemez.
+Portalı `http://127.0.0.1:8765/eworks-tasarim.html` adresinden açın. GİB bilgileri Eworks hesabına bağlı Vault alanında yapılandırılır. Bağımsız eski CLI yolunda `.env.example` şablonundan yerel `.env` oluşturabilirsiniz. `Baslat.ps1`, Windows Python 3.13 standart kurulum yolunu kullanır; farklı kurulumlarda doğrudan Python komutunu kullanın.
 
-Kullanıcı yerel canlı denemede OCR'ın çalıştığını bildirdi. Çizgili sentetik örnek gerçek ddddocr motoruyla okundu; 21 kontrol testi geçti. Otomatik girişten Supabase güncellemeye kadar canlı uçtan uca başarı henüz doğrulanmadı. `.ocr-venv` depoya dahil edilmez. Yeni kodun yüklenmesi için yeni robot işi başlatın.
+## Kontroller
 
-```powershell
-cd Eworks-Python-Robot
-python -m unittest test_captcha_assist test_local_ocr test_ocr test_cloud_credentials -v
-```
-
-Testler ana ortamdan çalıştırılır. Tarayıcı testleri yerel Chrome ve Playwright gerektirir. Doğrulama kodu okumaları yanlış olabilir; otomatik girişin etkinleştirilmesi başarı garantisi değildir.
-
-Kendi Supabase projenizi kurun. `https://YOUR_PROJECT.supabase.co` ve `YOUR_SUPABASE_PUBLISHABLE_KEY` yer tutucularını kendi projenizin adresi ve publishable anahtarıyla değiştirin. Portal HTML ve `cloud_credentials.py` içindeki sabitler ile bağımsız robotun `.env.example` dosyasını inceleyin. Service-role anahtarını HTML veya istemci koduna koymayın. SQL kurulumunu ve Vault/Edge Function dokümanlarını okuyarak uygulayın; SQL dosyalarını topluca çalıştırmayın.
-
-```powershell
-cd Eworks-Portal
-python yerel-sunucu.py
-```
-
-Adres: http://127.0.0.1:8765/eworks-tasarim.html
-
-`Baslat.ps1` özgün makinedeki Python313 kurulum yolunu bekler. Sanal ortam kullanırken yukarıdaki Python komutunu tercih edin.
-
-## Durum ve açık işler
-Önceki canlı çalışma kaydında 274 GİB sözleşmesinin okunup Supabase'e kaydedildiği belirtilmiştir. Bu pakette gerçek sözleşmeler veya müşteri verileri bulunmaz; paket üzerinde yeni canlı GİB testi yapılmamıştır.
-
-Firma bazlı Vault SQL ve gib-account Edge Function değişiklikleri **test edilmemiş ve dağıtılmamış taslaktır**. Müşavir hesabı akışıyla aynı tamamlanma seviyesinde değildir. Firma portal kısayolları ve e-Tebligat/e-Fatura/e-İrsaliye belge adaptörleri henüz tamamlanmamıştır. İlk hedef firmanın GİB Portal mı özel entegratör mü kullandığı belirlenmelidir.
-
-Alt klasörlerdeki belgeler tarihsel çalışma notları içerir; güncel durum için bu dosyadaki sınırlamalar esas alınmalıdır. Test dosyaları geliştirme kaynaklarıdır; bazılarının canlı hizmet/ek bağımlılık gereksinimleri vardır.
-
-## Aktarım
-Bu klasörün tamamını ortak depodaki `mert/eworks` konumuna kopyalayın. `.gitignore` dosyasını da dahil edin. Kodlar ortak depoda commit geçmişiyle takip edilir.
-
-## Dışarıda bırakılanlar
-.env ve yedekleri, gerçek GİB Excel/JSON kayıtları, ekran görüntüleri, çalışma ve oturum klasörleri, geçmiş yedekler ve üçüncü taraf runtime dosyaları. Canlı Supabase proje adresi/publishable anahtarı paylaşım kopyasında örnek değerlerle değiştirilmiştir. Orijinal dosyalar değiştirilmemiştir.
+Robot dizininde `python -m unittest` sentetik testleri çalıştırır. Chrome testleri kurulu Chrome gerektirir. Test sonuçları canlı GİB erişilebilirliğini garanti etmez. Bu dal tarihsel ilk sürümü koruduğundan arşivdeki mevcut test uyumsuzlukları ayrıca `VALIDATION.md` dosyasında belirtilir.
