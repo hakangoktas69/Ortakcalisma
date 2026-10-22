@@ -66,7 +66,8 @@ npm run lint && npm run typecheck
 8. **HTTP sözleşmesi:** Mevcut route ve yanıt şekilleri web + eklenti tarafından kullanılır; kırıcı değişiklik `packages/contracts` güncellemesi ve istemci değişikliğiyle birlikte yapılır.
 9. Tutar, kota, lisans gibi kararlar **sunucuda** hesaplanır; istemciden gelen değere güvenilmez.
 10. **Testsiz değişiklik yok:** yeni uç → e2e (büro izolasyonu dahil), yeni kural → birim, yeni sayfa → `PANEL_ROUTES`. Kapsam eşiklerini düşürme; `npm run verify` yeşil olmadan derleme/dağıtım yapılmaz (docs/ai/testing.md).
-11. **Duyarlı arayüz:** telefon 375 → büyük ekran 1920 desteklenir; kurallar `apps/web/CLAUDE.md`, sınaması `apps/web/e2e`.
+    **Geliştirme bitince** (iş "tamam" denmeden önce): değişen davranışın backend/frontend testlerini ekle, var olanları yeni davranışa göre revize et; ardından sistemdeki **tüm regresyon testlerini** çalıştır (`npm run verify`; arayüz değiştiyse yığın ayakta `npm run test:ui`). Kırmızı test varsa düzelt; çalıştırılamayan adımı ve sonucu kullanıcıya açıkça bildir.
+11. **Duyarlı arayüz:** önyüz/ekran değişikliğinde **tüm ekran sınıflarında** uyumluluk denetlenir ve bulunan sorun giderilir: telefon 375, tablet 768, laptop 1366, büyük ekran 1920. Kurallar `apps/web/CLAUDE.md`, sınaması `apps/web/e2e`.
 
 ## Dil ve üslup
 

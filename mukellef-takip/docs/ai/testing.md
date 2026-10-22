@@ -44,6 +44,13 @@ Eşikler mevcut seviyenin hemen altındadır; yeni kod testsiz eklenirse düşer
 6. Test verisinde gerçek kişisel veri yok: `makeTckn()` ile geçerli ama sahte T.C. no.
 7. Bir testi geçirmek için canlı kodunda test kısayolu açmayın; tek istisna `RATE_LIMIT=off` (config yalnız `NODE_ENV=test`'te kabul eder) — hız sınırı `throttle.e2e-spec.ts`'te açık sınanır.
 
+## Bir işi tamamlarken
+
+1. Değişen davranışın testlerini ekle (backend: birim + e2e; frontend: web birim + arayüz). Davranışı değişen mevcut testleri silmek yerine yeni davranışa göre **revize et**.
+2. Yalnız ilgili dosyanın değil, sistemdeki **tüm regresyon testlerini** çalıştır: `npm run verify` (statik + birim + API regresyon). Arayüz değiştiyse yığın ayaktayken `npm run test:ui` da koşulur.
+3. Önyüz değişikliğinde tüm ekran sınıflarında uyumluluğu denetle ve sorunları gider (sınıflar ve ölçüler: `apps/web/CLAUDE.md`).
+4. Kırmızı test bırakılmaz. Ortam yüzünden çalıştırılamayan adım (Docker kapalı vb.) varsa iş "bitti" denmez; hangi adımın koşulmadığı kullanıcıya açıkça söylenir.
+
 ## Bu testlerin yakaladığı gerçek hatalar (örnek)
 
 - Aynı VKN ile firma ekleme 500 dönüyordu → genel Prisma hata filtresi (409/404).
