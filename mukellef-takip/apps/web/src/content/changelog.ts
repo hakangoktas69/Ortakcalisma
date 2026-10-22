@@ -50,6 +50,16 @@ export const CHANGELOG: ChangeEntry[] = [
     ],
   },
   {
+    id: "2026-10-19-renkli-is-turleri",
+    date: "2026-10-19",
+    title: "Renkli iş türleri",
+    summary: "İş kutusunda her iş türü kendi rengiyle görünüyor.",
+    changes: [
+      { kind: "improved", text: "İş kutusunda klasörler sekme, iş türleri renkli etiket oldu; liste daha geniş.", href: "/" },
+      { kind: "improved", text: "Beyanname, tebligat, e-rapor, e-Defter ve bordro işleri kendi renkleriyle ayırt ediliyor." },
+    ],
+  },
+  {
     id: "2026-10-19-2fa-zorunlu",
     date: "2026-10-19",
     title: "İki adımlı doğrulama zorunluluğu",

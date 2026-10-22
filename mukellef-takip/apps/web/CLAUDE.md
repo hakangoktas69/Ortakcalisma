@@ -6,7 +6,7 @@ Genel kurallar: `../../CLAUDE.md`.
 
 ## Bugünkü yapı
 - `src/app/(panel)/*/page.tsx` ince sayfalar; mantık `src/components/*View.tsx`.
-- `src/components/shell/` kabuk (ikon menü `nav.ts`, Ctrl+K paleti, tema).
+- `src/components/shell/` kabuk (açılır-kapanır yan menü `Sidebar.tsx` + `nav.ts`, Ctrl+K paleti, tema).
 - `src/lib/api.ts` API istemcisi (401 → `/login`, 403 `PASSWORD_CHANGE_REQUIRED` / `TWO_FACTOR_REQUIRED` yönlendirmesi).
 - `src/content/faq.ts`, `changelog.ts`: özellik değişince güncelle.
 - Tema: `globals.css` + `node scripts/gen-theme.mjs`.
