@@ -37,7 +37,9 @@ services:
       SITE_ADDRESS: ":80"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-    ports: ["127.0.0.1:3000:80"]
+    # Varsayılan yalnız bu makineye açık (127.0.0.1). Ofis ağına (WiFi) açmak için: DEMO_BIND=0.0.0.0
+    # ör. ekip aynı ağdan http://<bu-pc-ip>:3000 adresinden girer (infra/docker/README.md#demo-ag).
+    ports: ["${DEMO_BIND:-127.0.0.1}:3000:80"]
     depends_on:
       api: { condition: service_healthy }
       web: { condition: service_healthy }
