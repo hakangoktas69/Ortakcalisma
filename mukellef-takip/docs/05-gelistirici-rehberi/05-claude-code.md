@@ -82,6 +82,26 @@ Denetim `npm run verify` başında ve CI'da çalışır. Ayrıca gitleaks bütü
 | `/hafiza aktar` | Kişisel hafızadaki proje kayıtlarını sınıflandırır, onayla ekip hafızasına taşır |
 | `/hafiza denetle` | Eskimiş, mükerrer veya yanlış katmandaki kayıtları bulur |
 
+## Codex ve diğer ajanlar
+
+Codex, `CLAUDE.md` yerine yoldaki `AGENTS.md` dosyalarını okur (depo kökünden çalışılan dizine kadar). Depoda iki tane var:
+
+- `Ortakcalisma/AGENTS.md`: klasör sahipliği ve ortak kurallar
+- `mukellef-takip/AGENTS.md`: oturum başında okunacak dosyalar, hafıza biçimi, iş bitirme adımları
+
+`AGENTS.md` kuralları kopyalamaz; ajanı `CLAUDE.md`, `docs/ai/` ve ekip hafızasına yönlendirir. Kural değişince yalnız kaynak dosya güncellenir, iki araç da aynısını okur.
+
+Codex'te Claude'un şu özellikleri yoktur; `AGENTS.md` bunları talimatla karşılar:
+
+| Claude Code | Codex karşılığı |
+|---|---|
+| `@docs/ai/*.md` içe aktarımı | ajan dosyaları kendisi açıp okur |
+| SessionStart kancası, son 14 günün hafıza değişiklikleri | `MEMORY.md` okunur, `git log` ile değişikliklere bakılır |
+| Otomatik hafıza | kayıt aynı biçimle elle yazılır, `npm run memory:check` çalıştırılır |
+| `/hafiza`, `/oryantasyon` | ilgili `.claude/skills/*/SKILL.md` okunup uygulanır |
+
+Codex'in bağlamı okuyup okumadığını sınamak için oturum başında şunu sorun: "Okuduğun proje kurallarını 5 maddede özetle." Codex'in yazdığı hafıza kayıtları da PR'da ve CI'daki `memory:check` ile denetlenir.
+
 ## Obsidian ile okuma
 
 `docs/` bir Obsidian kasasıdır. Obsidian'da **Open folder as vault → `mukellef-takip/docs`** seçin.
