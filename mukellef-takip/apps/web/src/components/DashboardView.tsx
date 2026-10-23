@@ -170,13 +170,18 @@ export default function DashboardPage() {
     },
   ];
 
+  // Dairesel uyum göstergesi (donut) geometrisi
+  const gaugeR = 52;
+  const gaugeC = 2 * Math.PI * gaugeR;
+  const gaugeDash = ((pct ?? 0) / 100) * gaugeC;
+
   return (
     <div className="space-y-6">
-      {/* HERO — defter başlığı: her iki temada koyu lacivert kalır (ink). Tek öne çıkan sayı: dönem uyumu. */}
+      {/* HERO — defter başlığı: her iki temada koyu kömür kalır (ink). Öne çıkan: dönem uyumu göstergesi. */}
       <section className="ink relative overflow-hidden rounded-2xl bg-ink-900 px-6 py-6 text-white sm:px-8 sm:py-7">
         {/* sağ üstte sönük marka ışıması — tek, sade vurgu */}
         <div className="pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-brand-500/20 blur-3xl" aria-hidden />
-        <div className="relative flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
+        <div className="relative flex flex-wrap items-center justify-between gap-x-10 gap-y-6">
           <div className="min-w-0">
             <p className="text-xs text-slate-400">{now.toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
             <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-white">
@@ -207,26 +212,52 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Öne çıkan sayı: dönem beyanname uyumu */}
-          <Link href="/beyanname" className="group min-w-[15rem] flex-1 sm:max-w-sm">
-            <p className="text-xs text-slate-400">{b.periodLabel} beyanname uyumu</p>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-5xl font-black tracking-tight tabular-nums text-white">{pct === null ? "—" : `%${pct}`}</span>
-              <ArrowUpRight size={18} className="mb-1 text-slate-500 transition group-hover:text-white" />
+          {/* Öne çıkan: dönem beyanname uyumu — dairesel gösterge */}
+          <Link href="/beyanname" className="group flex items-center gap-5">
+            <div className="relative size-28 shrink-0">
+              <svg viewBox="0 0 120 120" className="size-full -rotate-90">
+                <circle cx="60" cy="60" r={gaugeR} fill="none" strokeWidth="11" className="stroke-white/10" />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r={gaugeR}
+                  fill="none"
+                  strokeWidth="11"
+                  strokeLinecap="round"
+                  className="stroke-brand-400 transition-[stroke-dasharray] duration-700"
+                  strokeDasharray={`${gaugeDash} ${gaugeC}`}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl font-black tabular-nums text-white">{pct === null ? "—" : `%${pct}`}</span>
+                <span className="text-[10px] text-slate-400">uyum</span>
+              </div>
             </div>
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-brand-400 transition-[width] duration-500" style={{ width: `${pct ?? 0}%` }} />
-            </div>
-            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs">
-              <span className="text-slate-300">
-                <b className="font-semibold text-white tabular-nums">{b.filed}</b> verildi
-              </span>
-              <span className="text-slate-300">
-                <b className="font-semibold text-white tabular-nums">{b.pending}</b> bekliyor
-              </span>
-              {b.late > 0 && (
-                <span className="font-semibold text-amber-300 tabular-nums">{b.late} gecikti</span>
-              )}
+            <div className="min-w-0">
+              <p className="text-xs text-slate-400">{b.periodLabel}</p>
+              <p className="flex items-center gap-1 text-sm font-semibold text-white">
+                beyanname uyumu
+                <ArrowUpRight size={15} className="text-slate-500 transition group-hover:text-white" />
+              </p>
+              <dl className="mt-3 space-y-1.5 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="size-2 shrink-0 rounded-full bg-brand-400" />
+                  <span className="tabular-nums font-semibold text-white">{b.filed}</span>
+                  <span className="text-slate-400">verildi</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="size-2 shrink-0 rounded-full bg-white/25" />
+                  <span className="tabular-nums font-semibold text-white">{b.pending}</span>
+                  <span className="text-slate-400">bekliyor</span>
+                </div>
+                {b.late > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 shrink-0 rounded-full bg-amber-400" />
+                    <span className="tabular-nums font-semibold text-amber-300">{b.late}</span>
+                    <span className="text-slate-400">gecikti</span>
+                  </div>
+                )}
+              </dl>
             </div>
           </Link>
         </div>
