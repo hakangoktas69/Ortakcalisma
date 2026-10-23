@@ -2,21 +2,20 @@ export type ThemePref = "light" | "dark" | "system";
 
 const KEY = "mt_theme";
 
-/** Varsayılan açık tema; koyu veya "sisteme uy" sadece kullanıcı seçerse */
+/** Varsayılan koyu tema; açık veya "sisteme uy" için kullanıcı seçimi saklanır */
 export function readThemePref(): ThemePref {
   try {
     const v = localStorage.getItem(KEY);
-    return v === "dark" || v === "system" ? v : "light";
+    return v === "light" || v === "system" ? v : "dark";
   } catch {
-    return "light";
+    return "dark";
   }
 }
 
 /** Tercihi kaydeder ve <html class="dark"> sınıfını hemen uygular (kök düzendeki başlangıç betiğiyle aynı kural). */
 export function applyThemePref(pref: ThemePref) {
   try {
-    if (pref === "light") localStorage.removeItem(KEY);
-    else localStorage.setItem(KEY, pref);
+    localStorage.setItem(KEY, pref);
   } catch {
     // Depolama kapalıysa tercih sadece bu oturumda geçerli olur
   }

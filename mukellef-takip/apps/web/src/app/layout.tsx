@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   description: "Mali müşavirler için mükellef takip portalı",
 };
 
-// Tema tercihi ilk boyamadan önce uygulanır (yoksa sayfa bir an yanlış temada yanıp söner). Varsayılan açık tema.
-const themeInit = `try{var t=localStorage.getItem('mt_theme');if(t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`;
+// Tema tercihi ilk boyamadan önce uygulanır (yoksa sayfa bir an yanlış temada yanıp söner). Varsayılan koyu tema; yalnız kullanıcı "açık" seçerse aydınlık.
+const themeInit = `try{var t=localStorage.getItem('mt_theme');if(t!=='light'&&(t!=='system'||matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){document.documentElement.classList.add('dark')}`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
