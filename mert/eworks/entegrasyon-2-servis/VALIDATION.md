@@ -24,6 +24,8 @@ Portalın gömülü JavaScript'i ayrıca `node --check` ile kontrol edilir. Yeni
 
 ## Sınırlar
 
+Tablo görünümü ek kontrolü: e-Beyanname ve e-Bildirge tabloları, uzun sentetik ad/referans içeren üçer kayıtla 1440/1024/768/600/390 pikselde görüntülendi. On düzenin tümünde yatay taşma yok, Detay düğmeleri ekran ve tablo sınırları içinde. 1024 piksel SGK görünümü ayrıca görsel olarak incelendi. Bu işlem canlı sorgu veya portal veri yazımı yapmadı.
+
 Tüm tarihsel testler çalıştırılmadı. Eski pilotta ortam/arayüz varsayımına bağlı başka testler bulunur. OCR bağımlılık ortamı ve canlı Supabase kurulumu bu paylaşım doğrulamasında yeniden kurulmadı. Seçili testlerin geçmesi bütün test keşfinin veya yeni bir makinenin canlı aktarımının sorunsuz olacağını garanti etmez.
 
 Özel pilotta aynı gün ayrıca canlı doğrulama yapıldı: önce 5 satırlık tarayıcı/servis karşılaştırması, sonra yalnız önceki 11 hataya yönelik 10 sorgu ve 13 PDF kaydı başarılıydı. Bu sonuçların özeti [güncel durum](../docs/ai/memory/guncel-durum.md) dosyasında; özel ham kanıtlar ve belgeler Git paketinin dışındadır. Yeni hesap için bu canlı başarı sonucu tekrar üretim kanıtı sayılmaz.

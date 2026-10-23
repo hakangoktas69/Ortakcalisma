@@ -361,6 +361,26 @@ footer{left:18px;right:18px;font-size:10px}
 #portalApp .declaration-date-card button:focus-visible{outline:3px solid #ffcb12;outline-offset:2px}
 @media(max-width:850px){#portalApp .declaration-fetch-grid{grid-template-columns:minmax(0,1fr)}#portalApp .declaration-card-head{padding:18px}#portalApp .declaration-selection,#portalApp .declaration-fetch-body{padding:18px}}
 @media(max-width:450px){#portalApp .declaration-years,#portalApp .declaration-months{gap:7px}#portalApp .declaration-section-title span{font-size:10px}#portalApp .declaration-tabs{width:100%}#portalApp .declaration-tabs button{flex:1}#portalApp .declaration-heading h2{font-size:16px}}
+
+/* Keep document details within the available width; wrap long source references. */
+#portalApp .records-fit .table-scroll{overflow:visible}
+#portalApp .records-fit table{width:100%;min-width:0;table-layout:fixed}
+#portalApp .records-fit th,#portalApp .records-fit td{padding:12px 8px;white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
+#portalApp .records-fit .row-title,#portalApp .records-fit .row-sub{white-space:normal;overflow-wrap:anywhere}
+#portalApp .records-fit .badge{white-space:normal;max-width:100%;box-sizing:border-box}
+#portalApp .records-fit .badge:before{flex-shrink:0}
+#portalApp .records-fit .record-detail-cell{text-align:right}
+#portalApp .records-fit .record-detail-cell .table-link{white-space:nowrap;min-height:36px}
+@media(max-width:600px){
+ #portalApp .records-fit table,#portalApp .records-fit tbody{display:block;width:100%}
+ #portalApp .records-fit thead,#portalApp .records-fit colgroup{display:none}
+ #portalApp .records-fit tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;padding:16px;border-bottom:1px solid #edf2f6}
+ #portalApp .records-fit td{display:block;min-width:0;padding:0;border:0}
+ #portalApp .records-fit td:nth-child(-n+2),#portalApp .records-fit .record-empty-cell{grid-column:1/-1}
+ #portalApp .records-fit td[data-label]:before{content:attr(data-label);display:block;font-size:9px;color:#8698ae;font-weight:750;margin-bottom:4px}
+ #portalApp .records-fit .record-detail-cell{align-self:end;justify-self:end}
+}
+
 </style></head>
 <body data-default-view="login"><div id="cloudStatus" role="status" style="position:fixed;top:0;left:0;right:0;z-index:99998;padding:8px;background:#e6f5ef;text-align:center;font:12px Segoe UI">Supabase hesabınızla giriş yapın · GİB şifresi kullanmayın</div><section id="cloudFailure" hidden style="position:fixed;inset:20% 8%;z-index:100001;background:white;padding:28px;border:2px solid #c2415b;border-radius:16px;box-shadow:0 0 0 200vmax #0008"><h2>Değişiklikler veritabanına kaydedilemedi</h2><p id="cloudFailureText"></p><button data-cloud-retry>Kaydetmeyi Tekrar Dene</button> <button data-cloud-backup>Kaydedilmemiş JSON Yedeğini İndir</button><p>Kaydetme tamamlanmadan sekmeyi kapatmayın. Listeyi yenilemek bekleyen düzenlemeleri kaybettirebilir.</p></section><div style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#fff2c6;color:#674b00;padding:6px;text-align:center;font:12px Segoe UI">Developer · İkinci entegrasyon · Canlı kayıtlar</div><div id="loginPage">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -671,7 +691,16 @@ function firmOptions(any=true){return `${any?'<option value="all">Tüm mükellef
 function recordRows(page){return data.notes.filter(row=>row.page===page||(page==='declarations-view'&&row.page==='declarations'))}
 function filtered(rows){const q=UI.search.trim().toLocaleLowerCase('tr-TR');return rows.filter(r=>(UI.company==='all'||r.firmId===UI.company)&&(UI.status==='all'||r.status===UI.status)&&(!q||Object.values(r).some(v=>String(v).toLocaleLowerCase('tr-TR').includes(q))))}
 function statsStrip(rows){const counts={all:rows.length,done:rows.filter(r=>['Tamamlandı','Ödendi','Onaylandı','Okundu','Arşivlendi','Kontrol Edildi'].includes(r.status)).length,pending:rows.filter(r=>['Bekliyor','Onay Bekliyor','Kontrol Ediliyor','Yüklendi','Devam Ediyor'].includes(r.status)).length,missing:rows.filter(r=>['Eksik','Ödenmedi','Yeni'].includes(r.status)).length};return `<div class="mini-stats"><div class="mini-stat"><span>Toplam kayıt</span><b>${fmt.format(counts.all)}</b></div><div class="mini-stat"><span>Tamamlanan</span><b>${fmt.format(counts.done)}</b></div><div class="mini-stat"><span>İşlem bekleyen</span><b>${fmt.format(counts.pending)}</b></div><div class="mini-stat"><span>Dikkat gerektiren</span><b>${fmt.format(counts.missing)}</b></div></div>`;}
-function tableRows(rows,page){const payment=page.startsWith('payments'),firmRelated=!page.startsWith('settings')&&!['news','faq','suggest','expert','accounts-office'].includes(page);
+function fittedRecordTable(rows,page){
+ const sgk=page==='sgk-bildirge',list=filtered(rows);
+ const headers=['İşlem / Belge','Mükellef / Şirket','Dönem','Oluşturma',...(sgk?['Çalışan sayısı']:[]),'Durum','İşlem'];
+ const widths=sgk?[20,25,9,12,12,12,10]:[19,29,10,13,17,12];
+ return `<div class="paper table-card records-fit"><div class="table-header"><strong>${safe(INDEX[page].title)} kayıtları</strong><small>${list.length} kayıt listeleniyor · satıra tıklayarak detaylarını inceleyin</small></div><div class="table-scroll"><table><colgroup>${widths.map(w=>`<col style="width:${w}%">`).join('')}</colgroup><thead><tr>${headers.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${list.map(r=>{
+ const cells=[`<span class="row-title">${safe(r.document)}</span><span class="row-sub">${safe(r.reference)}</span>`,`<span class="row-title">${safe(r.firm)}</span><span class="row-sub">${safe(data.firms.find(f=>f.id===r.firmId)?.ref||'')}</span>`,safe(r.period),safe(trDate(r.date)),...(sgk?[`<span class="badge info">${Number.isInteger(r.metadata?.employeeCount)?safe(r.metadata.employeeCount)+' çalışan':'Doğrulanmadı'}</span>`]:[]),badge(r.status),`<button class="table-link" data-detail="${safe(r.id)}" data-source="${page}">Detay →</button>`];
+ return `<tr>${cells.map((cell,i)=>`<td data-label="${headers[i]}"${i===cells.length-1?' class="record-detail-cell"':''}>${cell}</td>`).join('')}</tr>`;
+ }).join('')||`<tr><td class="record-empty-cell" colspan="${headers.length}"><div class="empty-list"><b>Aradığınız kayıt bulunamadı.</b>Filtreleri değiştirmeyi deneyin.</div></td></tr>`}</tbody></table></div></div>`;
+}
+function tableRows(rows,page){if(['declarations-view','sgk-bildirge'].includes(page))return fittedRecordTable(rows,page);const payment=page.startsWith('payments'),firmRelated=!page.startsWith('settings')&&!['news','faq','suggest','expert','accounts-office'].includes(page);
  return `<div class="paper table-card"><div class="table-header"><strong>${safe(INDEX[page].title)} kayıtları</strong><small>${filtered(rows).length} kayıt listeleniyor · satıra tıklayarak detaylarını inceleyin</small></div><div class="table-scroll"><table><thead><tr><th>İşlem / Belge</th>${firmRelated?'<th>Mükellef / Şirket</th>':''}<th>Dönem</th><th>Oluşturma</th>${payment?'<th>Tutar</th>':''}${page==='sgk-bildirge'?'<th>Çalışan sayısı</th>':''}<th>Durum</th><th>İşlem</th></tr></thead><tbody>${filtered(rows).map(r=>`<tr><td><span class="row-title">${safe(r.document)}</span><span class="row-sub">${safe(r.reference)}</span></td>${firmRelated?`<td><span class="row-title">${safe(r.firm)}</span><span class="row-sub">${safe(data.firms.find(f=>f.id===r.firmId)?.ref||'')}</span></td>`:''}<td>${safe(r.period)}</td><td>${safe(trDate(r.date))}</td>${payment?`<td><b>${money(r.amount)}</b></td>`:''}${page==='sgk-bildirge'?`<td><span class="badge info">${Number.isInteger(r.metadata?.employeeCount)?safe(r.metadata.employeeCount)+' çalışan':'Doğrulanmadı'}</span></td>`:''}<td>${badge(r.status)}</td><td><button class="table-link" data-detail="${safe(r.id)}" data-source="${page}">Detay →</button></td></tr>`).join('')||`<tr><td colspan="7"><div class="empty-list"><b>Aradığınız kayıt bulunamadı.</b>Filtreleri değiştirmeyi deneyin.</div></td></tr>`}</tbody></table></div></div>`}
 function trDate(d){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(d)))return String(d);const [y,m,day]=d.split('-');return day+'.'+m+'.'+y}
 function generic(page){const info=INDEX[page],rows=recordRows(page),statuses=[...new Set(rows.map(r=>r.status))];
