@@ -8,7 +8,7 @@ import type { ControlStatus, StatusCounts } from "@/lib/api";
 // renk tek başına anlam taşımaz. Metinler seri rengini değil mürekkep tonlarını kullanır.
 export const STATUS_META: Record<ControlStatus, { label: string; color: string; icon: LucideIcon }> = {
   FILED: { label: "Verildi", color: "#10b981", icon: CheckCircle2 },
-  FILED_LATE: { label: "Geç verildi", color: "#94a3b8", icon: History },
+  FILED_LATE: { label: "Geç verildi", color: "#0ea5e9", icon: History },
   PENDING: { label: "Bekliyor", color: "#f59e0b", icon: Clock },
   LATE: { label: "Gecikti", color: "#f43f5e", icon: AlertTriangle },
 };

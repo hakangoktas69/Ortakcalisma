@@ -9,41 +9,11 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const theme = readFileSync(require.resolve('tailwindcss/theme.css'), 'utf8');
 const cssPath = new URL('../src/app/globals.css', import.meta.url);
-const palettes = ['slate', 'red', 'orange', 'amber', 'yellow', 'green', 'emerald', 'teal', 'sky', 'blue', 'indigo', 'violet', 'purple', 'rose', 'brand'];
+const palettes = ['slate', 'red', 'orange', 'amber', 'yellow', 'green', 'emerald', 'teal', 'sky', 'blue', 'indigo', 'violet', 'purple', 'rose'];
 const steps = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
 
 const val = {};
 for (const m of theme.matchAll(/--color-([a-z]+)-(\d+):\s*([^;]+);/g)) val[`${m[1]}-${m[2]}`] = m[3].trim();
-
-// Nötr gri'yi temiz nötr zinc yap (sıcak/mavi değil). globals.css @theme ile aynı.
-Object.assign(val, {
-  'slate-50': 'oklch(98.5% 0.001 286)',
-  'slate-100': 'oklch(96.7% 0.001 286)',
-  'slate-200': 'oklch(92% 0.004 286)',
-  'slate-300': 'oklch(87.1% 0.006 286)',
-  'slate-400': 'oklch(70.5% 0.015 286)',
-  'slate-500': 'oklch(55.2% 0.016 286)',
-  'slate-600': 'oklch(44.2% 0.017 286)',
-  'slate-700': 'oklch(37% 0.013 286)',
-  'slate-800': 'oklch(27.4% 0.006 286)',
-  'slate-900': 'oklch(21% 0.006 286)',
-  'slate-950': 'oklch(14.1% 0.005 286)',
-});
-
-// Özel marka ölçeği: mercan (coral, Tailwind'de yok). globals.css @theme ile aynı; koyu temada da ters çevrilsin.
-Object.assign(val, {
-  'brand-50': 'oklch(96.5% 0.018 45)',
-  'brand-100': 'oklch(93% 0.038 43)',
-  'brand-200': 'oklch(87% 0.066 42)',
-  'brand-300': 'oklch(80% 0.1 41)',
-  'brand-400': 'oklch(73% 0.135 40)',
-  'brand-500': 'oklch(68% 0.148 40)',
-  'brand-600': 'oklch(62% 0.15 39)',
-  'brand-700': 'oklch(53% 0.135 38)',
-  'brand-800': 'oklch(45% 0.11 37)',
-  'brand-900': 'oklch(39% 0.088 36)',
-  'brand-950': 'oklch(27% 0.058 35)',
-});
 
 let dark = `.dark {\n  color-scheme: dark;\n  --color-white: ${val['slate-900']};\n`;
 let ink = `.dark .ink {\n  color-scheme: light;\n  --color-white: #fff;\n`;

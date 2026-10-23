@@ -20,7 +20,7 @@ export function setTheme(pref: ThemePref) {
 }
 
 export function useThemePref() {
-  return useSyncExternalStore(subscribe, readThemePref, () => "dark" as ThemePref);
+  return useSyncExternalStore(subscribe, readThemePref, () => "light" as ThemePref);
 }
 
 const OPTIONS: { value: ThemePref; label: string; icon: typeof Sun }[] = [
