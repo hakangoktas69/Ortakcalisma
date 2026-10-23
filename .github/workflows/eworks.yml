@@ -1,0 +1,69 @@
+# Eworks sürekli entegrasyon: tip, mimari kurallar, testler, özellik durumu, ajan senkronu, hafıza, belgeler, sırlar.
+# Kurallar: docs/ai/kurallar.md, docs/ai/test.md. eski/ arşivi bu iş akışının dışındadır.
+name: eworks
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['eski/**', '.github/workflows/mukellef-takip.yml']
+  pull_request:
+    paths-ignore: ['eski/**', '.github/workflows/mukellef-takip.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eworks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Doğrulama — tip, mimari, testler, özellik durumu, ajan senkronu, hafıza, bağlantılar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable && pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm arch
+      - run: pnpm test:ci
+      - name: Özellik durumu test sonuçlarıyla güncel mi (docs/ozellik-durumu.md, README özeti)
+        run: node tools/features/uret.ts --denetle
+      - name: Ajan bağlamı senkron mu (AGENTS.md, MEMORY.md, beceriler)
+        run: node tools/ajan/senkron.mjs --denetle
+      - run: node tools/claude/check-memory.mjs
+      - name: Ajan senkronu kabul testleri
+        run: node --test tools/ajan/test/
+      - run: node tools/docs/baglanti-denetle.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-sonuclari
+          path: test-results/
+          if-no-files-found: ignore
+
+  integration:
+    name: Kurum entegrasyonu (Python ACL) — pytest, import kuralları
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/integration
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: pipx install uv
+      - run: uv sync
+      - run: uv run pytest -q
+      - run: uv run lint-imports
+
+  secrets:
+    name: Sır taraması (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

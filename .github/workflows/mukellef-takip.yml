@@ -1,13 +1,10 @@
-# Mükellef Takip (mukellef-takip) sürekli entegrasyon: kalite, güvenlik, imajlar.
-# Kurallar: mukellef-takip/docs/ai/conventions.md
-name: mukellef-takip
+# Mükellef Takip sürekli entegrasyon — ARŞİV (D32 / K-39, docs/adr/0001-depo-yeniden-yapilanmasi.md).
+# Proje eski/mukellef-takip altında referans olarak durur, geliştirme sürmez; iş akışı yalnız elle tetiklenir
+# (Actions → mukellef-takip (arşiv) → Run workflow). Kurallar: eski/mukellef-takip/docs/ai/conventions.md
+name: mukellef-takip (arşiv)
 
 on:
-  push:
-    branches: [main]
-    paths: ['mukellef-takip/**', '.github/workflows/mukellef-takip.yml']
-  pull_request:
-    paths: ['mukellef-takip/**', '.github/workflows/mukellef-takip.yml']
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,7 +15,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: mukellef-takip
+    working-directory: eski/mukellef-takip
 
 jobs:
   verify:
@@ -41,12 +38,12 @@ jobs:
         with:
           node-version: 24.22.0
           cache: npm
-          cache-dependency-path: mukellef-takip/package-lock.json
+          cache-dependency-path: eski/mukellef-takip/package-lock.json
       - name: Ekip hafızası denetimi (docs/ai/memory — biçim, indeks, kişisel veri/sır)
         run: node tools/claude/check-memory.mjs
       - run: npm ci --no-audit --no-fund
       - run: npx prisma generate
-        working-directory: mukellef-takip/apps/api
+        working-directory: eski/mukellef-takip/apps/api
         env: { DATABASE_URL: 'postgresql://x:x@localhost:5432/x' }
       - name: npm run verify:ci (yerelde npm run verify ile aynı adımlar)
         run: npm run verify:ci
@@ -74,7 +71,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: mukellef-takip/apps/web/playwright-report
+          path: eski/mukellef-takip/apps/web/playwright-report
       - if: always()
         run: docker compose -f infra/docker/compose.yml -f infra/docker/compose.dev.yml down -v
 
@@ -104,8 +101,8 @@ jobs:
       - uses: docker/setup-buildx-action@v4.4.1
       - uses: docker/build-push-action@v7.4.0
         with:
-          context: mukellef-takip
-          file: mukellef-takip/${{ matrix.dockerfile }}
+          context: eski/mukellef-takip
+          file: eski/mukellef-takip/${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
           tags: mukellef-takip/${{ matrix.name }}:ci
           load: true

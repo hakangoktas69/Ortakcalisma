@@ -1,3 +1,5 @@
+> **ARŞİV (2026-10-24, D28).** Bu dosya yeniden yapılanma öncesi depo kökünün bağlamıdır; içindeki yollar taşıma öncesine göredir (`mukellef-takip/` → `eski/mukellef-takip/` vb.). Güncel bağlam: depo kökündeki `CLAUDE.md` ve `AGENTS.md`. Ayrıntı: [README.md](README.md).
+
 # Ortakcalisma — ortak çalışma deposu
 
 Mali müşavir portalı üzerinde çalışan ekip üyelerinin klasörleri. Her klasör sahibinindir; başka birinin klasöründe değişiklik yapmadan önce kullanıcıya sor.

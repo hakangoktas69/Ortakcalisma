@@ -1,3 +1,5 @@
+> **ARŞİV (2026-10-24, D32 / K-39).** Mükellef Takip artık geliştirilmiyor; bu klasör referans olarak `eski/` altında duruyor. Depo kökü Eworks SaaS projesidir: `../../CLAUDE.md`, `../../AGENTS.md`. Ekip hafızası kök `docs/ai/memory/`; buradaki `docs/ai/memory/` yalnız Mükellef Takip kayıtlarını tutar. CI yalnız elle tetiklenir. Bu klasörde değişiklik yapmadan önce kullanıcıya sor.
+
 # Mükellef Takip — Claude proje belleği
 
 Mali müşavir bürolarının mükelleflerini (firma) izlediği çok kiracılı (multi-tenant) SaaS: beyanname kontrolü, e-Defter, e-Tebligat, SGK (Vizite, 4A, e-Bildirge), fatura/KDV ön kontrol, bordro mutabakatı, bildirimler, dilekçe, yapay zekâ asistanı. Kişisel veri (TCKN, sağlık raporu) ve kurum şifreleri işlendiği için **KVKK ve GİB/SGK gereği yüksek güvenlik** temel tasarım kısıtıdır.
