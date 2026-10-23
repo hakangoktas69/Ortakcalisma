@@ -52,7 +52,7 @@ pnpm verify                        # tip, mimari kurallar, testler, hafıza, aja
 pnpm test                          # vitest (packages, apps, tools)
 pnpm arch                          # dependency-cruiser katman/bağlam kuralları
 pnpm features                      # test sonuçlarından docs/ozellik-durumu.md + README özeti
-node --test tools/ajan/test/       # ajan senkronu kabul testleri
+node --test "tools/ajan/test/*.test.mjs"       # ajan senkronu kabul testleri
 ```
 
 ## Pazarlıksız kurallar (özet; ayrıntı ve gerekçe `docs/ai/kurallar.md`)

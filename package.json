@@ -20,7 +20,7 @@
     "memory:check": "node tools/claude/check-memory.mjs",
     "ajan:senkron": "node tools/ajan/senkron.mjs --yaz",
     "ajan:denetle": "node tools/ajan/senkron.mjs --denetle",
-    "ajan:test": "node --test tools/ajan/test/",
+    "ajan:test": "node --test \"tools/ajan/test/*.test.mjs\"",
     "docs:check": "node tools/docs/baglanti-denetle.mjs"
   },
   "devDependencies": {
