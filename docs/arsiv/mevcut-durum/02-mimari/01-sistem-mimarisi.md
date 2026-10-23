@@ -72,7 +72,7 @@ flowchart TB
 | Portal + köprü + robot | Klasör kopyası, `pip install`, `Baslat.ps1` | Müşavirin Windows bilgisayarı |
 | Yapılandırma | `SUPABASE_URL`/publishable key **üç yerde** elle: `eworks-tasarim.html` (~1297), `cloud_credentials.py` (5-6), robot `.env` (eski CLI) | — |
 
-Docker ile yerel Supabase denemesi: [../../docker/README.md](../../docker/README.md) (robot Docker'da çalışmaz: görünür Chrome + CAPTCHA).
+Docker ile yerel Supabase denemesi: [../../docker/README.md](../../../../eski/hkazaz/docker/README.md) (robot Docker'da çalışmaz: görünür Chrome + CAPTCHA).
 
 ## Bağlam sınırları (DDD diliyle)
 

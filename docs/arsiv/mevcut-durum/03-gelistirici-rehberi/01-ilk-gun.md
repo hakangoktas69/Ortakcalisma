@@ -41,7 +41,7 @@ cd ..
 
 ## 3. Supabase'i hazırlayın
 
-Seçenek A — **Yerel (önerilen, gerçek veri yok):** [../../docker/README.md](../../docker/README.md) içindeki `hkazaz/docker/mert/baslat.ps1` SQL'leri ve Edge Function'ı kopyalayıp `npx supabase start` ile 55321–55329 portlarında yerel Supabase kurar ve bir demo kullanıcı oluşturur.
+Seçenek A — **Yerel (önerilen, gerçek veri yok):** [../../docker/README.md](../../../../eski/hkazaz/docker/README.md) içindeki `hkazaz/docker/mert/baslat.ps1` SQL'leri ve Edge Function'ı kopyalayıp `npx supabase start` ile 55321–55329 portlarında yerel Supabase kurar ve bir demo kullanıcı oluşturur.
 
 Seçenek B — **Kendi bulut test projeniz:** SQL Editor'de sırayla:
 

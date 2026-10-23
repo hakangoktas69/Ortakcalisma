@@ -41,7 +41,7 @@ Amaç: Eworks'ün özgün değeri olan **GİB okuma robotunu** korumak, portal +
 4. PDF'ler Mükellef Takip `documents` bağlamına (içerik adresli, kiracı yolu).
 5. Eworks portalı salt okunur moda alınır, veri dışa aktarılıp Mükellef Takip'e taşınır, sonra emekliye ayrılır.
 
-Ayrıntılı alan eşlemesi: [../../mert-technical-analiz.md](../../mert-technical-analiz.md) §9. Mükellef Takip tarafında bu iş bir ADR ile kayda alınmalıdır (`mukellef-takip/docs/adr/`).
+Ayrıntılı alan eşlemesi: [../../mert-technical-analiz.md](../../../../eski/hkazaz/mert-technical-analiz.md) §9. Mükellef Takip tarafında bu iş bir ADR ile kayda alınmalıdır (`mukellef-takip/docs/adr/`).
 
 ## Faz C'ye gidilmezse (Eworks ayrı ürün olarak kalırsa)
 

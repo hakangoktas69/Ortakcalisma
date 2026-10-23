@@ -1,3 +1,5 @@
+> **Arşiv (24.10.2026, D28).** Bu belge depo yeniden yapılanmasından önceki Eworks pilotunu anlatır. İçindeki yollar taşıma öncesine göredir: `mert/eworks/…` → `eski/mert/eworks/…`, `E1/` → `eski/mert/eworks/entegrasyon-1-tarayici/`, `hkazaz/…` → `eski/hkazaz/…`, `mukellef-takip/…` → `eski/mukellef-takip/…`, `05-hedef-mimari/` → [docs/hedef-mimari/](../../../hedef-mimari/01-cok-kiracili-hedef-mimari.md). Yeni yapının bağlamı: kök `CLAUDE.md` ve `docs/ai/`.
+
 # Eworks durumu ve açık riskler
 
 > İşe başlamadan bu dosyaya bak. Son güncelleme: 2026-10-23, kaynak `51e2cd1` (kaynak tarihi 21.10.2026).

@@ -338,6 +338,6 @@ Ana düğümler (modül, sayfa) alt düğümlerden hesaplanır. Hepsi yeşilse y
 
 ## 9. Geçiş
 
-- Yeni yapı **bu deponun kökünde** sıfırdan kurulur; mevcut tüm klasörler `eski/` altına taşınır (D28, [5.8](08-depo-yeniden-yapilanmasi.md)). Veri taşıma yoktur (D29). Bugünkü `mert/eworks` kodu **referans** olarak kalır.
+- Yeni yapı **bu deponun kökünde** sıfırdan kurulur; mevcut tüm klasörler `eski/` altına taşınır (D28, [5.8](08-depo-yeniden-yapilanmasi.md)). Veri taşıma yoktur (D29). Bugünkü `eski/mert/eworks` kodu **referans** olarak kalır.
 - Taşınacak Python modülleri (5.1 §8), testleriyle birlikte `services/integration/institutions/...` altına alınır. Testler önce yeni sahte kurum sunucusuyla kırmızıya çevrilir, sonra uyarlanır.
 - İlk iş (Faz 0): iskelet, mimari kurallar, `feature-registry`'nin tam ağacı. Bugünkü portalın tüm ekranları ve işlemleri kayda girer ve **hepsi kırmızı** başlar. Böylece ilerleme ilk günden ölçülür.

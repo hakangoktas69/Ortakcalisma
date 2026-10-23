@@ -1,3 +1,5 @@
+> **Arşiv (24.10.2026, D28).** Bu belge depo yeniden yapılanmasından önceki Eworks pilotunu anlatır. İçindeki yollar taşıma öncesine göredir: `mert/eworks/…` → `eski/mert/eworks/…`, `E1/` → `eski/mert/eworks/entegrasyon-1-tarayici/`, `hkazaz/…` → `eski/hkazaz/…`, `mukellef-takip/…` → `eski/mukellef-takip/…`, `05-hedef-mimari/` → [docs/hedef-mimari/](../../hedef-mimari/01-cok-kiracili-hedef-mimari.md). Yeni yapının bağlamı: kök `CLAUDE.md` ve `docs/ai/`.
+
 # Eworks — Claude proje belleği
 
 Mali müşavirin GİB e-Beyanname sözleşmelerini, beyanname listelerini, beyanname/tahakkuk PDF'lerini ve MUHSGK içindeki SGK belgelerini, **müşavirin kendi Windows bilgisayarında** görünür Chrome ile çalışan bir Python/Playwright robotuyla okuyup Supabase üzerindeki tek sayfalık portala aktaran **yerel pilot**. GİB şifresi (Vault) ve TCKN/VKN işlendiği için **KVKK ve GİB kuralları** temel kısıttır.

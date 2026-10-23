@@ -66,7 +66,7 @@ flowchart TB
 
 ## Mükellef Takip ile ilişkisi
 
-Aynı depodaki `mukellef-takip/` (NestJS + Next.js + Chrome eklentisi) aynı iş alanında, farklı yaklaşımla çalışan ana üründür: GİB şifresi saklamaz ve **otomatik GİB girişi yapmaz** (Mükellef Takip pazarlıksız kural #3). Eworks ise şifreyi Vault'ta saklar ve 21.10 sürümünde OCR ile otomatik giriş yapar. Önerilen ilişki: Eworks robotunun `eworks.gib.contracts.v1` çıktısı Mükellef Takip'e bir **veri kaynağı** olarak içe aktarılır (ayrıntı: [../mert-technical-analiz.md](../mert-technical-analiz.md) §9, [03-iyilestirme-plani.md](04-eksikler-ve-riskler/03-iyilestirme-plani.md) Faz C).
+Aynı depodaki `mukellef-takip/` (NestJS + Next.js + Chrome eklentisi) aynı iş alanında, farklı yaklaşımla çalışan ana üründür: GİB şifresi saklamaz ve **otomatik GİB girişi yapmaz** (Mükellef Takip pazarlıksız kural #3). Eworks ise şifreyi Vault'ta saklar ve 21.10 sürümünde OCR ile otomatik giriş yapar. Önerilen ilişki: Eworks robotunun `eworks.gib.contracts.v1` çıktısı Mükellef Takip'e bir **veri kaynağı** olarak içe aktarılır (ayrıntı: [../mert-technical-analiz.md](../../../eski/hkazaz/mert-technical-analiz.md) §9, [03-iyilestirme-plani.md](04-eksikler-ve-riskler/03-iyilestirme-plani.md) Faz C).
 
 ## Depodaki konum ve kaynak doğruluğu
 

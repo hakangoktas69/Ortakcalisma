@@ -1,3 +1,5 @@
+> **Arşiv (24.10.2026, D28).** Bu belge depo yeniden yapılanmasından önceki Eworks pilotunu anlatır. İçindeki yollar taşıma öncesine göredir: `mert/eworks/…` → `eski/mert/eworks/…`, `E1/` → `eski/mert/eworks/entegrasyon-1-tarayici/`, `hkazaz/…` → `eski/hkazaz/…`, `mukellef-takip/…` → `eski/mukellef-takip/…`, `05-hedef-mimari/` → [docs/hedef-mimari/](../../hedef-mimari/01-cok-kiracili-hedef-mimari.md). Yeni yapının bağlamı: kök `CLAUDE.md` ve `docs/ai/`.
+
 # Eworks — kodlama ajanı talimatları (Codex vb.)
 
 Bu bağlam Claude Code için yazılmıştır ama araçtan bağımsızdır; aynısına uy. Kurallar burada **tekrarlanmaz**; kaynak aşağıdaki dosyalardır. Çelişki olursa kaynak dosya geçerlidir.

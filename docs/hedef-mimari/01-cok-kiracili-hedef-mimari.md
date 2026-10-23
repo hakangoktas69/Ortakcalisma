@@ -1,6 +1,6 @@
 # 5.1 Hedef mimari — çok kiracılı SaaS Eworks (genel bakış)
 
-> Önce: [Sistem mimarisi (bugün)](../02-mimari/01-sistem-mimarisi.md) · Sonra: [5.2 Kurum entegrasyon robotu](02-kurum-entegrasyon-robotu.md), [5.3 Kaynak verimliliği ve kapasite](03-kaynak-verimliligi-ve-kapasite.md), [5.4 Dağıtım: Compose / Kubernetes](04-dagitim-compose-kubernetes.md)
+> Önce: [Sistem mimarisi (bugün)](../arsiv/mevcut-durum/02-mimari/01-sistem-mimarisi.md) · Sonra: [5.2 Kurum entegrasyon robotu](02-kurum-entegrasyon-robotu.md), [5.3 Kaynak verimliliği ve kapasite](03-kaynak-verimliligi-ve-kapasite.md), [5.4 Dağıtım: Compose / Kubernetes](04-dagitim-compose-kubernetes.md)
 > Kapsam: yalnızca **Eworks portalı** (Mükellef Takip değil). Önceki güvenlik risk listesi (G-NN) bu belgenin girdisi değildir. Durum: kararlar alındı, ayrıntılar öneri (23.10.2026).
 
 ## Alınmış kararlar (23.10.2026, Hakan)
@@ -33,9 +33,9 @@
 | D24 | **(24.10)** Veritabanında **sharding baştan**: kontrol düzlemi + `org_id` ile kiracı shard'ları, shard içinde zamana göre bölümleme ([5.7](07-veri-saklama-ve-sharding.md)). |
 | D25 | **(24.10)** Kurum istek hızı **60 istek/dk ile başlar** (D11'deki 30'un yerine); hatasızken artar, bağlantı hatasında düşer. |
 | D26 | **(24.10)** Ölçek varsayımı: **500 ofis**, hesap başına **60 istek/dk**, gece penceresi **20:00–09:00** ([5.3](03-kaynak-verimliligi-ve-kapasite.md)). |
-| D27 | **(24.10)** **Satış portalı** (`mukellef-takip/satis` deseni) yeni yapının içindedir; **ofis, müşavir ve mükellef hesapları satış portalından açılır**; mükellef onayı satış sözleşmesiyle alınır ([5.8 §2](08-depo-yeniden-yapilanmasi.md#2-satış-portalı-d27)). |
+| D27 | **(24.10)** **Satış portalı** (`eski/mukellef-takip/satis` deseni) yeni yapının içindedir; **ofis, müşavir ve mükellef hesapları satış portalından açılır**; mükellef onayı satış sözleşmesiyle alınır ([5.8 §2](08-depo-yeniden-yapilanmasi.md#2-satış-portalı-d27)). |
 | D28 | **(24.10)** Depodaki **tüm klasörler `eski/` altına** taşınır, yeni yapı **depo kökünde** kurulur, hafıza/kanca/ekip hafızası yolları güncellenir ([5.8](08-depo-yeniden-yapilanmasi.md)). Şimdilik plan; taşıma ayrı adımda. |
-| D29 | **(24.10)** Sistem canlıda değil: **veri taşıma yok**, doğrudan yeni sistem kullanılır. `mert/eworks` yeniden yapılandırılan projenin kaynağıdır (M-15 kapandı). |
+| D29 | **(24.10)** Sistem canlıda değil: **veri taşıma yok**, doğrudan yeni sistem kullanılır. `eski/mert/eworks` yeniden yapılandırılan projenin kaynağıdır (M-15 kapandı). |
 | D30 | **(24.10)** Kırmızı (tamamlanmamış) özellikler **tüm ortamlarda tüm kullanıcılara** görünür ([5.6 §8.4](06-kaynak-kod-yapisi-ddd-tdd.md#84-ortam-davranışı)). |
 | D31 | **(24.10)** Yeni yapıda da Claude/Codex vb. ajanların **bağlam ve hafıza dosyaları git ile paylaşılır ve sürümlenir**. Claude veya Codex ile yapılan değişiklik öteki aracın dosyalarını **otomatik ve karşılıklı** günceller; iş bitirme betikleri her iki tarafı da kurar ([5.9](09-yapay-zeka-ajan-baglami.md)). |
 
