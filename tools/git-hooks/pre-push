@@ -1,0 +1,8 @@
+#!/bin/sh
+# Push öncesi kapı: üretilen ajan dosyaları kaynakla uyumlu mu, ekip hafızası geçerli mi (09 §5). CI aynısını denetler.
+# Acil durumda: git push --no-verify.
+command -v node >/dev/null 2>&1 || { echo "ajan senkronu: node bulunamadı, atlandı (CI denetler)" >&2; exit 0; }
+root=$(git rev-parse --show-toplevel)
+node "$root/tools/ajan/senkron.mjs" --denetle || exit 1
+node "$root/tools/claude/check-memory.mjs" || exit 1
+exit 0

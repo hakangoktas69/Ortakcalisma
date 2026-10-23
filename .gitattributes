@@ -1,0 +1,11 @@
+# Metin dosyaları depoda LF tutulur; çalışma ağacında platform varsayılanı.
+* text=auto
+
+# Container ve git kancası olarak çalışan dosyalar Windows'ta da LF kalmalı (CRLF kabuk betiklerini bozar)
+*.sh text eol=lf
+tools/git-hooks/* text eol=lf
+Dockerfile text eol=lf
+*.Dockerfile text eol=lf
+
+# Ekip hafızası dizini: aynı anda eklenen satırlar birleşsin (mükerrer satırı check-memory yakalar, eksik/fazla satırı senkron düzeltir)
+docs/ai/memory/MEMORY.md merge=union

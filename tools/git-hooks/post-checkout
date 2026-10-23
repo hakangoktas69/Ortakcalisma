@@ -1,0 +1,10 @@
+#!/bin/sh
+# Dal değişimi sonrası: üretilen ajan dosyalarını yeniden kurar, ajan bağlamı değiştiyse uyarır (09 §5).
+# $1 önceki HEAD, $2 yeni HEAD, $3 = 1 dal değişimi (dosya checkout'unda 0).
+[ "$3" = "1" ] || exit 0
+[ "$1" = "$2" ] && exit 0
+command -v node >/dev/null 2>&1 || exit 0
+root=$(git rev-parse --show-toplevel)
+node "$root/tools/ajan/senkron.mjs" --yaz --sahneleme-yok --sessiz || true
+node "$root/tools/ajan/baglam-uyar.mjs" "$1" "$2" || true
+exit 0

@@ -79,7 +79,7 @@ Ortakcalisma/
 <!-- senkron:bitis -->
 
 <!-- senkron:baslangic hafiza — elle düzenlemeyin -->
-(MEMORY.md'nin güncel kopyası + son 14 günün hafıza değişiklikleri)
+(MEMORY.md'nin güncel kopyası + son değişiklikler için `git log` komutu)
 <!-- senkron:bitis -->
 
 <!-- senkron:baslangic akis — elle düzenlemeyin -->
@@ -95,7 +95,7 @@ Codex `AGENTS.md`'yi her oturumda kendiliğinden yükler. Hafıza dizini ve okum
 | Yön | İş | Ayrıntı |
 |---|---|---|
 | Claude → Codex | `AGENTS.md` okuma listesi | Kök `CLAUDE.md`'deki `@...` içe aktarımları ve tüm alt dizin `CLAUDE.md`'leri listelenir. Alt dizinlerde karşılık gelen `AGENTS.md` üretilir |
-| Claude → Codex | `AGENTS.md` hafıza bloğu | `MEMORY.md` dizini + `git log` son 14 gün (`docs/ai/memory`) |
+| Claude → Codex | `AGENTS.md` hafıza bloğu | `MEMORY.md` dizininin kopyası (bağlantılar köke göre) + son değişiklikler için `git log --since=14.days` komutu. Değişikliklerin kendisi bloğa yazılmaz: üretim tarihe bağlı olursa `--denetle` gün geçtikçe ve makineden makineye farklı sonuç verir (uygulamada değişti, 24.10) |
 | Claude → Codex | Beceriler | `docs/ai/beceriler/*.md` → Codex'in desteklediği beceri/istem biçimi. Destek yoksa `AGENTS.md`'de "şu istekte şu dosyayı oku" eşlemesi yazılır |
 | Codex → Claude | `MEMORY.md` tamamlama | `docs/ai/memory/*.md` içinde dizinde satırı olmayan kayıt varsa frontmatter'daki `description`'dan satır eklenir. Silinen kaydın satırı kaldırılır |
 | Codex → Claude | Beceriler | `docs/ai/beceriler/*.md` → `.claude/skills/*/SKILL.md` |
@@ -151,3 +151,5 @@ Hafıza kaydı biçimi bugünküyle aynıdır: tek bilgi tek dosya, frontmatter 
    - Codex'in dizine eklemediği hafıza kaydı `MEMORY.md`'ye eklenir;
    - `AGENTS.md`'ye elle yazılan kural `--denetle`'de yakalanır;
    - pull sonrası post-merge uyarısı verilir.
+
+**Durum (24.10.2026): uygulandı** (`yeniden-yapilanma` dalı). 1–4 ve 6 tamam: kabul testleri `node --test tools/ajan/test/` (yukarıdaki dört senaryo + alt dizin `AGENTS.md`/beceri üretimi ve silinmesi + `autoMemoryDirectory` düzeltmesi + yerel taşıma betiği). 5 açık: Codex'in proje içi beceri desteği doğrulanmadı; şimdilik yedek yol (`AGENTS.md` "Beceriler" bloğu) kullanılıyor, `.codex/` üretilmiyor. Kullanım rehberi: [gelistirici-rehberi/claude-codex.md](../gelistirici-rehberi/claude-codex.md).

@@ -20,6 +20,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, rmdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ESKI_HAFIZA, ESKI_KANCA } from './ortak.mjs';
 
 export const ESKI_KLASORLER = ['mukellef-takip', 'mert', 'hkazaz', 'hakan', 'yunus'];
 const SILINECEK_DIZIN = new Set([
@@ -30,8 +31,6 @@ const silinecekMi = (yol, ad, dizin) =>
   (dizin && SILINECEK_DIZIN.has(ad)) ||
   (dizin && ad === 'generated' && /[\\/]src$/.test(dirname(yol))) ||
   (!dizin && (ad.endsWith('.tsbuildinfo') || ad === 'next-env.d.ts'));
-const ESKI_HAFIZA = /[\\/]mukellef-takip[\\/]docs[\\/]ai[\\/]memory[\\/]?$/i;
-const ESKI_KANCA = /^(?:\.\/)?mukellef-takip[\\/]\.githooks[\\/]?$/;
 
 const SANAL_ORTAM = new Set(['.venv', '.ocr-venv', 'venv']);
 

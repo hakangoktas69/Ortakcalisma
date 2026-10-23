@@ -1,0 +1,9 @@
+#!/bin/sh
+# git pull / merge sonrası: üretilen ajan dosyalarını kaynaktan yeniden kurar, ajan bağlamı değiştiyse uyarır
+# (docs/hedef-mimari/09-yapay-zeka-ajan-baglami.md §5). Kurulum: pnpm install (prepare) ya da
+# node tools/ajan/senkron.mjs --kanca-kur. Hata olursa birleştirmeyi etkilemez.
+command -v node >/dev/null 2>&1 || { echo "ajan senkronu: node bulunamadı, atlandı" >&2; exit 0; }
+root=$(git rev-parse --show-toplevel)
+node "$root/tools/ajan/senkron.mjs" --yaz --sahneleme-yok --sessiz || true
+node "$root/tools/ajan/baglam-uyar.mjs" ORIG_HEAD HEAD || true
+exit 0

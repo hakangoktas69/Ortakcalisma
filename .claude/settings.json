@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/mukellef-takip/tools/claude/session-start.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/claude/session-start.mjs\"",
             "timeout": 30
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/mukellef-takip/tools/claude/stop-bitir.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/claude/stop-bitir.mjs\"",
             "timeout": 10
           }
         ]

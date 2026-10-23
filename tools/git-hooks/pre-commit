@@ -1,0 +1,10 @@
+#!/bin/sh
+# Commit öncesi: üretilen ajan dosyaları (AGENTS.md, MEMORY.md dizini, .claude/skills) kaynaktan yeniden kurulup
+# aynı commit'e sahnelenir; ekip hafızası denetlenir (09 §5). Acil durumda: git commit --no-verify (CI yine denetler).
+command -v node >/dev/null 2>&1 || { echo "ajan senkronu: node bulunamadı, atlandı (CI denetler)" >&2; exit 0; }
+root=$(git rev-parse --show-toplevel)
+node "$root/tools/ajan/senkron.mjs" --yaz --sessiz || exit 1
+if git diff --cached --name-only | grep -q '^docs/ai/memory/'; then
+  node "$root/tools/claude/check-memory.mjs" || exit 1
+fi
+exit 0
