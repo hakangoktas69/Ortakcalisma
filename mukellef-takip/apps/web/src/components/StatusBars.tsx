@@ -7,10 +7,10 @@ import type { ControlStatus, StatusCounts } from "@/lib/api";
 // Durum renkleri ayrılmıştır (iyi / uyarı / ciddi / kritik) ve her zaman simge + etiketle birlikte kullanılır;
 // renk tek başına anlam taşımaz. Metinler seri rengini değil mürekkep tonlarını kullanır.
 export const STATUS_META: Record<ControlStatus, { label: string; color: string; icon: LucideIcon }> = {
-  FILED: { label: "Verildi", color: "#a87f22", icon: CheckCircle2 },
-  FILED_LATE: { label: "Geç verildi", color: "#ec835a", icon: History },
-  PENDING: { label: "Bekliyor", color: "#fab219", icon: Clock },
-  LATE: { label: "Gecikti", color: "#d03b3b", icon: AlertTriangle },
+  FILED: { label: "Verildi", color: "#10b981", icon: CheckCircle2 },
+  FILED_LATE: { label: "Geç verildi", color: "#0ea5e9", icon: History },
+  PENDING: { label: "Bekliyor", color: "#f59e0b", icon: Clock },
+  LATE: { label: "Gecikti", color: "#f43f5e", icon: AlertTriangle },
 };
 export const STATUS_ORDER: ControlStatus[] = ["FILED", "FILED_LATE", "PENDING", "LATE"];
 
