@@ -70,7 +70,7 @@ docker compose -f infra/docker/compose.demo.yml up -d --build     # veya: npm ru
 docker compose -f infra/docker/compose.demo.yml ps                # api "healthy", migrate "Exited (0)" → hazır
 ```
 
-- Adres: **http://localhost:3000** (API: http://localhost:3000/api, sağlık: `/api/health`). Yalnız `127.0.0.1`'e açılır.
+- Adres: **http://localhost:3000** (API: http://localhost:3000/api, sağlık: `/api/health`). Varsayılan yalnız `127.0.0.1`'e açılır; ekibe ağdan göstermek için aşağıdaki "Ekibe ağ üzerinden gösterme".
 - Giriş: `demo@mukellef.test` / `Demo1234!` · `personel@mukellef.test` / `Personel2026`
 - İlk derleme birkaç dakika sürer (imaj derlemesinde lint ve birim testleri koşar; testler geçmezse imaj oluşmaz).
 - Geliştirme yığınıyla (`mukellef-takip`, :8080) aynı anda çalışabilir: proje adı, imaj etiketleri, port ve veritabanı ayrıdır.
@@ -85,6 +85,22 @@ $DC down -v                     # durdur ve demo verisini sıfırla (sonraki aç
 ```
 
 **Geliştirme yığınından farkı:** sırlar `compose.demo.yml` içinde açık yazılıdır (yalnız yerel demo; başka yerde kullanmayın), container sertleştirmesi (salt okunur FS, iç ağlar, `cap_drop`) yoktur, Redis şifresizdir ve ayrı doğrulama (`npm run verify`) ile arayüz testleri koşmaz. **Gerçek veriyle kullanmayın**; güvenlik davranışını denerken `npm run stack:dev` kullanın.
+
+### <a name="demo-ag"></a>Ekibe ağ üzerinden gösterme (ofis WiFi)
+
+Geliştirmenin son halini ekibe göstermek için: demoyu ofiste 7/24 açık bir PC'de çalıştırıp aynı ağdaki herkese açarsınız. İnternete değil, yalnız **yerel ağa** (WiFi) açılır; IP'yi bilen girer. **Gerçek mükellef verisi girilmez; yalnız demo veri.**
+
+```bash
+# O PC'de, proje kökünden (mukellef-takip). DEMO_BIND ağa açar (varsayılan yalnız localhost).
+DEMO_BIND=0.0.0.0 docker compose -f infra/docker/compose.demo.yml up -d --build
+```
+
+PowerShell'de: `$env:DEMO_BIND="0.0.0.0"; docker compose -f infra/docker/compose.demo.yml up -d --build`
+
+- **PC'nin IP'sini öğrenin:** `ipconfig` (Windows) → "IPv4 Address", ör. `192.168.1.50`. Ekip, aynı WiFi'dayken tarayıcıdan **http://192.168.1.50:3000** açar.
+- **Güvenlik duvarı:** İlk açılışta Windows "erişime izin ver" diye sorabilir; **Özel ağ** için izin verin. Docker Desktop açık kalmalı.
+- **PC uyumasın:** Ayarlar → Güç → ekran kapanabilir ama bilgisayar uykuya geçmemeli; yoksa erişim kesilir.
+- Yalnız bu PC'de denemek için `DEMO_BIND` vermeden çalıştırın; adres `http://localhost:3000` olur.
 
 | Belirti | Çözüm |
 |---|---|
