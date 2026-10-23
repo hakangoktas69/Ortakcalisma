@@ -2,8 +2,8 @@
 
 Bu dosya yalnız `mert/eworks/` içindir. Önce [ekip hafızasını](docs/ai/memory/MEMORY.md) ve [güncel durumu](docs/ai/memory/guncel-durum.md) okuyun.
 
-- `entegrasyon-1-tarayici/` tarihsel ilk sürümdür; yeni geliştirmeleri buraya taşımayın.
-- `entegrasyon-2-servis/` ikinci entegrasyonun paylaşılabilir kaynak kopyasıdır. Çalışan özel aktarım ortamıyla aynı klasör değildir.
+- İlk sürüm proje dışında `../eworks-arsiv/entegrasyon-1-tarayici/` altında salt tarihsel arşivdir; yeni geliştirmeleri buraya taşımayın.
+- Ana proje `entegrasyon-2-servis/` üzerinden yürür. e-Defter yalnız ikinci entegrasyon yöntemiyle geliştirilecektir. Bu dizin ikinci entegrasyonun paylaşılabilir kaynak kopyasıdır. Çalışan özel aktarım ortamıyla aynı klasör değildir.
 - İşe güncel `dev` dalından `feature/…` açarak başlayın. Commit ve testlerden sonra güncel `dev` ile birleştirin, ardından ekip düzenine göre `dev` dalını push edin. Git Flow geliştirme dalı `dev`, üretim dalı `main` olmalıdır.
 - `.env`, parola, token, gerçek VKN/TCKN, mükellef isimleri, PDF'ler, özel iş sonuçları ve yerel yorumlayıcı ayarları Git'e girmez. Bağlantı sabitleri paylaşım kopyasında şablondur.
 - Eworks bilgileri bu dizinin `docs/ai/memory/` alanında tutulur. Başka ekip üyelerinin klasörlerini veya `mukellef-takip/` uygulamasını bu işle değiştirmeyin.

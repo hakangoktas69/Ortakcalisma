@@ -381,6 +381,25 @@ footer{left:18px;right:18px;font-size:10px}
  #portalApp .records-fit .record-detail-cell{align-self:end;justify-self:end}
 }
 
+
+#portalApp .edefter-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+#portalApp .edefter-controls input,#portalApp .edefter-controls select{max-width:100%;min-width:0}
+#portalApp .edefter-controls input{flex:1;min-width:160px}
+#portalApp .edefter-legend{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0;color:#708ba6;font-size:11px}
+#portalApp .edefter-matrix{overflow-x:auto}
+#portalApp .edefter-matrix table{table-layout:fixed;min-width:860px}
+#portalApp .edefter-matrix .edefter-firm-col{width:210px}
+#portalApp .edefter-matrix td,#portalApp .edefter-matrix th{padding:10px 4px;text-align:center}
+#portalApp .edefter-matrix th:first-child,#portalApp .edefter-matrix td:first-child{text-align:left;padding:12px;position:sticky;left:0;background:#fff;z-index:1}
+#portalApp .edefter-matrix th:first-child{background:#f7f9fd;z-index:2}
+#portalApp .edefter-matrix .row-title,#portalApp .edefter-matrix .row-sub{white-space:normal;overflow-wrap:anywhere}
+#portalApp .edefter-month-stack{display:grid;gap:5px;justify-items:center}
+#portalApp .edefter-doc{border:1px solid #e2eaf3;border-radius:8px;background:#f5f8fc;color:#91a3b8;min-width:31px;min-height:29px;font-size:10px;font-weight:800;padding:5px;cursor:pointer}
+#portalApp .edefter-doc.available{background:#e7f2ff;border-color:#b4d4f3;color:#2166a3}
+#portalApp .edefter-doc:hover{border-color:#2166a3}
+#portalApp .edefter-firm-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+#portalApp .edefter-firm-meta span{font-size:9px;color:#7188a0;background:#f1f5fa;border-radius:5px;padding:3px 5px}
+
 </style></head>
 <body data-default-view="login"><div id="cloudStatus" role="status" style="position:fixed;top:0;left:0;right:0;z-index:99998;padding:8px;background:#e6f5ef;text-align:center;font:12px Segoe UI">Supabase hesabınızla giriş yapın · GİB şifresi kullanmayın</div><section id="cloudFailure" hidden style="position:fixed;inset:20% 8%;z-index:100001;background:white;padding:28px;border:2px solid #c2415b;border-radius:16px;box-shadow:0 0 0 200vmax #0008"><h2>Değişiklikler veritabanına kaydedilemedi</h2><p id="cloudFailureText"></p><button data-cloud-retry>Kaydetmeyi Tekrar Dene</button> <button data-cloud-backup>Kaydedilmemiş JSON Yedeğini İndir</button><p>Kaydetme tamamlanmadan sekmeyi kapatmayın. Listeyi yenilemek bekleyen düzenlemeleri kaybettirebilir.</p></section><div style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#fff2c6;color:#674b00;padding:6px;text-align:center;font:12px Segoe UI">Developer · İkinci entegrasyon · Canlı kayıtlar</div><div id="loginPage">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1017,8 +1036,61 @@ showDrawer(drawerHead(action==='review'?'Mükellef Kontrolü':action==='fill'?'E
 function calendarPage(){const rows=data.tasks.filter(r=>(UI.status==='all'||r.status===UI.status)&&(!UI.search||Object.values(r).join(' ').toLocaleLowerCase('tr-TR').includes(UI.search.toLocaleLowerCase('tr-TR'))));
 return `${titleBlock('Takvim ve Görevler','Yasal tarihlerinizi, şirket işlerini ve sorumlulukları planlayın.',`<button class="btn" data-export="tasks">${ico('download')} Excel / CSV</button><button class="btn blue" data-newtask>${ico('plus')} Yeni Görev</button>`,'GÜNLÜK YÖNETİM')}
  <div class="mini-stats"><div class="mini-stat"><span>Görev sayısı</span><b>${data.tasks.length}</b></div><div class="mini-stat"><span>Bekleyen</span><b>${data.tasks.filter(t=>t.status==='Bekliyor').length}</b></div><div class="mini-stat"><span>Öncelikli</span><b>${data.tasks.filter(t=>t.status==='Öncelikli').length}</b></div><div class="mini-stat"><span>Tamamlanan</span><b>${data.tasks.filter(t=>t.status==='Tamamlandı').length}</b></div></div><div class="filterbar"><input class="grow" id="innerSearch" placeholder="Görev veya firma ara..." value="${safe(UI.search)}"/><select id="statusFilter"><option value="all">Tüm durumlar</option>${[...new Set(data.tasks.map(t=>t.status))].map(s=>`<option>${safe(s)}</option>`).join('')}</select><button class="btn" data-resetfilters>${ico('refresh')} Temizle</button></div><div class="paper table-card"><div class="table-header"><strong>Görev ve son tarih listesi</strong><small>${rows.length} görev</small></div><div class="table-scroll"><table><thead><tr><th>Görev</th><th>Firma</th><th>Son tarih</th><th>Sorumlu</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${rows.map(t=>`<tr><td><span class="row-title">${safe(t.title)}</span></td><td>${safe(t.firm)}</td><td>${trDate(t.due)}</td><td>${safe(t.owner)}</td><td>${badge(t.status)}</td><td><button class="table-link" data-taskdetail="${safe(t.id)}">Düzenle →</button></td></tr>`).join('')}</tbody></table></div></div>`}
+const EDEFTER_KINDS=[['yevmiye_berat','YB','Yevmiye beratı'],['kebir_berat','KB','Kebir beratı'],['yevmiye_defteri','Y','Yevmiye defteri']];
+const edefterFilters={type:'all',status:'all',firm:'all',search:''};
+function edefterVerifiedRecords(firm,year){
+ const owner=cloud.session?.user?.id;if(!owner)return [];
+ return data.notes.filter(r=>r.page==='ledger'&&r.sourceType==='gib_live'&&r.authorizationVerified===true&&r.ownerId===owner&&r.firmId===firm.id&&r.identity===(firm.taxNumber||firm.identityNumber)&&new RegExp('^'+year+'-(0[1-9]|1[0-2])$').test(r.period));
+}
+function edefterFiles(firm,year,month,kind){
+ const period=year+'-'+String(month+1).padStart(2,'0');
+ return edefterVerifiedRecords(firm,year).filter(r=>r.period===period).flatMap(r=>(r.attachments||[]).filter(f=>f.ledgerKind===kind&&f.storageVerified===true&&f.ownerId===r.ownerId&&f.identity===r.identity&&f.recordId===r.recordId));
+}
+function edefterVisibleFirms(){
+ return data.firms.filter(f=>{
+  const corporate=/limited|anonim|kurum/i.test(f.type||'');const personal=/şahıs|sahis|esnaf|serbest/i.test(f.type||'');
+  const observed=edefterVerifiedRecords(f,UI.year).length>0;
+  return (edefterFilters.type==='all'||(edefterFilters.type==='corporate'?corporate:personal))&&(edefterFilters.status==='all'||(edefterFilters.status==='observed'?observed:!observed))&&(edefterFilters.firm==='all'||f.id===edefterFilters.firm)&&(!edefterFilters.search||[f.name,f.taxNumber,f.identityNumber].join(' ').toLocaleLowerCase('tr-TR').includes(edefterFilters.search.toLocaleLowerCase('tr-TR')));
+ });
+}
+function edefterExport(){
+ const rows=edefterVisibleFirms().flatMap(f=>Array.from({length:12},(_,m)=>({Mükellef:f.name,Dönem:UI.year+'-'+String(m+1).padStart(2,'0'),...Object.fromEntries(EDEFTER_KINDS.map(([k,code])=>[code,edefterFiles(f,UI.year,m,k).length?'Kayıtlı belge':'Kontrol edilmedi']))})));
+ exportCsv('Eworks_Edefter_'+UI.year,rows);
+}
+function edefterMonthDrawer(id,month){
+ const f=data.firms.find(f=>f.id===id);if(!f||!Number.isInteger(month)||month<0||month>11)return;
+ const rows=edefterVerifiedRecords(f,UI.year).filter(r=>r.period===UI.year+'-'+String(month+1).padStart(2,'0'));
+ showDrawer(drawerHead('e-Defter · '+MONTHS[month]+' '+UI.year,f.name)+detailFields({'Mükellef':f.name,'Dönem':MONTHS[month]+' '+UI.year,'Kaynak durumu':rows.length?'Doğrulanmış kaynak kaydı':'Kontrol edilmedi'})+EDEFTER_KINDS.map(([kind,code,label])=>{const files=edefterFiles(f,UI.year,month,kind);return `<section class="paper panel-padding" style="margin-top:12px"><h3>${label} · ${code}</h3><p>${files.length?files.length+' kayıtlı belge':'Bu döneme ait doğrulanmış belge kaydı henüz yok.'}</p></section>`}).join('')+'<p class="small-note">Belge kaydı bulunmaması, kaynakta belge olmadığı anlamına gelmez. Yerel yüklemeler GİB onayı olarak gösterilmez.</p>');
+}
+function ledgersPage(){
+ const firms=edefterVisibleFirms(),observed=data.firms.filter(f=>edefterVerifiedRecords(f,UI.year).length),records=data.firms.flatMap(f=>edefterVerifiedRecords(f,UI.year));
+ const dates=records.map(r=>r.observedAt).filter(d=>Number.isFinite(Date.parse(d))).sort();const updated=dates.length?new Date(dates.at(-1)).toLocaleString('tr-TR'):'Henüz canlı sorgu yapılmadı';
+ const years=Array.from({length:Math.min(6,Number(TODAY.slice(0,4))-2003)},(_,i)=>Number(TODAY.slice(0,4))-i);
+ return `${titleBlock('e-Defter','Mükelleflerin defter ve berat belgelerini yıl ve ay bazında izleyin.',`<button class="btn" data-edefter-export>${ico('download')} Excel / CSV</button><button class="btn" data-edefter-local>${ico('folder')} Yerel dosya takibi</button>`,'EWORKS / E-DEFTER')}
+ <div class="edefter-controls"><div class="segmented">${[['all','Tümü'],['corporate','Kurum'],['personal','Şahıs']].map(([id,label])=>`<button class="${edefterFilters.type===id?'current':''}" data-edefter-type="${id}">${label}</button>`).join('')}</div><select class="btn" id="edefterYear" aria-label="e-Defter yılı">${years.map(y=>`<option ${UI.year===y?'selected':''}>${y}</option>`).join('')}</select><input class="btn" id="edefterSearch" aria-label="e-Defter firma ara" placeholder="Firma, VKN veya TCKN ara…" value="${safe(edefterFilters.search)}"><span class="small-note">Son güncelleme: ${safe(updated)}</span></div>
+ <div class="mini-stats"><div class="mini-stat"><span>Firma kapsamı</span><b>${data.firms.length}</b></div><div class="mini-stat"><span>Aktif yıl</span><b>${UI.year}</b></div><div class="mini-stat"><span>Kaynak kaydı bulunan firma</span><b>${observed.length}</b></div><div class="mini-stat"><span>Doğrulama bekleyen firma</span><b>${data.firms.length-observed.length}</b></div></div>
+ <div class="edefter-controls"><select class="btn" id="edefterFirm" aria-label="e-Defter mükellef seç"><option value="all">Tüm mükellefler</option>${data.firms.map(f=>`<option value="${safe(f.id)}" ${edefterFilters.firm===f.id?'selected':''}>${safe(f.name)}</option>`).join('')}</select><select class="btn" id="edefterStatus" aria-label="e-Defter kaynak durumu">${[['all','Tüm durumlar'],['observed','Kaynak kaydı bulunan'],['unknown','Kontrol edilmedi']].map(([v,label])=>`<option value="${v}" ${edefterFilters.status===v?'selected':''}>${label}</option>`).join('')}</select><button class="btn blue" disabled title="Canlı kaynak doğrulaması tamamlandıktan sonra kullanılabilir">GİB’den belge çek</button></div>
+ <div class="small-note warn" style="margin-bottom:16px">Canlı e-Defter bağlantısı henüz doğrulanmadı. Kontrol edilmeyen aylar gri gösterilir; belge yok veya onaylı olarak değerlendirilmez.</div>
+ <div class="paper table-card"><div class="table-header"><strong>${UI.year} e-Defter ve berat takibi</strong><small>${firms.length} mükellef · ay kutucuğundan dönem detayını açın</small></div><div class="edefter-matrix"><table><colgroup><col class="edefter-firm-col">${SHORT.map(()=>'<col>').join('')}</colgroup><thead><tr><th scope="col">Mükellef / Firma</th>${SHORT.map(m=>`<th scope="col">${safe(m)}</th>`).join('')}</tr></thead><tbody>${firms.map(f=>`<tr><td><strong class="row-title">${safe(f.name)}</strong><span class="row-sub">${safe(f.taxNumber||f.identityNumber||'Kimlik bilgisi eksik')}</span><div class="edefter-firm-meta"><span>${safe(f.type||'Tür belirtilmedi')}</span><span>Dönem: doğrulanmadı</span></div></td>${Array.from({length:12},(_,m)=>`<td><div class="edefter-month-stack">${EDEFTER_KINDS.map(([kind,code,label])=>{const count=edefterFiles(f,UI.year,m,kind).length;return `<button class="edefter-doc ${count?'available':''}" data-edefter-month="${m}" data-edefter-firm="${safe(f.id)}" aria-label="${safe(f.name)} · ${MONTHS[m]} ${UI.year} · ${label} · ${count?'Kayıtlı belge':'Kontrol edilmedi'}" title="${label}: ${count?'Kayıtlı belge':'Kontrol edilmedi'}">${code}</button>`}).join('')}</div></td>`).join('')}</tr>`).join('')||'<tr><td colspan="13"><div class="empty-list">Seçilen filtrelere uygun firma bulunamadı.</div></td></tr>'}</tbody></table></div></div>
+ <div class="edefter-legend"><span>YB · Yevmiye beratı</span><span>KB · Kebir beratı</span><span>Y · Yevmiye defteri</span><span>Mavi: kayıtlı belge · Gri: kontrol edilmedi</span></div>`;
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-edefter-type],[data-edefter-month],[data-edefter-export],[data-edefter-local]');if(!b)return;
+ if(b.hasAttribute('data-edefter-type')){edefterFilters.type=b.dataset.edefterType;render();}
+ else if(b.hasAttribute('data-edefter-month'))edefterMonthDrawer(b.dataset.edefterFirm,Number(b.dataset.edefterMonth));
+ else if(b.hasAttribute('data-edefter-export'))edefterExport();
+ else if(b.hasAttribute('data-edefter-local'))showDrawer(legacyLedgersPage());
+});
+document.addEventListener('change',e=>{
+ const t=e.target;if(t.id==='edefterYear')UI.year=Number(t.value);
+ else if(t.id==='edefterFirm')edefterFilters.firm=t.value;
+ else if(t.id==='edefterStatus')edefterFilters.status=t.value;
+ else if(t.id==='edefterSearch')edefterFilters.search=t.value;
+ else return;render();
+});
+
 function ledgerStatus(fid,month){return data.ledgers[fid+':'+month]||(data.uploaded.some(file=>file.firmId===fid&&file.month===month)?'Yüklendi':'Kontrol edilmedi')}
-function ledgersPage(){const firm=data.firms.find(f=>f.id===UI.ledgerCompany)||data.firms[0];const id=firm?.id||'';UI.ledgerCompany=id;const s=UI.period,start=s*3;const completed=Array.from({length:12},(_,m)=>ledgerStatus(id,m)).filter(v=>v==='Onaylandı'||v==='Kontrol Edildi').length;
+function legacyLedgersPage(){const firm=data.firms.find(f=>f.id===UI.ledgerCompany)||data.firms[0];const id=firm?.id||'';UI.ledgerCompany=id;const s=UI.period,start=s*3;const completed=Array.from({length:12},(_,m)=>ledgerStatus(id,m)).filter(v=>v==='Onaylandı'||v==='Kontrol Edildi').length;
  const periodCard=Array.from({length:4},(_,q)=>{const done=Array.from({length:3},(_,k)=>ledgerStatus(id,q*3+k)).filter(v=>v==='Onaylandı'||v==='Kontrol Edildi').length;return `<button class="period ${UI.period===q?'selected':''}" data-period="${q}"><strong>${q+1}. Dönem</strong><small>${MONTHS[q*3]} – ${MONTHS[q*3+2]}</small><div class="period-bar"><i style="width:${done/3*100}%"></i></div></button>`}).join('');
  const monthCards=Array.from({length:3},(_,i)=>{let m=start+i,st=ledgerStatus(id,m);const files=data.uploaded.filter(f=>f.firmId===id&&f.month===m);return `<div class="ledger-month"><div class="monthname"><strong>${MONTHS[m]}</strong>${badge(st)}</div><div class="ledger-checks"><div><span>Defter / Berat</span><b>${files.length?files.length+' dosya':st==='Onaylandı'?'Arşiv kaydı':'Dosya bekleniyor'}</b></div><div><span>Kontrol durumu</span><b>${st==='Onaylandı'?'Kayıtlı onay':st==='Kontrol Edildi'?'Kontrol edildi':st==='Yüklendi'?'Yükleme alındı':'Bekliyor'}</b></div><div><span>Dönem</span><b>${MONTHS[m]} ${UI.year}</b></div></div><div class="month-footer"><button class="btn small" data-choosemonth="${m}">${ico('upload')} Dosya Ekle</button><button class="btn small" data-ledger-review="${m}" ${!files.length&&!data.ledgers[id+':'+m]?'disabled':''}>${ico('check')} Kontrol</button></div></div>`}).join('');
  const tabs=`<div class="segmented"><button class="${UI.ledgerMode==='quarter'?'current':''}" data-ledgermode="quarter">3 Aylık Takip</button><button class="${UI.ledgerMode==='year'?'current':''}" data-ledgermode="year">12 Aylık Matris</button></div>`;

@@ -9,7 +9,7 @@
     "Eworks-Portal/declaration-pdf-viewer.mjs": "d3ec6e1b926589f2d921b3a2efb47969cc06150c099452a18f2b062c8a0a5b55",
     "Eworks-Portal/demo-cleanup.js": "704632427742858eab553d4afd56f0e5e7af31dae7dbf3813ddef0886d154fbe",
     "Eworks-Portal/document-retry-source.example.json": "3dcf0ad9fc782e564ca23e6496fc623d488593cd5c97a28336fb52c041035dbc",
-    "Eworks-Portal/eworks-tasarim.html": "34175957de9a87ca5476b4073dd1522fe5391b9bfacf25a07430165fad94386a",
+    "Eworks-Portal/eworks-tasarim.html": "57f73b1ac01fe941fb7eac185b33e144d45eb8e0d1cbe34f5afdd982efa7c9f5",
     "Eworks-Portal/institution-review.js": "c919c1f59dba4aa36a4a45668388bf193b5fcbedd56c955ef58487c05f28b4d3",
     "Eworks-Portal/requirements.txt": "6876df1f5a5212b7005a97dc80cd68178133cb2114dbd642cf2ef5dc124888c4",
     "Eworks-Portal/robot-config.json": "c469acf9130604524f4780748f2c76ae49b9d8ef431f7e95280e6a00997f9aaf",
@@ -299,7 +299,7 @@
     "Eworks-Python-Robot/test_robot.py": "2c7c627a54cd47c795b7eb9cab92c2ddd8bbcc261c74af01599e3720443b18ed",
     "Eworks-Python-Robot/test_service_transport.py": "65063acfa3024b5e9e48c1374e4455830a869a5812484f7558be718cda27fb0f",
     "Eworks-Python-Robot/test_sgk_employee_count.py": "f46e365c9631ab2ea1123fe087fc77a017d8e69de77dcf42d2f6470f662c4748",
-    "README.md": "6490fa277c9934742574cc58273260eedf3df682b83c633c2f993e8924d82871",
-    "VALIDATION.md": "2cfc55011ad34807f0e8855ce46f1964d43739b8549c67c3fc0843323473784e"
+    "README.md": "5a1b83592072d40c7101ff6eda5dbaced2a658dce2c555e3e9745a2de63f2b3c",
+    "VALIDATION.md": "2f84135f55934d266f02960a97989d7d68338d21c2be78776c1c795c08f2029e"
   }
 }

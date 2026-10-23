@@ -17,3 +17,11 @@ Kullanıcının son toplu hedefi 274 mükellef için 22 Temmuz–31 Ağustos 202
 Kalan toplu aktarım ve izleme otomasyonu beklemededir. Eylül/Ekim için yeni toplu sorgu yapılmaz; önceki kayıtlar silinmez. Geçerli sözleşme bulunmaması, kayıt bulunmaması, kaynağın belgeyi sunmaması ve robot hatası ayrı durumlardır. Bu çalışma tüm mükelleflerin aktarımının bittiği anlamına gelmez.
 
 Canlı iş kimlikleri, hesap kimliği, müşteri listesi ve PDF'ler paylaşım paketinde bulunmaz. Devam için özel ortamın sahibi tarafından kontrollü olarak sağlanmaları gerekir.
+
+## Ana proje ve e-Defter kararı
+
+Ana proje artık yalnız ikinci entegrasyon yöntemidir. İlk sürüm ana proje ağacından `mert/eworks-arsiv/entegrasyon-1-tarayici/` altına içerikleri değişmeden taşındı; tarihsel Git dalı korunur. e-Defter, aynı oturumda doğrulanmış servis yolu yaklaşımıyla bu ana projeye eklenecek; ilk sürüme eklenmeyecek.
+
+Referans görsel yerleşim örneğidir. Yeni e-Defter ekranı Eworks mavi tonları, beyaz kartları ve mevcut filtre/rozet stiliyle hazırlandı: firma türü, yıl, firma ve kaynak durumu filtreleri, 12 aylık belge matrisi, dönem detayı ve CSV dışa aktarımı. YB/KB/Y kutucukları sadece ilgili sahip/firma/yıl/döneme bağlı doğrulanmış belge kaydı varsa mavi; bilinmeyen aylar gri görünür. Görseldeki sayılar kopyalanmaz; kaynağı doğrulanmayan dönem sıklığı veya yazılım adı üretilmez. Eski yerel dosya takip ekranı ayrı düğmeden korunur; onun notları canlı GİB verisi sayılmaz.
+
+Bu aşama ekran ve proje ayrımıdır. Canlı e-Defter endpoint/alan sözleşmesi ve indirilebilir belge akışı henüz doğrulanmadı; GİB'den belge çek düğmesi bu yüzden pasif. Yeni oturumda canlı kaynak gözlemi, hesap/yetki doğrulaması ve ardından servis adaptörü gerekli. Henüz e-Defter belgesi çekildiği veya entegrasyon tamamlandığı söylenemez.
