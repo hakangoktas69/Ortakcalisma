@@ -4,8 +4,8 @@ Ekip arkadaşları için başlangıç: **[Ortak hafıza](docs/ai/memory/MEMORY.m
 
 | Dizin | Amaç |
 |---|---|
-| `entegrasyon-1-tarayici/` | 21 Ekim ilk tarayıcı entegrasyonu; tarihsel kaynak korunur |
-| `entegrasyon-2-servis/` | Aynı oturumda servis taşıma, sorgu karşılaştırması ve sınırlı belge tekrarını içeren ikinci yöntem |
+| `../eworks-arsiv/entegrasyon-1-tarayici/` | Ana proje dışında korunan ilk sürüm arşivi |
+| **`entegrasyon-2-servis/` — ana proje** | Aynı oturumda servis taşıma, sorgu karşılaştırması ve sınırlı belge tekrarını içeren ikinci yöntem |
 | `docs/ai/memory/` | Ekibin paylaşabileceği mimari, kararlar ve kaldığımız aşama |
 | `docs/gunluk/` | Tarihli çalışma özetleri |
 
@@ -13,6 +13,8 @@ Ekip arkadaşları için başlangıç: **[Ortak hafıza](docs/ai/memory/MEMORY.m
 
 Yeni işlere güncel `dev` dalından `feature/…` açılarak başlanır. Git Flow ayarları ve devam adımları [ekip rehberinde](docs/ai/memory/devam-rehberi.md). Ajanlar önce [CLAUDE.md](CLAUDE.md) dosyasını okumalıdır.
 
-İlk sürümün kaynak envanteri kendi `SOURCE-MANIFEST.json` dosyasında korunur. [İlk sürümün eski kurulum notları](docs/ilk-entegrasyon-rehberi.md) ve [ilk sürüm test sınırlamaları](VALIDATION.md) ayrıca saklanır. İkinci sürümün test sonuçları [kendi doğrulama belgesindedir](entegrasyon-2-servis/VALIDATION.md).
+e-Defter dahil tüm yeni geliştirmeler yalnız ikinci entegrasyonda yapılır. Görsel örnekler yerleşim içindir; renk ve kutucuklar Eworks tasarımına uyarlanır.
+
+İlk sürümün kaynak envanteri [ayrı arşivde](../eworks-arsiv/README.md) korunur. [İlk sürümün eski kurulum notları](docs/ilk-entegrasyon-rehberi.md) ve [ilk sürüm test sınırlamaları](VALIDATION.md) ayrıca saklanır. İkinci sürümün test sonuçları [kendi doğrulama belgesindedir](entegrasyon-2-servis/VALIDATION.md).
 
 Bu kaynaklar yerel pilot içindir. Üretim yayını ve tamamlanmış e-Defter aktarımı olarak değerlendirilmemelidir.

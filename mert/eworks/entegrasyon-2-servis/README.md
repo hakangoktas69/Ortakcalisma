@@ -1,6 +1,6 @@
 # Eworks ikinci entegrasyon — ekip kaynak paketi
 
-İlk sürüm `../entegrasyon-1-tarayici/` içinde korunur. Bu dizin aynı GİB oturumunda servis taşıması, karşılaştırma, devam ve hedefli belge tekrarı eklenen ikinci yöntemin paylaşım kopyasıdır. Canlı hesap ayarları ve özel sonuçlar dahil değildir.
+Bu dizin aktif ana projedir. İlk sürüm proje dışında `../../eworks-arsiv/entegrasyon-1-tarayici/` içinde korunur. e-Defter yalnız ikinci entegrasyon yöntemiyle geliştirilecektir. Bu dizin aynı GİB oturumunda servis taşıması, karşılaştırma, devam ve hedefli belge tekrarı eklenen ikinci yöntemin paylaşım kopyasıdır. Canlı hesap ayarları ve özel sonuçlar dahil değildir.
 
 Önce [ekip hafızasını](../docs/ai/memory/MEMORY.md) okuyun. Son canlı doğrulama ve sınırlar [güncel durum](../docs/ai/memory/guncel-durum.md) dosyasındadır.
 

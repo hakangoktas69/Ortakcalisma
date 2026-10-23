@@ -24,6 +24,8 @@ Portalın gömülü JavaScript'i ayrıca `node --check` ile kontrol edilir. Yeni
 
 ## Sınırlar
 
+e-Defter ekranı: sentetik firmalarla tür filtresi, yıl değişiminde eski yılın belgelerinin gösterilmemesi, farklı hesap belgelerinin dışlanması ve belgesi doğrulanmamış ayların onaylı sayılmaması kontrol edildi. 1360 piksel görünüm görsel olarak incelendi; 390 pikselde sayfa taşması yok, 12 aylık matris kendi alanında kayar. Canlı e-Defter sorgusu veya indirme bu kontrole dahil değildir; bağlantı doğrulanmadığı için belge çekme düğmesi pasiftir.
+
 Tablo görünümü ek kontrolü: e-Beyanname ve e-Bildirge tabloları, uzun sentetik ad/referans içeren üçer kayıtla 1440/1024/768/600/390 pikselde görüntülendi. On düzenin tümünde yatay taşma yok, Detay düğmeleri ekran ve tablo sınırları içinde. 1024 piksel SGK görünümü ayrıca görsel olarak incelendi. Bu işlem canlı sorgu veya portal veri yazımı yapmadı.
 
 Tüm tarihsel testler çalıştırılmadı. Eski pilotta ortam/arayüz varsayımına bağlı başka testler bulunur. OCR bağımlılık ortamı ve canlı Supabase kurulumu bu paylaşım doğrulamasında yeniden kurulmadı. Seçili testlerin geçmesi bütün test keşfinin veya yeni bir makinenin canlı aktarımının sorunsuz olacağını garanti etmez.
