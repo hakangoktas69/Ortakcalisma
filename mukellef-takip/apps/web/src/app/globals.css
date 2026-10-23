@@ -7,21 +7,21 @@
 
 @theme inline {
   --font-sans: var(--font-jakarta);
-  /* Marka / birincil: sky (açık mavi) — Linear/Stripe tarzı modern vurgu. Sky paleti gen-theme ile iki temada çalışır. */
-  --color-brand-50: var(--color-sky-50);
-  --color-brand-100: var(--color-sky-100);
-  --color-brand-200: var(--color-sky-200);
-  --color-brand-300: var(--color-sky-300);
-  --color-brand-400: var(--color-sky-400);
-  --color-brand-500: var(--color-sky-500);
-  --color-brand-600: var(--color-sky-600);
-  --color-brand-700: var(--color-sky-700);
-  --color-brand-800: var(--color-sky-800);
-  --color-brand-900: var(--color-sky-900);
-  --color-brand-950: var(--color-sky-950);
 }
 
 @theme {
+  /* Marka / birincil: mercan (coral, ≈ brand-500) — sıcak, canlı vurgu. Koyu tema gen-theme.mjs ile üretilir. */
+  --color-brand-50: oklch(96.5% 0.018 45);
+  --color-brand-100: oklch(93% 0.038 43);
+  --color-brand-200: oklch(87% 0.066 42);
+  --color-brand-300: oklch(80% 0.1 41);
+  --color-brand-400: oklch(73% 0.135 40);
+  --color-brand-500: oklch(68% 0.148 40);
+  --color-brand-600: oklch(62% 0.15 39);
+  --color-brand-700: oklch(53% 0.135 38);
+  --color-brand-800: oklch(45% 0.11 37);
+  --color-brand-900: oklch(39% 0.088 36);
+  --color-brand-950: oklch(27% 0.058 35);
   /* Kenar çubuğu / hero: nötr koyu (zinc) — temadan bağımsız */
   --color-ink-700: oklch(32% 0.004 286);
   --color-ink-800: oklch(24% 0.004 286);
@@ -199,6 +199,17 @@
   --color-rose-800: oklch(89.2% 0.058 10.001);
   --color-rose-900: oklch(94.1% 0.03 12.58);
   --color-rose-950: oklch(96.9% 0.015 12.422);
+  --color-brand-50: oklch(27% 0.058 35);
+  --color-brand-100: oklch(39% 0.088 36);
+  --color-brand-200: oklch(45% 0.11 37);
+  --color-brand-300: oklch(53% 0.135 38);
+  --color-brand-400: oklch(62% 0.15 39);
+  --color-brand-500: oklch(68% 0.148 40);
+  --color-brand-600: oklch(73% 0.135 40);
+  --color-brand-700: oklch(80% 0.1 41);
+  --color-brand-800: oklch(87% 0.066 42);
+  --color-brand-900: oklch(93% 0.038 43);
+  --color-brand-950: oklch(96.5% 0.018 45);
 }
 
 .dark .ink {
@@ -358,6 +369,17 @@
   --color-rose-800: oklch(45.5% 0.188 13.697);
   --color-rose-900: oklch(41% 0.159 10.272);
   --color-rose-950: oklch(27.1% 0.105 12.094);
+  --color-brand-50: oklch(96.5% 0.018 45);
+  --color-brand-100: oklch(93% 0.038 43);
+  --color-brand-200: oklch(87% 0.066 42);
+  --color-brand-300: oklch(80% 0.1 41);
+  --color-brand-400: oklch(73% 0.135 40);
+  --color-brand-500: oklch(68% 0.148 40);
+  --color-brand-600: oklch(62% 0.15 39);
+  --color-brand-700: oklch(53% 0.135 38);
+  --color-brand-800: oklch(45% 0.11 37);
+  --color-brand-900: oklch(39% 0.088 36);
+  --color-brand-950: oklch(27% 0.058 35);
 }
 /* gen-theme:end */
 
