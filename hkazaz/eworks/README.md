@@ -25,6 +25,15 @@ Eworks; mali müşavirin GİB'deki e-Beyanname sözleşmelerini, beyanname liste
 | 4 | [04-eksikler-ve-riskler/01-mimari-yapisal-eksikler.md](04-eksikler-ve-riskler/01-mimari-yapisal-eksikler.md) | Mimar, CTO |
 | 4 | [04-eksikler-ve-riskler/02-guvenlik-riskleri.md](04-eksikler-ve-riskler/02-guvenlik-riskleri.md) | Mimar, CTO, Senior |
 | 4 | [04-eksikler-ve-riskler/03-iyilestirme-plani.md](04-eksikler-ve-riskler/03-iyilestirme-plani.md) — önceliklendirilmiş yol haritası | CTO, Mimar |
+| 5 | [05-hedef-mimari/01-cok-kiracili-hedef-mimari.md](05-hedef-mimari/01-cok-kiracili-hedef-mimari.md) — **hedef**: SaaS, ofis → müşavir → mükellef, kararlar D1–D10, Next.js BFF, veri modeli, geçiş planı | CTO, Mimar, Senior |
+| 5 | [05-hedef-mimari/02-kurum-entegrasyon-robotu.md](05-hedef-mimari/02-kurum-entegrasyon-robotu.md) — kurum entegrasyonları: web servis birincil, robot yedek; otomatik CAPTCHA, dakikalık istek sınırı, gece planlayıcı, SGK, PDF saklama | Mimar, Senior |
+| 5 | [05-hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md](05-hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md) — DDD bounded context'ler, monorepo dizinleri, katman kuralları, TDD, kırmızı/yeşil özellik işaretleme | Junior, Senior, Mimar |
+| 5 | [05-hedef-mimari/07-veri-saklama-ve-sharding.md](05-hedef-mimari/07-veri-saklama-ve-sharding.md) — 10 yıl saklama, kontrol düzlemi + kiracı shard'ları, zamana göre bölümleme | Mimar, CTO, DevOps |
+| 5 | [05-hedef-mimari/08-depo-yeniden-yapilanmasi.md](05-hedef-mimari/08-depo-yeniden-yapilanmasi.md) — `eski/` + yeni kök, satış portalı, hafıza/kanca yolları (plan) | Herkes |
+| 5 | [05-hedef-mimari/09-yapay-zeka-ajan-baglami.md](05-hedef-mimari/09-yapay-zeka-ajan-baglami.md) — Claude ↔ Codex paylaşılan hafıza ve karşılıklı otomatik senkron | Herkes |
+| 5 | [05-hedef-mimari/05-yetki-ve-hesap-modeli.md](05-hedef-mimari/05-yetki-ve-hesap-modeli.md) — müşavir–mükellef ilişkisi, hiyerarşik sayfa/işlem yetkisi, hesap kullanım izni, mükellef onayı | Mimar, Senior, CTO |
+| 5 | [05-hedef-mimari/03-kaynak-verimliligi-ve-kapasite.md](05-hedef-mimari/03-kaynak-verimliligi-ve-kapasite.md) — istek bütçesi kapasite formülü, servis bazında tutumluluk kuralları | Mimar, CTO, DevOps |
+| 5 | [05-hedef-mimari/04-dagitim-compose-kubernetes.md](05-hedef-mimari/04-dagitim-compose-kubernetes.md) — aynı imajlarla Compose veya Kubernetes, profiller | DevOps, Mimar |
 | AI | [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md), [ai/](ai/) — kodlama ajanı bağlamı | Claude Code / Codex |
 
 ## Okuma yolları

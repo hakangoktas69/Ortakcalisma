@@ -1,0 +1,32 @@
+---
+name: eworks-hedef-mimari
+description: "[mert/eworks] Eworks çok kiracılı SaaS hedef mimarisi kararları D1–D31 (2026-10-23/24, Hakan): Next.js BFF, web servis birincil/robot yedek, istek/dk sınırı, hiyerarşik yetki, DDD/TDD, 10 yıl + sharding, satış portalı, eski/ yeniden yapılanma, Claude↔Codex senkron"
+metadata:
+  type: project
+---
+
+Klasör: mert/eworks (belgeler `hkazaz/eworks/05-hedef-mimari/`)
+
+Hakan, Eworks portalının (Mükellef Takip'ten **ayrı** ürün) yüzlerce kullanıcılı, ofis → müşavir → mükellef çok kiracılı SaaS'a dönüşmesine 2026-10-23/24'te şu kararlarla yön verdi:
+
+- **Platform:** Next.js ön yüz + BFF. Tarayıcı JS'inde token, Supabase adresi veya anahtar yok (oturum Redis'te, `__Host-` HttpOnly çerez). Supabase on-prem, iç ağda. Dağıtım seçimli: aynı imajlarla Docker Compose **veya** Kubernetes.
+- **Kullanıcı kurulumu yok:** localhost köprüsü ve masaüstü ajanı yok. Entegrasyonlar backend'de, kuyrukla (RabbitMQ; durum Postgres `jobs` + outbox) paralel çalışır.
+- **Kurum entegrasyonu:** web servis birincil, robot (Playwright) yedek. CAPTCHA otomatik (etkileşimli yok), gece toplu işleri tam otomatik.
+- **Hız:** Kurumlara giden istekler Redis GCRA ile aralıklı gider, toplam istek/dk parametredir. Başlangıç 60 istek/dk (D25; ilk karar D11'de 30'du), hatasızken kademeli artar, bağlantı hatasında yarıya iner ve devre kesici açılır.
+- **Çıkış IP'si:** Sabit, kayıtlı IP kullanılır. Hesap başına sahte/dönüşümlü IP (spoofing) istendi, **uygulanmadı** (K-22): TCP/TLS'te spoofing çalışmaz, IP rotasyonu kurumun erişim denetimini atlatmaya yönelik olur. Kapasite resmî servis, kurum izni ve artımlı senkronla artırılır.
+- **Hesaplar:** müşavir ve her mükellefin kendi GİB/SGK hesabı (`institution_accounts`, Vault). Örnek: 5 müşavir × 300 = 1.505 hesap/ofis. "Şifre hatalı" hesap bir daha denenmez.
+- **İlişki ve yetki:** Bir mükellef yalnız bir müşavirle çalışır (aktif VKN sistem genelinde tekil, devir akışı var). Sayfa ve işlem bazında hiyerarşik yetki vardır. Personel kapsamını müşavir veya ofis admini verir; müşavir izniyle personel müşavirin hesabını kullanır. Mükellef onayıyla müşavir mükellef hesabını kullanır; mükellef müşavirin hiçbir bilgisini kullanamaz.
+- **SGK:** Eworks'teki tüm SGK ekranları ilk sürümde. Veri, müşavirin talebiyle topluca çekilir.
+- **Mükellef girişi:** Mükellefler portala girer.
+- **PDF saklama:** 7 gün (parametre), parçalı temizlik + yönetici toplu temizliği.
+- **Kaynaklar:** Servisler kaynak sınırlı çalışır; büyük veri parçalı işlenir. Robot kapasitesini CPU değil **istek bütçesi** belirler.
+- **Kod yapısı:** DDD (D20–D22). 11 bounded context (`identity-access`, `organization`, `portfolio`, `credentials`, `sync`, `tax-filing`, `social-security`, `documents`, `workspace`, `notifications`, `audit`) + Python `integration` ACL. Her bağlam aynı adla `packages/contexts/<ctx>`, `apps/web/src/features/<ctx>`, `app/api/<ctx>`, DB şeması ve testte görünür. Alan kuralı yalnız TS'tedir; Python alan tablolarına yazmaz.
+- **TDD:** Özellik ağacı = yetki ağacı (`packages/feature-registry`). Testler `@F:anahtar` ile etiketlenir, durum CI'da hesaplanır. Ön yüzde tamamlanmayan modül/sayfa/buton **kırmızıdır** ve **tüm ortamlarda tüm kullanıcılara görünür** (D30). Uygulanmamış işlem 501 döner.
+- **Veri:** İş verisi **10 yıl** saklanır (devirde eski ofisteki veri dahil). **Sharding baştan** (D24): kontrol düzlemi (GoTrue, ofis dizini, `shard_map`, VKN tekilliği, satış) + `org_id` ile kiracı shard'ları (16 mantıksal / 2 fiziksel başlangıç, shard başına PostgREST). Shard içinde zamana göre bölümleme. Şema Citus'a hazır (PK `(org_id, id)`).
+- **Ölçek ve hız:** 500 ofis, hesap başına 60 istek/dk, gece 20:00–09:00. Başlangıç hızı 60 istek/dk (D25; 30'un yerine).
+- **Satış portalı:** Yeni yapıda `apps/sales` (ADR 0009 deseni). Ofis, müşavir ve mükellef hesapları satıştan açılır, mükellef onayı satış sözleşmesiyle alınır.
+- **Depo:** Tüm klasörler (`mukellef-takip` dahil) `eski/` altına taşınacak, Eworks SaaS depo kökünde kurulacak. Hafıza ve kanca yolları değişecek (`08-depo-yeniden-yapilanmasi.md`). 2026-10-24 itibarıyla **yalnız plan**. Veri taşıma yok; `mert/eworks` revize edilen proje.
+- **Ajan bağlamı (D31):** Yeni yapıda da Claude/Codex hafızası git'te. Tek kaynak: `CLAUDE.md`, `docs/ai`, `docs/ai/memory`, `docs/ai/beceriler`. `tools/ajan/senkron.mjs`, `AGENTS.md`'nin üretilen bloklarını (okuma listesi, hafıza dizini, akış), `MEMORY.md` dizinini ve iki aracın becerilerini üretir. Tetikler: git kancaları (post-merge, pre-commit, pre-push), Claude kancaları ve Codex `AGENTS.md` talimatı. `bitir` her iki tarafı da günceller (`09-yapay-zeka-ajan-baglami.md`).
+
+**Why:** Hedef, binlerce kurum hesabını IP engellenmeden ve kullanıcı kurulumu olmadan yönetmek; kararlar tek tek kullanıcıyla netleşti ve bazıları önceki önerilerin (masaüstü ajanı, Mükellef Takip'e veri kaynağı olma) yerine geçti.
+**How to apply:** Eworks tasarım/kod işinde bu kararları yeniden tartışma; ayrıntı ve gerekçe için `05-hedef-mimari/` ve `K-13…K-38`. Yeni SaaS kodu yazılırken önce `06-kaynak-kod-yapisi-ddd-tdd.md`. Hesap başına IP rotasyonu yeniden istenirse K-22 gerekçesini hatırlat. Mükellef Takip'in "otomatik GİB girişi yok" kuralı yalnız Mükellef Takip için geçerlidir, Eworks'e taşınmaz. Açık konular: [[eworks-acik-konular]]; belge yerleri: [[eworks-dokumantasyonu]].

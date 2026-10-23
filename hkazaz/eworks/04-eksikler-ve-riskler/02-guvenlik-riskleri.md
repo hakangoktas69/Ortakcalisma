@@ -9,7 +9,7 @@
 
 | # | Risk | Önem | Durum |
 |---|---|---|---|
-| [G-01](#g-01) | Otomatik GİB girişi (Vault şifresi + OCR CAPTCHA + otomatik tıklama) | **Kritik** (uyum) | Açık |
+| [G-01](#g-01) | Otomatik GİB girişi (Vault şifresi + OCR CAPTCHA + otomatik tıklama) | **Kritik** (uyum) | Bilinçli kabul (K-15, 2026-10-23) |
 | [G-02](#g-02) | Geçerli JWT + Origin'siz istek = GİB şifresi düz metin | **Kritik** | Açık |
 | [G-03](#g-03) | Vault okuma (şifre çözme) denetim kaydı yok | Yüksek | Açık |
 | [G-04](#g-04) | Yerel diskte süresiz düz metin kişisel veri (`jobs/`) | Yüksek | Açık |

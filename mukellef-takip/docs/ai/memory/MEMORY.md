@@ -4,4 +4,8 @@
 - [Docker demo yığını](docker-demo-yigini.md) — tüm Docker dosyaları infra/docker'da; demo = compose.demo.yml / npm run stack:demo (yalnız Docker, :3000, RLS etkin)
 - [Ajan senkron betikleri](ajan-senkron-betikleri.md) — tools/ajan/{claude,codex}.ps1: guncelle işe başlarken, bitir push'tan önce; Claude'da kancalar yapar, Codex'te bitir elle
 - [Node 24 gerekli](node-24-gerekli.md) — Prisma 7 eski Node'da çalışmaz; yerel Node eskiyse npm/test komutlarını node:24 container'da veya npm run verify ile koş
-- [Eworks dokümantasyonu](eworks-dokumantasyonu.md) — [mert/eworks] belgeler + Claude bağlamı hkazaz/eworks/CLAUDE.md; risk kimlikleri G-NN/M-NN
+- [Eworks dokümantasyonu](eworks-dokumantasyonu.md) — [mert/eworks] belgeler + Claude bağlamı hkazaz/eworks/CLAUDE.md; G-NN/M-NN riskler, K-NN kararlar
+- [Eworks hedef mimarisi](eworks-hedef-mimari.md) — [mert/eworks] SaaS kararları D1–D31: Next.js BFF, web servis birincil, istek/dk sınırı, yetki, DDD/TDD, 10 yıl + sharding, satış portalı, eski/ planı, Claude↔Codex hafıza senkronu
+- [Eworks açık konular](eworks-acik-konular.md) — [mert/eworks] 4 açık konu: 60/dk–500 ofis uyumsuzluğu, Mükellef Takip eski/ sonrası, taşıma tarihi, shard donanımı
+- [Eworks yeniden yapılanma](eworks-yeniden-yapilanma.md) — [kök] tüm klasörler eski/, SaaS kökte: belge yerleri, adımlar, git'in taşımadığı yerel dosyalar, kırılan yollar (yalnız plan, onay gerekli)
+- [Eworks çalışma biçimi](eworks-calisma-bicimi.md) — [mert/eworks] her karar D-NN + K-NN + durum + hafıza birlikte; açık konular hafızada; taşıma yalnız onayla
