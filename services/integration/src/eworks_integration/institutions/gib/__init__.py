@@ -1,0 +1,1 @@
+"""GİB: ebeyanname, ivd."""

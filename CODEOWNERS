@@ -1,0 +1,4 @@
+# Bağlam başına sahip (06 §5). Sahipler ekip kararıyla GitHub kullanıcı adlarıyla doldurulacak (açık iş, docs/ai/durum.md).
+# Biçim:
+# /packages/contexts/social-security/   <github-kullanici-adi>
+# /services/integration/                <github-kullanici-adi>

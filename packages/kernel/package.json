@@ -1,0 +1,7 @@
+{
+  "name": "@eworks/kernel",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "devDependencies": { "@eworks/testing": "workspace:*" }
+}

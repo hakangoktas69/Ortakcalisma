@@ -18,7 +18,7 @@ Eworks; mali müşavirin GİB'deki e-Beyanname sözleşmelerini, beyanname liste
 | 2 | [02-mimari/02-bilesen-iliskileri.md](02-mimari/02-bilesen-iliskileri.md) — projeler arası akışlar (sıra diyagramları) | Mimar, Senior |
 | 2 | [02-mimari/03-veri-modeli.md](02-mimari/03-veri-modeli.md) — tablolar, JSONB yükü, Storage, Vault | Senior, Mimar |
 | 2 | [02-mimari/04-guvenlik-mimarisi.md](02-mimari/04-guvenlik-mimarisi.md) — mevcut kontroller | Mimar, CTO |
-| 2 | [02-mimari/05-mimari-kararlar.md](02-mimari/05-mimari-kararlar.md) — geriye dönük karar kayıtları | Mimar |
+| 2 | [docs/adr/karar-kaydi.md](../../adr/karar-kaydi.md) (taşındı) — geriye dönük karar kayıtları | Mimar |
 | 3 | [03-gelistirici-rehberi/01-ilk-gun.md](03-gelistirici-rehberi/01-ilk-gun.md) — kurulum, çalıştırma | Junior |
 | 3 | [03-gelistirici-rehberi/02-kod-haritasi.md](03-gelistirici-rehberi/02-kod-haritasi.md) — hangi dosya ne yapar | Junior, Senior |
 | 3 | [03-gelistirici-rehberi/03-tarifler.md](03-gelistirici-rehberi/03-tarifler.md) — sık değişiklikler adım adım | Senior |

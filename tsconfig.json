@@ -1,0 +1,21 @@
+{
+  // Tüm TypeScript paketleri derleme adımı olmadan kaynak olarak kullanılır (Next.js, Vitest, Node 24 tip ayıklama).
+  // İçe aktarmalar .ts uzantılıdır; yalnız silinebilir TS sözdizimi (enum/namespace yok) — Node 24 doğrudan çalıştırabilsin.
+  "compilerOptions": {
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["packages/**/*.ts", "apps/worker/**/*.ts", "tools/**/*.ts", "vitest.config.ts"],
+  "exclude": ["**/node_modules"]
+}

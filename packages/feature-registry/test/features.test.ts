@@ -1,0 +1,83 @@
+import { describe, expect, it } from 'vitest';
+import { childrenOf, computeStatus, contextOf, featureTags, features, parentOf } from '../src/index.ts';
+
+describe('özellik ağacı', () => {
+  const keys = Object.keys(features);
+
+  it('her düğümün üstü ağaçta var, anahtarlar biçime uyuyor', () => {
+    for (const k of keys) {
+      expect(k).toMatch(/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$/);
+      const p = parentOf(k);
+      if (p) expect(features[p], `${k} için üst düğüm ${p}`).toBeDefined();
+    }
+  });
+
+  it('modül kökte, işlem yaprakta; işlemlerin kabul testi gerekir', () => {
+    for (const k of keys) {
+      const f = features[k]!;
+      if (f.kind === 'module') expect(parentOf(k)).toBeNull();
+      if (f.kind === 'action') {
+        expect(childrenOf(features, k)).toEqual([]);
+        expect(f.acceptance).toBe(true);
+      } else {
+        expect(childrenOf(features, k).length, `${k} boş`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('05 §3.1 yetki ağacındaki anahtarlar kayıtta', () => {
+    for (const k of [
+      'firmalar.liste.view', 'firmalar.kart.archive', 'firmalar.kurum_hesaplari.grant_use',
+      'beyanname.liste.export', 'beyanname.belge.download', 'beyanname.senkron.start',
+      'sgk.kontrol.view', 'sgk.ebildirge.sync', 'sgk.ise_giris_cikis.sync', 'sgk.erapor.approve', 'sgk.is_kazasi.view',
+      'gorevler.assign', 'yonetim.kullanicilar.edit_permissions', 'yonetim.zamanlama.edit',
+      'yonetim.belge_temizligi.run', 'yonetim.hiz_politikasi.edit',
+    ]) expect(features[k], k).toBeDefined();
+  });
+
+  it('bağlam miras alınır, sayfa ezebilir', () => {
+    expect(contextOf(features, 'sgk.erapor.approve')).toBe('social-security');
+    expect(contextOf(features, 'firmalar.kurum_hesaplari.consent')).toBe('credentials');
+    expect(contextOf(features, 'tebligat.liste.view')).toBeNull();
+  });
+
+  it('test sonucu yokken her düğüm kırmızı başlar', () => {
+    const s = computeStatus(features, []);
+    expect(Object.values(s).every((n) => n.status === 'red')).toBe(true);
+    expect(s['sgk']).toMatchObject({ green: 0, total: 11 });
+  });
+});
+
+describe('durum hesabı', () => {
+  const tree = {
+    sgk: { title: 'SGK', kind: 'module' },
+    'sgk.ebildirge': { title: 'e-Bildirge', kind: 'page' },
+    'sgk.ebildirge.view': { title: 'Görüntüle', kind: 'action', acceptance: true },
+    'sgk.ebildirge.sync': { title: 'Güncelle', kind: 'action', acceptance: true },
+  } as const;
+
+  it('tüm testleri geçen işlem yeşil, biri kırmızıysa üst düğüm kırmızı ve ilerleme gösterir', () => {
+    const s = computeStatus(tree, [
+      { feature: 'sgk.ebildirge.view', passed: true },
+      { feature: 'sgk.ebildirge.sync', passed: true },
+      { feature: 'sgk.ebildirge.sync', passed: false },
+    ]);
+    expect(s['sgk.ebildirge.view']).toEqual({ status: 'green', green: 1, total: 1, tests: 1 });
+    expect(s['sgk.ebildirge.sync']?.status).toBe('red');
+    expect(s['sgk']).toEqual({ status: 'red', green: 1, total: 2, tests: 3 });
+  });
+
+  it('tüm işlemler yeşilse modül yeşil', () => {
+    const s = computeStatus(tree, [
+      { feature: 'sgk.ebildirge.view', passed: true },
+      { feature: 'sgk.ebildirge.sync', passed: true },
+    ]);
+    expect(s['sgk']?.status).toBe('green');
+  });
+
+  it('etiketleri test adından okur', () => {
+    expect(featureTags('[F:sgk.ebildirge.sync] e-Bildirge toplu')).toEqual(['sgk.ebildirge.sync']);
+    expect(featureTags('@F:sgk.erapor.view @F:sgk.kontrol.view listeler')).toEqual(['sgk.erapor.view', 'sgk.kontrol.view']);
+    expect(featureTags('etiketsiz')).toEqual([]);
+  });
+});

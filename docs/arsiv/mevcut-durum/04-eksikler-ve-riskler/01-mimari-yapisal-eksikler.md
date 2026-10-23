@@ -1,6 +1,6 @@
 # 4.1 Mimari ve yapısal eksikler
 
-> İlgili: [Güvenlik riskleri](02-guvenlik-riskleri.md), [İyileştirme planı](03-iyilestirme-plani.md), [Mimari kararlar](../02-mimari/05-mimari-kararlar.md)
+> İlgili: [Güvenlik riskleri](02-guvenlik-riskleri.md), [İyileştirme planı](03-iyilestirme-plani.md), [Mimari kararlar](../../../adr/karar-kaydi.md)
 > Kaynak: `51e2cd1`. **Durum** sütunu her kod güncellemesinde işlenir: Açık / Planlandı / Kapandı (commit).
 
 Etki: **Y**üksek / **O**rta / **D**üşük — ürünleşme ve bakım açısından.

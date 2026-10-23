@@ -1,0 +1,33 @@
+{
+  "name": "eworks",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.18.3",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "prepare": "node tools/ajan/senkron.mjs --kanca-kur",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ci": "vitest run --reporter=default --reporter=junit --outputFile.junit=test-results/vitest.xml",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "arch": "depcruise --config tools/arch/dependency-cruiser.cjs packages apps",
+    "features": "node tools/features/uret.ts",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "verify": "pnpm typecheck && pnpm arch && pnpm test && pnpm memory:check && pnpm ajan:denetle && pnpm docs:check",
+    "memory:check": "node tools/claude/check-memory.mjs",
+    "ajan:senkron": "node tools/ajan/senkron.mjs --yaz",
+    "ajan:denetle": "node tools/ajan/senkron.mjs --denetle",
+    "ajan:test": "node --test tools/ajan/test/",
+    "docs:check": "node tools/docs/baglanti-denetle.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "dependency-cruiser": "^18.7.0",
+    "turbo": "^2.5.8",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.11"
+  }
+}

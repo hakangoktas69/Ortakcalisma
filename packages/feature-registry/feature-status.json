@@ -1,0 +1,1276 @@
+{
+  "oturum.giris.login": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "oturum.giris": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "oturum.sifre_sifirlama.reset": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "oturum.sifre_sifirlama": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "oturum.mfa.setup": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "oturum.mfa.verify": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "oturum.mfa": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "oturum": {
+    "status": "red",
+    "green": 0,
+    "total": 4,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "genel_bakis.panel.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "genel_bakis.panel": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "genel_bakis.takvim.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "genel_bakis.takvim": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "genel_bakis": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "firmalar.liste.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar.liste.export": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar.liste": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar.kart.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar.kart.create": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar.kart.edit": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar.kart.archive": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar.kart": {
+    "status": "red",
+    "green": 0,
+    "total": 4,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar.kurum_hesaplari.view_status": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "credentials"
+  },
+  "firmalar.kurum_hesaplari.edit_credentials": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "credentials"
+  },
+  "firmalar.kurum_hesaplari.grant_use": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "credentials"
+  },
+  "firmalar.kurum_hesaplari.consent": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "credentials"
+  },
+  "firmalar.kurum_hesaplari": {
+    "status": "red",
+    "green": 0,
+    "total": 4,
+    "tests": 0,
+    "context": "credentials"
+  },
+  "firmalar.gib_sozlesmeler.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "firmalar.gib_sozlesmeler.sync": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "firmalar.gib_sozlesmeler.review": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "firmalar.gib_sozlesmeler": {
+    "status": "red",
+    "green": 0,
+    "total": 3,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "firmalar.devir.start": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar.devir.object": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar.devir": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "firmalar": {
+    "status": "red",
+    "green": 0,
+    "total": 15,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "beyanname.liste.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "beyanname.liste.export": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "beyanname.liste": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "beyanname.kontrol.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "beyanname.kontrol": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "beyanname.belge.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "documents"
+  },
+  "beyanname.belge.download": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "documents"
+  },
+  "beyanname.belge": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "documents"
+  },
+  "beyanname.senkron.start": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sync"
+  },
+  "beyanname.senkron.cancel": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sync"
+  },
+  "beyanname.senkron": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "sync"
+  },
+  "beyanname.pilot_bolge.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "beyanname.pilot_bolge.edit": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "beyanname.pilot_bolge": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "beyanname": {
+    "status": "red",
+    "green": 0,
+    "total": 9,
+    "tests": 0,
+    "context": "tax-filing"
+  },
+  "tebligat.liste.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "tebligat.liste.sync": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "tebligat.liste": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "tebligat": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "sgk.kontrol.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.kontrol": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.ebildirge.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.ebildirge.download": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.ebildirge.sync": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.ebildirge": {
+    "status": "red",
+    "green": 0,
+    "total": 3,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.ise_giris_cikis.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.ise_giris_cikis.sync": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.ise_giris_cikis": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.erapor.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.erapor.sync": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.erapor.approve": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.erapor": {
+    "status": "red",
+    "green": 0,
+    "total": 3,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.is_kazasi.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.is_kazasi.sync": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk.is_kazasi": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "sgk": {
+    "status": "red",
+    "green": 0,
+    "total": 11,
+    "tests": 0,
+    "context": "social-security"
+  },
+  "edefter.liste.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "edefter.liste.review": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "edefter.liste": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "edefter": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "dilekceler.tum.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "dilekceler.tum.create": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "dilekceler.tum": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "dilekceler.borc_durum.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "dilekceler.borc_durum.create": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "dilekceler.borc_durum": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "dilekceler": {
+    "status": "red",
+    "green": 0,
+    "total": 4,
+    "tests": 0,
+    "context": null
+  },
+  "faturalar.efatura.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "faturalar.efatura": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "faturalar.earsiv.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "faturalar.earsiv": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "faturalar.fis.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "faturalar.fis": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "faturalar.tevkifat.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "faturalar.tevkifat": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "faturalar": {
+    "status": "red",
+    "green": 0,
+    "total": 4,
+    "tests": 0,
+    "context": null
+  },
+  "gorevler.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "gorevler.create": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "gorevler.assign": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "gorevler.close": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "gorevler": {
+    "status": "red",
+    "green": 0,
+    "total": 4,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "notlar.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "notlar.create": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "notlar": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "bildirimler.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "notifications"
+  },
+  "bildirimler.mark_read": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "notifications"
+  },
+  "bildirimler": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "notifications"
+  },
+  "raporlar.pos.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.pos.export": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.pos": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.kayitli_araclar.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.kayitli_araclar.export": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.kayitli_araclar": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.ticaret_sicil.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.ticaret_sicil.export": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.ticaret_sicil": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.karsit_inceleme.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.karsit_inceleme.export": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar.karsit_inceleme": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "raporlar": {
+    "status": "red",
+    "green": 0,
+    "total": 8,
+    "tests": 0,
+    "context": "workspace"
+  },
+  "odeme.aylik_liste.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.aylik_liste": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.cari_kasa.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.cari_kasa": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.borclar.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.borclar": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.online.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.online": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.ucretler.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.ucretler.edit": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.ucretler": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.istatistikler.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.istatistikler": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.ayarlar.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.ayarlar.edit": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "odeme.ayarlar": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": null
+  },
+  "odeme": {
+    "status": "red",
+    "green": 0,
+    "total": 9,
+    "tests": 0,
+    "context": null
+  },
+  "yonetim.kullanicilar.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "yonetim.kullanicilar.invite": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "yonetim.kullanicilar.edit_permissions": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "yonetim.kullanicilar": {
+    "status": "red",
+    "green": 0,
+    "total": 3,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "yonetim.mukellef_kullanicilari.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "yonetim.mukellef_kullanicilari.invite": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "yonetim.mukellef_kullanicilari": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "yonetim.zamanlama.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sync"
+  },
+  "yonetim.zamanlama.edit": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sync"
+  },
+  "yonetim.zamanlama": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "sync"
+  },
+  "yonetim.belge_temizligi.run": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "documents"
+  },
+  "yonetim.belge_temizligi": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "documents"
+  },
+  "yonetim.hiz_politikasi.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sync"
+  },
+  "yonetim.hiz_politikasi.edit": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sync"
+  },
+  "yonetim.hiz_politikasi": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "sync"
+  },
+  "yonetim.denetim_kaydi.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "audit"
+  },
+  "yonetim.denetim_kaydi": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "audit"
+  },
+  "yonetim": {
+    "status": "red",
+    "green": 0,
+    "total": 11,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "ayarlar.profil.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "ayarlar.profil.edit": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "ayarlar.profil": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "identity-access"
+  },
+  "ayarlar.iletisim.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "notifications"
+  },
+  "ayarlar.iletisim.edit": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "notifications"
+  },
+  "ayarlar.iletisim": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "notifications"
+  },
+  "ayarlar.mukellef_gruplari.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "ayarlar.mukellef_gruplari.edit": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "ayarlar.mukellef_gruplari": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "portfolio"
+  },
+  "ayarlar.portal_kullanimi.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "organization"
+  },
+  "ayarlar.portal_kullanimi": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "organization"
+  },
+  "ayarlar": {
+    "status": "red",
+    "green": 0,
+    "total": 7,
+    "tests": 0,
+    "context": "organization"
+  },
+  "destek.uzmana_sor.ask": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "destek.uzmana_sor": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "destek.oneriler.create": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "destek.oneriler": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "destek.sss.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "destek.sss": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "destek.yenilikler.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "destek.yenilikler": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": null
+  },
+  "destek": {
+    "status": "red",
+    "green": 0,
+    "total": 4,
+    "tests": 0,
+    "context": null
+  },
+  "satis.ofis.create": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis.ofis.freeze": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis.ofis": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis.musavir.create": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis.musavir": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis.mukellef.create": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis.mukellef.contract": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis.mukellef": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis.ekip.view": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis.ekip.invite": {
+    "status": "red",
+    "green": 0,
+    "total": 1,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis.ekip": {
+    "status": "red",
+    "green": 0,
+    "total": 2,
+    "tests": 0,
+    "context": "sales"
+  },
+  "satis": {
+    "status": "red",
+    "green": 0,
+    "total": 7,
+    "tests": 0,
+    "context": "sales"
+  }
+}
