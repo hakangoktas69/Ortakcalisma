@@ -2,7 +2,7 @@
 
 > Önce: [5.6 Kaynak kod yapısı](06-kaynak-kod-yapisi-ddd-tdd.md)
 > Kararlar (24.10.2026, Hakan): **D28** Ortakcalisma'daki **tüm klasörler** (mukellef-takip dahil) `eski/` altına taşınır. Yeni Eworks SaaS yapısı **depo kökünde** kurulur. Taşınan hafıza dosyaları, kancalar ve ekip hafızası yolları güncellenir · **D27** satış portalı yeni yapının içindedir · **D29** veri taşıma yoktur.
-> **Durum: plan.** Taşıma henüz yapılmadı. Onayla ayrı bir adımda uygulanacak.
+> **Durum: uygulandı (24.10.2026, `yeniden-yapilanma` dalı; [ADR 0001](../adr/0001-depo-yeniden-yapilanmasi.md)).** Bu belgedeki "bugün" sütunları taşıma öncesini anlatır. Uygulamada plandan farklar §6'da.
 
 ## 1. Hedef görünüm
 
@@ -98,7 +98,16 @@ Ortakcalisma/                        ← depo kökü = Eworks SaaS monoreposu
    - `pnpm arch`/`pnpm test` iskelet üzerinde yeşil.
 9. PR ve ekip onayı, ardından birleştirme. Ekip üyeleri `git pull` sonrası yeni oturum açar.
 
-## 5. Karar bekleyenler
+## 5. Kararlar (önceden bekleyenler)
 
-- **Mükellef Takip'in durumu:** `eski/` altına taşındıktan sonra geliştirmesi sürecek mi, yoksa referans/arşiv mi olacak? CI'ın `eski/mukellef-takip` için çalışıp çalışmayacağı buna bağlı.
-- **Ekip duyurusu ve taşıma tarihi.**
+- **Mükellef Takip arşivdir** (D32, K-39): `.github/workflows/mukellef-takip.yml` yalnız elle tetiklenir (`workflow_dispatch`), çalışma dizini `eski/mukellef-takip`; eski pre-push kancası etkisizdir.
+- **Ekip duyurusu** taşımadan önce yapıldı; taşıma 24.10.2026'da uygulandı.
+
+## 6. Uygulamada plandan farklar (24.10)
+
+- Eski kök `README.md`, §1'deki yeni `eski/README.md` ile aynı yolu istediği için `eski/README-eski-kok.md` adını aldı.
+- Arşivdeki Eworks bağlam dosyaları `docs/arsiv/mevcut-durum/CLAUDE.eski.md` / `AGENTS.eski.md` oldu; `CLAUDE.md` adıyla kalsalar o dizinde etkin ajan bağlamı sayılırlardı.
+- Karar kaydı (`02-mimari/05-mimari-kararlar.md`) arşive değil `docs/adr/karar-kaydi.md`'ye taşındı (yaşayan kayıt); §1'deki "`hedef-mimari/` ← 01–08" 09'u da kapsar.
+- `git mv` Windows'ta klasörü diskte bütün olarak yeniden adlandırdığı için taşımayı yapan makinede yoksayılan dosyalar da taşındı. Diğer makinelerde §3a geçerlidir: `node tools/ajan/eski-yerel-tasi.mjs --uygula`.
+- `AGENTS.md` hafıza bloğu son 14 günün değişikliklerini değil `git log` komutunu içerir ([5.9 §4](09-yapay-zeka-ajan-baglami.md#4-senkronmjs-ne-yapar)).
+- Skill kaynakları `docs/ai/beceriler/`, karar sayısı K-01…K-39, bağlam sayısı 12 (`sales` dahil).

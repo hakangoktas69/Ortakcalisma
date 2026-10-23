@@ -1,11 +1,11 @@
 ---
 name: eworks-hedef-mimari
-description: "[mert/eworks] Eworks çok kiracılı SaaS hedef mimarisi kararları D1–D31 (2026-10-23/24, Hakan): Next.js BFF, web servis birincil/robot yedek, istek/dk sınırı, hiyerarşik yetki, DDD/TDD, 10 yıl + sharding, satış portalı, eski/ yeniden yapılanma, Claude↔Codex senkron"
+description: Eworks çok kiracılı SaaS hedef mimarisi kararları D1–D32 (2026-10-23/24, Hakan) — Next.js BFF, web servis birincil/robot yedek, istek/dk sınırı, hiyerarşik yetki, DDD/TDD, 10 yıl + sharding, satış portalı, eski/ yeniden yapılanma, Claude↔Codex senkron, Mükellef Takip arşiv
 metadata:
   type: project
 ---
 
-Klasör: mert/eworks (belgeler `hkazaz/eworks/05-hedef-mimari/`)
+Belgeler: `docs/hedef-mimari/` (karar tablosu 01), karar kaydı `docs/adr/karar-kaydi.md`.
 
 Hakan, Eworks portalının (Mükellef Takip'ten **ayrı** ürün) yüzlerce kullanıcılı, ofis → müşavir → mükellef çok kiracılı SaaS'a dönüşmesine 2026-10-23/24'te şu kararlarla yön verdi:
 
@@ -20,13 +20,14 @@ Hakan, Eworks portalının (Mükellef Takip'ten **ayrı** ürün) yüzlerce kull
 - **Mükellef girişi:** Mükellefler portala girer.
 - **PDF saklama:** 7 gün (parametre), parçalı temizlik + yönetici toplu temizliği.
 - **Kaynaklar:** Servisler kaynak sınırlı çalışır; büyük veri parçalı işlenir. Robot kapasitesini CPU değil **istek bütçesi** belirler.
-- **Kod yapısı:** DDD (D20–D22). 11 bounded context (`identity-access`, `organization`, `portfolio`, `credentials`, `sync`, `tax-filing`, `social-security`, `documents`, `workspace`, `notifications`, `audit`) + Python `integration` ACL. Her bağlam aynı adla `packages/contexts/<ctx>`, `apps/web/src/features/<ctx>`, `app/api/<ctx>`, DB şeması ve testte görünür. Alan kuralı yalnız TS'tedir; Python alan tablolarına yazmaz.
-- **TDD:** Özellik ağacı = yetki ağacı (`packages/feature-registry`). Testler `@F:anahtar` ile etiketlenir, durum CI'da hesaplanır. Ön yüzde tamamlanmayan modül/sayfa/buton **kırmızıdır** ve **tüm ortamlarda tüm kullanıcılara görünür** (D30). Uygulanmamış işlem 501 döner.
+- **Kod yapısı:** DDD (D20–D22). 12 bounded context (`identity-access`, `organization`, `portfolio`, `credentials`, `sync`, `tax-filing`, `social-security`, `documents`, `workspace`, `notifications`, `audit`, `sales`) + Python `integration` ACL. Her bağlam aynı adla `packages/contexts/<ctx>`, `apps/web/src/features/<ctx>`, `app/api/<ctx>`, DB şeması ve testte görünür. Alan kuralı yalnız TS'tedir; Python alan tablolarına yazmaz.
+- **TDD:** Özellik ağacı = yetki ağacı (`packages/feature-registry`). Testler `@F:anahtar` ile etiketlenir, durum test sonuçlarından hesaplanır (`pnpm features`). Ön yüzde tamamlanmayan modül/sayfa/buton **kırmızıdır** ve **tüm ortamlarda tüm kullanıcılara görünür** (D30). Uygulanmamış işlem 501 döner.
 - **Veri:** İş verisi **10 yıl** saklanır (devirde eski ofisteki veri dahil). **Sharding baştan** (D24): kontrol düzlemi (GoTrue, ofis dizini, `shard_map`, VKN tekilliği, satış) + `org_id` ile kiracı shard'ları (16 mantıksal / 2 fiziksel başlangıç, shard başına PostgREST). Shard içinde zamana göre bölümleme. Şema Citus'a hazır (PK `(org_id, id)`).
 - **Ölçek ve hız:** 500 ofis, hesap başına 60 istek/dk, gece 20:00–09:00. Başlangıç hızı 60 istek/dk (D25; 30'un yerine).
-- **Satış portalı:** Yeni yapıda `apps/sales` (ADR 0009 deseni). Ofis, müşavir ve mükellef hesapları satıştan açılır, mükellef onayı satış sözleşmesiyle alınır.
-- **Depo:** Tüm klasörler (`mukellef-takip` dahil) `eski/` altına taşınacak, Eworks SaaS depo kökünde kurulacak. Hafıza ve kanca yolları değişecek (`08-depo-yeniden-yapilanmasi.md`). 2026-10-24 itibarıyla **yalnız plan**. Veri taşıma yok; `mert/eworks` revize edilen proje.
-- **Ajan bağlamı (D31):** Yeni yapıda da Claude/Codex hafızası git'te. Tek kaynak: `CLAUDE.md`, `docs/ai`, `docs/ai/memory`, `docs/ai/beceriler`. `tools/ajan/senkron.mjs`, `AGENTS.md`'nin üretilen bloklarını (okuma listesi, hafıza dizini, akış), `MEMORY.md` dizinini ve iki aracın becerilerini üretir. Tetikler: git kancaları (post-merge, pre-commit, pre-push), Claude kancaları ve Codex `AGENTS.md` talimatı. `bitir` her iki tarafı da günceller (`09-yapay-zeka-ajan-baglami.md`).
+- **Satış portalı:** `apps/sales` (ADR 0009 deseni). Ofis, müşavir ve mükellef hesapları satıştan açılır, mükellef onayı satış sözleşmesiyle alınır.
+- **Depo (D28):** Tüm eski klasörler `eski/` altında, Eworks SaaS depo kökünde — **2026-10-24'te uygulandı** ([[eworks-yeniden-yapilanma]]). Veri taşıma yok (D29); `eski/mert/eworks` yeniden yapılandırılan projenin kaynağı.
+- **Mükellef Takip (D32, 2026-10-24):** `eski/mukellef-takip` **arşivdir**; geliştirme sürmez, CI (`.github/workflows/mukellef-takip.yml`) yalnız elle tetiklenir.
+- **Ajan bağlamı (D31):** Claude/Codex hafızası git'te. Tek kaynak: `CLAUDE.md`, `docs/ai`, `docs/ai/memory`, `docs/ai/beceriler`. `tools/ajan/senkron.mjs` `AGENTS.md`'yi, `MEMORY.md` dizinini ve becerileri üretir. Tetikler: git kancaları (`tools/git-hooks`), Claude kancaları, Codex `AGENTS.md` talimatı. `bitir` her iki tarafı da günceller ([[ajan-senkron-betikleri]]).
 
 **Why:** Hedef, binlerce kurum hesabını IP engellenmeden ve kullanıcı kurulumu olmadan yönetmek; kararlar tek tek kullanıcıyla netleşti ve bazıları önceki önerilerin (masaüstü ajanı, Mükellef Takip'e veri kaynağı olma) yerine geçti.
-**How to apply:** Eworks tasarım/kod işinde bu kararları yeniden tartışma; ayrıntı ve gerekçe için `05-hedef-mimari/` ve `K-13…K-38`. Yeni SaaS kodu yazılırken önce `06-kaynak-kod-yapisi-ddd-tdd.md`. Hesap başına IP rotasyonu yeniden istenirse K-22 gerekçesini hatırlat. Mükellef Takip'in "otomatik GİB girişi yok" kuralı yalnız Mükellef Takip için geçerlidir, Eworks'e taşınmaz. Açık konular: [[eworks-acik-konular]]; belge yerleri: [[eworks-dokumantasyonu]].
+**How to apply:** Eworks tasarım/kod işinde bu kararları yeniden tartışma; ayrıntı ve gerekçe için `docs/hedef-mimari/` ve `K-13…K-39`. Yeni SaaS kodu yazılırken önce `06-kaynak-kod-yapisi-ddd-tdd.md` ve `docs/ai/test.md`. Hesap başına IP rotasyonu yeniden istenirse K-22 gerekçesini hatırlat. Mükellef Takip'in "otomatik GİB girişi yok" kuralı yalnız Mükellef Takip için geçerlidir, Eworks'e taşınmaz. Açık konular: [[eworks-acik-konular]]; belge yerleri: [[eworks-dokumantasyonu]].

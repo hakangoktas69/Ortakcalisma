@@ -34,10 +34,11 @@
 | D25 | **(24.10)** Kurum istek hızı **60 istek/dk ile başlar** (D11'deki 30'un yerine); hatasızken artar, bağlantı hatasında düşer. |
 | D26 | **(24.10)** Ölçek varsayımı: **500 ofis**, hesap başına **60 istek/dk**, gece penceresi **20:00–09:00** ([5.3](03-kaynak-verimliligi-ve-kapasite.md)). |
 | D27 | **(24.10)** **Satış portalı** (`eski/mukellef-takip/satis` deseni) yeni yapının içindedir; **ofis, müşavir ve mükellef hesapları satış portalından açılır**; mükellef onayı satış sözleşmesiyle alınır ([5.8 §2](08-depo-yeniden-yapilanmasi.md#2-satış-portalı-d27)). |
-| D28 | **(24.10)** Depodaki **tüm klasörler `eski/` altına** taşınır, yeni yapı **depo kökünde** kurulur, hafıza/kanca/ekip hafızası yolları güncellenir ([5.8](08-depo-yeniden-yapilanmasi.md)). Şimdilik plan; taşıma ayrı adımda. |
+| D28 | **(24.10)** Depodaki **tüm klasörler `eski/` altına** taşınır, yeni yapı **depo kökünde** kurulur, hafıza/kanca/ekip hafızası yolları güncellenir ([5.8](08-depo-yeniden-yapilanmasi.md)). **Uygulandı (24.10, `yeniden-yapilanma` dalı)**. |
 | D29 | **(24.10)** Sistem canlıda değil: **veri taşıma yok**, doğrudan yeni sistem kullanılır. `eski/mert/eworks` yeniden yapılandırılan projenin kaynağıdır (M-15 kapandı). |
 | D30 | **(24.10)** Kırmızı (tamamlanmamış) özellikler **tüm ortamlarda tüm kullanıcılara** görünür ([5.6 §8.4](06-kaynak-kod-yapisi-ddd-tdd.md#84-ortam-davranışı)). |
 | D31 | **(24.10)** Yeni yapıda da Claude/Codex vb. ajanların **bağlam ve hafıza dosyaları git ile paylaşılır ve sürümlenir**. Claude veya Codex ile yapılan değişiklik öteki aracın dosyalarını **otomatik ve karşılıklı** günceller; iş bitirme betikleri her iki tarafı da kurar ([5.9](09-yapay-zeka-ajan-baglami.md)). |
+| D32 | **(24.10)** **Mükellef Takip arşivdir:** `eski/mukellef-takip` altında geliştirme sürmez; CI iş akışı yalnız elle tetiklenir ([ADR 0001](../adr/0001-depo-yeniden-yapilanmasi.md)). |
 
 ## 1. Hedefler ve kısıtlar
 
@@ -328,13 +329,11 @@ Toplam ≈ 5,5–6 ay.
 ## 10. Açık konular
 
 1. **Hız ve ölçek tutarlılığı:** 500 ofis ≈ 750.000 hesap. Gece penceresinde hepsini taramak için gereken toplam hız, 60 istek/dk başlangıç hızının çok üzerinde ([5.3 §1a](03-kaynak-verimliligi-ve-kapasite.md#1a-500-ofis-ölçeğinde-hesap-d26)). Netleşmesi gerekenler: "hesap başına 60 istek/dk" ile "60 istek/dk ile başla" kapsamları (toplam mı, kurum mu, servis mi robot mu, hesap mı?) ve web servis analizinden çıkacak kurum servis limitleri.
-2. **Mükellef Takip'in `eski/` sonrası durumu:** geliştirmesi sürecek mi, arşiv mi? CI'ı buna göre ([5.8 §5](08-depo-yeniden-yapilanmasi.md#5-karar-bekleyenler)).
-3. **Depo taşımasının tarihi ve ekip duyurusu** ([5.8 §4](08-depo-yeniden-yapilanmasi.md#4-uygulama-adımları-onaydan-sonra)).
-4. **Shard başlangıç donanımı:** 2 fiziksel shard sunucusu + kontrol düzlemi önerisi ([5.7 §2.3](07-veri-saklama-ve-sharding.md#23-shard-sayısı-ve-büyüme)).
+2. **Shard başlangıç donanımı:** 2 fiziksel shard sunucusu + kontrol düzlemi önerisi ([5.7 §2.3](07-veri-saklama-ve-sharding.md#23-shard-sayısı-ve-büyüme)).
 
 Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri analiz ediliyor (Hakan, 24.10).
 
-Kapanan konular (24.10): pilot hızı (D11 → D25), mükellef erişimi (D12), SGK kapsamı (D13), çıkış IP'si (D14), PDF saklama (D15), müşavir–mükellef ilişkisi (D16), yetki modeli (D17), hesap kullanımı (D18), web servis/robot (D19), mükellef onay biçimi (satış sözleşmesi, D27), devirde veri saklama (10 yıl, D23; itiraz süresi parametre, varsayılan 7 gün), kurumdan izin (web servis analizinde), kaynak gerçeği (D29), Claude bağlamının yeri (D28), geçiş planı (D29), yeni kodun yeri (D28), pilotta kırmızılar (D30).
+Kapanan konular (24.10): pilot hızı (D11 → D25), mükellef erişimi (D12), SGK kapsamı (D13), çıkış IP'si (D14), PDF saklama (D15), müşavir–mükellef ilişkisi (D16), yetki modeli (D17), hesap kullanımı (D18), web servis/robot (D19), mükellef onay biçimi (satış sözleşmesi, D27), devirde veri saklama (10 yıl, D23; itiraz süresi parametre, varsayılan 7 gün), kurumdan izin (web servis analizinde), kaynak gerçeği (D29), Claude bağlamının yeri (D28), geçiş planı (D29), yeni kodun yeri (D28), pilotta kırmızılar (D30), Mükellef Takip'in durumu (arşiv, D32), depo taşıma tarihi (24.10, duyuru önceden yapıldı). Güncel açık konu listesi: [docs/ai/durum.md](../ai/durum.md).
 
 ## 11. IP sahteciliği hakkında (D14)
 
