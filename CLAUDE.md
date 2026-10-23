@@ -6,8 +6,8 @@ Mali müşavir portalı üzerinde çalışan ekip üyelerinin klasörleri. Her k
 |---|---|---|
 | `mukellef-takip/` | Mükellef Takip — NestJS + Next.js + Chrome eklentisi, DDD modüler monolit, Docker (ana proje) | `mukellef-takip/CLAUDE.md` |
 | `hakan/` | Hakan'ın kişisel çalışma klasörü | — |
-| `mert/eworks` | Eworks portalı + Python GİB robotu (Supabase) | — |
-| `hkazaz/` | Analiz dokümanları, iki projenin Docker denemeleri | — |
+| `mert/eworks` | Eworks portalı + Python GİB robotu (Supabase) | `hkazaz/eworks/CLAUDE.md` (çalışmadan önce oku) |
+| `hkazaz/` | Analiz dokümanları, Eworks dokümantasyonu (`hkazaz/eworks/`), iki projenin Docker denemeleri | — |
 | `yunus/` | — | — |
 
 Bir projede çalışırken o projenin `CLAUDE.md`'si ve `docs/ai/` belgeleri esastır (proje klasöründe çalışıldığında otomatik yüklenir).

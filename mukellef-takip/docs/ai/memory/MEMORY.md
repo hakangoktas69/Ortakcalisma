@@ -4,3 +4,4 @@
 - [Docker demo yığını](docker-demo-yigini.md) — tüm Docker dosyaları infra/docker'da; demo = compose.demo.yml / npm run stack:demo (yalnız Docker, :3000, RLS etkin)
 - [Ajan senkron betikleri](ajan-senkron-betikleri.md) — tools/ajan/{claude,codex}.ps1: guncelle işe başlarken, bitir push'tan önce; Claude'da kancalar yapar, Codex'te bitir elle
 - [Node 24 gerekli](node-24-gerekli.md) — Prisma 7 eski Node'da çalışmaz; yerel Node eskiyse npm/test komutlarını node:24 container'da veya npm run verify ile koş
+- [Eworks dokümantasyonu](eworks-dokumantasyonu.md) — [mert/eworks] belgeler + Claude bağlamı hkazaz/eworks/CLAUDE.md; risk kimlikleri G-NN/M-NN
