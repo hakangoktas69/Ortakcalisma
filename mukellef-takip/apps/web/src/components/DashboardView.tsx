@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertOctagon, ArrowUpRight, CalendarClock, CheckCircle2, ChevronRight, Clock, Inbox, Stethoscope, type LucideIcon } from "lucide-react";
+import { AlertOctagon, ArrowUpRight, BarChart3, Bell, CalendarClock, CheckCircle2, ChevronRight, Clock, Inbox, ListChecks, Stethoscope, type LucideIcon } from "lucide-react";
 import { api, formatDate, type DashboardSummary, type Me } from "@/lib/api";
 import { StatusBars, StatusLegend } from "./StatusBars";
 
@@ -86,11 +86,18 @@ function buildTasks(d: DashboardSummary, now: Date): Task[] {
 }
 
 /* Ortak yüzey: ince kenarlık + yumuşak zemin. Tek tip ağır gölgeli kart yerine sakin panel. */
-function Panel({ title, action, children, className = "" }: { title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
+function Panel({ title, icon: Icon, action, children, className = "" }: { title: string; icon?: LucideIcon; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
     <section className={`rounded-2xl border border-slate-200 bg-white ${className}`}>
       <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-3">
-        <h2 className="text-sm font-bold text-slate-900">{title}</h2>
+        <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+          {Icon && (
+            <span className="flex size-6 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+              <Icon size={14} />
+            </span>
+          )}
+          {title}
+        </h2>
         {action}
       </div>
       <div className="px-5 pb-5">{children}</div>
@@ -208,7 +215,7 @@ export default function DashboardPage() {
               <ArrowUpRight size={18} className="mb-1 text-slate-500 transition group-hover:text-white" />
             </div>
             <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-emerald-400 transition-[width] duration-500" style={{ width: `${pct ?? 0}%` }} />
+              <div className="h-full rounded-full bg-brand-400 transition-[width] duration-500" style={{ width: `${pct ?? 0}%` }} />
             </div>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs">
               <span className="text-slate-300">
@@ -227,9 +234,9 @@ export default function DashboardPage() {
 
       {/* Yapılacaklar + Bu hafta */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <Panel title="Yapılacaklar">
+        <Panel title="Yapılacaklar" icon={ListChecks}>
           {tasks.length === 0 ? (
-            <p className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <p className="flex items-center gap-2 rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-800">
               <CheckCircle2 size={18} /> Süresi yaklaşan ya da geciken bir iş görünmüyor.
             </p>
           ) : (
@@ -255,7 +262,7 @@ export default function DashboardPage() {
           )}
         </Panel>
 
-        <Panel title="Bu hafta" action={<span className="text-xs text-slate-500">Vergi son günleri</span>}>
+        <Panel title="Bu hafta" icon={CalendarClock} action={<span className="text-xs text-slate-500">Vergi son günleri</span>}>
           <ol className="relative ml-1 space-y-4 border-l border-slate-200 pl-5">
             {agenda.map(({ date, events }) => {
               const n = daysUntil(date.toISOString(), now);
@@ -309,6 +316,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel
           title={`Beyanname durumu · ${b.periodLabel}`}
+          icon={BarChart3}
           action={
             <Link href="/beyanname" className="text-sm font-semibold text-brand-700 hover:underline">
               Kontrol ekranı
@@ -330,6 +338,7 @@ export default function DashboardPage() {
 
         <Panel
           title="Son bildirimler"
+          icon={Bell}
           action={data.unreadCount > 0 ? <span className="rounded-full bg-brand-600 px-2 py-0.5 text-xs font-bold text-white">{data.unreadCount} yeni</span> : undefined}
         >
           <ul className="space-y-1">
