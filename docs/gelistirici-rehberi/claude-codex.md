@@ -97,6 +97,7 @@ Sonra Claude Code / Codex'te yeni oturum açın.
 | Belirti | Neden / çözüm |
 |---|---|
 | Claude ekip hafızasını bilmiyor | Kancalar kapalı ya da `node` PATH'te yok. `/hooks` ile bakın; elle: `node tools/claude/session-start.mjs` |
+| VS Code'da `/memory` → "Open auto-memory folder": "…is not one" | Beklenen: eklenti Windows'ta yalnız proje dışındaki hafıza klasörlerini açar. Ekip hafızası bilerek proje içinde; yine yüklenir. Klasörü elle açın: `docs/ai/memory` |
 | "autoMemoryDirectory başka bir dizini gösteriyor" | `settings.local.json`'da bilinçli olmayan bir değer var: satırı silin, kanca doğrusunu yazar |
 | `pre-push` "senkron değil" diyor | `node tools/ajan/senkron.mjs --yaz`, değişiklikleri commitleyin; `AGENTS.md`'ye elle kural yazdıysanız kaynağa taşıyın |
 | Kancalar çalışmıyor | `git config core.hooksPath` → `tools/git-hooks` olmalı: `node tools/ajan/senkron.mjs --kanca-kur` |
