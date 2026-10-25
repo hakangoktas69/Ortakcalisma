@@ -6,6 +6,7 @@ import addFormats from 'ajv-formats';
 import { recordLoginResult, type CredentialRepository } from '@eworks/credentials';
 import { registerDocuments, type DocumentRepository } from '@eworks/documents';
 import { createFirmFromSource, firmsByTaxIds, refreshFirmFromSource, type FirmDeps } from '@eworks/portfolio';
+import { importFilings, type FilingRepository, type SgkFilingRecord } from '@eworks/social-security';
 import { finishJob, recordProgress, type JobRepository } from '@eworks/sync';
 import {
   declarationSummaryText,
@@ -51,6 +52,7 @@ export type UygulayiciDeps = {
   sozlesmeler: ContractRepository;
   beyannameler: DeclarationRepository;
   belgeler: DocumentRepository;
+  sgk: FilingRepository;
   sonucOku: (anahtar: string) => Promise<unknown>;
   /** Uygulanan ham sonuç silinir (02 §9: ham sonuç saklanmaz); silinemezse iş yine tamamlanır. */
   sonucSil: (anahtar: string) => Promise<void>;
@@ -107,7 +109,7 @@ export async function sonucuIsle(ham: unknown, d: UygulayiciDeps): Promise<strin
   if (!m.resultKey || !m.resultKey.startsWith(`org/${m.orgId}/`)) throw new Error('Sonuç anahtarı ofisle eşleşmiyor');
   const sonuc = await d.sonucOku(m.resultKey);
   try {
-    return is.kind === 'gib.beyannameler' ? await beyannameUygula(ctx, m, sonuc, sahip, d) : await sozlesmeUygula(ctx, m, sonuc, sahip, d);
+    return is.kind === 'gib.beyannameler' || is.kind === 'gib.muhsgk' ? await beyannameUygula(ctx, m, sonuc, sahip, d) : await sozlesmeUygula(ctx, m, sonuc, sahip, d);
   } finally {
     await d.sonucSil(m.resultKey).catch(() => {});
   }
@@ -147,11 +149,29 @@ async function beyannameUygula(ctx: { org: string }, m: SonucMesaji, sonuc: unkn
     await finishJob(ctx, m.jobId, 'failed', LISTE_HATASI[k.error] ?? 'Sözleşme listesi uygulanmadı; beyannameler yazılmadı.', d);
     return 'liste_hatasi';
   }
+  const sgk = { bildirim: 0, belge: 0, gecersiz: 0 };
   const x = await importDeclarations(
     ctx,
     { jobId: m.jobId, source: s.sourceType, contracts: s.contracts.contracts, queries: s.queries },
-    { firms: firmaPortu(d.firmalar), declarations: d.beyannameler, documents: belgePortu(d.belgeler) },
+    {
+      firms: firmaPortu(d.firmalar),
+      declarations: d.beyannameler,
+      documents: belgePortu(d.belgeler),
+      // MUHSGK'nın SGK bildirimleri social-security bağlamına (beyanname kanıtla kabul edildikten sonra)
+      onSaved: async (firmId, declarationId, r) => {
+        if (r.type !== 'MUHSGK' || !r.sgk?.length) return;
+        const t = await importFilings(
+          ctx,
+          { firmId, declarationId, parent: r, rows: r.sgk as SgkFilingRecord[], source: s.sourceType, jobId: m.jobId },
+          { filings: d.sgk, documents: { register: (c, docs) => registerDocuments(c, docs.map((z) => ({ ...z, subjectKind: 'sgk_filing' as const })), { repo: d.belgeler }) } },
+        );
+        sgk.bildirim += t.bildirim;
+        sgk.belge += t.belge;
+        sgk.gecersiz += t.gecersiz;
+      },
+    },
   );
-  await finishJob(ctx, m.jobId, 'succeeded', declarationSummaryText(x, s.sourceType), d, { ...x, kaynak: s.sourceType, gozlem: s.observedAt, kapsam: s.scope });
+  const metin = `${declarationSummaryText(x, s.sourceType)}${sgk.bildirim ? ` · ${sgk.bildirim} SGK bildirimi (${sgk.belge} belge)` : ''}${sgk.gecersiz ? ` · ${sgk.gecersiz} SGK listesi doğrulanamadı` : ''}`;
+  await finishJob(ctx, m.jobId, 'succeeded', metin.slice(0, 500), d, { ...x, sgk, kaynak: s.sourceType, gozlem: s.observedAt, kapsam: s.scope });
   return 'uygulandi';
 }

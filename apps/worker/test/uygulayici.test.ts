@@ -58,6 +58,7 @@ function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status']; kin
     } as DeclarationRepository,
     belgeler: { upsert: async (_c: unknown, x: { key: string }) => void belgeler.push(x.key) } as unknown as DocumentRepository,
     sonucOku: async (k) => nesneler.get(k),
+    sgk: { upsert: async () => ({ id: 's' }), list: async () => [], get: async () => null },
     sonucSil: async (k) => void silinen.push(k),
   };
   return { d, is, girisler, firmalar, yazilan, nesneler, beyannameler, belgeler, silinen };
@@ -157,5 +158,29 @@ describe('entegrasyon sonucu uygulayıcı', () => {
     expect(k.is.statusMessage).toContain('3 sorgu · 1 beyanname (1 yeni) · 1 belge');
     expect(k.is.statusMessage).toContain('1 mükellefte Aracılık ve Sorumluluk sözleşmesi yok');
     expect(k.silinen).toEqual([anahtar]);
+  });
+
+  it('[F:sgk.ebildirge.sync] MUHSGK sonucu: SGK bildirimleri ve belgeleri social-security ve documents bağlamlarına yazılır', async () => {
+    const k = kur({ kind: 'gib.muhsgk' });
+    const sgkYazilan: string[] = [];
+    k.d.sgk = { upsert: async (_c, _f, _b, r) => (sgkYazilan.push(r.recordId), { id: `s-${r.recordId}` }), list: async () => [], get: async () => null };
+    const l = liste(1);
+    const [a] = l.contracts;
+    const sha = 'c'.repeat(64);
+    k.nesneler.set(anahtar, {
+      schema: 'eworks.gib.declarations.v1', jobId: JOB, sourceType: 'sahte_gib', observedAt: '2026-10-25T10:00:00Z',
+      contracts: { count: l.count, contracts: l.contracts }, scope: { startDate: '2026-09-01', endDate: '2026-09-30' },
+      queries: [{
+        identity: a!.taxNumber, startDate: '2026-09-01', endDate: '2026-09-30', outcome: 'ok', access: { method: 'same_session_contract', contractNumbers: [a!.number] },
+        records: [{ recordId: 'm1', type: 'MUHSGK', periodStart: '2026-08', periodEnd: '2026-08', uploadedAt: '2026-09-20T10:00:00+03:00', taxStatus: 'Onaylandı',
+          sgkStatus: 'Onaylandı', branch: '0', reference: `${a!.taxNumber}_MUHSGK.xml`, referenceType: 'source_filename', documents: [], documentWarnings: [],
+          sgk: [{ recordId: 'sg1', workplace: '1'.repeat(26), period: '2026-08', status: 'Onaylandı', employeeCount: 7, documentWarnings: [],
+            documents: [{ kind: 'sgk_service', key: `org/${ORG}/belgeler/${sha}.pdf`, sha256: sha, size: 900 }] }] }],
+      }],
+    });
+    expect(await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'ok', resultKey: anahtar }, k.d)).toBe('uygulandi');
+    expect(sgkYazilan).toEqual(['sg1']);
+    expect(k.belgeler).toEqual([`org/${ORG}/belgeler/${sha}.pdf`]);
+    expect(k.is.statusMessage).toContain('1 SGK bildirimi (1 belge)');
   });
 });

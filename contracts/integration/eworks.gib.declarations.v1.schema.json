@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://eworks.local/contracts/integration/eworks.gib.declarations.v1.schema.json",
   "title": "GİB e-Beyanname listesi ve belgeleri — ACL sonucu",
-  "description": "Python ACL'in tek GİB oturumunda okuduğu sözleşme listesi (erişim kanıtı) ve kapsamdaki mükellef × ay sorgularının sonuçları. Belgeler S3'te içerik özetiyle (org/<ofis>/belgeler/<sha256>.pdf) saklanır; burada yalnız anahtarları vardır. Uygulayıcı apps/worker'daki tax-filing ve documents use-case'leridir. Eski robotun eworks.gib.review.v1 / eworks.declarations.sync.v1 biçimlerinden türetilmiştir.",
+  "description": "Python ACL'in tek GİB oturumunda okuduğu sözleşme listesi (erişim kanıtı) ve kapsamdaki mükellef × ay sorgularının sonuçları. Belgeler S3'te içerik özetiyle (org/<ofis>/belgeler/<sha256>.pdf) saklanır; burada yalnız anahtarları vardır. MUHSGK satırları SGK bildirimlerini (işyeri × ay, SGK tahakkuk + hizmet listesi, çalışan sayısı) taşır. Uygulayıcı apps/worker'daki tax-filing ve documents use-case'leridir. Eski robotun eworks.gib.review.v1 / eworks.declarations.sync.v1 biçimlerinden türetilmiştir.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -134,6 +134,70 @@
             "type": "string",
             "maxLength": 300
           }
+        },
+        "sgk": {
+          "type": "array",
+          "maxItems": 50,
+          "description": "Yalnız MUHSGK: SGK bildirimleri (işyeri × ay)",
+          "items": {
+            "$ref": "#/$defs/sgkFiling"
+          }
+        }
+      }
+    },
+    "sgkFiling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recordId",
+        "workplace",
+        "period",
+        "status",
+        "documents",
+        "documentWarnings",
+        "employeeCount"
+      ],
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,100}$|^encoded-[0-9a-f]{64}$"
+        },
+        "workplace": {
+          "type": "string",
+          "pattern": "^\\d{17,30}$",
+          "description": "SGK işyeri sicil numarası"
+        },
+        "period": {
+          "$ref": "#/$defs/month"
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "documents": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/document"
+          }
+        },
+        "documentWarnings": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "employeeCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100000,
+          "description": "Hizmet dökümündeki tekil çalışan sayısı; kişi bilgisi ACL dışına çıkmaz"
         }
       }
     }

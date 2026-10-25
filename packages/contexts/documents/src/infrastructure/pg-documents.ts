@@ -3,7 +3,7 @@ import { withCtx, type Client, type Depo, type ShardRouter } from '@eworks/platf
 import type { DocumentKind } from '../domain/document.ts';
 import type { Ctx, DocumentRepository, FileStore, RegisterInput, StoredDocument } from '../application/documents.ts';
 
-const KOLON = `id, firm_id as "firmId", subject_id as "subjectId", kind, sha256, size, storage_key as "storageKey",
+const KOLON = `id, firm_id as "firmId", subject_kind as "subjectKind", subject_id as "subjectId", kind, sha256, size, storage_key as "storageKey",
   stored_at as "storedAt", file_deleted_at as "fileDeletedAt"`;
 
 export class PgDocumentRepository implements DocumentRepository {
@@ -18,9 +18,9 @@ export class PgDocumentRepository implements DocumentRepository {
     await this.tx(ctx, (c) =>
       c.query(
         `insert into documents.files(org_id, firm_id, subject_kind, subject_id, kind, sha256, size, storage_key, source, created_by_job)
-         values ($1, $2, 'declaration', $3, $4, $5, $6, $7, $8, $9)
+         values ($1, $2, $10, $3, $4, $5, $6, $7, $8, $9)
          on conflict (org_id, subject_id, kind, sha256) do update set stored_at = now(), file_deleted_at = null`,
-        [ctx.org, d.firmId, d.subjectId, d.kind, d.sha256, d.size, d.key, d.source, d.jobId],
+        [ctx.org, d.firmId, d.subjectId, d.kind, d.sha256, d.size, d.key, d.source, d.jobId, d.subjectKind ?? 'declaration'],
       ),
     );
   }

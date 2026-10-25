@@ -371,45 +371,45 @@
     "context": null
   },
   "sgk.kontrol.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "social-security"
   },
   "sgk.kontrol": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "social-security"
   },
   "sgk.ebildirge.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "social-security"
   },
   "sgk.ebildirge.download": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "social-security"
   },
   "sgk.ebildirge.sync": {
     "status": "red",
     "green": 0,
     "total": 1,
-    "tests": 0,
+    "tests": 5,
     "context": "social-security"
   },
   "sgk.ebildirge": {
     "status": "red",
-    "green": 0,
+    "green": 2,
     "total": 3,
-    "tests": 0,
+    "tests": 13,
     "context": "social-security"
   },
   "sgk.ise_giris_cikis.view": {
@@ -484,9 +484,9 @@
   },
   "sgk": {
     "status": "red",
-    "green": 0,
+    "green": 3,
     "total": 11,
-    "tests": 0,
+    "tests": 17,
     "context": "social-security"
   },
   "edefter.liste.view": {

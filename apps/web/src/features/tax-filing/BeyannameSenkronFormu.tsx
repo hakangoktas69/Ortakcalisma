@@ -2,14 +2,18 @@
 
 import { IsDurumuSatiri, useKurumIsi, type IsDurumu } from '@/features/sync/KurumIsi.tsx';
 
-// Beyanname senkronu: gönderim (yükleme) ay aralığı + kapsam (tek mükellef ya da sözleşmeli tüm mükellefler).
+// Beyanname / MUHSGK (SGK e-Bildirge) senkronu: gönderim (yükleme) ay aralığı + kapsam (tek mükellef ya da sözleşmeli tüm mükellefler).
 // Kapsamı sunucu yeniden doğrular; yalnız Aracılık ve Sorumluluk sözleşmeli mükellefler sorgulanır.
 export function BeyannameSenkronFormu({
   csrf,
   ilk,
   firmalar,
   varsayilanAy,
+  uc = '/api/sync/beyannameler',
+  dugme = 'Senkronu başlat',
 }: {
+  uc?: string;
+  dugme?: string;
   csrf: string;
   ilk: IsDurumu | null;
   firmalar: { id: string; ad: string }[];
@@ -22,7 +26,7 @@ export function BeyannameSenkronFormu({
       onSubmit={(e) => {
         e.preventDefault();
         const v = new FormData(e.currentTarget);
-        void k.baslat('/api/sync/beyannameler', csrf, { bas: v.get('bas'), bit: v.get('bit'), firmaId: v.get('firma') || null });
+        void k.baslat(uc, csrf, { bas: v.get('bas'), bit: v.get('bit'), firmaId: v.get('firma') || null });
       }}
     >
       <div className="form-satir">
@@ -48,7 +52,7 @@ export function BeyannameSenkronFormu({
       </div>
       <div className="eylemler">
         <button type="submit" className="dugme birincil" disabled={k.bekliyor || k.suruyor}>
-          {k.suruyor ? 'Çalışıyor…' : 'Senkronu başlat'}
+          {k.suruyor ? 'Çalışıyor…' : dugme}
         </button>
       </div>
       <IsDurumuSatiri is={k.is} hata={k.hata} />

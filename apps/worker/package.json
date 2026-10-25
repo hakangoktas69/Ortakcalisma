@@ -14,6 +14,7 @@
     "@eworks/platform": "workspace:*",
     "@eworks/portfolio": "workspace:*",
     "@eworks/sales": "workspace:*",
+    "@eworks/social-security": "workspace:*",
     "@eworks/sync": "workspace:*",
     "@eworks/tax-filing": "workspace:*",
     "ajv": "^8.17.1",

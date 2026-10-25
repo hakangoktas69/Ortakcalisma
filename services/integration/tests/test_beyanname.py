@@ -13,6 +13,7 @@ from eworks_integration.core.captcha import CaptchaCozucu
 from eworks_integration.institutions.gib.beyannameler import (BeyannameHatasi, aylik_kapsam, beyanname_tara, erisim_kaniti, kaynak_kimligi,
                                                               pdf_dogrula, satirlari_dogrula, to_declarations)
 from eworks_integration.institutions.gib.giris import giris_yap
+from eworks_integration.institutions.gib.muhsgk import calisan_sayisi
 from eworks_integration.institutions.gib.sozlesmeler import sozlesme_listesi_oku
 from eworks_integration.transports.robot.tarayici import Tarayici
 from tests.sahte_kurumlar import ebeyanname as sahte_ebyn
@@ -70,6 +71,13 @@ def test_erisim_yalniz_aracilik_ve_sorumluluk_sozlesmesiyle():
     assert k['1234567890']['contractNumbers'] == ['S-1']
 
 
+def test_hizmet_listesinden_calisan_sayisi():
+    k = {'kimlik': '1234567890', 'oid': 'x'}
+    s = {'oid': 'sgk1', 'isyeri': '1' * 26, 'donem': '08/2026'}
+    assert calisan_sayisi(sahte_ebyn.hizmet_pdf(k, s)) == len(sahte_ebyn.calisanlar('1234567890', 'sgk1'))
+    assert calisan_sayisi(sahte_ebyn.pdf(['baska bir belge'])) is None
+
+
 def test_aylik_kapsam_ve_pdf_dogrulama():
     assert aylik_kapsam(date(2026, 8, 15), date(2026, 10, 3)) == [
         (date(2026, 8, 15), date(2026, 8, 31)), (date(2026, 9, 1), date(2026, 9, 30)), (date(2026, 10, 1), date(2026, 10, 3))]
@@ -115,7 +123,16 @@ def test_ayni_oturumda_sozlesme_sonra_beyanname_ve_pdfler(sunucu):
     assert tamam['outcome'] == 'ok' and tamam['access']['contractNumbers'] == [hedef['number']]
     assert sorted(r['recordId'] for r in tamam['records']) == sorted(k['oid'] for k in beklenen)
     assert all({d['kind'] for d in r['documents']} == {'declaration', 'tax_accrual'} for r in tamam['records'])
-    assert len(depo) == 2 * len(beklenen)
+    belge_sayisi = sum(len(r['documents']) + sum(len(x['documents']) for x in r.get('sgk', [])) for r in tamam['records'])
+    assert len(depo) == belge_sayisi
+    # MUHSGK: SGK bildirimleri (işyeri × ay), iki PDF ve hizmet listesinden çalışan sayısı; kişi bilgisi sonuçta yok
+    muhsgk = next(r for r in tamam['records'] if r['type'] == 'MUHSGK')
+    kaynak = next(k for k in beklenen if k['tur'] == 'MUHSGK')
+    assert [(x['workplace'], x['period']) for x in muhsgk['sgk']] == [(s['isyeri'], f"{s['donem'][3:]}-{s['donem'][:2]}") for s in kaynak['sgk']]
+    for x, s in zip(muhsgk['sgk'], kaynak['sgk']):
+        assert {d['kind'] for d in x['documents']} == {'sgk_accrual', 'sgk_service'}
+        assert x['employeeCount'] == len(sahte_ebyn.calisanlar(kaynak['kimlik'], s['oid']))
+    assert not any(t for t, _ in sahte_ebyn.calisanlar(kaynak['kimlik'], kaynak['sgk'][0]['oid']) if t in json.dumps(sorgular))
     if yok:
         assert next(q for q in sorgular if q['identity'] != hedef['taxNumber'])['outcome'] == 'no_access'
     jsonschema.validate(to_declarations(JOB, okunan, kapsam, sorgular, sahte=True), SEMA, format_checker=jsonschema.FormatChecker())

@@ -7,6 +7,7 @@ import { PgDocumentRepository, S3FileStore } from '@eworks/documents';
 import { databaseSchema, Depo, loadConfig, sessionSchema, ShardRouter, storageSchema, taxIdSchema } from '@eworks/platform';
 import { PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portfolio';
 import { PgJobRepository } from '@eworks/sync';
+import { PgFilingRepository } from '@eworks/social-security';
 import { PgContractRepository, PgDeclarationRepository } from '@eworks/tax-filing';
 
 // BFF bağımlılıkları (süreç başına tek örnek). Yapılandırma açılışta doğrulanır; tarayıcıya hiçbir değer gitmez (D5).
@@ -32,6 +33,7 @@ function kur() {
     isler: { jobs: new PgJobRepository(router), newId: randomUUID },
     sozlesmeler: { contracts: new PgContractRepository(router) },
     beyannameler: { declarations: new PgDeclarationRepository(router) },
+    sgk: { filings: new PgFilingRepository(router) },
     belgeler: {
       repo: new PgDocumentRepository(router),
       files: new S3FileStore(new Depo({ endpoint: c.S3_ENDPOINT, bucket: c.S3_BUCKET, accessKey: c.S3_ACCESS_KEY, secretKey: c.S3_SECRET_KEY, region: c.S3_REGION })),

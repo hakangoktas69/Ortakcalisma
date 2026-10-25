@@ -27,6 +27,7 @@ function depo(belgeler: StoredDocument[] = []) {
 const belge = (o: Partial<StoredDocument> = {}): StoredDocument => ({
   id: 'd-1',
   firmId: 'f',
+  subjectKind: 'declaration',
   subjectId: 's',
   kind: 'declaration',
   sha256: sha,

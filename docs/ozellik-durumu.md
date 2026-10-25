@@ -59,13 +59,13 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;e-Tebligat listesi | `tebligat.liste` | — (atanmadı) | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `tebligat.liste.view` | — (atanmadı) | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Güncelle | `tebligat.liste.sync` | — (atanmadı) | 🔴 canlı | 0 |
-| **SGK** | `sgk` | social-security | 🔴 0/11 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;SGK kontrol listesi | `sgk.kontrol` | social-security | 🔴 0/1 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.kontrol.view` | social-security | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;e-Bildirge | `sgk.ebildirge` | social-security | 🔴 0/3 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.ebildirge.view` | social-security | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PDF indir | `sgk.ebildirge.download` | social-security | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.ebildirge.sync` | social-security | 🔴 canlı | 0 |
+| **SGK** | `sgk` | social-security | 🔴 3/11 | 17 |
+| &nbsp;&nbsp;&nbsp;&nbsp;SGK kontrol listesi | `sgk.kontrol` | social-security | 🟢 1/1 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.kontrol.view` | social-security | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;e-Bildirge | `sgk.ebildirge` | social-security | 🔴 2/3 | 13 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.ebildirge.view` | social-security | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PDF indir | `sgk.ebildirge.download` | social-security | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.ebildirge.sync` | social-security | 🔴 canlı | 5 |
 | &nbsp;&nbsp;&nbsp;&nbsp;İşe giriş çıkış | `sgk.ise_giris_cikis` | social-security | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.ise_giris_cikis.view` | social-security | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.ise_giris_cikis.sync` | social-security | 🔴 canlı | 0 |

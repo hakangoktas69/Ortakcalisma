@@ -5,9 +5,12 @@ import { validDocument, type DocumentKind, type NewDocument } from '../domain/do
 
 export type Ctx = { readonly sub?: string; readonly org: string };
 
+export type SubjectKind = 'declaration' | 'sgk_filing';
+
 export type StoredDocument = {
   id: string;
   firmId: string;
+  subjectKind: SubjectKind;
   subjectId: string;
   kind: DocumentKind;
   sha256: string;
@@ -17,7 +20,7 @@ export type StoredDocument = {
   fileDeletedAt: string | null;
 };
 
-export type RegisterInput = NewDocument & { firmId: string; subjectId: string; source: 'gib_live' | 'sahte_gib'; jobId: string };
+export type RegisterInput = NewDocument & { firmId: string; subjectKind?: SubjectKind; subjectId: string; source: 'gib_live' | 'sahte_gib'; jobId: string };
 
 export interface DocumentRepository {
   /** Yoksa ekler; varsa dosyayı yeniden saklanmış sayar (stored_at, file_deleted_at = null). */

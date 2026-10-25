@@ -53,6 +53,9 @@ importers:
       '@eworks/portfolio':
         specifier: workspace:*
         version: link:../../packages/contexts/portfolio
+      '@eworks/social-security':
+        specifier: workspace:*
+        version: link:../../packages/contexts/social-security
       '@eworks/sync':
         specifier: workspace:*
         version: link:../../packages/contexts/sync
@@ -120,6 +123,9 @@ importers:
       '@eworks/sales':
         specifier: workspace:*
         version: link:../../packages/contexts/sales
+      '@eworks/social-security':
+        specifier: workspace:*
+        version: link:../../packages/contexts/social-security
       '@eworks/sync':
         specifier: workspace:*
         version: link:../../packages/contexts/sync
@@ -258,6 +264,13 @@ importers:
       '@eworks/kernel':
         specifier: workspace:*
         version: link:../../kernel
+      '@eworks/platform':
+        specifier: workspace:*
+        version: link:../../platform
+    devDependencies:
+      '@eworks/testing':
+        specifier: workspace:*
+        version: link:../../testing
 
   packages/contexts/sync:
     dependencies:

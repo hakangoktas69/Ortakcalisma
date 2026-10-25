@@ -20,6 +20,8 @@ export type DeclarationRecord = {
   referenceType: 'source_filename' | 'source_record_id';
   documents: { kind: DocumentKind; key: string; sha256: string; size: number }[];
   documentWarnings: string[];
+  /** Yalnız MUHSGK: SGK bildirimleri — social-security bağlamı uygular (tax-filing içeriğini yorumlamaz). */
+  sgk?: unknown[];
 };
 
 export type DocumentKind = 'declaration' | 'tax_accrual' | 'sgk_accrual' | 'sgk_service';

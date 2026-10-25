@@ -54,7 +54,13 @@ export type DeclarationSummary = {
 export async function importDeclarations(
   ctx: Ctx,
   input: { jobId: string; source: 'gib_live' | 'sahte_gib'; contracts: readonly ContractRow[]; queries: readonly DeclarationQuery[] },
-  d: { firms: Pick<FirmPort, 'byTaxIds'>; declarations: DeclarationRepository; documents: DocumentPort },
+  d: {
+    firms: Pick<FirmPort, 'byTaxIds'>;
+    declarations: DeclarationRepository;
+    documents: DocumentPort;
+    /** Kaydedilen her beyanname için (bileşim kökü: MUHSGK'nın SGK bildirimlerini social-security'ye iletir). */
+    onSaved?: (firmId: string, declarationId: string, r: DeclarationRecord) => Promise<void>;
+  },
 ): Promise<DeclarationSummary> {
   const s: DeclarationSummary = { sorgu: input.queries.length, bos: 0, basarisiz: 0, erisim_yok: 0, firma_yok: 0, beyanname: 0, yeni: 0, belge: 0, belge_uyarisi: 0 };
   const firms = new Map((await d.firms.byTaxIds(ctx, [...new Set(input.queries.map((q) => q.identity))])).map((f) => [f.taxId, f]));
@@ -93,6 +99,7 @@ export async function importDeclarations(
           r.documents.map((x) => ({ ...x, firmId: firm.id, subjectId: saved.id, source: input.source, jobId: input.jobId })),
         );
       }
+      if (d.onSaved) await d.onSaved(firm.id, saved.id, r);
     }
   }
   return s;

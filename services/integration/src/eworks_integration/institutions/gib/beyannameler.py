@@ -16,12 +16,14 @@ import io
 import re
 import time
 import unicodedata
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from urllib.parse import unquote, urlsplit
 from zoneinfo import ZoneInfo
 
 from ...transports.robot.tarayici import gib_alani
 from .gezinme import confirm_transition, visible_target
+from .muhsgk import sgk_bildirimleri
 
 TR = ZoneInfo('Europe/Istanbul')
 KOKEN = 'https://ebeyanname.gib.gov.tr'
@@ -38,6 +40,20 @@ SAYAC = re.compile(r'\s*(\d+)\s*-\s*(\d+)\s*/\s*(\d+)\s*')
 
 class BeyannameHatasi(ValueError):
     """Sorgu ya da liste doğrulanamadı; o kapsamın sonucu yazılmaz."""
+
+
+@dataclass(frozen=True)
+class BelgeIstegi:
+    """Hangi belgeler indirilir: beyanname + tahakkuk ve/veya MUHSGK SGK bildirimleri (tahakkuk + hizmet listesi)."""
+    kaydet: object
+    beyanname: bool = True
+    sgk: bool = True
+
+
+def belge_istegi(deger) -> BelgeIstegi | None:
+    if deger is None or isinstance(deger, BelgeIstegi):
+        return deger
+    return BelgeIstegi(deger)
 
 
 def sade(metin: str) -> str:
@@ -407,7 +423,15 @@ async def _sayfalari_oku(context, cerceve, kimlik, esler, bas, bit, belge_kaydet
             if kayit['recordId'] in gorulen:
                 raise BeyannameHatasi('Sayfalarda mükerrer kayıt.')
             gorulen.add(kayit['recordId'])
-            kayit['documents'], kayit['documentWarnings'] = (await belgeleri_indir(context, cerceve, kayit, belge_kaydet)) if belge_kaydet else ([], [])
+            istek = belge_istegi(belge_kaydet)
+            kayit['documents'], kayit['documentWarnings'] = (
+                (await belgeleri_indir(context, cerceve, kayit, istek.kaydet)) if istek and istek.beyanname else ([], []))
+            if istek and istek.sgk and kayit['type'] == 'MUHSGK':
+                try:
+                    kayit['sgk'] = await sgk_bildirimleri(context, cerceve, kayit, istek.kaydet, pdf_yakala, pdf_dogrula, kaynak_kimligi)
+                except ValueError as e:
+                    # SGK detayı okunamazsa beyanname satırı yine yazılır; SGK kısmı uyarıyla boş kalır
+                    kayit['documentWarnings'].append(f'SGK bildirimleri: {str(e)[:200]}')
             kayit.pop('_ham')
             kayitlar.append(kayit)
         if son == toplam:

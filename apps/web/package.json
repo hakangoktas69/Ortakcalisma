@@ -17,6 +17,7 @@
     "@eworks/kernel": "workspace:*",
     "@eworks/platform": "workspace:*",
     "@eworks/portfolio": "workspace:*",
+    "@eworks/social-security": "workspace:*",
     "@eworks/sync": "workspace:*",
     "@eworks/tax-filing": "workspace:*",
     "ioredis": "^5.8.2",

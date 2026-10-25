@@ -20,6 +20,7 @@ import {
 } from '@eworks/platform';
 import { PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portfolio';
 import { failStaleJobs, PgJobRepository } from '@eworks/sync';
+import { PgFilingRepository } from '@eworks/social-security';
 import { PgContractRepository, PgDeclarationRepository } from '@eworks/tax-filing';
 import { sonucuIsle, type UygulayiciDeps } from './uygulayici.ts';
 
@@ -59,6 +60,7 @@ export async function main(env = process.env) {
     sozlesmeler: new PgContractRepository(router),
     beyannameler: new PgDeclarationRepository(router),
     belgeler: new PgDocumentRepository(router),
+    sgk: new PgFilingRepository(router),
     sonucOku: (k) => depo.json(k),
     sonucSil: (k) => depo.sil(k),
   };

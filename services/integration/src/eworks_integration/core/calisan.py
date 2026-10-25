@@ -16,7 +16,7 @@ import psycopg
 from playwright.async_api import async_playwright
 from redis import asyncio as aioredis
 
-from ..institutions.gib.beyannameler import BeyannameHatasi, beyanname_tara, to_declarations
+from ..institutions.gib.beyannameler import BelgeIstegi, BeyannameHatasi, beyanname_tara, to_declarations
 from ..institutions.gib.giris import GirisBasarisiz, YanlisSifre, giris_yap
 from ..institutions.gib.sozlesmeler import ListeHatasi, sozlesme_listesi_oku, to_contract
 from ..transports.robot.tarayici import Tarayici
@@ -27,7 +27,7 @@ from .hiz import HizSinirlayici
 EXCHANGE, DLX = 'eworks', 'eworks.dlx'
 ROBOT_GIB, SONUC, DLQ = 'robot.gib', 'entegrasyon.sonuc', 'eworks.dlq'
 ARGUMANLAR = {'x-queue-type': 'quorum', 'x-dead-letter-exchange': DLX, 'x-delivery-limit': 5}
-TURLER = ('gib.sozlesmeler', 'gib.beyannameler')
+TURLER = ('gib.sozlesmeler', 'gib.beyannameler', 'gib.muhsgk')
 UUID = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 
 log = logging.getLogger('eworks.entegrasyon')
@@ -100,7 +100,7 @@ class Calisan:
                     ana = await giris_yap(await ctx.new_page(), kimlik, self.cozucu, ilerleme)
                     await ilerleme('Giriş yapıldı; sözleşme listesine gidiliyor.')
                     kayitlar = await sozlesme_listesi_oku(ctx, ilerleme)
-                    if kind == 'gib.beyannameler':
+                    if kind in ('gib.beyannameler', 'gib.muhsgk'):
                         await ilerleme(f'{len(kayitlar)} sözleşme okundu; e-Beyanname uygulamasına geçiliyor.')
 
                         async def belge_kaydet(ozet: str, ham: bytes) -> str:
@@ -108,11 +108,13 @@ class Calisan:
                             anahtar_pdf = f'org/{org}/belgeler/{ozet}.pdf'
                             await asyncio.to_thread(self.s3.put_object, Bucket=self.a.s3_bucket, Key=anahtar_pdf, Body=ham, ContentType='application/pdf')
                             return anahtar_pdf
-                        sorgular = await beyanname_tara(ctx, ana, kayitlar, params, belge_kaydet, ilerleme)
+                        # MUHSGK işi (SGK e-Bildirge toplu güncelleme) yalnız SGK tahakkuk + hizmet listesini indirir
+                        istek = BelgeIstegi(belge_kaydet, beyanname=kind == 'gib.beyannameler', sgk=True)
+                        sorgular = await beyanname_tara(ctx, ana, kayitlar, params, istek, ilerleme)
                 finally:
                     await ctx.close()
             anahtar = f'org/{org}/sonuc/{job}.json'
-            sonuc = (to_declarations(job, kayitlar, params, sorgular, bool(self.a.sahte_gib)) if kind == 'gib.beyannameler'
+            sonuc = (to_declarations(job, kayitlar, params, sorgular, bool(self.a.sahte_gib)) if kind in ('gib.beyannameler', 'gib.muhsgk')
                      else to_contract(job, kayitlar, bool(self.a.sahte_gib)))
             govde = json.dumps(sonuc, ensure_ascii=False).encode('utf-8')
             await asyncio.to_thread(self.s3.put_object, Bucket=self.a.s3_bucket, Key=anahtar, Body=govde, ContentType='application/json')

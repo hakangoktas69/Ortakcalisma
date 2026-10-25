@@ -15,5 +15,6 @@ export {
   type OpenError,
   type RegisterInput,
   type StoredDocument,
+  type SubjectKind,
 } from './application/documents.ts';
 export { PgDocumentRepository, S3FileStore } from './infrastructure/pg-documents.ts';
