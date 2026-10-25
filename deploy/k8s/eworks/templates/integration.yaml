@@ -17,10 +17,15 @@ spec:
           image: {{ include "eworks.image" (dict "root" . "name" "eworks/integration") }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
-            - secretRef: { name: {{ .Values.secrets.existing }} }
+            - secretRef: { name: {{ .Values.secrets.integration }} }
           resources: {{- toYaml .Values.integration.resources | nindent 12 }}
           {{- include "eworks.guvenlik" . | nindent 10 }}
           volumeMounts:
             - { name: tmp, mountPath: /tmp }
+            # Başsız Chromium: yazılabilir ev dizini ve paylaşımlı bellek (salt okunur kök dosya sistemi)
+            - { name: home, mountPath: /home/pwuser }
+            - { name: shm, mountPath: /dev/shm }
       volumes:
         - { name: tmp, emptyDir: {} }
+        - { name: home, emptyDir: {} }
+        - { name: shm, emptyDir: { medium: Memory, sizeLimit: 512Mi } }

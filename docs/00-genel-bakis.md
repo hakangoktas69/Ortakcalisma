@@ -19,5 +19,5 @@ Eworks, mali müşavir ofislerinin kurum (GİB, SGK) verilerini müşavirin ve m
 | [baglamlar/](baglamlar/README.md) | Bounded context sayfaları |
 | [ozellik-durumu.md](ozellik-durumu.md) | Modül → sayfa → işlem, kırmızı/yeşil (üretilir) |
 | [ai/](ai/vizyon.md) | Ajan bağlamı; [ai/memory/](ai/memory/MEMORY.md) ekip hafızası; `ai/beceriler/` beceri kaynakları |
-| [gelistirici-rehberi/](gelistirici-rehberi/claude-codex.md) | Claude Code ve Codex ile çalışma, ekip senkronu |
+| [gelistirici-rehberi/](gelistirici-rehberi/claude-codex.md) | Claude Code ve Codex ile çalışma, ekip senkronu; [canlı GİB doğrulaması](gelistirici-rehberi/canli-dogrulama.md) |
 | [arsiv/mevcut-durum/](arsiv/mevcut-durum/README.md) | Eski Eworks pilotunun analizi (yalnız referans) |

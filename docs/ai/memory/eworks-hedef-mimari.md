@@ -1,6 +1,6 @@
 ---
 name: eworks-hedef-mimari
-description: Eworks çok kiracılı SaaS hedef mimarisi kararları D1–D35 (2026-10-23/25, Hakan) — Next.js BFF, web servis birincil/robot yedek, istek/dk sınırı, hiyerarşik yetki, DDD/TDD, 10 yıl + sharding, satış portalı, eski/ yeniden yapılanma, Claude↔Codex senkron; Mükellef Takip arşiv; canlı doğrulama koşulu, shard'a doğrudan pg, S3 = SeaweedFS
+description: Eworks çok kiracılı SaaS hedef mimarisi kararları D1–D36 (2026-10-23/25, Hakan) — Next.js BFF, web servis birincil/robot yedek, istek/dk sınırı, hiyerarşik yetki, DDD/TDD, 10 yıl + sharding, satış portalı, eski/ yeniden yapılanma, Claude↔Codex senkron; Mükellef Takip arşiv; canlı doğrulama koşulu, shard'a doğrudan pg, S3 = SeaweedFS, beyanname/SGK aynı oturum sözleşme kanıtıyla
 metadata:
   type: project
 ---
@@ -30,7 +30,8 @@ Hakan, Eworks portalının (Mükellef Takip'ten **ayrı** ürün) yüzlerce kull
 - **Canlı doğrulama (D33, 2026-10-25):** Kurumla konuşan özellik (`live: true`: GİB sözleşme güncelleme, beyanname senkronu, SGK senkronları) sahte GİB testleri geçse de `packages/feature-registry/canli-dogrulamalar.json` kaydı girilene kadar kırmızıdır. Canlı koşu Hakan'ın hesabıyla, oturuma katılarak yapılır.
 - **Shard erişimi (D34):** PostgREST yok; BFF/işçi shard'a `pg` ile bağlanır, her işlemde `set local role authenticated` + `request.jwt.claims`. Yardımcılar `app.uid()`, `app.active_org()`, `app.is_system(org)` (yalnız `eworks_worker` oturumunda). `supabase/postgres` imajında `auth.uid()` bu claim'den dolmadı (2026-10-25 denemesi), bu yüzden kullanılmaz.
 - **Nesne deposu (D35):** S3 uyumlu; Compose'da SeaweedFS (MinIO imajları Docker Hub'dan kalktı).
+- **Beyanname/SGK erişim kanıtı (D36, 2026-10-25):** Robot önce sözleşme listesini okur; e-Beyanname ve MUHSGK SGK bildirimleri yalnız aynı oturumda geçerli "Aracılık ve Sorumluluk" sözleşmesi olan mükellef için alınır, işçi yeniden denetler. Hizmet listesinden yalnız çalışan sayısı çıkar (kişi bilgisi ACL dışına çıkmaz).
 - **Ajan bağlamı (D31):** Claude/Codex hafızası git'te. Tek kaynak: `CLAUDE.md`, `docs/ai`, `docs/ai/memory`, `docs/ai/beceriler`. `tools/ajan/senkron.mjs` `AGENTS.md`'yi, `MEMORY.md` dizinini ve becerileri üretir. Tetikler: git kancaları (`tools/git-hooks`), Claude kancaları, Codex `AGENTS.md` talimatı. `bitir` her iki tarafı da günceller ([[ajan-senkron-betikleri]]).
 
 **Why:** Hedef, binlerce kurum hesabını IP engellenmeden ve kullanıcı kurulumu olmadan yönetmek; kararlar tek tek kullanıcıyla netleşti ve bazıları önceki önerilerin (masaüstü ajanı, Mükellef Takip'e veri kaynağı olma) yerine geçti.
-**How to apply:** Eworks tasarım/kod işinde bu kararları yeniden tartışma; ayrıntı ve gerekçe için `docs/hedef-mimari/` ve `K-13…K-42`. Yeni SaaS kodu yazılırken önce `06-kaynak-kod-yapisi-ddd-tdd.md` ve `docs/ai/test.md`. Hesap başına IP rotasyonu yeniden istenirse K-22 gerekçesini hatırlat. Mükellef Takip'in "otomatik GİB girişi yok" kuralı yalnız Mükellef Takip için geçerlidir, Eworks'e taşınmaz. Açık konular: [[eworks-acik-konular]]; belge yerleri: [[eworks-dokumantasyonu]].
+**How to apply:** Eworks tasarım/kod işinde bu kararları yeniden tartışma; ayrıntı ve gerekçe için `docs/hedef-mimari/` ve `K-13…K-43`. Yeni SaaS kodu yazılırken önce `06-kaynak-kod-yapisi-ddd-tdd.md` ve `docs/ai/test.md`. Hesap başına IP rotasyonu yeniden istenirse K-22 gerekçesini hatırlat. Mükellef Takip'in "otomatik GİB girişi yok" kuralı yalnız Mükellef Takip için geçerlidir, Eworks'e taşınmaz. Açık konular: [[eworks-acik-konular]]; belge yerleri: [[eworks-dokumantasyonu]].

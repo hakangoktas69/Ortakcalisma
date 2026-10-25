@@ -1,13 +1,18 @@
 # Compose'daki servislerin Kubernetes karşılığı (04 §1). Veritabanları, Redis, RabbitMQ, S3 ve GoTrue
-# küme dışında yönetilen servis ya da ayrı chart olarak varsayılır; adresleri ve sırları `secrets.existing` içinden gelir.
+# küme dışında yönetilen servis ya da ayrı chart olarak varsayılır; adresleri ve sırları bileşen başına `secrets.*` Secret'larından gelir.
 image:
   registry: ""
   tag: "0.1.0"
   pullPolicy: IfNotPresent
 
+# Bileşen başına önceden oluşturulmuş Secret: her biri yalnız kendi veritabanı rolünü taşır (D34, en az yetki).
+# web: eworks_app; worker + migrate: eworks_worker/eworks_control; integration: eworks_integration (yalnız iş ve sır fonksiyonları).
+# integration Secret'ında GIB_SAHTE_SUNUCU bulunmaz; EWORKS_ORTAM=uretim.
 secrets:
-  # Ortam değişkenlerini taşıyan, önceden oluşturulmuş Secret (CONTROL_DATABASE_URL, SHARD_DATABASE_URLS, JWT_SECRET, …)
-  existing: eworks-env
+  web: eworks-web-env
+  worker: eworks-worker-env
+  integration: eworks-integration-env
+  migrate: eworks-migrate-env
 
 web:
   replicas: 2

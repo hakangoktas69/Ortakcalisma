@@ -17,7 +17,7 @@ spec:
           image: {{ include "eworks.image" (dict "root" . "name" "eworks/worker") }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
-            - secretRef: { name: {{ .Values.secrets.existing }} }
+            - secretRef: { name: {{ .Values.secrets.worker }} }
           resources: {{- toYaml .Values.worker.resources | nindent 12 }}
           {{- include "eworks.guvenlik" . | nindent 10 }}
           volumeMounts:

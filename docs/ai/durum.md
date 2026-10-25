@@ -6,8 +6,8 @@
 
 | Alan | Durum |
 |---|---|
-| Kararlar | D1–D35 alındı ([hedef-mimari/01](../hedef-mimari/01-cok-kiracili-hedef-mimari.md)), karar kaydı K-01…K-42 ([adr/karar-kaydi.md](../adr/karar-kaydi.md)) |
-| Eski portalın portu (2026-10-25, Hakan) | Sürüyor, aşama A–H: altyapı → kimlik/ofis → portföy + kurum hesapları → senkron + Python ACL → beyanname → SGK → çalışma alanı → kapanış. Yeşil kapsam: gerçek akışlar; kurumla konuşanlar canlı doğrulamaya kadar kırmızı (D33) |
+| Kararlar | D1–D36 alındı ([hedef-mimari/01](../hedef-mimari/01-cok-kiracili-hedef-mimari.md)), karar kaydı K-01…K-43 ([adr/karar-kaydi.md](../adr/karar-kaydi.md)) |
+| Eski portalın portu (2026-10-25, Hakan) | **Tamamlandı (aşama A–H)**: eski Eworks portalının çalışan kısımları (giriş, firmalar, kurum hesapları, GİB sözleşmeleri, e-Beyanname + PDF, MUHSGK/SGK, görev/not) yeni yapıda, gerçek akışlarla ve testleriyle. Uygulama: `node tools/deploy/yigin.mjs up` → `http://localhost:8080`. Kurumla konuşan 3 işlem canlı doğrulama bekler: [canli-dogrulama.md](../gelistirici-rehberi/canli-dogrulama.md) |
 | Çalışma alanı (aşama G) | Görevler (oluştur, ata, durum, kapat; iyimser kilit; atama/kapatma denetimli), firma notları (eklenir, değiştirilmez), ana sayfa sayaçları (yetki + kapsamla) ve son kurum işleri. Yeşil: 36 düğüm |
 | SGK (aşama F) | MUHSGK'nın SGK bildirimleri (e-Beyanname içinden): işyeri × ay, durum, hizmet listesinden tekil çalışan sayısı (kişi bilgisi ACL dışına çıkmaz), SGK tahakkuk + hizmet listesi PDF'leri; `social_security.workplace_filings`; e-Bildirge (toplu güncelle: iş türü `gib.muhsgk`) ve SGK kontrol ekranları. Yeşil: 26 düğüm; `sgk.ebildirge.sync` canlı kayıt bekler (D33). SGK'nın kendi sistemleri (işe giriş/çıkış, e-Rapor, iş kazası) bağlanmadı |
 | Beyanname + belgeler (aşama E) | Robot aynı GİB oturumunda sözleşme listesi + e-Beyanname (ay ay sorgu, sayfalama, beyanname/tahakkuk PDF'leri, kurum incelemesi kuralı: yalnız Aracılık ve Sorumluluk sözleşmeli mükellef), sahte e-Beyanname, `tax_filing.declarations`, `documents.files` (içerik özetli S3, denetimli indirme, D15 saklama temizliği). Ekranlar: beyanname senkron/liste/CSV/kontrol/belge, kurum incelemesi. Yeşil: 22 işlem/düğüm; `beyanname.senkron.start` canlı kayıt bekler (D33) |
@@ -17,8 +17,8 @@
 | Altyapı (aşama A) | Compose: kontrol düzlemi (Supabase Postgres + GoTrue), 2 shard (Vault), Redis, RabbitMQ, S3 (SeaweedFS), `migrate` görevi; Helm iskeleti (`helm lint` yeşil, kümede koşulmadı); migration çalıştırıcı, `ShardRouter`, pgTAP koşucusu. Testler: `node tools/deploy/yigin.mjs test` |
 | Depo yeniden yapılanması (D28) | **Uygulandı (2026-10-24, `yeniden-yapilanma` dalı)**: tüm eski klasörler `eski/` altında, yeni iskelet kökte. Ekip pull sonrası `node tools/ajan/eski-yerel-tasi.mjs --uygula` çalıştırır |
 | Mükellef Takip | **Arşiv** (D32): `eski/mukellef-takip`, CI yalnız elle tetiklenir |
-| Kod | Faz 0 iskeleti: `kernel` (TaxId, Period), 12 bağlam paketi (boş), `feature-registry` tam ağaç, `tools/arch`, `tools/features`. Uygulamalar (`apps/*`) ve servisler yalnız iskelet |
-| Özellikler | Bugünkü portalın tüm ekranları + hedef ekranlar kayıtta, **hepsi kırmızı** ([ozellik-durumu.md](../ozellik-durumu.md)) |
+| Kod | Dolu bağlamlar: identity-access, sales (hesap açma), portfolio, credentials, audit, sync, tax-filing, documents, social-security, workspace. Boş: organization (yönetim ekranları), notifications. `apps/web`, `apps/worker`, `services/integration` çalışır; `apps/sales` ekranı yok |
+| Özellikler | 36 düğüm yeşil (gerçek akış + kabul testi); kalanlar kırmızı: canlı doğrulama bekleyen 3 işlem, e-Tebligat, e-Defter, fatura, dilekçe, ödeme, rapor, yönetim, SGK sistemleri, satış portalı ([ozellik-durumu.md](../ozellik-durumu.md)) |
 | Ajan bağlamı | Claude ↔ Codex senkronu (D31) kuruldu: `tools/ajan/senkron.mjs`, git kancaları, ortak hafıza `docs/ai/memory` |
 
 ## Açık konular
@@ -28,6 +28,9 @@
 3. **Bağlama atanmamış portal modülleri:** e-Tebligat, e-Defter, Faturalar, Dilekçeler, Ödeme, Raporlar, Destek ([baglamlar/README.md](../baglamlar/README.md)).
 4. **CODEOWNERS:** bağlam başına sahipler belirlenmedi.
 5. **Codex proje içi beceri desteği** doğrulanmadı; şimdilik `AGENTS.md`'deki beceri eşlemesi kullanılıyor ([09 §7](../hedef-mimari/09-yapay-zeka-ajan-baglami.md#7-geçiş-58deki-taşıma-adımlarına-eklenir)).
+6. **Canlı GİB doğrulaması:** `firmalar.gib_sozlesmeler.sync`, `beyanname.senkron.start`, `sgk.ebildirge.sync` sahte GİB'e karşı geçiyor; canlı koşu Hakan'ın hesabıyla ([canli-dogrulama.md](../gelistirici-rehberi/canli-dogrulama.md)). Canlı GİB güvenlik kodunda ddddocr başarısı bilinmiyor (sahte sunucuda 30/30).
+7. **Bağlamlar arası okuma birleşimleri:** tax-filing, social-security, workspace sorguları firma unvanı için `portfolio.firms` ile birleşir (kural 5'ten sapma). Okuma modeline ya da portfolio API'sine taşınmalı.
+8. **Yönetim ekranları yok:** personel ataması, kişiye özel izin, ofis kullanıcısı daveti, mükellef kullanıcıları — şimdilik yalnız `hesap-ac` komutu.
 
 Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri analizi (Hakan). Sonuç gelince [02 §1a](../hedef-mimari/02-kurum-entegrasyon-robotu.md) `integrations` tablosu ve [03 §1a](../hedef-mimari/03-kaynak-verimliligi-ve-kapasite.md) hesapları güncellenir.
 
@@ -38,3 +41,6 @@ Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri analizi (Ha
 - [x] `supabase/migrations` (control/tenant) + pgTAP koşucusu; `ShardRouter` (aşama A)
 - [x] `services/integration`: sahte GİB sunucusu; GİB girişi, İVD geçişi, sözleşme listesi modülleri taşındı (aşama D). Beyanname ve SGK modülleri E–F aşamalarında
 - [ ] CI: `pnpm features` çıktısının PR'da güncel olduğunun denetimi; pytest sonuçlarının özellik durumuna katılması (pytest yığın testinde koşuyor, JUnit `test-results/pytest.xml`)
+- [x] Eski portalın portu, aşama A–H (2026-10-25)
+- [ ] Canlı GİB doğrulaması (Hakan, açık konu 6)
+- [ ] Yönetim ekranları, `apps/sales`, e-Tebligat, SGK sistemleri, bildirimler

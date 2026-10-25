@@ -42,6 +42,7 @@
 | D33 | **(25.10)** **Kurumla konuşan özellikler canlı doğrulama ister:** sahte kurum sunucusuna karşı kabul testleri geçse bile, Hakan'ın hesabıyla canlı koşu yapılıp `packages/feature-registry/canli-dogrulamalar.json`'a kaydı (tarih, kim, sayılarla sonuç, sürüm) girilene kadar kırmızı kalırlar ([5.6 §8](06-kaynak-kod-yapisi-ddd-tdd.md#8-özellik-durumu-ve-ön-yüzde-kırmızıyeşil-işaretleme-d22)). |
 | D34 | **(25.10)** **Shard erişimi doğrudan `pg` ile:** BFF ve işçi shard'a PostgREST yerine doğrudan bağlanır; RLS her işlemde kullanıcı JWT claim'leriyle (`authenticated` rolü) uygulanır ([5.7 §2.1](07-veri-saklama-ve-sharding.md#21-yönlendirme)). |
 | D35 | **(25.10)** **Nesne deposu S3 uyumlu, Compose'da SeaweedFS:** MinIO topluluk imajları yayından kalktığı için (zorunlu değişiklik). Kod S3 portuna yazılır. |
+| D36 | **(25.10)** **Beyanname ve SGK verisi aynı GİB oturumunda, sözleşme kanıtıyla:** robot önce sözleşme listesini okur; e-Beyanname ve MUHSGK'nın SGK bildirimleri yalnız o listede geçerli "Aracılık ve Sorumluluk" sözleşmesi olan mükellef için sorgulanır, işçi kanıtı yeniden denetler (eski kurum incelemesi kuralı). SGK hizmet listesinden yalnız tekil çalışan sayısı çıkar; kişi bilgisi ACL dışına çıkmaz. SGK'nın kendi sistemleri sonraki fazdır ([baglamlar/tax-filing](../baglamlar/tax-filing.md), [social-security](../baglamlar/social-security.md)). |
 
 ## 1. Hedefler ve kısıtlar
 

@@ -17,6 +17,6 @@ spec:
           image: {{ include "eworks.image" (dict "root" . "name" "eworks/worker") }}
           command: [node, apps/worker/src/migrate.ts]
           envFrom:
-            - secretRef: { name: {{ .Values.secrets.existing }} }
+            - secretRef: { name: {{ .Values.secrets.migrate }} }
           {{- include "eworks.guvenlik" . | nindent 10 }}
 {{- end }}
