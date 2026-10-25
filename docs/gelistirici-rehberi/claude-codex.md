@@ -76,11 +76,24 @@ Claude Code `autoMemoryDirectory` ayarını güvenlik gereği paylaşılan `sett
 
 | Komut (Claude) | Codex | Ne yapar |
 |---|---|---|
+| `/gelistir` | "şunu geliştir", "hatayı düzelt" → `docs/ai/beceriler/gelistir.md` | Kod değiştiren her iş: anla → planla ve uygula → doğrula (aşağıda) |
 | `/oryantasyon` | "projeyi anlat" → `docs/ai/beceriler/oryantasyon.md` | Durum özeti, ortam kontrolü, role göre okuma yolu, ilk iş |
 | `/hafiza <bilgi>` | "hafızaya yaz" → `docs/ai/beceriler/hafiza.md` | Bilgiyi doğru katmana yazar |
 | `/hafiza aktar` · `/hafiza denetle` | aynı dosya | Kişisel hafızayı aktarır · eskimiş kayıtları bulur |
 
 Codex'in proje içi beceri desteği doğrulanana kadar eşleme `AGENTS.md`'nin "Beceriler" bloğundadır ([durum](../ai/durum.md), açık konu).
+
+### Ajana iş verdiğinde ne olur (`gelistir`)
+
+Yazılım bilgisi gerekmez; ajan teknik doğruluk ve güvenlikten sorumludur. Sen işi **iş diliyle** anlat ("müşavir firma listesinde son beyanname tarihini görsün"), ajan üç aşamada çalışır:
+
+| Aşama | Ajan ne yapar | Senden beklenen |
+|---|---|---|
+| **A. Anla** | Hafızayı, durumu, ilgili bağlamı ve benzer çalışan özelliği okur; isteği iş diliyle yeniden anlatır, kimin göreceğini/göremeyeceğini sorar | Anlatımı doğrula, sorulara yanıt ver. Bilmiyorsan "bilmiyorum" de; ajan açık konuya yazar |
+| **B. Planla ve uygula** | Etki, olası hata ve güvenlik analizi; kısa plan; önce kırmızı test, sonra kod; gerekli denetim kaydı ve log | Büyük ya da geri alınması zor işte planı onayla |
+| **C. Doğrula** | Plan ↔ kod ↔ iş kuralı tutarlılığı, `pnpm verify`, yığın testleri, dört ekran boyutunda arayüz testi ve ekran görüntüsü incelemesi | Rapordaki "koşulamadı" maddelerine ve elle bakılacak ekrana göz at |
+
+Ajan bir isteği kural gereği reddederse (ör. testsiz kod, şifreyi loglama, başka ofisin verisini gösterme) gerekçesini ve meşru yolu söyler; ısrar etmek yerine yolu sor. "Hızlıca", "testi sonra" demek adımları atlatmaz.
 
 ## Depo yeniden yapılanmasından sonra (bir kez)
 

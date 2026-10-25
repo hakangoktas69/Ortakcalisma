@@ -1,6 +1,6 @@
 # Durum, açık konular ve sıradaki işler
 
-> İşe başlamadan bu dosyaya bak. Son güncelleme: 2026-10-25. Eski Eworks pilotunun durum ve risk listesi (G-NN, M-NN): [arsiv/mevcut-durum/ai/durum-ve-riskler.md](../arsiv/mevcut-durum/ai/durum-ve-riskler.md).
+> İşe başlamadan bu dosyaya bak. Son güncelleme: 2026-10-26. Eski Eworks pilotunun durum ve risk listesi (G-NN, M-NN): [arsiv/mevcut-durum/ai/durum-ve-riskler.md](../arsiv/mevcut-durum/ai/durum-ve-riskler.md).
 
 ## Durum
 
@@ -19,7 +19,7 @@
 | Mükellef Takip | **Arşiv** (D32): `eski/hakan/mukellef-takip` (2026-10-25'te `eski/mukellef-takip`'ten taşındı; diğer makinelerde `node tools/ajan/eski-yerel-tasi.mjs --uygula` + `npm install`), CI yalnız elle tetiklenir |
 | Kod | Dolu bağlamlar: identity-access, sales (hesap açma), portfolio, credentials, audit, sync, tax-filing, documents, social-security, workspace. Boş: organization (yönetim ekranları), notifications. `apps/web`, `apps/worker`, `services/integration` çalışır; `apps/sales` ekranı yok |
 | Özellikler | 36 düğüm yeşil (gerçek akış + kabul testi); kalanlar kırmızı: canlı doğrulama bekleyen 3 işlem, e-Tebligat, e-Defter, fatura, dilekçe, ödeme, rapor, yönetim, SGK sistemleri, satış portalı ([ozellik-durumu.md](../ozellik-durumu.md)) |
-| Ajan bağlamı | Claude ↔ Codex senkronu (D31) kuruldu: `tools/ajan/senkron.mjs`, git kancaları, ortak hafıza `docs/ai/memory`. DDD/TDD yönlendirmesi (2026-10-25): `gelistir` becerisi, rehberler (`docs/gelistirici-rehberi/{ddd,tdd}*.md`), alt dizin `CLAUDE.md`'leri (`packages/contexts`, `packages/kernel`, `packages/feature-registry`, `services/integration`, `supabase`, `apps/*`); bekçiler: kapsam eşiği `pnpm verify`/CI'da zorunlu (domain + application + kernel), yetki anahtarı rota taraması testi |
+| Ajan bağlamı | Claude ↔ Codex senkronu (D31) kuruldu: `tools/ajan/senkron.mjs`, git kancaları, ortak hafıza `docs/ai/memory`. DDD/TDD yönlendirmesi (2026-10-25): `gelistir` becerisi, rehberler (`docs/gelistirici-rehberi/{ddd,tdd}*.md`), alt dizin `CLAUDE.md`'leri; junior kullanıcı varsayımıyla üç aşamalı `gelistir` akışı (2026-10-26: anla → planla/uygula → tutarlılık, fonksiyonel, dört ekran görsel/UX doğrulaması) (`packages/contexts`, `packages/kernel`, `packages/feature-registry`, `services/integration`, `supabase`, `apps/*`); bekçiler: kapsam eşiği `pnpm verify`/CI'da zorunlu (domain + application + kernel), yetki anahtarı rota taraması testi |
 
 ## Açık konular
 
@@ -33,6 +33,7 @@
 8. **Yönetim ekranları yok:** personel ataması, kişiye özel izin, ofis kullanıcısı daveti, mükellef kullanıcıları — şimdilik yalnız `hesap-ac` komutu.
 9. **ACL kapsam eşiği zorlanmıyor:** "ACL ayrıştırıcıları %90" kuralı için `services/integration`'da pytest kapsam ölçümü yok (TS tarafı `pnpm verify`/CI'da zorlanıyor).
 10. **Keşif kodu ifadesi onay bekliyor:** [tdd.md §5.3](../gelistirici-rehberi/tdd.md#53-netleşmemiş-iş-ve-keşif) "deneme kodu olduğu gibi birleştirilmez" ifadesi kuraldan çıkarım; ekip onayı ya da çıkarılması bekleniyor.
+11. **Web/BFF'te operasyon logu yok (2026-10-26):** ACL JSON olay logu (`gunluk`), işçi `console.error` kullanıyor; `apps/web`'de ortak log yardımcısı yok. Örnek: `apps/web/src/app/api/gorevler/route.ts` (ve benzer `notlar`) her hatayı (veritabanı kesintisi dahil) "Firma bulunamadı" 404'üne katlıyor ve loglamıyor ([kurallar](kurallar.md#kod) "Hata ve log"). Tek log yardımcısı (biçim, kişisel veri süzgeci) ve bu uçların düzeltilmesi bekliyor.
 
 Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri analizi (Hakan). Sonuç gelince [02 §1a](../hedef-mimari/02-kurum-entegrasyon-robotu.md) `integrations` tablosu ve [03 §1a](../hedef-mimari/03-kaynak-verimliligi-ve-kapasite.md) hesapları güncellenir.
 

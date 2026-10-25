@@ -14,9 +14,18 @@ Bu dosya ve içe aktarılan belgeler ekibin ortak bağlamıdır; git'e girer. Ku
 - @docs/ai/test.md — TDD akışı, test katmanları, özellik durumu (kırmızı/yeşil)
 - @docs/ai/durum.md — şu anki durum, açık konular, sıradaki işler (işe başlamadan bak)
 - Hedef mimari (gerekçeler, ayrıntı): `docs/hedef-mimari/01…09`; karar kaydı `docs/adr/karar-kaydi.md` (`K-NN`), kısa liste `D-NN` hedef-mimari/01'de.
-- **Kod değiştirmeden önce** (özellik, uç, ekran, kural, migration, hata düzeltme, refactor): `gelistir` becerisini uygula (`docs/ai/beceriler/gelistir.md`; DDD + TDD adımları). Kavram ve örnekler: [DDD rehberi](docs/gelistirici-rehberi/ddd.md), [TDD rehberi](docs/gelistirici-rehberi/tdd.md).
+- **Kod değiştirmeden önce** (özellik, uç, ekran, kural, migration, hata düzeltme, refactor): `gelistir` becerisini uygula (`docs/ai/beceriler/gelistir.md`): **A)** önce hafıza, yapı ve iş modelini özümse; **B)** etki, hata ve güvenlik analiziyle planla, DDD + TDD ile uygula; **C)** tutarlılık, fonksiyonel ve dört ekran görsel/UX doğrulaması. Kavram ve örnekler: [DDD rehberi](docs/gelistirici-rehberi/ddd.md), [TDD rehberi](docs/gelistirici-rehberi/tdd.md).
 - Bağlam sayfası: bir bağlamda çalışmadan önce `docs/baglamlar/<context>.md`. Alt dizin kuralları: `apps/*`, `packages/contexts`, `packages/kernel`, `packages/feature-registry`, `services/integration`, `supabase` altındaki `CLAUDE.md`.
 - Eski Eworks pilotunun analizi (yalnız referans): `docs/arsiv/mevcut-durum/`.
+
+## Kiminle çalışıyorsun
+
+Ajana iş veren geliştiriciler **junior**dır ve yazılım geliştirmeyi bilmeyebilir. Teknik doğruluk, güvenlik ve test sorumluluğu ajandadır:
+
+- İsteği iş diliyle yeniden anlat ve onay al; belirsizliği tahminle değil, seçenekli kısa sorularla kapat; teknik terimi ilk kullanışta açıkla.
+- Kural çiğneyen isteği yapma; nedenini sade anlat, meşru yolu öner. "Hızlıca", "testi sonra" gibi istekler kuralları ve doğrulamayı askıya almaz.
+- Öncelik: **güvenlik ve sağlamlık → doğruluk → performans**.
+- Raporda neyin doğrulandığını, neyin **doğrulanamadığını** ve kullanıcının elle bakabileceği yeri ayrı yaz.
 
 ## Ekip hafızası ve ajanlar
 

@@ -21,6 +21,7 @@
 - Domain saf: Supabase, Redis, `process.env`, `Date.now()`, rastgele yok — `Clock`/kimlik üreteci portla gelir. Beklenen hata `Result` değeridir.
 - Bağlam dışına yalnız `src/index.ts` açılır; başka bağlamın tablosuna sorgu yok; yan etki olayla (outbox).
 - Kullanıcıya dönen mesaj sabit Türkçe metindir; `String(error)` arayüze verilmez.
+- **Hata ve log:** beklenmeyen hata yalnız sınırda (BFF ucu, işçi tüketicisi, ACL işi) yakalanır; bilinen durum (ör. kapsam dışı → 404) ile altyapı hatası (→ 500) aynı yanıta katlanmaz ve altyapı hatası loglanmadan yutulmaz. İş olayı ve yetki değişikliği denetim kaydına (`audit`), işletim bilgisi (hata, iş süresi, kurum sonuç kodu) operasyon loguna gider. Loga `org_id`, `job_id`, hata kodu, süre, sayı girer; kişisel veri, şifre, token, istek gövdesi, kurum yanıt içeriği girmez.
 - Migration bağlam önekli (`20261101_0001_portfolio__taxpayers.sql`), idempotent; `SECURITY DEFINER` fonksiyonda `search_path = ''` ve tam nitelikli adlar.
 - Python ACL alan paketini import etmez, kurumlar birbirini import etmez (`uv run lint-imports`); çıktı `contracts/` şemasına uyar.
 
