@@ -4,7 +4,8 @@ import { inSegment, validateFirm, type FirmFieldError, type FirmInput, type Firm
 // Firma use-case'leri. Yetki anahtarı BFF'te denetlenir (firmalar.*); görünürlük ve yazma sınırı RLS'tedir (app.can_see_firm).
 // VKN tekilliği iki aşamalı (07 §2.2): kontrol düzleminde rezervasyon → shard'da kayıt → rezervasyon onayı.
 
-export type Ctx = { readonly sub: string; readonly org: string };
+/** Kullanıcı (sub + etkin ofis) ya da işçinin sistem bağlamı (yalnız ofis). */
+export type Ctx = { readonly sub?: string; readonly org: string };
 
 export type Firm = ValidFirm & {
   id: string;
@@ -22,7 +23,9 @@ export interface FirmRepository {
   list(ctx: Ctx, includeArchived: boolean): Promise<Firm[]>;
   get(ctx: Ctx, id: string): Promise<Firm | null>;
   myAdvisor(ctx: Ctx): Promise<string | null>;
-  insert(ctx: Ctx, id: string, advisorId: string, f: ValidFirm): Promise<void>;
+  insert(ctx: Ctx, id: string, advisorId: string, f: ValidFirm, source?: 'manual' | 'gib_contract'): Promise<void>;
+  byTaxIds(ctx: Ctx, taxIds: readonly string[]): Promise<Firm[]>;
+  updateFromSource(ctx: Ctx, id: string, patch: { title?: string; taxOffice?: string | null }): Promise<void>;
   update(ctx: Ctx, id: string, version: number, f: ValidFirm): Promise<'ok' | 'conflict' | 'not_found'>;
   archive(ctx: Ctx, id: string): Promise<boolean>;
   /** Dışa aktarmayı denetim kaydına yazar (ticari gizli veri, security: dışa aktarma kaydı). */
@@ -128,5 +131,42 @@ export const firmsCsv = (firms: readonly Firm[]) =>
     { baslik: 'Grup', deger: (f) => f.groupName },
     { baslik: 'Müşavir', deger: (f) => f.advisorName },
   ]);
+
+/** Kurum kaynağından (GİB sözleşme listesi) gelen mükellef: ofis içinde VKN/TCKN ile eşleşen firmalar. */
+export const firmsByTaxIds = (ctx: Ctx, taxIds: readonly string[], d: Pick<FirmDeps, 'repo'>) => d.repo.byTaxIds(ctx, taxIds);
+
+/**
+ * GİB sözleşme listesinde olup ofiste bulunmayan mükellefi açar (eski mergeGib: tür unvandan çıkarılır, "Onay Bekliyor",
+ * grup "GİB Aktarımı"). VKN başka ofiste aktifse açılmaz ('vkn_kayitli') — tekillik kaynak verisi için de geçerlidir.
+ */
+export async function createFirmFromSource(
+  ctx: Ctx,
+  s: { title: string; taxId: string; taxOffice: string; advisorId: string },
+  d: FirmDeps,
+): Promise<Result<{ id: string }, 'gecersiz' | 'vkn_kayitli'>> {
+  const kind = /LİMİTED|LIMITED/iu.test(s.title) ? 'Limited' : /ANONİM|ANONIM/iu.test(s.title) ? 'Anonim' : s.taxId.length === 11 ? 'Şahıs' : 'Belirtilmedi';
+  const v = validateFirm({ title: s.title, kind, taxId: s.taxId, taxOffice: s.taxOffice, groupName: 'GİB Aktarımı', status: 'Onay Bekliyor' });
+  if (!v.ok) return { ok: false, error: 'gecersiz' };
+  const id = d.newId();
+  const hash = d.hashTaxId(v.value.taxId);
+  if ((await d.registry.reserve(hash, ctx.org, id)) === 'taken') return { ok: false, error: 'vkn_kayitli' };
+  try {
+    await d.repo.insert(ctx, id, s.advisorId, v.value, 'gib_contract');
+  } catch (err) {
+    await d.registry.release(hash, ctx.org, id);
+    throw err;
+  }
+  await d.registry.activate(hash, ctx.org, id);
+  return { ok: true, value: { id } };
+}
+
+/** Kaynak güncellemesi: vergi dairesi her zaman; unvan yalnız kaynaktan açılmış (elle düzenlenmemiş kaynak) kartta. */
+export async function refreshFirmFromSource(ctx: Ctx, f: Firm, s: { title: string; taxOffice: string }, d: Pick<FirmDeps, 'repo'>) {
+  const patch: { title?: string; taxOffice?: string | null } = {};
+  if (s.taxOffice && s.taxOffice !== f.taxOffice) patch.taxOffice = s.taxOffice.slice(0, 120);
+  if (f.source === 'gib_contract' && s.title.trim() && s.title.trim() !== f.title) patch.title = s.title.trim().slice(0, 300);
+  if (Object.keys(patch).length > 0) await d.repo.updateFromSource(ctx, f.id, patch);
+  return Object.keys(patch).length > 0;
+}
 
 export type { FirmInput, FirmKind, FirmStatus, Segment, TaxRegime };

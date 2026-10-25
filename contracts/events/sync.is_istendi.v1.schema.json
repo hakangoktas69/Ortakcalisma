@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eworks.local/contracts/events/sync.is_istendi.v1.schema.json",
+  "title": "Kurum işi istendi — outbox'tan entegrasyona (RabbitMQ: robot.gib)",
+  "description": "Mesajda yalnız kimlikler bulunur (02 §5.1); kapsam ve durum Postgres'te, kimlik bilgisi Vault'ta.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "orgId",
+    "jobId",
+    "kind",
+    "shard"
+  ],
+  "properties": {
+    "orgId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "jobId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "enum": [
+        "gib.sozlesmeler",
+        "gib.beyannameler"
+      ]
+    },
+    "shard": {
+      "type": "string",
+      "pattern": "^shard-[0-9]{2}$",
+      "description": "Outbox taşıyıcısı ekler; ACL bu shard'a entegrasyon rolüyle bağlanır"
+    }
+  }
+}

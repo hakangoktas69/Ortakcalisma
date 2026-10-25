@@ -182,17 +182,17 @@
     "context": "credentials"
   },
   "firmalar.gib_sozlesmeler.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "tax-filing"
   },
   "firmalar.gib_sozlesmeler.sync": {
     "status": "red",
     "green": 0,
     "total": 1,
-    "tests": 0,
+    "tests": 8,
     "context": "tax-filing"
   },
   "firmalar.gib_sozlesmeler.review": {
@@ -204,9 +204,9 @@
   },
   "firmalar.gib_sozlesmeler": {
     "status": "red",
-    "green": 0,
+    "green": 1,
     "total": 3,
-    "tests": 0,
+    "tests": 12,
     "context": "tax-filing"
   },
   "firmalar.devir.start": {
@@ -232,9 +232,9 @@
   },
   "firmalar": {
     "status": "red",
-    "green": 8,
+    "green": 9,
     "total": 15,
-    "tests": 41,
+    "tests": 53,
     "context": "portfolio"
   },
   "beyanname.liste.view": {

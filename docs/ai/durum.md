@@ -8,6 +8,7 @@
 |---|---|
 | Kararlar | D1–D35 alındı ([hedef-mimari/01](../hedef-mimari/01-cok-kiracili-hedef-mimari.md)), karar kaydı K-01…K-42 ([adr/karar-kaydi.md](../adr/karar-kaydi.md)) |
 | Eski portalın portu (2026-10-25, Hakan) | Sürüyor, aşama A–H: altyapı → kimlik/ofis → portföy + kurum hesapları → senkron + Python ACL → beyanname → SGK → çalışma alanı → kapanış. Yeşil kapsam: gerçek akışlar; kurumla konuşanlar canlı doğrulamaya kadar kırmızı (D33) |
+| Senkron + Python ACL (aşama D) | Kurum işi (iş + transactional outbox → RabbitMQ), işçi (outbox taşıyıcı, sonuç uygulayıcı, takılı iş temizliği), Python ACL (Playwright başsız tarayıcı, otomatik güvenlik kodu — ddddocr, Redis GCRA hız sınırı, `*.gib.gov.tr` → sahte GİB yönlendirmesi yalnız demo/test), GİB e-Beyanname sözleşme listesi → firma eşleme/açma, `/firmalar/gib_sozlesmeler`. Yeşil: `firmalar.gib_sozlesmeler.view` (10/107). `firmalar.gib_sozlesmeler.sync` testleri geçer, **canlı GİB kaydı bekler** (D33) |
 | Portföy ve kurum hesapları (aşama C) | Firma kartı (ekle/düzenle/arşivle), liste + CSV, sistem genelinde VKN tekilliği (HMAC), kapsam RLS'i, müşavir/firma GİB hesabı (Vault), hash zincirli denetim kaydı. Yeşil: `firmalar.liste.*`, `firmalar.kart.*`, `firmalar.kurum_hesaplari.view_status/edit_credentials` (9/107) |
 | Kimlik ve web (aşama B) | `apps/web` Next.js 16 (BFF, nonce'lu CSP, HttpOnly oturum, CSRF), GoTrue girişi, rol şablonları + miraslı yetki, ofis/kullanıcı açma komutu (`hesap-ac`), demo hesabı. Yeşil: `oturum.giris.login` |
 | Altyapı (aşama A) | Compose: kontrol düzlemi (Supabase Postgres + GoTrue), 2 shard (Vault), Redis, RabbitMQ, S3 (SeaweedFS), `migrate` görevi; Helm iskeleti (`helm lint` yeşil, kümede koşulmadı); migration çalıştırıcı, `ShardRouter`, pgTAP koşucusu. Testler: `node tools/deploy/yigin.mjs test` |
@@ -32,5 +33,5 @@ Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri analizi (Ha
 - [x] `apps/web` Next.js kurulumu; `FeatureGate`/`FeatureBadge`; ilk kabul testi (aşama B). `apps/sales` ekranı bekliyor
 - [x] Compose yığını ve Helm iskeleti; on-prem Supabase (kontrol düzlemi + 2 shard), RabbitMQ, Redis, S3 (aşama A, 2026-10-25)
 - [x] `supabase/migrations` (control/tenant) + pgTAP koşucusu; `ShardRouter` (aşama A)
-- [ ] `services/integration` için sahte kurum sunucusu; taşınacak Python modülleri (01 §8)
-- [ ] CI: `pnpm features` çıktısının PR'da güncel olduğunun denetimi; pytest/pgTAP sonuçlarının özellik durumuna katılması
+- [x] `services/integration`: sahte GİB sunucusu; GİB girişi, İVD geçişi, sözleşme listesi modülleri taşındı (aşama D). Beyanname ve SGK modülleri E–F aşamalarında
+- [ ] CI: `pnpm features` çıktısının PR'da güncel olduğunun denetimi; pytest sonuçlarının özellik durumuna katılması (pytest yığın testinde koşuyor, JUnit `test-results/pytest.xml`)

@@ -32,6 +32,11 @@ function fakes(opts: { insertFails?: boolean; advisor?: string | null } = {}) {
       return true;
     },
     recordExport: async (_c, count) => void audit.push(count),
+    byTaxIds: async (_c, ids) => [...firms.values()].filter((f) => !f.archivedAt && ids.includes(f.taxId)),
+    updateFromSource: async (_c, id, p) => {
+      const e = firms.get(id)!;
+      firms.set(id, { ...e, ...(p.title ? { title: p.title } : {}), ...(p.taxOffice ? { taxOffice: p.taxOffice } : {}) });
+    },
   };
   const reg: TaxpayerRegistry = {
     reserve: async (h, org, firm) => {

@@ -1,5 +1,5 @@
 import { createHmac } from 'node:crypto';
-import { withUser, type Client, type ShardRouter } from '@eworks/platform';
+import { withCtx, type Client, type ShardRouter } from '@eworks/platform';
 import type { ValidFirm } from '../domain/firm.ts';
 import type { Ctx, Firm, FirmRepository, TaxpayerRegistry } from '../application/firms.ts';
 
@@ -18,7 +18,7 @@ export class PgFirmRepository implements FirmRepository {
     this.router = router;
   }
   private async tx<T>(ctx: Ctx, fn: (c: Client) => Promise<T>) {
-    return withUser(await this.router.poolFor(ctx.org), { sub: ctx.sub, org: ctx.org }, fn);
+    return withCtx(await this.router.poolFor(ctx.org), ctx, fn);
   }
   list(ctx: Ctx, includeArchived: boolean) {
     return this.tx(ctx, async (c) =>
@@ -31,12 +31,12 @@ export class PgFirmRepository implements FirmRepository {
   myAdvisor(ctx: Ctx) {
     return this.tx(ctx, async (c) => (await c.query<{ a: string | null }>('select app.my_advisor($1) as a', [ctx.org])).rows[0]?.a ?? null);
   }
-  async insert(ctx: Ctx, id: string, advisorId: string, f: ValidFirm) {
+  async insert(ctx: Ctx, id: string, advisorId: string, f: ValidFirm, source: 'manual' | 'gib_contract' = 'manual') {
     await this.tx(ctx, (c) =>
       c.query(
         `insert into portfolio.firms(org_id, id, advisor_id, title, kind, tax_id, tax_id_kind, tax_office, city, representative, phone, email,
-           activity_code, activity_name, tax_regime, status, group_name) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
-        [ctx.org, id, advisorId, ...deger(f)],
+           activity_code, activity_name, tax_regime, status, group_name, source) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+        [ctx.org, id, advisorId, ...deger(f), source],
       ),
     );
   }
@@ -52,6 +52,20 @@ export class PgFirmRepository implements FirmRepository {
       const var_ = await c.query('select 1 from portfolio.firms where org_id = $1 and id = $2 and archived_at is null', [ctx.org, id]);
       return var_.rowCount === 1 ? ('conflict' as const) : ('not_found' as const);
     });
+  }
+  byTaxIds(ctx: Ctx, taxIds: readonly string[]) {
+    return this.tx(ctx, async (c) =>
+      (await c.query<Firm>(`select ${KOLON} from ${KAYNAK} where f.org_id = $1 and f.archived_at is null and f.tax_id = any($2)`, [ctx.org, taxIds])).rows,
+    );
+  }
+  async updateFromSource(ctx: Ctx, id: string, p: { title?: string; taxOffice?: string | null }) {
+    await this.tx(ctx, (c) =>
+      c.query(
+        `update portfolio.firms set title = coalesce($3, title), tax_office = coalesce($4, tax_office), version = version + 1, updated_at = now()
+          where org_id = $1 and id = $2`,
+        [ctx.org, id, p.title ?? null, p.taxOffice ?? null],
+      ),
+    );
   }
   async recordExport(ctx: Ctx, count: number) {
     await this.tx(ctx, (c) => c.query(`select audit.record($1, 'firmalar.disa_aktarildi', null, jsonb_build_object('adet', $2::int))`, [ctx.org, count]));

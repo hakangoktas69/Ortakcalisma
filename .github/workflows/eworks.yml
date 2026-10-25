@@ -68,15 +68,11 @@ jobs:
   integration:
     name: Kurum entegrasyonu (Python ACL) — pytest, import kuralları
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: services/integration
+    # Robot akışı testleri gerçek tarayıcı ister: üretim imajıyla (Playwright + OCR modeli) koşulur
     steps:
       - uses: actions/checkout@v7.0.1
-      - run: pipx install uv
-      - run: uv sync
-      - run: uv run pytest -q
-      - run: uv run lint-imports
+      - run: docker build -q -f deploy/docker/integration.Dockerfile -t eworks/integration:ci .
+      - run: docker run --rm --ipc=host eworks/integration:ci sh -c 'python3 -m pytest -q -p no:cacheprovider && lint-imports --no-cache'
 
   secrets:
     name: Sır taraması (gitleaks)

@@ -153,6 +153,76 @@ services:
       DEMO_SIFRE: ${DEMO_SIFRE:?}
       DEMO_AD: ${DEMO_AD:-Demo Müşavir}
 
+  # Arka plan işçisi: outbox → RabbitMQ, entegrasyon sonucunu alan bağlamlarına uygular, takılı işleri kapatır
+  worker:
+    <<: *node
+    depends_on:
+      db-shard-01: { condition: service_healthy }
+      db-shard-02: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      s3: { condition: service_healthy }
+    environment:
+      CONTROL_DATABASE_URL: postgres://eworks_control:${CONTROL_DB_PASSWORD}@db-control:5432/postgres
+      SHARD_DATABASE_URLS: shard-01=postgres://eworks_worker:${WORKER_DB_PASSWORD}@db-shard-01:5432/postgres,shard-02=postgres://eworks_worker:${WORKER_DB_PASSWORD}@db-shard-02:5432/postgres
+      RABBITMQ_URL: amqp://eworks:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      S3_ENDPOINT: http://s3:8333
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      TAX_ID_HMAC_KEY: ${TAX_ID_HMAC_KEY}
+    deploy:
+      resources:
+        limits: { memory: 384m }
+
+  # Kurum entegrasyonu (Python ACL, başsız tarayıcı). Kuruma giden istekler Redis'teki ortak hız sınırından geçer.
+  # Demo/test: *.gib.gov.tr istekleri sahte GİB'e gider (GIB_SAHTE_SUNUCU). Üretimde EWORKS_ORTAM=uretim ve
+  # GIB_SAHTE_SUNUCU boş verilir; ikisi birlikte verilirse servis açılmaz.
+  integration:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/integration.Dockerfile
+    image: eworks/integration:local
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp, /home/pwuser]
+    shm_size: 512m
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    depends_on:
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      s3: { condition: service_healthy }
+      fake-gib: { condition: service_healthy, required: false }
+    environment:
+      EWORKS_ORTAM: ${EWORKS_ORTAM:-demo}
+      GIB_SAHTE_SUNUCU: ${GIB_SAHTE_SUNUCU-http://fake-gib:8090}
+      GIB_ISTEK_DK: ${GIB_ISTEK_DK:-60}
+      SHARD_DATABASE_URLS: shard-01=postgres://eworks_integration:${INTEGRATION_DB_PASSWORD}@db-shard-01:5432/postgres,shard-02=postgres://eworks_integration:${INTEGRATION_DB_PASSWORD}@db-shard-02:5432/postgres
+      RABBITMQ_URL: amqp://eworks:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/1
+      S3_ENDPOINT: http://s3:8333
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+    deploy:
+      resources:
+        limits: { memory: 1536m }
+
+  # Sahte GİB (yalnız demo profili): sentetik veri, gerçek GİB ekran akışının taklidi — canlı doğrulama sayılmaz (D33)
+  fake-gib:
+    image: eworks/integration:local
+    profiles: [demo]
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    command: [python3, -m, tests.sahte_kurumlar.gib]
+    environment:
+      SAHTE_GIB_SIFRE: ${SAHTE_GIB_SIFRE:-demo-gib-sifre}
+    healthcheck:
+      test: [CMD, python3, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8090/dijital/portal/login')"]
+      interval: 5s
+      retries: 30
+
   # Portal + BFF (Next.js). Tek açık port; üretimde önünde TLS sonlandıran ters vekil olur (COOKIE_SECURE=true, EWORKS_ORTAM=uretim)
   web:
     build:

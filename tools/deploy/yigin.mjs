@@ -56,7 +56,7 @@ function yiginiKaldir(ek = []) {
   docker(compose('up', '-d', '--wait', '--wait-timeout', '600', ...ALTYAPI));
   docker(compose('run', '--rm', 'migrate'));
   if (PROFIL === 'demo') docker(compose('run', '--rm', 'hesap-ac'));
-  docker(compose('up', '-d', '--wait', '--wait-timeout', '600', ...ek));
+  docker(compose('up', '-d', '--remove-orphans', '--wait', '--wait-timeout', '600', ...ek));
 }
 
 const compose = (...args) => ['compose', '-p', PROJE, '--env-file', ENV, '-f', COMPOSE, '--profile', PROFIL, ...args];
@@ -112,6 +112,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const ag = execFileSync('docker', compose('ps', '-q', 'db-control'), { encoding: 'utf8', cwd: KOK }).trim();
     const network = execFileSync('docker', ['inspect', '-f', '{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}', ag], { encoding: 'utf8' }).trim().split(' ')[0];
     docker(['run', '--rm', '--network', network, ...envArgs, '-v', `${sonuc}:/app/test-results`, `eworks/${hedef}:local`, ...geri]);
+    // Python ACL: birim + robot akışı (süreç içi sahte GİB, gerçek tarayıcı) + import kuralları
+    if (komut === 'test') {
+      docker(['run', '--rm', '--ipc=host', '-v', `${sonuc}:/out`, 'eworks/integration:local', 'sh', '-c',
+        'python3 -m pytest -q -p no:cacheprovider --junitxml=/out/pytest.xml && lint-imports --no-cache']);
+    }
   } else {
     console.error('Kullanım: node tools/deploy/yigin.mjs sirlar|up|down [--sil]|test|e2e|helm');
     process.exit(2);

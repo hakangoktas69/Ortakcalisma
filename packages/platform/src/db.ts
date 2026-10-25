@@ -44,3 +44,9 @@ export const withSystem = <T>(pool: Pool, orgId: string, fn: (c: Client) => Prom
 
 /** Rol değiştirmeyen işlem (kontrol düzlemi, migration). */
 export const withTx = <T>(pool: Pool, fn: (c: Client) => Promise<T>) => tx(pool, async () => {}, fn);
+
+/** Use-case bağlamı: kullanıcı (sub + etkin ofis) ya da yalnız ofis (işçinin sistem bağlamı). */
+export type Baglam = { readonly sub?: string; readonly org: string };
+
+export const withCtx = <T>(pool: Pool, ctx: Baglam, fn: (c: Client) => Promise<T>) =>
+  ctx.sub ? withUser(pool, { sub: ctx.sub, org: ctx.org }, fn) : withSystem(pool, ctx.org, fn);

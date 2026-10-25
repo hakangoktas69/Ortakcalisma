@@ -1,0 +1,274 @@
+"""Sahte GİB sunucusu (06 §7.2: sahte kurum sunucusu) — demo ve test için, canlı GİB değildir (D33).
+
+Robot gerçek GİB adreslerine (https://dijital.gib.gov.tr, https://intvrg.gib.gov.tr) gider; demo/test ortamında tarayıcı
+bağlamı bu istekleri buraya yönlendirir (/dijital/…, /intvrg/…). Sayfa yapısı eski robotun canlıda gözlenen akışını izler:
+giriş + CAPTCHA → "Geçiş Yapılabilecek Uygulamalar" → İnternet Vergi Dairesi + yönlendirme onayı → E-Beyanname Yetki
+Bilgileri → Geçerli E-Beyanname Sözleşmeleri Listesi (sayfalı, "Tümünü Göster", alt bilgide toplam).
+
+Veri sentetiktir: kullanıcı koduna göre tohumlanmış, kontrol hanesi geçerli ama sahte VKN/TCKN (99 önekli TCKN).
+Hesap kuralı: SAHTE_GIB_SIFRE (vars. demo-gib-sifre) ile her kullanıcı kodu girer; başka şifre "hatalı".
+Çalıştırma: python -m tests.sahte_kurumlar.gib  (port SAHTE_GIB_PORT, vars. 8090)
+"""
+from __future__ import annotations
+
+import html
+import io
+import json
+import os
+import random
+import secrets
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlsplit
+
+from PIL import Image, ImageDraw, ImageFont
+
+TITLE = 'Geçerli E-Beyanname Sözleşmeleri Listesi'
+HEADERS = ('Mükellef Vergi Kimlik Numarası', 'Mükellef TC Kimlik Numarası', 'Mükellef Unvanı', 'Mükellef Vergi Dairesi',
+           'Sözleşme Numarası', 'Sözleşme Tarihi', 'Hizmet Sözleşmesi Tarih ve No', 'Sisteme Giriş Tarihi', 'Sözleşme Türü')
+SAYFA = 20
+FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+
+SIFRE = os.environ.get('SAHTE_GIB_SIFRE', 'demo-gib-sifre')
+ADET = int(os.environ.get('SAHTE_GIB_SOZLESME_ADEDI', '45'))
+
+_kilit = threading.Lock()
+_captcha: dict[str, str] = {}          # oturum çerezi → beklenen kod
+_dvd_oturum: dict[str, str] = {}       # dijital oturum → kullanıcı kodu
+_ivd_belirtec: dict[str, str] = {}     # tek kullanımlık İVD geçiş belirteci → kullanıcı kodu
+_ivd_oturum: dict[str, str] = {}       # intvrg oturum → kullanıcı kodu
+
+
+def _vkn(rnd: random.Random) -> str:
+    d = [rnd.randrange(10) for _ in range(9)]
+    toplam = 0
+    for i, x in enumerate(d):
+        t = (x + 9 - i) % 10
+        toplam += 0 if t == 0 else ((t * 2 ** (9 - i)) % 9 or 9)
+    return ''.join(map(str, d)) + str((10 - toplam % 10) % 10)
+
+
+def _tckn(rnd: random.Random) -> str:
+    d = [9, 9] + [rnd.randrange(10) for _ in range(7)]
+    tek, cift = d[0] + d[2] + d[4] + d[6] + d[8], d[1] + d[3] + d[5] + d[7]
+    d.append((tek * 7 - cift) % 10)
+    d.append(sum(d) % 10)
+    return ''.join(map(str, d))
+
+
+SEHIR = ('Anadolu', 'Ege', 'Marmara', 'Akdeniz', 'Karadeniz', 'Trakya', 'Kapadokya', 'Toros', 'Fırat', 'Dicle')
+ALAN = ('Gıda', 'Tekstil', 'İnşaat', 'Lojistik', 'Yazılım', 'Mobilya', 'Kimya', 'Turizm', 'Otomotiv', 'Tarım')
+AD = ('Ayşe', 'Mehmet', 'Fatma', 'Ali', 'Zeynep', 'Mustafa', 'Elif', 'Ahmet', 'Emine', 'Hüseyin')
+SOYAD = ('Yılmaz', 'Kaya', 'Demir', 'Şahin', 'Çelik', 'Yıldız', 'Aydın', 'Öztürk', 'Arslan', 'Doğan')
+VD = ('Kadıköy', 'Beşiktaş', 'Çankaya', 'Konak', 'Nilüfer', 'Seyhan', 'Meram', 'Muratpaşa')
+
+
+def sozlesmeler(kullanici: str) -> list[dict[str, str]]:
+    """Kullanıcı koduna göre tekrarlanabilir sentetik sözleşme listesi."""
+    rnd = random.Random(f'eworks-sahte-gib:{kullanici}')
+    sonuc = []
+    for i in range(ADET):
+        sahis = rnd.random() < 0.3
+        if sahis:
+            vkn, tckn, unvan = '', _tckn(rnd), f'{rnd.choice(AD)} {rnd.choice(SOYAD)}'
+        else:
+            vkn, tckn = _vkn(rnd), ''
+            unvan = f'{rnd.choice(SEHIR)} {rnd.choice(ALAN)} {"Sanayi ve Ticaret Limited Şirketi" if rnd.random() < .7 else "Anonim Şirketi"}'
+        tarih = f'{rnd.randint(1, 28):02d}.{rnd.randint(1, 12):02d}.{rnd.randint(2015, 2026)}'
+        sonuc.append({
+            'taxNumber': vkn, 'identityNumber': tckn, 'name': unvan, 'taxOffice': rnd.choice(VD),
+            'number': f'{rnd.randint(100000, 999999)}-{i + 1:03d}', 'date': tarih, 'service': f'{tarih} / {rnd.randint(1, 999)}',
+            'registeredAt': tarih, 'type': 'Aracılık ve Sorumluluk Sözleşmesi' if rnd.random() < .85 else 'Yalnız Aracılık Sözleşmesi',
+        })
+    return sonuc
+
+
+def _captcha_png(kod: str) -> bytes:
+    rnd = random.Random(kod)
+    img = Image.new('RGB', (150, 50), 'white')
+    d = ImageDraw.Draw(img)
+    font = ImageFont.truetype(FONT, 30) if os.path.exists(FONT) else ImageFont.load_default()
+    for j, ch in enumerate(kod):
+        d.text((10 + j * 26, 8 + rnd.randint(-3, 3)), ch, fill=(20, 40, 90), font=font)
+    for _ in range(3):
+        d.line([(rnd.randint(0, 150), rnd.randint(0, 50)), (rnd.randint(0, 150), rnd.randint(0, 50))], fill=(160, 160, 160), width=1)
+    b = io.BytesIO()
+    img.save(b, 'PNG')
+    return b.getvalue()
+
+
+def _sayfa(baslik: str, govde: str) -> bytes:
+    return (f'<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>{html.escape(baslik)}</title>'
+            '<style>body{font-family:sans-serif;margin:16px}.kart{display:inline-block;padding:12px;border:1px solid #ccc;margin:6px;cursor:pointer}'
+            'table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:4px}</style></head><body>' + govde + '</body></html>').encode('utf-8')
+
+
+def _giris_sayfasi() -> bytes:
+    return _sayfa('GİB Dijital Vergi Dairesi', '''
+<h1>Dijital Vergi Dairesi</h1>
+<label for="kullanici">Kullanıcı Kodu / T.C. Kimlik No</label> <input id="kullanici" type="text">
+<label for="sifre">Şifre</label> <input id="sifre" type="password"><br>
+<img id="captchaImg" alt="Güvenlik kodu (captcha)" src="/portal/captcha?r=1" width="150" height="50">
+<label for="guvenlik">Güvenlik Kodu</label> <input id="guvenlik" type="text"><br>
+<button id="giris" type="button">Giriş Yap</button>
+<p id="hata" role="alert"></p>
+<script>
+document.getElementById('giris').addEventListener('click', async () => {
+  const v = id => document.getElementById(id).value;
+  const r = await fetch('/portal/api/giris', {method: 'POST', headers: {'content-type': 'application/json'},
+    body: JSON.stringify({k: v('kullanici'), s: v('sifre'), g: v('guvenlik')})});
+  const j = await r.json();
+  if (j.tamam) { location.href = '/portal/anasayfa'; return; }
+  document.getElementById('hata').textContent = j.hata;
+  document.getElementById('guvenlik').value = '';
+  document.getElementById('captchaImg').src = '/portal/captcha?r=' + Math.random();
+});
+</script>''')
+
+
+def _anasayfa() -> bytes:
+    return _sayfa('GİB Dijital Vergi Dairesi', '''
+<h1>Dijital Vergi Dairesi</h1>
+<section><h2>Geçiş Yapılabilecek Uygulamalar</h2>
+<div class="kart" onclick="document.getElementById('onay').hidden=false"><p>İnternet Vergi Dairesi</p></div>
+<div class="kart"><p>e-Beyanname</p></div></section>
+<div id="onay" hidden><div>
+<h3>Yönlendirmeyi Onaylıyor Musunuz?</h3>
+<p>İnternet Vergi Dairesi uygulamasına geçiş yapmak üzeresiniz. Bu işlemle birlikte aktif İnternet Vergi Dairesi oturumlarınız da sonlandırılacaktır. Devam etmek istiyor musunuz?</p>
+<button type="button" onclick="document.getElementById('onay').hidden=true">İPTAL ET</button>
+<button type="button" onclick="fetch('/portal/api/ivd',{method:'POST'}).then(r=>r.json()).then(j=>{location.href='https://intvrg.gib.gov.tr/intvrg_side/main.jsp?token='+j.belirtec})">ONAYLA</button>
+</div></div>''')
+
+
+def _ivd_ana() -> bytes:
+    return _sayfa('İnternet Vergi Dairesi', f'''
+<nav><ul><li><a href="#" onclick="document.getElementById('alt').hidden=false;return false">E-Beyanname Yetki Bilgileri</a>
+<ul id="alt" hidden><li><a href="/intvrg_side/sozlesmeler">{TITLE}</a></li></ul></li></ul></nav>
+<main><h1>İnternet Vergi Dairesi</h1></main>''')
+
+
+def _liste(kullanici: str, tumu: bool) -> bytes:
+    kayitlar = sozlesmeler(kullanici)
+    gorunen = kayitlar if tumu else kayitlar[:SAYFA]
+    satir = ''.join('<tr>' + ''.join(f'<td>{html.escape(v or "-----")}</td>' for v in (
+        k['taxNumber'], k['identityNumber'], k['name'], k['taxOffice'], k['number'], k['date'], k['service'], k['registeredAt'], k['type'])) + '<td><a href="#">Görüntüle</a></td></tr>' for k in gorunen)
+    dugme = ('<span style="cursor:pointer" onclick="location.href=\'?tumu=0\'">Sayfalı Göster</span>' if tumu
+             else '<span style="cursor:pointer" onclick="location.href=\'?tumu=1\'">Tümünü Göster</span>')
+    alt = f'<tr><td colspan="{len(HEADERS) + 1}">1 - {len(gorunen)} listeleniyor. Toplam : {len(kayitlar)} {dugme}</td></tr>'
+    baslik = '<tr>' + ''.join(f'<th>{h}</th>' for h in HEADERS) + '<th>Görüntüle</th></tr>'
+    return _sayfa(TITLE, f'<h1>{TITLE}</h1><table>{baslik}{satir}{alt}</table>')
+
+
+class Isleyici(BaseHTTPRequestHandler):
+    server_version = 'SahteGIB/1.0'
+
+    def log_message(self, *a):  # istek günlüğü yazılmaz (gövde/çerez içerebilir)
+        pass
+
+    def _cerez(self, ad: str) -> str | None:
+        for parca in (self.headers.get('Cookie') or '').split(';'):
+            k, _, v = parca.strip().partition('=')
+            if k == ad:
+                return v
+        return None
+
+    def _yanit(self, durum: int, govde: bytes, tur='text/html; charset=utf-8', cerez: str | None = None, yer: str | None = None):
+        self.send_response(durum)
+        self.send_header('Content-Type', tur)
+        self.send_header('Content-Length', str(len(govde)))
+        self.send_header('Cache-Control', 'no-store')
+        if cerez:
+            self.send_header('Set-Cookie', cerez + '; Path=/; HttpOnly; Secure; SameSite=Lax')
+        if yer:
+            self.send_header('Location', yer)
+        self.end_headers()
+        self.wfile.write(govde)
+
+    def _json(self, deger: dict, cerez: str | None = None):
+        self._yanit(200, json.dumps(deger, ensure_ascii=False).encode('utf-8'), 'application/json; charset=utf-8', cerez)
+
+    def do_GET(self):  # noqa: N802
+        u = urlsplit(self.path)
+        q = parse_qs(u.query)
+        if u.path == '/saglik':
+            return self._json({'durum': 'ok'})
+        if u.path == '/dijital/portal/login':
+            oturum = secrets.token_hex(16)
+            with _kilit:
+                _captcha[oturum] = ''.join(random.choice('0123456789') for _ in range(5))
+            return self._yanit(200, _giris_sayfasi(), cerez=f'DVDGIRIS={oturum}')
+        if u.path == '/dijital/portal/captcha':
+            oturum = self._cerez('DVDGIRIS')
+            with _kilit:
+                if not oturum or oturum not in _captcha:
+                    return self._yanit(404, b'')
+                _captcha[oturum] = ''.join(random.choice('0123456789') for _ in range(5)) if q.get('r', ['1'])[0] != '1' else _captcha[oturum]
+                kod = _captcha[oturum]
+            return self._yanit(200, _captcha_png(kod), 'image/png')
+        if u.path == '/dijital/portal/anasayfa':
+            if self._cerez('DVD') not in _dvd_oturum:
+                return self._yanit(302, b'', yer='/portal/login')
+            return self._yanit(200, _anasayfa())
+        if u.path == '/intvrg/intvrg_side/main.jsp':
+            belirtec = q.get('token', [''])[0]
+            with _kilit:
+                kullanici = _ivd_belirtec.pop(belirtec, None)
+                if kullanici is None and self._cerez('IVD') not in _ivd_oturum:
+                    return self._yanit(403, _sayfa('Yetkisiz', '<p>Oturum bulunamadı.</p>'))
+                cerez = None
+                if kullanici is not None:
+                    oturum = secrets.token_hex(16)
+                    _ivd_oturum[oturum] = kullanici
+                    cerez = f'IVD={oturum}'
+            return self._yanit(200, _ivd_ana(), cerez=cerez)
+        if u.path == '/intvrg/intvrg_side/sozlesmeler':
+            kullanici = _ivd_oturum.get(self._cerez('IVD') or '')
+            if kullanici is None:
+                return self._yanit(403, _sayfa('Yetkisiz', '<p>Oturum bulunamadı.</p>'))
+            return self._yanit(200, _liste(kullanici, q.get('tumu', ['0'])[0] == '1'))
+        return self._yanit(404, _sayfa('Bulunamadı', '<p>Sayfa bulunamadı.</p>'))
+
+    def do_POST(self):  # noqa: N802
+        u = urlsplit(self.path)
+        uzunluk = min(int(self.headers.get('Content-Length') or 0), 8192)
+        govde = self.rfile.read(uzunluk) if uzunluk else b''
+        if u.path == '/dijital/portal/api/giris':
+            try:
+                v = json.loads(govde or b'{}')
+            except ValueError:
+                return self._json({'tamam': False, 'hata': 'İstek geçersiz.'})
+            oturum = self._cerez('DVDGIRIS')
+            with _kilit:
+                beklenen = _captcha.get(oturum or '')
+            if not beklenen or str(v.get('g', '')).strip() != beklenen:
+                return self._json({'tamam': False, 'hata': 'Güvenlik kodu hatalı. Lütfen tekrar deneyiniz.'})
+            kullanici = str(v.get('k', '')).strip()
+            if not kullanici or v.get('s') != SIFRE:
+                return self._json({'tamam': False, 'hata': 'Kullanıcı kodu veya şifre hatalı.'})
+            yeni = secrets.token_hex(16)
+            with _kilit:
+                _dvd_oturum[yeni] = kullanici
+                _captcha.pop(oturum or '', None)
+            return self._json({'tamam': True}, cerez=f'DVD={yeni}')
+        if u.path == '/dijital/portal/api/ivd':
+            kullanici = _dvd_oturum.get(self._cerez('DVD') or '')
+            if kullanici is None:
+                return self._yanit(403, b'{}', 'application/json')
+            belirtec = secrets.token_urlsafe(24)
+            with _kilit:
+                _ivd_belirtec[belirtec] = kullanici
+            return self._json({'belirtec': belirtec})
+        return self._yanit(404, b'')
+
+
+def baslat(port: int = 0) -> ThreadingHTTPServer:
+    """Testler için arka planda başlatır; port 0 → boş port."""
+    sunucu = ThreadingHTTPServer(('0.0.0.0', port), Isleyici)
+    threading.Thread(target=sunucu.serve_forever, daemon=True).start()
+    return sunucu
+
+
+if __name__ == '__main__':
+    port = int(os.environ.get('SAHTE_GIB_PORT', '8090'))
+    print(f'Sahte GİB {port} portunda (demo/test; canlı GİB değildir)', flush=True)
+    ThreadingHTTPServer(('0.0.0.0', port), Isleyici).serve_forever()

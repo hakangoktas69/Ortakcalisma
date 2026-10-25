@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eworks.local/contracts/events/integration.sonuc.v1.schema.json",
+  "title": "IntegrationResultReady — ACL'den işçiye iş sonucu mesajı (RabbitMQ: entegrasyon.sonuc)",
+  "description": "Mesajda yalnız kimlikler ve sonuç türü bulunur; veri S3'tedir (resultKey). Kişisel veri ve kurum yanıt metni taşınmaz.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["orgId", "jobId", "outcome"],
+  "properties": {
+    "orgId": { "type": "string", "format": "uuid" },
+    "jobId": { "type": "string", "format": "uuid" },
+    "outcome": { "enum": ["ok", "wrong_password", "failed", "progress"] },
+    "resultKey": { "type": "string", "pattern": "^org/[0-9a-f-]{36}/sonuc/[0-9a-f-]{36}\\.json$" },
+    "message": { "type": "string", "maxLength": 500, "description": "Kullanıcıya gösterilecek sabit Türkçe metin" }
+  }
+}

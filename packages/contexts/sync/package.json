@@ -2,6 +2,18 @@
   "name": "@eworks/sync",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@eworks/kernel": "workspace:*" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@eworks/kernel": "workspace:*",
+    "@eworks/platform": "workspace:*"
+  },
+  "devDependencies": {
+    "@eworks/credentials": "workspace:*",
+    "@eworks/identity-access": "workspace:*",
+    "@eworks/portfolio": "workspace:*",
+    "@eworks/sales": "workspace:*",
+    "@eworks/testing": "workspace:*"
+  }
 }

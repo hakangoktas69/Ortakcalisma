@@ -116,6 +116,8 @@ td.sayi { text-align: right; font-variant-numeric: tabular-nums; }
 .etiket.iyi { background: var(--yesil-zemin); color: var(--yesil); }
 .etiket.kotu { background: var(--kirmizi-zemin); color: var(--kirmizi); }
 .etiket.bekliyor { background: var(--uyari-zemin); color: var(--uyari); }
+.kurum-isi { display: grid; gap: .5rem; justify-items: start; margin: .6rem 0; }
+.is-durumu { margin: 0; overflow-wrap: anywhere; }
 .sayaclar { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); }
 .sayac { background: #fff; border: 1px solid var(--cizgi); border-radius: var(--yaricap); padding: .9rem 1rem; display: grid; gap: .2rem; color: inherit; }
 a.sayac:hover { text-decoration: none; border-color: var(--birincil); }

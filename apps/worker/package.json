@@ -7,9 +7,18 @@
     "migrate": "node src/migrate.ts"
   },
   "dependencies": {
-    "@eworks/platform": "workspace:*",
-    "@eworks/kernel": "workspace:*",
+    "@eworks/credentials": "workspace:*",
     "@eworks/identity-access": "workspace:*",
-    "@eworks/sales": "workspace:*"
+    "@eworks/kernel": "workspace:*",
+    "@eworks/platform": "workspace:*",
+    "@eworks/portfolio": "workspace:*",
+    "@eworks/sales": "workspace:*",
+    "@eworks/sync": "workspace:*",
+    "@eworks/tax-filing": "workspace:*",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@eworks/testing": "workspace:*"
   }
 }

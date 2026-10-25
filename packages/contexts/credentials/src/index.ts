@@ -4,6 +4,7 @@ export const CONTEXT = 'credentials' as const;
 
 export {
   accountStatuses,
+  recordLoginResult,
   saveAccount,
   statusLabel,
   type AccountStatus,

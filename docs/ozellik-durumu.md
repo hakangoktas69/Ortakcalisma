@@ -19,7 +19,7 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `genel_bakis.panel.view` | workspace | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Takvim | `genel_bakis.takvim` | workspace | 🔴 0/1 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `genel_bakis.takvim.view` | workspace | 🔴 | 0 |
-| **Firmalarım** | `firmalar` | portfolio | 🔴 8/15 | 41 |
+| **Firmalarım** | `firmalar` | portfolio | 🔴 9/15 | 53 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Firma listesi | `firmalar.liste` | portfolio | 🟢 2/2 | 9 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `firmalar.liste.view` | portfolio | 🟢 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dışa aktar | `firmalar.liste.export` | portfolio | 🟢 | 5 |
@@ -33,9 +33,9 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bilgileri gir | `firmalar.kurum_hesaplari.edit_credentials` | credentials | 🟢 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kullanım izni ver | `firmalar.kurum_hesaplari.grant_use` | credentials | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mükellef onayı | `firmalar.kurum_hesaplari.consent` | credentials | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;GİB e-Beyanname sözleşmeleri | `firmalar.gib_sozlesmeler` | tax-filing | 🔴 0/3 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `firmalar.gib_sozlesmeler.view` | tax-filing | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GİB'den güncelle | `firmalar.gib_sozlesmeler.sync` | tax-filing | 🔴 canlı | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;GİB e-Beyanname sözleşmeleri | `firmalar.gib_sozlesmeler` | tax-filing | 🔴 1/3 | 12 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `firmalar.gib_sozlesmeler.view` | tax-filing | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GİB'den güncelle | `firmalar.gib_sozlesmeler.sync` | tax-filing | 🔴 canlı | 8 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kurum incelemesi | `firmalar.gib_sozlesmeler.review` | tax-filing | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Müşavir devri | `firmalar.devir` | portfolio | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Devir başlat | `firmalar.devir.start` | portfolio | 🔴 | 0 |

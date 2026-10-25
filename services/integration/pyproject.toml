@@ -1,26 +1,29 @@
 # Kurum entegrasyonu — anti-corruption layer (06 §1.3, §3). Kurum web servisi / robot, ham format ayrıştırma,
 # yayımlanmış dile (contracts/) çevirme. Alan kuralı ve alan tablolarına yazma YOK.
+# Sürümler deploy/docker/integration.Dockerfile ile aynıdır (Playwright paketi imajdaki tarayıcıya eşlenir).
 [project]
 name = "eworks-integration"
-version = "0.0.0"
+version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+  "playwright==1.64.0",
+  "ddddocr==1.5.6",
+  "aio-pika==9.5.7",
+  "psycopg[binary]==3.2.12",
+  "redis==6.4.0",
+  "boto3==1.40.61",
+  "pillow==11.3.0",
+]
 
 [dependency-groups]
-dev = ["pytest>=8.3", "import-linter>=2.1"]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/eworks_integration"]
+dev = ["pytest==8.4.2", "jsonschema==4.25.1", "import-linter==2.5.2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src", "."]
 markers = ["feature(key): testi feature-registry anahtarına bağlar (06 §7.3)"]
 
-# 06 §6: kurumlar birbirini import etmez; çekirdek kurumlara bağımlı değildir.
+# 06 §6: kurumlar birbirini import etmez; taşıma katmanı kurumlara bağımlı değildir.
 [tool.importlinter]
 root_package = "eworks_integration"
 
@@ -30,7 +33,7 @@ type = "independence"
 modules = ["eworks_integration.institutions.gib", "eworks_integration.institutions.sgk"]
 
 [[tool.importlinter.contracts]]
-name = "Çekirdek kurumlara bağımlı değil"
+name = "Taşıma katmanı kurumlara bağımlı değil"
 type = "forbidden"
-source_modules = ["eworks_integration.core"]
+source_modules = ["eworks_integration.transports"]
 forbidden_modules = ["eworks_integration.institutions"]

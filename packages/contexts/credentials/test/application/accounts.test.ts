@@ -10,6 +10,7 @@ function repo() {
       kayit.push(i);
       return { ok: true, value: { accountId: 'h-1' } };
     },
+    recordLogin: async () => {},
     statuses: async () => [
       { id: 'h-1', ownerKind: 'firm', ownerId: 'f-1', institution: 'GIB', status: 'wrong_password', updatedAt: '', lastSuccessAt: null },
       { id: 'h-2', ownerKind: 'advisor', ownerId: 'a-1', institution: 'GIB', status: 'active', updatedAt: '', lastSuccessAt: null },

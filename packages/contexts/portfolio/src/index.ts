@@ -6,6 +6,9 @@ export { FIRM_KINDS, FIRM_STATUSES, firmCategory, inSegment, isApproved, TAX_REG
 export {
   archiveFirm,
   createFirm,
+  createFirmFromSource,
+  firmsByTaxIds,
+  refreshFirmFromSource,
   exportFirms,
   firmsCsv,
   getFirm,

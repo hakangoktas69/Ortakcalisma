@@ -5,6 +5,8 @@ import { PgCredentialRepository } from '@eworks/credentials';
 import { GoTrueAuthProvider, PgMembershipReader, RedisSessionStore } from '@eworks/identity-access';
 import { databaseSchema, loadConfig, sessionSchema, ShardRouter, taxIdSchema } from '@eworks/platform';
 import { PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portfolio';
+import { PgJobRepository } from '@eworks/sync';
+import { PgContractRepository } from '@eworks/tax-filing';
 
 // BFF bağımlılıkları (süreç başına tek örnek). Yapılandırma açılışta doğrulanır; tarayıcıya hiçbir değer gitmez (D5).
 
@@ -26,6 +28,8 @@ function kur() {
     clock: { now: () => new Date() },
     firmalar: { repo: new PgFirmRepository(router), registry: new PgTaxpayerRegistry(router), hashTaxId: taxIdHasher(c.TAX_ID_HMAC_KEY), newId: randomUUID },
     kurumHesaplari: new PgCredentialRepository(router),
+    isler: { jobs: new PgJobRepository(router), newId: randomUUID },
+    sozlesmeler: { contracts: new PgContractRepository(router) },
   };
 }
 
