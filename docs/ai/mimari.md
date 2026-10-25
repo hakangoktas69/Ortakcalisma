@@ -1,6 +1,6 @@
 # Mimari
 
-> Kısa özet. Ayrıntı: [01 genel bakış](../hedef-mimari/01-cok-kiracili-hedef-mimari.md), [02 kurum entegrasyonu](../hedef-mimari/02-kurum-entegrasyon-robotu.md), [05 yetki](../hedef-mimari/05-yetki-ve-hesap-modeli.md), [06 kaynak kod](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md), [07 veri ve sharding](../hedef-mimari/07-veri-saklama-ve-sharding.md).
+> Kısa özet. Ayrıntı: [01 genel bakış](../hedef-mimari/01-cok-kiracili-hedef-mimari.md), [02 kurum entegrasyonu](../hedef-mimari/02-kurum-entegrasyon-robotu.md), [05 yetki](../hedef-mimari/05-yetki-ve-hesap-modeli.md), [06 kaynak kod](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md), [07 veri ve sharding](../hedef-mimari/07-veri-saklama-ve-sharding.md). Örnekli DDD uygulama rehberi: [gelistirici-rehberi/ddd.md](../gelistirici-rehberi/ddd.md).
 
 ## Bileşenler
 

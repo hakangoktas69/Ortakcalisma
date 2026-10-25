@@ -16,6 +16,11 @@ Bu dosya **üretilir**; kural burada yazılmaz ve tekrarlanmaz. Kaynaklar: `CLAU
    - `apps/sales/CLAUDE.md`
    - `apps/web/CLAUDE.md`
    - `apps/worker/CLAUDE.md`
+   - `packages/contexts/CLAUDE.md`
+   - `packages/feature-registry/CLAUDE.md`
+   - `packages/kernel/CLAUDE.md`
+   - `services/integration/CLAUDE.md`
+   - `supabase/CLAUDE.md`
 3. Bir bağlamda çalışacaksan `docs/baglamlar/<context>.md`; karar ve gerekçe için `docs/adr/karar-kaydi.md` ve `docs/hedef-mimari/`.
 <!-- senkron:bitis okuma-listesi -->
 
@@ -46,6 +51,7 @@ Güncel dizin (`MEMORY.md`):
 
 İstek aşağıdakilerden birine uyuyorsa ilgili dosyayı oku ve adımlarını uygula (Claude'a özgü araç adlarını kendi araçlarınla karşıla):
 
+- **gelistir** → `docs/ai/beceriler/gelistir.md` — Kod değiştiren her işte DDD sınırları ve TDD döngüsüyle çalışma akışı — yeni özellik, işlem, ekran, uç, kural, migration, hata düzeltme ya da refactor. "Şu özelliği ekle", "şunu geliştir", "hatayı düzelt", "uç/ekran/tablo ekle", "/gelistir" dendiğinde ya da packages/, apps/, services/, supabase/ altında kod yazmadan önce kullan.
 - **hafiza** → `docs/ai/beceriler/hafiza.md` — Ekip hafızasına (docs/ai/memory) kayıt ekler veya günceller, kişisel Claude hafızasındaki proje kayıtlarını ekip hafızasına aktarır, hafızayı denetler. "Bunu hatırla", "hafızaya yaz", "ekip bilsin", "/hafiza aktar", "/hafiza denetle" dendiğinde kullan.
 - **oryantasyon** → `docs/ai/beceriler/oryantasyon.md` — Projeye yeni katılan geliştiriciyi karşılar — rolüne göre okuma yolu, güncel durum, ortam kontrolü ve ilk işi önerir. "Projeye yeni katıldım", "nereden başlamalıyım", "projeyi anlat", "/oryantasyon" dendiğinde kullan.
 <!-- senkron:bitis beceriler -->

@@ -11,7 +11,7 @@ Claude Code ve Codex bu projede **sıfırdan başlamaz**. Kurallar, mimari, gün
 | `CLAUDE.md` (kök + `apps/*` vb. alt dizinler) | `AGENTS.md` (kök): okuma listesi, ekip hafızası, beceri eşlemesi, akış |
 | `docs/ai/*.md` (vizyon, mimari, kurallar, test, durum) | `<dizin>/AGENTS.md`: her alt dizin `CLAUDE.md`'si için |
 | `docs/ai/memory/*.md` (ekip hafızası kayıtları) | `docs/ai/memory/MEMORY.md`: eksik satırlar eklenir, silinen kaydın satırı kalkar |
-| `docs/ai/beceriler/*.md` (hafiza, oryantasyon) | `.claude/skills/*/SKILL.md` |
+| `docs/ai/beceriler/*.md` (gelistir, hafiza, oryantasyon) | `.claude/skills/*/SKILL.md` |
 
 Üretici `node tools/ajan/senkron.mjs`:
 

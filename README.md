@@ -100,4 +100,4 @@ Uygulamalar (`apps/*`) ve yerel yığın (Compose) Faz 0'da eklenecek; durum: [d
 
 ## Katkı
 
-TDD: önce `feature-registry` anahtarı, sonra `@F:<anahtar>` etiketli kırmızı kabul testi ([docs/ai/test.md](docs/ai/test.md)). Kurallar: [CLAUDE.md](CLAUDE.md) ve [docs/ai/kurallar.md](docs/ai/kurallar.md). Claude Code ya da Codex ile çalışma: [docs/gelistirici-rehberi/claude-codex.md](docs/gelistirici-rehberi/claude-codex.md). Canlı GİB doğrulaması: [docs/gelistirici-rehberi/canli-dogrulama.md](docs/gelistirici-rehberi/canli-dogrulama.md).
+TDD: önce `feature-registry` anahtarı, sonra `@F:<anahtar>` etiketli kırmızı kabul testi ([docs/ai/test.md](docs/ai/test.md)). Örnekli rehberler: [DDD](docs/gelistirici-rehberi/ddd.md), [TDD](docs/gelistirici-rehberi/tdd.md). Kurallar: [CLAUDE.md](CLAUDE.md) ve [docs/ai/kurallar.md](docs/ai/kurallar.md). Claude Code ya da Codex ile çalışma: [docs/gelistirici-rehberi/claude-codex.md](docs/gelistirici-rehberi/claude-codex.md). Canlı GİB doğrulaması: [docs/gelistirici-rehberi/canli-dogrulama.md](docs/gelistirici-rehberi/canli-dogrulama.md).

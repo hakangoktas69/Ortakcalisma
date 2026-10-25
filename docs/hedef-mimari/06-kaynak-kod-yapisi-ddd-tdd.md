@@ -1,6 +1,7 @@
 # 5.6 Kaynak kod yapısı — DDD ve TDD
 
 > Önce: [5.1 Genel bakış](01-cok-kiracili-hedef-mimari.md), [5.5 Yetki ve hesap modeli](05-yetki-ve-hesap-modeli.md)
+> Bugünkü koddaki karşılıkları ve örnekli uygulama: [DDD rehberi](../gelistirici-rehberi/ddd.md), [TDD rehberi](../gelistirici-rehberi/tdd.md)
 > Kararlar (24.10.2026, Hakan): **D20** kaynak kod DDD'ye göre yeniden yapılanır (ön yüz, BFF, ortak kısımlar dahil) · **D21** depoyu açan yazılımcı projenin resmini hemen anlamalıdır · **D22** geliştirme TDD ile yapılır; ön yüzde modül, sayfa ve işlemler test durumuna göre işaretlenir, **tamamlanmayanlar kırmızıdır**.
 
 ## 1. İlkeler
@@ -229,7 +230,7 @@ Yeni bir yazılımcı için okuma sırası: `README.md` → `docs/00-genel-bakis
 | Bağlamlar arası yalnız `index.ts` | dependency-cruiser | `pnpm arch` |
 | İstemci bileşeni sunucu koduna erişemez | `server-only` paketi + ESLint | `pnpm lint` |
 | `NEXT_PUBLIC_*` yasak | ESLint/grep kapısı | `pnpm lint` |
-| Her rota/uç/server action bir yetki anahtarı bildirir; anahtar `feature-registry`'de var | özel test (`tools/features`) | `pnpm test` |
+| Her rota/uç/server action bir yetki anahtarı bildirir; anahtar `feature-registry`'de var | rota taraması testi (`apps/web/src/bff/yetki-anahtarlari.test.ts`) | `pnpm test` |
 | Python ACL alan paketini import etmez, kurumlar birbirini import etmez | import-linter | `uv run lint-imports` |
 | Python çıktısı `contracts/` şemasına uyar; TS uygulayıcı aynı şemayı okur | sözleşme testleri (iki tarafta) | `pnpm test`, `uv run pytest` |
 | Migration'lar bağlam önekli; RLS'siz tablo yok | pgTAP + betik | `pnpm test:db` |

@@ -19,7 +19,7 @@
 | Mükellef Takip | **Arşiv** (D32): `eski/mukellef-takip`, CI yalnız elle tetiklenir |
 | Kod | Dolu bağlamlar: identity-access, sales (hesap açma), portfolio, credentials, audit, sync, tax-filing, documents, social-security, workspace. Boş: organization (yönetim ekranları), notifications. `apps/web`, `apps/worker`, `services/integration` çalışır; `apps/sales` ekranı yok |
 | Özellikler | 36 düğüm yeşil (gerçek akış + kabul testi); kalanlar kırmızı: canlı doğrulama bekleyen 3 işlem, e-Tebligat, e-Defter, fatura, dilekçe, ödeme, rapor, yönetim, SGK sistemleri, satış portalı ([ozellik-durumu.md](../ozellik-durumu.md)) |
-| Ajan bağlamı | Claude ↔ Codex senkronu (D31) kuruldu: `tools/ajan/senkron.mjs`, git kancaları, ortak hafıza `docs/ai/memory` |
+| Ajan bağlamı | Claude ↔ Codex senkronu (D31) kuruldu: `tools/ajan/senkron.mjs`, git kancaları, ortak hafıza `docs/ai/memory`. DDD/TDD yönlendirmesi (2026-10-25): `gelistir` becerisi, rehberler (`docs/gelistirici-rehberi/{ddd,tdd}*.md`), alt dizin `CLAUDE.md`'leri (`packages/contexts`, `packages/kernel`, `packages/feature-registry`, `services/integration`, `supabase`, `apps/*`); bekçiler: kapsam eşiği `pnpm verify`/CI'da zorunlu (domain + application + kernel), yetki anahtarı rota taraması testi |
 
 ## Açık konular
 

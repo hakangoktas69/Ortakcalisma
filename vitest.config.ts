@@ -27,8 +27,12 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      include: ['packages/**/src/**/*.ts'],
-      // 06 §7.2: domain + application %90 satır / %80 dal; eşik düşürülmez
+      // 06 §7.2: domain + application (+ paylaşılan çekirdek) %90 satır / %80 dal; eşik düşürülmez.
+      // Altyapı adaptörleri birim testinde değil, yığında (*.int.test.ts) gerçek bağımlılıkla test edilir.
+      include: ['packages/contexts/*/src/domain/**/*.ts', 'packages/contexts/*/src/application/**/*.ts', 'packages/kernel/src/**/*.ts'],
+      exclude: ['**/index.ts'],
+      reporter: ['text-summary'],
+      reportsDirectory: 'test-results/kapsam',
       thresholds: { lines: 90, branches: 80 },
     },
   },
