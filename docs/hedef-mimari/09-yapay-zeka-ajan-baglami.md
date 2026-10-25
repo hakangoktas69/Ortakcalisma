@@ -153,3 +153,15 @@ Hafıza kaydı biçimi bugünküyle aynıdır: tek bilgi tek dosya, frontmatter 
    - pull sonrası post-merge uyarısı verilir.
 
 **Durum (24.10.2026): uygulandı** (`yeniden-yapilanma` dalı). 1–4 ve 6 tamam: kabul testleri `node --test "tools/ajan/test/*.test.mjs"` (yukarıdaki dört senaryo + alt dizin `AGENTS.md`/beceri üretimi ve silinmesi + `autoMemoryDirectory` düzeltmesi + yerel taşıma betiği). 5 açık: Codex'in proje içi beceri desteği doğrulanmadı; şimdilik yedek yol (`AGENTS.md` "Beceriler" bloğu) kullanılıyor, `.codex/` üretilmiyor. Kullanım rehberi: [gelistirici-rehberi/claude-codex.md](../gelistirici-rehberi/claude-codex.md).
+
+## 8. Ajanın çalışma akışı (D37)
+
+Ajana iş veren geliştiriciler junior varsayılır; isteğin teknik doğruluğu, güvenliği ve testi ajanın sorumluluğundadır. Kod değiştiren her iş `gelistir` becerisinin (`docs/ai/beceriler/gelistir.md`, tek kaynak; Claude ve Codex yansımaları `senkron.mjs` ile üretilir) üç aşamasından geçer:
+
+| Aşama | İçerik | Bekçi |
+|---|---|---|
+| **A. Anla** | Hafıza, durum, özellik durumu, git; bağlam ve alt `CLAUDE.md`; en yakın yeşil örnek; iş modeli soruları (kim görür/göremez, yetki, kapsam, onay, kişisel veri, başarı ölçütü); eskiyen belge/hafızanın tazelenmesi | SessionStart kancası (hafıza) |
+| **B. Planla ve uygula** | Etki analizi, paradigma içinde kalma (yeni kalıp = karar), olası hataların teste dönüşmesi, güvenlik kontrol listesi, plan; DDD + TDD döngüsü; çalışma zamanı hataları, denetim kaydı / operasyon logu ayrımı; performans en son | `pnpm arch`, kapsam eşiği, yetki anahtarı testi |
+| **C. Doğrula** | Plan ↔ diff ↔ iş kuralı tutarlılığı, diff temizliği, `pnpm verify`, yığın testleri, dört ekranda kabul testi + ekran görüntüsü incelemesi + UX listesi, son güvenlik bakışı, sade rapor (koşulamayan doğrulama ayrı) | Stop kancası → `bitir.mjs`, `pnpm verify`, CI |
+
+Öncelik sırası: güvenlik ve sağlamlık → doğruluk → performans. Kural çiğneyen istek reddedilir, gerekçesi sade anlatılır ve meşru yol önerilir. İnsan için özet: [gelistirici-rehberi/claude-codex.md](../gelistirici-rehberi/claude-codex.md#ajana-iş-verdiğinde-ne-olur-gelistir).

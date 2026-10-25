@@ -7,7 +7,7 @@ description: Kod değiştiren her işte üç aşamalı akış — A) önce proje
 
 Amaç, sistemi bozmadan değişiklik yapmak. Bu projede ajana iş veren geliştiriciler **junior**dır ve yazılım geliştirmeyi bilmeyebilir: isteğin teknik doğruluğunu, güvenliğini ve testini onlardan bekleme, sen sağla. Öncelik sırası: **güvenlik ve sağlamlık → doğruluk → performans**.
 
-Üç aşamayı sırayla uygula. Her aşamanın sonunda kullanıcıya iki-üç cümlelik sade bir özet ver. Atladığın ya da koşamadığın adımı açıkça söyle. Kavramlar: `docs/gelistirici-rehberi/ddd.md`, `docs/gelistirici-rehberi/tdd.md`.
+Bu akış bir süreç kuralıdır (D37 / K-44). Üç aşamayı sırayla uygula. Her aşamanın sonunda kullanıcıya iki-üç cümlelik sade bir özet ver. Atladığın ya da koşamadığın adımı açıkça söyle. Kavramlar: `docs/gelistirici-rehberi/ddd.md`, `docs/gelistirici-rehberi/tdd.md`.
 
 ## Junior kullanıcıyla iletişim
 
