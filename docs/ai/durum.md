@@ -46,6 +46,5 @@ Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri analizi (Ha
 - [x] `services/integration`: sahte GİB sunucusu; GİB girişi, İVD geçişi, sözleşme listesi modülleri taşındı (aşama D). Beyanname ve SGK modülleri E–F aşamalarında
 - [ ] CI: `pnpm features` çıktısının PR'da güncel olduğunun denetimi; pytest sonuçlarının özellik durumuna katılması (pytest yığın testinde koşuyor, JUnit `test-results/pytest.xml`)
 - [x] Eski portalın portu, aşama A–H (2026-10-25)
-- [ ] **Acil (2026-10-26):** `next` 16.4.0 → 16.4.1 — `pnpm audit`: 2 kritik (kimlik doğrulamasız uzaktan kod çalıştırma: görsel optimizasyonu + SVG, `use cache`), 1 yüksek (server action DoS)
 - [ ] Canlı GİB doğrulaması (Hakan, açık konu 6)
 - [ ] Yönetim ekranları, `apps/sales`, e-Tebligat, SGK sistemleri, bildirimler
