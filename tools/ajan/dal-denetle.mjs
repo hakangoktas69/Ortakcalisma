@@ -9,9 +9,9 @@ if (ortakDalMi(dal)) {
   console.error(
     [
       `✖ "${dal}" ortak dal; doğrudan commit edilmez (D37, ortak dallar: ${ORTAK_DALLAR.join(', ')}).`,
-      '  İş dalı aç (değişiklikler taşınır) ve yeniden commit et:',
-      '    git switch -c is/<kısa-ad>',
-      '  Birleştirme PR ile yapılır (.github/pull_request_template.md).',
+      '  Kişisel dal aç (değişiklikler taşınır) ve yeniden commit et:',
+      '    git switch -c <ad>/<kısa-iş>',
+      "  dev'e birleştirme: node tools/ajan/birlestir.mjs guncelle, sonra dev --mesaj \"…\" (main'e kod sahibi alır).",
     ].join('\n'),
   );
   process.exit(1);

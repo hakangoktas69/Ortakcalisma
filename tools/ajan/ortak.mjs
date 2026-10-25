@@ -13,32 +13,57 @@ export const BAGLAM_YOLLARI = ['CLAUDE.md', 'AGENTS.md', 'apps', 'packages', 'do
 export const baglamDosyasiMi = (yol) =>
   /(^|\/)(CLAUDE|AGENTS)\.md$/.test(yol) || /^docs\/(ai|adr|baglamlar|hedef-mimari)\//.test(yol);
 
-// Ortak dallar (D37): iş bu dallara doğrudan commitlenmez; `is/<kısa-ad>` dalında yapılır, PR ile birleşir.
+// Ortak dallar (D37): iş bu dallara doğrudan commitlenmez. İş kişisel dalda (`<ad>/<kısa-iş>`) yapılır, dev'in
+// güncellemeleri kişisel dala çekilip çatışma orada çözülür, sonra dev'e çatışmasız birleşir (tools/ajan/birlestir.mjs).
+// dev → main birleşimini kod sahibi yapar. yeniden-yapilanma dev'e birleşene kadar listede durur.
 export const ORTAK_DALLAR = ['main', 'master', 'dev', 'yeniden-yapilanma'];
 export const ortakDalMi = (dal) => ORTAK_DALLAR.includes(dal);
+export const BIRLESIM_DALI = 'dev';
 
-// Kıdemli onayı isteyen alanlar (D37). CODEOWNERS belirlenene kadar (açık konu) PR'ı proje sorumlusu onaylar.
+// Kıdemli onayı isteyen alanlar (D37) ve kod sahibi; .github/CODEOWNERS bu listeden üretilir (codeownersMetni).
+// Yol: "dizin/" önek, "**/ad" her dizinde o ad, diğerleri tam yol.
+export const KOD_SAHIBI = '@hkazaz';
 export const HASSAS_ALANLAR = [
-  { desen: /^supabase\//, neden: 'veritabanı şeması, RLS, migration' },
-  { desen: /^packages\/contexts\/credentials\//, neden: 'kurum şifresi, hesap kullanım hakkı' },
-  { desen: /^packages\/contexts\/(identity-access|audit)\/|^packages\/feature-registry\//, neden: 'kimlik, yetki ağacı, denetim kaydı' },
-  { desen: /^apps\/web\/src\/(bff|app\/api)\/|^apps\/web\/next\.config\.ts$|^apps\/web\/src\/(middleware|proxy)\.ts$/, neden: 'oturum, CSRF, BFF uçları ve yetki koruması, CSP' },
-  { desen: /^apps\/worker\//, neden: 'işçi: kurum hesabı kullanım hakkının yeniden denetimi, sonuç uygulama' },
-  { desen: /^tools\/(ajan|claude)\/|^\.claude\/settings\.json$/, neden: 'ajan bekçileri (akış, kancalar, hassas alan listesi)' },
-  { desen: /^packages\/platform\//, neden: 'veritabanı bağlantısı, shard yönlendirme' },
-  { desen: /^services\/integration\/|^contracts\//, neden: 'kurumla konuşan kod, yayımlanmış sözleşme' },
-  { desen: /^deploy\/|^\.github\/|^tools\/git-hooks\//, neden: 'dağıtım, sırlar, CI, git kancaları' },
-  { desen: /(^|\/)(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|pyproject\.toml|uv\.lock)$/, neden: 'bağımlılık (lisans + güvenlik açığı denetimi)' },
+  { yollar: ['supabase/'], neden: 'veritabanı şeması, RLS, migration' },
+  { yollar: ['packages/contexts/credentials/'], neden: 'kurum şifresi, hesap kullanım hakkı' },
+  { yollar: ['packages/contexts/identity-access/', 'packages/contexts/audit/', 'packages/feature-registry/'], neden: 'kimlik, yetki ağacı, denetim kaydı' },
+  {
+    yollar: ['apps/web/src/bff/', 'apps/web/src/app/api/', 'apps/web/next.config.ts', 'apps/web/src/middleware.ts', 'apps/web/src/proxy.ts'],
+    neden: 'oturum, CSRF, BFF uçları ve yetki koruması, CSP',
+  },
+  { yollar: ['apps/worker/'], neden: 'işçi: kurum hesabı kullanım hakkının yeniden denetimi, sonuç uygulama' },
+  { yollar: ['tools/ajan/', 'tools/claude/', '.claude/settings.json'], neden: 'ajan bekçileri (akış, kancalar, hassas alan listesi)' },
+  { yollar: ['packages/platform/'], neden: 'veritabanı bağlantısı, shard yönlendirme' },
+  { yollar: ['services/integration/', 'contracts/'], neden: 'kurumla konuşan kod, yayımlanmış sözleşme' },
+  { yollar: ['deploy/', '.github/', 'tools/git-hooks/'], neden: 'dağıtım, sırlar, CI, git kancaları' },
+  {
+    yollar: ['**/package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '**/pyproject.toml', '**/uv.lock'],
+    neden: 'bağımlılık (lisans + güvenlik açığı denetimi)',
+  },
 ];
+
+const yolEslesir = (yol, d) =>
+  yol.startsWith('**/') ? d === yol.slice(3) || d.endsWith(`/${yol.slice(3)}`) : yol.endsWith('/') ? d.startsWith(yol) : d === yol;
 
 /** Dosyaları ilk eşleşen hassas alana göre gruplar: [{ neden, dosyalar }]. */
 export function hassasAlanlar(dosyalar) {
   const gruplar = new Map();
   for (const d of dosyalar) {
-    const alan = HASSAS_ALANLAR.find((a) => a.desen.test(d));
+    const alan = HASSAS_ALANLAR.find((a) => a.yollar.some((y) => yolEslesir(y, d)));
     if (alan) gruplar.set(alan.neden, [...(gruplar.get(alan.neden) ?? []), d]);
   }
   return [...gruplar].map(([neden, d]) => ({ neden, dosyalar: d }));
+}
+
+/** .github/CODEOWNERS içeriği: hassas alanların her yolu kod sahibine bağlanır (dev → main PR'ında onay). */
+export function codeownersMetni() {
+  return [
+    '# Üretilir: tools/ajan/ortak.mjs HASSAS_ALANLAR (D37). Elle değiştirme; listeyi değiştir ve',
+    '#   node tools/ajan/senkron.mjs --yaz',
+    '# Kod sahibi dev → main birleşiminde bu alanlardaki değişikliği onaylar.',
+    ...HASSAS_ALANLAR.flatMap((a) => [`\n# ${a.neden}`, ...a.yollar.map((y) => `${y.startsWith('**/') ? y : `/${y}`} ${KOD_SAHIBI}`)]),
+    '',
+  ].join('\n');
 }
 
 /** Yeniden yapılanma öncesi ekip hafızası (D28); yerel ayarda görülürse yenisiyle değiştirilir. */

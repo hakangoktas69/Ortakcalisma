@@ -14,7 +14,7 @@ Bu dosya ve içe aktarılan belgeler ekibin ortak bağlamıdır; git'e girer. Ku
 - @docs/ai/test.md — TDD akışı, test katmanları, özellik durumu (kırmızı/yeşil)
 - @docs/ai/durum.md — şu anki durum, açık konular, sıradaki işler (işe başlamadan bak)
 - Hedef mimari (gerekçeler, ayrıntı): `docs/hedef-mimari/01…09`; karar kaydı `docs/adr/karar-kaydi.md` (`K-NN`), kısa liste `D-NN` hedef-mimari/01'de.
-- **Kod değiştirmeden önce** (özellik, uç, ekran, kural, migration, hata düzeltme, refactor): `gelistir` becerisini uygula (`docs/ai/beceriler/gelistir.md`): **A)** önce hafıza, yapı ve iş modelini özümse; **B)** etki, hata ve güvenlik analiziyle planla, DDD + TDD ile uygula; **C)** tutarlılık, fonksiyonel, dört ekran görsel/erişilebilirlik/UX doğrulaması, bağımsız inceleme ve PR açıklaması. Kavram ve örnekler: [DDD rehberi](docs/gelistirici-rehberi/ddd.md), [TDD rehberi](docs/gelistirici-rehberi/tdd.md).
+- **Kod değiştirmeden önce** (özellik, uç, ekran, kural, migration, hata düzeltme, refactor): `gelistir` becerisini uygula (`docs/ai/beceriler/gelistir.md`): **A)** önce hafıza, yapı ve iş modelini özümse; **B)** etki, hata ve güvenlik analiziyle planla, DDD + TDD ile uygula; **C)** tutarlılık, fonksiyonel, dört ekran görsel/erişilebilirlik/UX doğrulaması, bağımsız inceleme ve `dev`'e birleştirme. Kavram ve örnekler: [DDD rehberi](docs/gelistirici-rehberi/ddd.md), [TDD rehberi](docs/gelistirici-rehberi/tdd.md).
 - Bağlam sayfası: bir bağlamda çalışmadan önce `docs/baglamlar/<context>.md`. Alt dizin kuralları: `apps/*`, `packages/contexts`, `packages/kernel`, `packages/feature-registry`, `services/integration`, `supabase` altındaki `CLAUDE.md`.
 - Eski Eworks pilotunun analizi (yalnız referans): `docs/arsiv/mevcut-durum/`.
 
@@ -25,7 +25,7 @@ Ajana iş veren geliştiriciler **junior**dır ve yazılım geliştirmeyi bilmey
 - İsteği iş diliyle yeniden anlat ve onay al; belirsizliği tahminle değil, seçenekli kısa sorularla kapat; teknik terimi ilk kullanışta açıkla.
 - Kural çiğneyen isteği yapma; nedenini sade anlat, meşru yolu öner. "Hızlıca", "testi sonra" gibi istekler kuralları ve doğrulamayı askıya almaz.
 - Öncelik: **güvenlik ve sağlamlık → doğruluk → performans**.
-- İş `is/<kısa-ad>` dalında yapılır, PR ile birleşir (ortak dala commit kancada reddedilir); hassas alan değişikliği kıdemli onayı ister; diff bağımsız incelemeden geçer; PR açıklaması `.github/pull_request_template.md`'ye göre.
+- **Dallar:** iş başında `dev`'den kişisel dal (`<ad>/<kısa-iş>`), iş bitiminde orada commit. `dev`'e birleştirmeden önce `dev`'in güncellemeleri kişisel dala çekilir (`node tools/ajan/birlestir.mjs guncelle`); çatışma kişisel dalda, iki tarafın amacı kodda analiz edilerek çözülür, doğrulamalar yeniden koşulur, sonra `birlestir.mjs dev`. `dev` push'u her seferinde kullanıcı onayıyla; `dev` → `main`'i kod sahibi (`@hkazaz`) yapar. Ortak dala doğrudan commit kancada reddedilir; hassas alan değişikliği kod sahibinin onayını ister; diff bağımsız incelemeden geçer.
 - Raporda neyin doğrulandığını, neyin **doğrulanamadığını** ve kullanıcının elle bakabileceği yeri ayrı yaz.
 
 ## Ekip hafızası ve ajanlar

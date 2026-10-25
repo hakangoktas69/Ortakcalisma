@@ -1,0 +1,48 @@
+# Üretilir: tools/ajan/ortak.mjs HASSAS_ALANLAR (D37). Elle değiştirme; listeyi değiştir ve
+#   node tools/ajan/senkron.mjs --yaz
+# Kod sahibi dev → main birleşiminde bu alanlardaki değişikliği onaylar.
+
+# veritabanı şeması, RLS, migration
+/supabase/ @hkazaz
+
+# kurum şifresi, hesap kullanım hakkı
+/packages/contexts/credentials/ @hkazaz
+
+# kimlik, yetki ağacı, denetim kaydı
+/packages/contexts/identity-access/ @hkazaz
+/packages/contexts/audit/ @hkazaz
+/packages/feature-registry/ @hkazaz
+
+# oturum, CSRF, BFF uçları ve yetki koruması, CSP
+/apps/web/src/bff/ @hkazaz
+/apps/web/src/app/api/ @hkazaz
+/apps/web/next.config.ts @hkazaz
+/apps/web/src/middleware.ts @hkazaz
+/apps/web/src/proxy.ts @hkazaz
+
+# işçi: kurum hesabı kullanım hakkının yeniden denetimi, sonuç uygulama
+/apps/worker/ @hkazaz
+
+# ajan bekçileri (akış, kancalar, hassas alan listesi)
+/tools/ajan/ @hkazaz
+/tools/claude/ @hkazaz
+/.claude/settings.json @hkazaz
+
+# veritabanı bağlantısı, shard yönlendirme
+/packages/platform/ @hkazaz
+
+# kurumla konuşan kod, yayımlanmış sözleşme
+/services/integration/ @hkazaz
+/contracts/ @hkazaz
+
+# dağıtım, sırlar, CI, git kancaları
+/deploy/ @hkazaz
+/.github/ @hkazaz
+/tools/git-hooks/ @hkazaz
+
+# bağımlılık (lisans + güvenlik açığı denetimi)
+**/package.json @hkazaz
+/pnpm-lock.yaml @hkazaz
+/pnpm-workspace.yaml @hkazaz
+**/pyproject.toml @hkazaz
+**/uv.lock @hkazaz

@@ -8,7 +8,7 @@ import { dirname, join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { bitirMetni, degisenDosyalar, durumTopla } from '../bitir.mjs';
-import { hassasAlanlar, ortakDalMi } from '../ortak.mjs';
+import { codeownersMetni, HASSAS_ALANLAR, hassasAlanlar, ortakDalMi } from '../ortak.mjs';
 import { yaz } from '../senkron.mjs';
 
 const GERCEK_KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
@@ -49,7 +49,7 @@ test('pre-commit kancası ortak dala doğrudan commit’i reddeder, iş dalında
   const red = commit(kok, 'ortak dala');
   assert.notEqual(red.status, 0, 'main’e commit reddedilmeli');
   assert.match(red.stderr, /ortak dal/i);
-  assert.match(red.stderr, /git switch -c is\//);
+  assert.match(red.stderr, /git switch -c <ad>\//);
 
   g(kok, 'switch', '-q', '-c', 'is/deneme');
   const izin = commit(kok, 'iş dalına');
@@ -141,7 +141,13 @@ test('bekçi kodu, BFF uçları ve işçi de hassas alandır', () => {
   assert.equal(hepsi.length, 5, hepsi.join());
 });
 
-test('bitirme metni ortak dal ve hassas alan uyarısı, bağımsız inceleme ve PR adımı içerir', () => {
+test('CODEOWNERS hassas alan listesinden üretilir; her yol kod sahibine bağlı', () => {
+  const metin = codeownersMetni();
+  for (const a of HASSAS_ALANLAR) for (const y of a.yollar) assert.match(metin, new RegExp(`^${(y.startsWith('**/') ? y : `/${y}`).replace(/[.*]/g, '\\$&')} @hkazaz$`, 'm'), y);
+  assert.match(metin, /Üretilir/);
+});
+
+test('bitirme metni ortak dal ve hassas alan uyarısı, bağımsız inceleme ve dev birleştirme adımı içerir', () => {
   const ortak = bitirMetni('claude', {
     senkron: 'güncel',
     hafiza: 'yeşil',
@@ -149,11 +155,12 @@ test('bitirme metni ortak dal ve hassas alan uyarısı, bağımsız inceleme ve 
     hassas: [{ neden: 'veritabanı şeması, RLS', dosyalar: ['supabase/migrations/tenant/a.sql'] }],
   });
   assert.match(ortak, /ortak daldasın/i);
-  assert.match(ortak, /git switch -c is\//);
+  assert.match(ortak, /git switch -c <ad>\//);
   assert.match(ortak, /Kıdemli onayı/);
+  assert.match(ortak, /@hkazaz/);
   assert.match(ortak, /supabase\/migrations\/tenant\/a\.sql/);
   assert.match(ortak, /code-review/);
-  assert.match(ortak, /pull_request_template/);
+  assert.match(ortak, /birlestir\.mjs guncelle/);
 
   const temiz = bitirMetni('codex', { senkron: 'güncel', hafiza: 'yeşil', dal: 'is/x', hassas: [] });
   assert.doesNotMatch(temiz, /ortak daldasın/i);

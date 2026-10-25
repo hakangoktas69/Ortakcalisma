@@ -6,6 +6,7 @@
 //   • <dizin>/AGENTS.md: her alt dizin CLAUDE.md'si için "bu dizinde CLAUDE.md'yi oku" + başlık özeti
 //   • docs/ai/memory/MEMORY.md: dizinde satırı olmayan kayıt eklenir, silinen kaydın satırı kaldırılır (Codex → Claude)
 //   • .claude/skills/<ad>/SKILL.md: docs/ai/beceriler/<ad>.md'den (Codex → Claude)
+//   • .github/CODEOWNERS: tools/ajan/ortak.mjs HASSAS_ALANLAR + KOD_SAHIBI'nden (D37)
 //
 // Kullanım (depo kökünden):
 //   node tools/ajan/senkron.mjs --yaz [--sahneleme-yok] [--sessiz]   üretir; değiştiyse git add ile sahneler
@@ -14,7 +15,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { git, gitDeposuMu, hafizaAyariniKur, kancalariKur, KOK, onBilgi } from './ortak.mjs';
+import { codeownersMetni, git, gitDeposuMu, hafizaAyariniKur, kancalariKur, KOK, onBilgi } from './ortak.mjs';
 
 export const URETILDI = '<!-- senkron:uretildi — elle düzenlemeyin; kaynak ve üretici: node tools/ajan/senkron.mjs --yaz -->';
 const BLOK = (ad, govde) => `<!-- senkron:baslangic ${ad} -->\n${govde.trim()}\n<!-- senkron:bitis ${ad} -->`;
@@ -171,6 +172,8 @@ export function uret(kok) {
   if (varMi(kok, 'docs/ai/memory')) out['docs/ai/memory/MEMORY.md'] = hafiza;
   for (const c of k.altClaude) out[`${posix.dirname(c)}/AGENTS.md`] = altAgents(kok, c);
   for (const b of k.beceriler) out[`.claude/skills/${b.ad}/SKILL.md`] = skill(b);
+  // Kod sahipliği hassas alan listesinden (D37); .github olan depoda
+  if (varMi(kok, '.github')) out['.github/CODEOWNERS'] = codeownersMetni();
   return out;
 }
 

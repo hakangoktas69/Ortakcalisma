@@ -1,6 +1,6 @@
 ---
 name: gelistir
-description: Kod değiştiren her işte üç aşamalı akış — A) önce projeyi ve işi anla, iş dalı aç; B) etki/risk/güvenlik/bağımlılık analiziyle planla, DDD + TDD ile uygula; C) tutarlılık, fonksiyonel, dört ekran görsel/erişilebilirlik/UX doğrulaması, bağımsız inceleme, PR açıklaması ve kıdemli onayı. Yeni özellik, işlem, ekran, uç, kural, migration, hata düzeltme ya da refactor. "Şu özelliği ekle", "şunu geliştir", "hatayı düzelt", "uç/ekran/tablo ekle", "/gelistir" dendiğinde ya da packages/, apps/, services/, supabase/ altında kod yazmadan önce kullan.
+description: Kod değiştiren her işte üç aşamalı akış — A) kişisel dal aç, projeyi ve işi anla; B) etki/risk/güvenlik/bağımlılık analiziyle planla, DDD + TDD ile uygula; C) tutarlılık, fonksiyonel, dört ekran görsel/erişilebilirlik/UX doğrulaması, bağımsız inceleme, kıdemli onayı ve dev'e birleştirme (dev güncellemesi, çatışma çözümü). Yeni özellik, işlem, ekran, uç, kural, migration, hata düzeltme ya da refactor. "Şu özelliği ekle", "şunu geliştir", "hatayı düzelt", "uç/ekran/tablo ekle", "/gelistir" dendiğinde ya da packages/, apps/, services/, supabase/ altında kod yazmadan önce kullan.
 ---
 
 # Geliştir: anla → planla ve uygula → doğrula
@@ -15,8 +15,8 @@ Bu akış bir süreç kuralıdır (D37 / K-44). Üç aşamayı sırayla uygula. 
 - Belirsizliği tahminle kapatma. En fazla 3 somut, seçenekli soru sor; önerdiğin seçeneği gerekçesiyle başa koy.
 - İstek bir kuralı çiğniyorsa (kiracı izolasyonu, şifre, kişisel veri, hız sınırı, testsiz kod, `NEXT_PUBLIC_*`, `eski/`'de geliştirme) **yapma**; nedenini sade anlat, meşru yolu öner.
 - "Hızlıca", "testi sonra yaz", "şimdilik böyle olsun" istekleri testleri, doğrulamayı ve kuralları askıya almaz. İş büyükse küçük, kendi başına çalışan dilimlere böl.
-- Geri alınması zor işlerde (migration'da veri silme/dönüştürme, klasör taşıma, yetki ağacından anahtar silme, başkasının alanı, push, PR açma) önce sor.
-- **Kıdemli onayı:** iş hassas bir alana dokunuyorsa (veritabanı şeması/RLS, kurum şifresi, kimlik/yetki/denetim, oturum/CSRF/CSP, shard bağlantısı, kurumla konuşan kod, dağıtım/CI/kancalar, bağımlılık; liste `tools/ajan/ortak.mjs` `HASSAS_ALANLAR`) bunu planda söyle. Birleştirmeden önce proje sorumlusu onaylar (CODEOWNERS belirlenene kadar, açık konu).
+- Geri alınması zor işlerde (migration'da veri silme/dönüştürme, klasör taşıma, yetki ağacından anahtar silme, başkasının alanı, push) önce sor. `dev`'i push etmek **her seferinde** kullanıcı onayıyla; `main`'e ajan birleştirmez.
+- **Kıdemli onayı:** iş hassas bir alana dokunuyorsa (veritabanı şeması/RLS, kurum şifresi, kimlik/yetki/denetim, oturum/CSRF/CSP, shard bağlantısı, kurumla konuşan kod, dağıtım/CI/kancalar, bağımlılık; liste `tools/ajan/ortak.mjs` `HASSAS_ALANLAR`) bunu planda söyle. Kod sahibi (`@hkazaz`, `.github/CODEOWNERS`) bu değişikliği `dev` → `main` birleşiminde onaylar; `birlestir.mjs dev` birleştirme mesajına "Kıdemli onayı gerekli" bölümünü ekler.
 
 ## A. Önce: projeyi ve işi özümse (koda dokunmadan)
 
@@ -24,7 +24,7 @@ Bu akış bir süreç kuralıdır (D37 / K-44). Üç aşamayı sırayla uygula. 
 - Bağlamda ekip hafızası (`MEMORY.md` içeriği) yoksa `docs/ai/memory/MEMORY.md`'yi oku ve SessionStart kancasının çalışmadığını kullanıcıya bir kez söyle. İşe değen hafıza kayıtlarını aç.
 - `docs/ai/durum.md`: süren iş, açık konular. İş bir açık konuya değiyorsa söyle. `docs/ozellik-durumu.md`: ilgili özellik kırmızı mı yeşil mi.
 - `git status` ve `git log --oneline -10`. Başka oturumun commitlenmemiş değişikliği varsa ona dokunma (`paralel-oturumlar` hafıza kaydı).
-- **İş dalı:** ortak daldaysan (`main`, `master`, `dev`, `yeniden-yapilanma`; liste `tools/ajan/ortak.mjs`) koda dokunmadan önce `git switch -c is/<kısa-ad>`. Ortak dala doğrudan commit pre-commit kancasında reddedilir; birleştirme PR ile yapılır. Bir iş dalı = bir iş; ilgisiz değişiklik ayrı dala.
+- **Kişisel dal:** iş başında `dev`'in güncel halinden kişisel dal aç: `git fetch origin && git switch -c <ad>/<kısa-iş> origin/dev` (`<ad>` geliştiricinin adı, ör. `hakan/gorev-logu`; bilinmiyorsa sor). Ortak dallara (`main`, `master`, `dev`, `yeniden-yapilanma`; liste `tools/ajan/ortak.mjs`) doğrudan commit pre-commit kancasında reddedilir. Bir kişisel dal = bir iş; ilgisiz değişiklik ayrı dala.
 
 **A2. Yapı.**
 - İşin **bağlamını** belirle: `docs/ai/mimari.md` bağlam tablosu → `docs/baglamlar/<ctx>.md` → `packages/contexts/<ctx>/src/index.ts`. İş iki bağlama da uyuyorsa ya da yeni bağlam gerektiriyorsa **dur ve sor**; yeni bağlam bir karardır (D-NN/K-NN).
@@ -114,5 +114,19 @@ Etiketi (`@F:` / `[F:]`) yalnız o özelliği gerçekten doğrulayan teste koy. 
 
 **C5. Rapor ve bitiş.**
 - `node tools/ajan/bitir.mjs --ajan claude|codex` çıktısındaki adımları uygula.
-- İş dalında commitle. **PR açıklaması** taslağını `.github/pull_request_template.md` bölümlerine göre hazırla: iş dilinde değişiklik ve kabul ölçütü (A); etki, riskler, güvenlik, bağımlılık, migration geri alma planı (B); doğrulama sonuçları, bağımsız inceleme bulguları, koşulamayanlar (C); kıdemli onayı gereken hassas alanlar (`bitir.mjs` çıktısı). Push ve PR yalnız kullanıcı isteyince.
+- İş bitiminde kişisel dalda commitle (Türkçe başlık; ara commit serbest).
 - Kullanıcıya sade rapor: (1) iş dilinde ne değişti; (2) hangi testler önce kırmızıydı, şimdi ne yeşil; (3) hangi doğrulama koşuldu, hangisi **koşulamadı** ve nedeni; (4) kalan risk ya da açık konu; (5) kıdemli onayı gerekip gerekmediği; (6) kullanıcının elle bakabileceği yer (ekran yolu, demo hesabı).
+
+**C6. dev'e birleştir.** Kişisel dal commitli ve C1–C5 tamam olduğunda:
+
+1. `node tools/ajan/birlestir.mjs guncelle`: `dev`'in güncellemelerini kişisel dala çeker (merge; rebase değil). Çatışma **kişisel dalda** çözülür, `dev`'de değil.
+2. **Çatışma varsa** betik her dosyayı ve iki tarafın commitlerini listeler. Her dosya için:
+   - Her iki tarafın **hedeflediği işlevi** kodda analiz et: commit mesajı, değişen testler, özellik anahtarı (`@F:`), ilgili bağlam sayfası. "Bizimki" ya da "onlarınki" toptan seçilmez.
+   - İki amacı da koruyan kodu yaz; öteki tarafın testini silme ya da zayıflatma, onun testleri de yeşil kalmalı.
+   - Üretilen dosyalar (AGENTS.md, MEMORY.md dizini, `.claude/skills`, CODEOWNERS, özellik durumu, kilit dosyaları) elle çözülmez, betiğin söylediği komutla yeniden üretilir.
+   - **Dur ve sor:** iki tarafın iş kuralı çelişiyorsa, öteki tarafın amacı koddan anlaşılmıyorsa ya da çatışma hassas alandaysa. Kararı kullanıcı verir; gerekirse değişikliğin sahibine danışılır.
+   - Çözünce `git add` + `git commit --no-edit`; vazgeçmek için `git merge --abort`.
+3. **Birleşik kod yeni koddur:** çatışma olsun olmasın C2 ve C3 doğrulamalarını yeniden koş (`pnpm verify`; değişen alana göre yığın testleri ve e2e). Kırmızıysa dev'e birleştirme yok.
+4. `node tools/ajan/birlestir.mjs dev --mesaj "<Türkçe başlık>\n\n<kısa rapor>"`: kişisel dalı `dev`'e `--no-ff` birleştirir. Rapor: iş dilinde ne değişti, doğrulama, koşulamayan, çözülen çatışmalar ve nasıl çözüldükleri. Hassas alan varsa betik "Kıdemli onayı gerekli (@hkazaz)" bölümünü ekler. `dev` bu arada ilerlediyse betik reddeder: 1. adıma dön.
+5. **Push etme.** Kullanıcıya birleşimi ve doğrulama sonuçlarını göster, `git push origin dev` için açık onay iste (her seferinde). Kişisel dalı silmek de kullanıcı onayıyla.
+6. `dev` → `main` birleşimini kod sahibi yapar; PR açıklaması `.github/pull_request_template.md`'ye göre, birleştirme mesajlarındaki raporlardan derlenir.

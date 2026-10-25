@@ -1,5 +1,6 @@
 <!--
-Ajanla geliştirme akışı (D37): ajan bu açıklamayı `gelistir` becerisinin A/B/C aşamalarından doldurur.
+dev → main PR'ı (D37, kod sahibi @hkazaz). Açıklama, dev'e giren birleştirme commit'lerindeki A/B/C raporlarından derlenir
+(git log --merges main..dev). Kişisel dal → dev birleşimi PR'sız yapılır: tools/ajan/birlestir.mjs.
 Boş kalacak bölüme "yok" yazılır ve kısaca nedeni eklenir. Kişisel veri, sır, gerçek mükellef/müşavir bilgisi yazılmaz.
 -->
 
@@ -40,7 +41,7 @@ Koşulamayan doğrulama ve nedeni:
 <!-- Hassas alan listesi: `node tools/ajan/bitir.mjs` çıktısı (tools/ajan/ortak.mjs HASSAS_ALANLAR). -->
 
 - [ ] Hassas alan değişmedi
-- [ ] Hassas alan değişti, proje sorumlusu onayı gerekli:
+- [ ] Hassas alan değişti (birleştirme mesajlarındaki "Kıdemli onayı gerekli" bölümleri), kod sahibi onayı gerekli:
 
 ## Elle bakılacak yer
 

@@ -10,7 +10,7 @@
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { git, hassasAlanlar, KOK, ORTAK_DALLAR, ortakDalMi } from './ortak.mjs';
+import { git, hassasAlanlar, KOD_SAHIBI, KOK, ORTAK_DALLAR, ortakDalMi } from './ortak.mjs';
 import { yaz } from './senkron.mjs';
 
 const refVar = (kok, ref) => {
@@ -64,12 +64,12 @@ export function bitirMetni(ajan, { senkron, hafiza, dal, hassas }) {
       : 'code-review becerisini çalıştır; hassas alan değiştiyse ayrıca security-review';
   const uyarilar = [];
   if (ortakDalMi(dal)) {
-    uyarilar.push(`⚠ Ortak daldasın (${dal}): commit etmeden önce iş dalı aç: git switch -c is/<kısa-ad> (değişiklikler taşınır). pre-commit kancası ortak dala commit'i reddeder.`);
+    uyarilar.push(`⚠ Ortak daldasın (${dal}): commit etmeden önce kişisel dal aç: git switch -c <ad>/<kısa-iş> (değişiklikler taşınır). pre-commit kancası ortak dala commit'i reddeder.`);
   }
   if (hassas.length > 0) {
     uyarilar.push(
       [
-        '⚠ Kıdemli onayı gerekli — hassas alan değişti (PR açıklamasının "Kıdemli onayı" bölümüne yaz; birleştirmeden önce proje sorumlusu onaylar):',
+        `⚠ Kıdemli onayı gerekli (${KOD_SAHIBI}) — hassas alan değişti; birlestir.mjs dev bunu birleştirme mesajına ekler, kod sahibi dev → main birleşiminde onaylar:`,
         ...hassas.map((h) => `   • ${h.neden}: ${h.dosyalar.join(', ')}`),
       ].join('\n'),
     );
@@ -85,7 +85,8 @@ export function bitirMetni(ajan, { senkron, hafiza, dal, hassas }) {
     '5. Kod değiştiyse tutarlılık ve güvenlik (gelistir C1, C4): plan ile git diff örtüşüyor mu; iş modeli yanıtlarının (kim görür/göremez, kapsam, onay, maskeleme) ve öngörülen hata durumlarının her biri bir testte mi; altyapı hatası loglanmadan yutulmuyor, loga kişisel veri/şifre/token girmiyor; diff\'te hata ayıklama kodu, TODO, skip, sır kalmadı; yeni bağımlılığın lisansı ve güvenlik açığı denetlendi (gelistir B2).',
     `6. Kod değiştiyse bağımsız inceleme (gelistir C4): ${incelemeAdimi}. Her bulguyu düzelt ya da neden düzeltmediğini rapora yaz.`,
     '7. Belgeleri veya hafızayı değiştirdiysen node tools/ajan/senkron.mjs --yaz (pre-commit kancası da çalıştırır), sonra pnpm verify (tip, mimari, birim testleri + kapsam eşiği, yetki anahtarı denetimi, hafıza, senkron, bağlantılar); Node 24 yoksa sh tools/deploy/dogrula.sh. Entegrasyon/migration değiştiyse node tools/deploy/yigin.mjs test. Arayüz değiştiyse node tools/deploy/yigin.mjs e2e (dört ekran, erişilebilirlik taraması dahil) ve değişen ekranın 375 ile 1366 genişlikte görüntüsünü alıp UX kontrol listesiyle incele (gelistir C3). Koşamadığın doğrulamayı geçti diye raporlama.',
-    '8. İş dalında commitle (Türkçe başlık). PR açıklaması taslağını .github/pull_request_template.md bölümlerine göre hazırla ve kullanıcıya sade raporla birlikte ver (gelistir C5): iş dilinde ne değişti, hangi test kırmızıdan yeşile döndü, ne koşulamadı ve neden, kalan risk, elle bakılacak yer. Push etme, PR açma; kullanıcı ister.',
+    '8. Kişisel dalda commitle (Türkçe başlık). Kullanıcıya sade rapor (gelistir C5): iş dilinde ne değişti, hangi test kırmızıdan yeşile döndü, ne koşulamadı ve neden, kalan risk, kıdemli onayı, elle bakılacak yer.',
+    "9. dev'e birleştir (gelistir C6): node tools/ajan/birlestir.mjs guncelle — çatışma varsa kişisel dalda, iki tarafın amacını kodda analiz ederek çöz (amaçlar çelişiyorsa ya da hassas alandaysa kullanıcıya sor), sonra doğrulamaları yeniden koş; ardından node tools/ajan/birlestir.mjs dev --mesaj \"<başlık>\\n\\n<kısa rapor>\". dev'i push etme; her seferinde kullanıcı onayı iste. main'e birleştirmeyi kod sahibi yapar.",
   ].join('\n');
 }
 

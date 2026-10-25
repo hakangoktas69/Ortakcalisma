@@ -1,6 +1,6 @@
 ---
 name: eworks-acik-konular
-description: Eworks açık konuları (2026-10-25) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, CODEOWNERS, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, web/BFF'te operasyon logu yok, ekranda VKN maskeleme uygulanmıyor
+description: Eworks açık konuları (2026-10-25) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, web/BFF'te operasyon logu yok, ekranda VKN maskeleme uygulanmıyor
 metadata:
   type: project
 ---
@@ -12,7 +12,7 @@ metadata:
    - web servis analizinden çıkacak kurum limitleri.
 2. **Shard başlangıç donanımı:** Öneri: kontrol düzlemi + 2 fiziksel shard sunucusu, 16 mantıksal shard (`docs/hedef-mimari/07-veri-saklama-ve-sharding.md` §2.3).
 3. **Bağlama atanmamış portal modülleri:** e-Tebligat, e-Defter, Faturalar, Dilekçeler, Ödeme, Raporlar, Destek `feature-registry`'de `context: null` (`docs/baglamlar/README.md`). Yeni bağlam mı, mevcut bağlam mı kararı bekliyor.
-4. **CODEOWNERS:** bağlam başına sahipler (GitHub kullanıcı adları) belirlenmedi. Geçici olarak hassas alan (`tools/ajan/ortak.mjs` `HASSAS_ALANLAR`) değişikliğini PR'da proje sorumlusu onaylar (D37, 2026-10-26). GitHub dal koruması (ortak dallarda PR + CI zorunlu) da ayarlanmadı; yerel pre-commit kancası `--no-verify` ile aşılabilir.
+4. **GitHub dal koruması yok (2026-10-26):** kod sahibi `@hkazaz` (CODEOWNERS `HASSAS_ALANLAR`'dan üretilir, D37) ama `main`'de PR + CI + kod sahibi onayı zorunluluğu GitHub'da açılmadı; `dev`'de doğrudan push engeli yok; yerel pre-commit kancası `--no-verify` ile aşılabilir.
 5. **Codex proje içi beceri desteği** doğrulanmadı; yedek yol `AGENTS.md` "Beceriler" bloğu (09 §7.5).
 6. **Canlı GİB doğrulaması (2026-10-25):** eski portalın portu bitti; `firmalar.gib_sozlesmeler.sync`, `beyanname.senkron.start`, `sgk.ebildirge.sync` yalnız sahte GİB'e karşı sınandı. Canlı koşu Hakan'ın hesabıyla (`docs/gelistirici-rehberi/canli-dogrulama.md`); canlı güvenlik kodunda OCR başarısı bilinmiyor.
 7. **Bağlamlar arası okuma birleşimleri:** tax-filing/social-security/workspace sorguları unvan için `portfolio.firms` ile birleşiyor (kural 5'ten sapma); okuma modeline taşınacak.

@@ -89,11 +89,11 @@ Yazılım bilgisi gerekmez; ajan teknik doğruluk ve güvenlikten sorumludur. Se
 
 | Aşama | Ajan ne yapar | Senden beklenen |
 |---|---|---|
-| **A. Anla** | İş dalı açar (`is/<kısa-ad>`); hafızayı, durumu, ilgili bağlamı ve benzer çalışan özelliği okur; isteği iş diliyle yeniden anlatır, kimin göreceğini/göremeyeceğini sorar | Anlatımı doğrula, sorulara yanıt ver. Bilmiyorsan "bilmiyorum" de; ajan açık konuya yazar |
+| **A. Anla** | `dev`'den kişisel dal açar (`<ad>/<kısa-iş>`); hafızayı, durumu, ilgili bağlamı ve benzer çalışan özelliği okur; isteği iş diliyle yeniden anlatır, kimin göreceğini/göremeyeceğini sorar | Anlatımı doğrula, sorulara yanıt ver. Bilmiyorsan "bilmiyorum" de; ajan açık konuya yazar |
 | **B. Planla ve uygula** | Etki, olası hata, güvenlik ve bağımlılık analizi; migration geri alma planı; kıdemli onayı gerekiyorsa söyler; kısa plan; önce kırmızı test, sonra kod; gerekli denetim kaydı ve log | Büyük ya da geri alınması zor işte planı onayla |
-| **C. Doğrula** | Plan ↔ kod ↔ iş kuralı tutarlılığı, `pnpm verify`, yığın testleri, dört ekran boyutunda arayüz + erişilebilirlik testi ve ekran görüntüsü incelemesi, bağımsız inceleme (Claude `code-review`; Codex'te senden `/review` ister), PR açıklaması taslağı | Rapordaki "koşulamadı" maddelerine ve elle bakılacak ekrana göz at; PR'ı sen açarsın, hassas alan varsa proje sorumlusundan onay iste |
+| **C. Doğrula** | Plan ↔ kod ↔ iş kuralı tutarlılığı, `pnpm verify`, yığın testleri, dört ekran boyutunda arayüz + erişilebilirlik testi ve ekran görüntüsü incelemesi, bağımsız inceleme (Claude `code-review`; Codex'te senden `/review` ister); sonra `dev`'in güncellemelerini dalına çeker, çatışmayı iki tarafın amacını analiz ederek çözer, testleri yeniden koşar ve `dev`'e birleştirir | Rapordaki "koşulamadı" maddelerine ve elle bakılacak ekrana göz at; `dev` push'u için onay ver ya da verme; çatışmada iş kuralı sorusu gelirse yanıtla |
 
-Ortak dala (`main`, `dev`, `yeniden-yapilanma`) commit kancada reddedilir: `git switch -c is/<kısa-ad>` ile iş dalı aç. Acil durumda `--no-verify` vardır; gerekçesi ekibe yazılır.
+Ortak dala (`main`, `dev`, `yeniden-yapilanma`) commit kancada reddedilir: `git switch -c <ad>/<kısa-iş>` ile kişisel dal aç. Birleştirme komutları: `node tools/ajan/birlestir.mjs guncelle` ve `node tools/ajan/birlestir.mjs dev --mesaj "…"`. `dev` → `main`'i kod sahibi (`@hkazaz`) alır. Acil durumda `--no-verify` vardır; gerekçesi ekibe yazılır.
 
 Ajan bir isteği kural gereği reddederse (ör. testsiz kod, şifreyi loglama, başka ofisin verisini gösterme) gerekçesini ve meşru yolu söyler; ısrar etmek yerine yolu sor. "Hızlıca", "testi sonra" demek adımları atlatmaz.
 
