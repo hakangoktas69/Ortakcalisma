@@ -13,7 +13,8 @@ const xml = `<?xml version="1.0"?>
 </testsuites>`;
 
 describe('JUnit okuma', () => {
-  it('etiketli testleri, başarısız ve atlananları ayırır', () => {
+  it('etiketli testleri, başarısız ve atlananları ayırır; kabul çıktısını işaretler', () => {
+    expect(parseJunit(xml, true)[0]).toEqual({ feature: 'sgk.ebildirge.view', passed: true, acceptance: true });
     expect(parseJunit(xml)).toEqual([
       { feature: 'sgk.ebildirge.view', passed: true },
       { feature: 'sgk.ebildirge.sync', passed: false },
@@ -30,7 +31,7 @@ describe('çıktılar', () => {
     'sgk.ebildirge.view': { title: 'Görüntüle', kind: 'action', acceptance: true },
     'sgk.ebildirge.sync': { title: 'Güncelle', kind: 'action', acceptance: true },
   } as const;
-  const status = computeStatus(tree, parseJunit(xml));
+  const status = computeStatus(tree, parseJunit(xml, true));
 
   it('belge ağacı ilerlemeyle ve bilinmeyen etiketlerle yazar', () => {
     const md = renderMarkdown(tree, status, ['sgk.yok']);

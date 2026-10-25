@@ -1,6 +1,6 @@
 # organization — Ofis
 
-> Durum: **iskelet** (kod yok, tüm özellikler kırmızı). Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil). Kod: `packages/contexts/organization` — dışarıya yalnız `src/index.ts`.
+> Durum: **B aşaması (2026-10-25)**: ofis ve müşavir kaydı (tablolar, RLS). Davet ve ofis ayarları yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil). Kod: `packages/contexts/organization` — dışarıya yalnız `src/index.ts`.
 
 | | |
 |---|---|

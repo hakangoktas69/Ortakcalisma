@@ -47,7 +47,8 @@ export function contextOf(tree: FeatureTree, key: string): ContextName | null {
   return null;
 }
 
-export type TestResult = { readonly feature: string; readonly passed: boolean };
+/** `acceptance`: kullanıcı gözünden kabul testi (Playwright, yığına karşı). Birim/entegrasyon testleri de etiketlenir ama tek başına yeşil yapmaz. */
+export type TestResult = { readonly feature: string; readonly passed: boolean; readonly acceptance?: boolean };
 
 /** Canlı kurum doğrulaması (D33): canlı koşudan sonra elle girilen tek kayıt; kanıt ve sayı taşır. */
 export type LiveVerification = {
@@ -62,7 +63,7 @@ export type NodeStatus = { readonly status: FeatureStatus; readonly green: numbe
 
 /**
  * Durum elle işaretlenmez, test sonuçlarından hesaplanır (06 §8.2):
- * işlem yeşil = en az bir test var ve anahtara bağlı tüm testler geçiyor (kurumla konuşan işlemde ayrıca canlı doğrulama kaydı);
+ * işlem yeşil = en az bir kabul testi var ve anahtara bağlı tüm testler geçiyor (kurumla konuşan işlemde ayrıca canlı doğrulama kaydı);
  * ana düğüm yeşil = tüm işlemleri yeşil.
  */
 export function computeStatus(
@@ -81,7 +82,7 @@ export function computeStatus(
     let s: NodeStatus;
     if (kids.length === 0) {
       const rs = byKey.get(key) ?? [];
-      const green = rs.length > 0 && rs.every((r) => r.passed) && (!tree[key]?.live || verified.has(key));
+      const green = rs.some((r) => r.acceptance) && rs.every((r) => r.passed) && (!tree[key]?.live || verified.has(key));
       s = { status: green ? 'green' : 'red', green: green ? 1 : 0, total: 1, tests: rs.length };
     } else {
       const parts = kids.map(visit);

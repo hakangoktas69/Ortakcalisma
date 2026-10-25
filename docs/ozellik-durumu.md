@@ -6,9 +6,9 @@
 
 | Özellik | Anahtar | Bağlam | Durum | Testler |
 |---|---|---|---|---|
-| **Oturum** | `oturum` | identity-access | 🔴 0/4 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Giriş | `oturum.giris` | identity-access | 🔴 0/1 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Giriş yap | `oturum.giris.login` | identity-access | 🔴 | 0 |
+| **Oturum** | `oturum` | identity-access | 🔴 1/4 | 10 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Giriş | `oturum.giris` | identity-access | 🟢 1/1 | 10 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Giriş yap | `oturum.giris.login` | identity-access | 🟢 | 10 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Şifremi unuttum | `oturum.sifre_sifirlama` | identity-access | 🔴 0/1 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Şifre sıfırla | `oturum.sifre_sifirlama.reset` | identity-access | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;İki adımlı doğrulama | `oturum.mfa` | identity-access | 🔴 0/2 | 0 |

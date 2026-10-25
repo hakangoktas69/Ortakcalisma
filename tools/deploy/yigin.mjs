@@ -21,7 +21,7 @@ const PROFIL = process.env.YIGIN_PROFIL ?? 'demo';
 
 const SIRLAR = [
   'POSTGRES_PASSWORD', 'JWT_SECRET', 'SESSION_SECRET', 'CONTROL_DB_PASSWORD', 'APP_DB_PASSWORD', 'WORKER_DB_PASSWORD',
-  'INTEGRATION_DB_PASSWORD', 'REDIS_PASSWORD', 'RABBITMQ_PASSWORD', 'S3_ACCESS_KEY', 'S3_SECRET_KEY', 'TAX_ID_HMAC_KEY',
+  'INTEGRATION_DB_PASSWORD', 'REDIS_PASSWORD', 'RABBITMQ_PASSWORD', 'S3_ACCESS_KEY', 'S3_SECRET_KEY', 'TAX_ID_HMAC_KEY', 'DEMO_SIFRE',
 ];
 const VARSAYILAN = { WEB_PORT: '8080', PUBLIC_URL: 'http://localhost:8080' };
 
@@ -51,9 +51,11 @@ const ALTYAPI = ['db-control', 'auth', 'db-shard-01', 'db-shard-02', 'redis', 'r
 
 /** Altyapı → migration → uygulama servisleri; tek seferlik görevler `--wait`'i bozmasın diye ayrı çalışır. */
 function yiginiKaldir(ek = []) {
-  docker(compose('build'));
+  // Görev profilindeki servisler (migrate, hesap-ac) de derlensin; `up` ise onları başlatmasın
+  docker(['compose', '-p', PROJE, '--env-file', ENV, '-f', COMPOSE, '--profile', PROFIL, '--profile', 'gorev', 'build']);
   docker(compose('up', '-d', '--wait', '--wait-timeout', '600', ...ALTYAPI));
   docker(compose('run', '--rm', 'migrate'));
+  if (PROFIL === 'demo') docker(compose('run', '--rm', 'hesap-ac'));
   docker(compose('up', '-d', '--wait', '--wait-timeout', '600', ...ek));
 }
 

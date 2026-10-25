@@ -29,6 +29,8 @@ export const sessionSchema = z.object({
   SESSION_SECRET: secret(32),
   REDIS_URL: z.string().startsWith('redis'),
   COOKIE_SECURE: z.enum(['true', 'false']).default('true').transform((v) => v === 'true'),
+  // Ortam açıkça verilir; verilmezse en sıkı mod (üretim). NODE_ENV'e güvenilmez: Next standalone her zaman production'dır.
+  EWORKS_ORTAM: z.enum(['gelistirme', 'demo', 'uretim']).default('uretim'),
 });
 
 export const messagingSchema = z.object({
@@ -53,7 +55,7 @@ export function loadConfig<S extends z.ZodType>(schema: S, env: Env = process.en
     throw new Error(`Yapılandırma geçersiz — ${alanlar}`);
   }
   const value = r.data as Record<string, unknown>;
-  if (env['NODE_ENV'] === 'production' && value['COOKIE_SECURE'] === false) {
+  if ((value['EWORKS_ORTAM'] ?? env['EWORKS_ORTAM'] ?? 'uretim') === 'uretim' && value['COOKIE_SECURE'] === false) {
     throw new Error('Yapılandırma geçersiz — üretimde COOKIE_SECURE=false kullanılamaz');
   }
   return r.data;

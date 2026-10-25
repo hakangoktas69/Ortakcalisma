@@ -1,4 +1,5 @@
 // Özellik durumu üretici (06 §8.2): test koşucularının JUnit çıktılarındaki @F:/[F:] etiketlerinden durum hesaplar.
+// Kabul testleri Playwright'ın `test-results/e2e*.xml` çıktısıdır; yeşil için en az biri gerekir.
 // Çıktılar (elle düzenlenmez): packages/feature-registry/feature-status.json, docs/ozellik-durumu.md, README özet bloğu.
 // Kullanım: node tools/features/uret.ts [--sonuclar test-results] [--denetle]   (Node 24: TypeScript doğrudan çalışır)
 //   --denetle: hiçbir şey yazmaz; üretilenler test sonuçlarıyla uyumsuzsa 1 ile çıkar.
@@ -22,14 +23,14 @@ const unescapeXml = (s: string) =>
   s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
 
 /** JUnit XML'deki her testcase için etiketli sonuçları döner; skip/todo başarısız sayılır (06 §8.2). */
-export function parseJunit(xml: string): TestResult[] {
+export function parseJunit(xml: string, acceptance = false): TestResult[] {
   const out: TestResult[] = [];
   for (const m of xml.matchAll(/<testcase\b([^>]*?)(?:\/>|>([\s\S]*?)<\/testcase>)/g)) {
     const attrs = m[1] ?? '';
     const body = m[2] ?? '';
     const attr = (n: string) => unescapeXml(new RegExp(`\\b${n}="([^"]*)"`).exec(attrs)?.[1] ?? '');
     const passed = !/<(failure|error|skipped)\b/.test(body);
-    for (const feature of new Set([...featureTags(attr('name')), ...featureTags(attr('classname'))])) out.push({ feature, passed });
+    for (const feature of new Set([...featureTags(attr('name')), ...featureTags(attr('classname'))])) out.push({ feature, passed, ...(acceptance ? { acceptance } : {}) });
   }
   return out;
 }
@@ -78,7 +79,7 @@ export function generate(root: string, resultsDir: string) {
   const results: TestResult[] = [];
   const dir = resolve(root, resultsDir);
   if (existsSync(dir)) {
-    for (const f of readdirSync(dir).filter((x) => x.endsWith('.xml'))) results.push(...parseJunit(readFileSync(join(dir, f), 'utf8')));
+    for (const f of readdirSync(dir).filter((x) => x.endsWith('.xml'))) results.push(...parseJunit(readFileSync(join(dir, f), 'utf8'), f.startsWith('e2e')));
   }
   const status = computeStatus(features, results, liveVerifications);
   const unknown = [...new Set(results.map((r) => r.feature))].filter((k) => !features[k]).sort();

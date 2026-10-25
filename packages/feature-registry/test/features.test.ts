@@ -58,19 +58,23 @@ describe('durum hesabı', () => {
 
   it('tüm testleri geçen işlem yeşil, biri kırmızıysa üst düğüm kırmızı ve ilerleme gösterir', () => {
     const s = computeStatus(tree, [
-      { feature: 'sgk.ebildirge.view', passed: true },
-      { feature: 'sgk.ebildirge.sync', passed: true },
-      { feature: 'sgk.ebildirge.sync', passed: false },
+      { feature: 'sgk.ebildirge.view', passed: true, acceptance: true },
+      { feature: 'sgk.ebildirge.sync', passed: true, acceptance: true },
+      { feature: 'sgk.ebildirge.sync', passed: false, acceptance: true },
     ]);
     expect(s['sgk.ebildirge.view']).toEqual({ status: 'green', green: 1, total: 1, tests: 1 });
     expect(s['sgk.ebildirge.sync']?.status).toBe('red');
     expect(s['sgk']).toEqual({ status: 'red', green: 1, total: 2, tests: 3 });
   });
 
+  it('kabul testi olmadan (yalnız birim testi) işlem yeşil olmaz', () => {
+    expect(computeStatus(tree, [{ feature: 'sgk.ebildirge.view', passed: true }])['sgk.ebildirge.view']?.status).toBe('red');
+  });
+
   it('tüm işlemler yeşilse modül yeşil', () => {
     const s = computeStatus(tree, [
-      { feature: 'sgk.ebildirge.view', passed: true },
-      { feature: 'sgk.ebildirge.sync', passed: true },
+      { feature: 'sgk.ebildirge.view', passed: true, acceptance: true },
+      { feature: 'sgk.ebildirge.sync', passed: true, acceptance: true },
     ]);
     expect(s['sgk']?.status).toBe('green');
   });
@@ -90,8 +94,8 @@ describe('canlı doğrulama (D33)', () => {
     'gib.sozlesme.sync': { title: 'Güncelle', kind: 'action', acceptance: true, live: true },
   } as const;
   const results = [
-    { feature: 'gib.sozlesme.view', passed: true },
-    { feature: 'gib.sozlesme.sync', passed: true },
+    { feature: 'gib.sozlesme.view', passed: true, acceptance: true },
+    { feature: 'gib.sozlesme.sync', passed: true, acceptance: true },
   ];
   const kayit = { anahtar: 'gib.sozlesme.sync', tarih: '2026-10-25', kim: 'test', sonuc: '3 sözleşme', surum: 'abc1234' };
 
@@ -102,7 +106,7 @@ describe('canlı doğrulama (D33)', () => {
 
   it('canlı kayıt + yeşil testler → yeşil; testler kırmızıysa kayıt yetmez', () => {
     expect(computeStatus(tree, results, [kayit])['gib']?.status).toBe('green');
-    expect(computeStatus(tree, [{ feature: 'gib.sozlesme.sync', passed: false }], [kayit])['gib.sozlesme.sync']?.status).toBe('red');
+    expect(computeStatus(tree, [{ feature: 'gib.sozlesme.sync', passed: false, acceptance: true }], [kayit])['gib.sozlesme.sync']?.status).toBe('red');
   });
 
   it('kayıtlı anahtarlar ağaçta var ve kurumla konuşan işleme ait', () => {

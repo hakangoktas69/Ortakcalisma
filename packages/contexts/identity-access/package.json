@@ -2,6 +2,18 @@
   "name": "@eworks/identity-access",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@eworks/kernel": "workspace:*" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@eworks/kernel": "workspace:*",
+    "@eworks/platform": "workspace:*",
+    "ioredis": "^5.8.2",
+    "jose": "^6.1.0"
+  },
+  "devDependencies": {
+    "@eworks/feature-registry": "workspace:*",
+    "@eworks/testing": "workspace:*",
+    "@eworks/sales": "workspace:*"
+  }
 }

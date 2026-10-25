@@ -1,16 +1,16 @@
 {
   "oturum.giris.login": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 10,
     "context": "identity-access"
   },
   "oturum.giris": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 10,
     "context": "identity-access"
   },
   "oturum.sifre_sifirlama.reset": {
@@ -50,9 +50,9 @@
   },
   "oturum": {
     "status": "red",
-    "green": 0,
+    "green": 1,
     "total": 4,
-    "tests": 0,
+    "tests": 10,
     "context": "identity-access"
   },
   "genel_bakis.panel.view": {

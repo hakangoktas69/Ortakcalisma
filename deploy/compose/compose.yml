@@ -137,6 +137,57 @@ services:
       WORKER_DB_PASSWORD: ${WORKER_DB_PASSWORD:?}
       INTEGRATION_DB_PASSWORD: ${INTEGRATION_DB_PASSWORD:?}
 
+  # Demo hesabı (profil: gorev): yigin.mjs up demo profilinde çalıştırır; tekrar çalıştırılabilir
+  hesap-ac:
+    <<: *node
+    profiles: [gorev]
+    restart: 'no'
+    command: [node, apps/worker/src/hesap-ac.ts, demo]
+    environment:
+      CONTROL_DATABASE_URL: postgres://eworks_control:${CONTROL_DB_PASSWORD}@db-control:5432/postgres
+      SHARD_DATABASE_URLS: shard-01=postgres://eworks_worker:${WORKER_DB_PASSWORD}@db-shard-01:5432/postgres,shard-02=postgres://eworks_worker:${WORKER_DB_PASSWORD}@db-shard-02:5432/postgres
+      AUTH_URL: http://auth:9999
+      JWT_SECRET: ${JWT_SECRET}
+      DEMO_OFIS: ${DEMO_OFIS:-Demo Mali Müşavirlik}
+      DEMO_EPOSTA: ${DEMO_EPOSTA:-demo@eworks.test}
+      DEMO_SIFRE: ${DEMO_SIFRE:?}
+      DEMO_AD: ${DEMO_AD:-Demo Müşavir}
+
+  # Portal + BFF (Next.js). Tek açık port; üretimde önünde TLS sonlandıran ters vekil olur (COOKIE_SECURE=true, EWORKS_ORTAM=uretim)
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/node.Dockerfile
+      target: web
+    image: eworks/web:local
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp, /app/apps/web/.next/cache]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    ports: ['${WEB_PORT:-8080}:3000']
+    depends_on:
+      auth: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      db-shard-01: { condition: service_healthy }
+      db-shard-02: { condition: service_healthy }
+    environment:
+      EWORKS_ORTAM: ${EWORKS_ORTAM:-demo}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      CONTROL_DATABASE_URL: postgres://eworks_control:${CONTROL_DB_PASSWORD}@db-control:5432/postgres
+      SHARD_DATABASE_URLS: shard-01=postgres://eworks_app:${APP_DB_PASSWORD}@db-shard-01:5432/postgres,shard-02=postgres://eworks_app:${APP_DB_PASSWORD}@db-shard-02:5432/postgres
+      AUTH_URL: http://auth:9999
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET:?}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://localhost:3000/api/saglik').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 5s
+      retries: 30
+    deploy:
+      resources:
+        limits: { memory: 512m }
+
 volumes:
   db-control:
   db-shard-01:

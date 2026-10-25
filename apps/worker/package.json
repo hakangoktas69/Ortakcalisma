@@ -7,6 +7,9 @@
     "migrate": "node src/migrate.ts"
   },
   "dependencies": {
-    "@eworks/platform": "workspace:*"
+    "@eworks/platform": "workspace:*",
+    "@eworks/kernel": "workspace:*",
+    "@eworks/identity-access": "workspace:*",
+    "@eworks/sales": "workspace:*"
   }
 }

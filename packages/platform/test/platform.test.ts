@@ -47,8 +47,9 @@ describe('yapılandırma', () => {
   });
 
   it('üretimde güvensiz çerezle açılmaz', () => {
-    expect(loadConfig(sessionSchema, { ...base, COOKIE_SECURE: 'false' }).COOKIE_SECURE).toBe(false);
-    expect(() => loadConfig(sessionSchema, { ...base, COOKIE_SECURE: 'false', NODE_ENV: 'production' })).toThrow(/COOKIE_SECURE/);
+    expect(loadConfig(sessionSchema, { ...base, COOKIE_SECURE: 'false', EWORKS_ORTAM: 'demo' }).COOKIE_SECURE).toBe(false);
+    expect(() => loadConfig(sessionSchema, { ...base, COOKIE_SECURE: 'false' })).toThrow(/COOKIE_SECURE/);
+    expect(() => loadConfig(sessionSchema, { ...base, COOKIE_SECURE: 'false', EWORKS_ORTAM: 'uretim' })).toThrow(/COOKIE_SECURE/);
     expect(loadConfig(sessionSchema, base).COOKIE_SECURE).toBe(true);
   });
 });
