@@ -11,7 +11,7 @@ const config: NextConfig = {
   turbopack: { root: kok },
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
-  transpilePackages: ['@eworks/feature-registry', '@eworks/identity-access', '@eworks/kernel', '@eworks/platform'],
+  transpilePackages: ['@eworks/credentials', '@eworks/feature-registry', '@eworks/identity-access', '@eworks/kernel', '@eworks/platform', '@eworks/portfolio'],
   serverExternalPackages: ['pg', 'ioredis'],
   async headers() {
     return [

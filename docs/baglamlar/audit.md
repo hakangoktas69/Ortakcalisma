@@ -1,6 +1,6 @@
 # audit — Denetim
 
-> Durum: **iskelet** (kod yok, tüm özellikler kırmızı). Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil). Kod: `packages/contexts/audit` — dışarıya yalnız `src/index.ts`.
+> Durum: **C aşaması (2026-10-25)**: değiştirilemez denetim kaydı (`audit.entries`, ofis başına hash zinciri, yalnız `audit.record()`); kurum hesabı kaydı ve CSV dışa aktarma yazıyor. Görüntüleme ekranı yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil). Kod: `packages/contexts/audit` — dışarıya yalnız `src/index.ts`.
 
 | | |
 |---|---|

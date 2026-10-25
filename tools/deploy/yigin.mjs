@@ -104,6 +104,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       TEST_S3_SECRET_KEY: env.S3_SECRET_KEY,
       TEST_AUTH_URL: 'http://auth:9999',
       TEST_JWT_SECRET: env.JWT_SECRET,
+      TEST_TAX_ID_HMAC_KEY: env.TAX_ID_HMAC_KEY,
       TEST_WEB_URL: 'http://web:3000',
       TEST_FAKE_GIB_URL: 'http://fake-gib:8090',
     };

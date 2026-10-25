@@ -8,6 +8,7 @@
 |---|---|
 | Kararlar | D1–D35 alındı ([hedef-mimari/01](../hedef-mimari/01-cok-kiracili-hedef-mimari.md)), karar kaydı K-01…K-42 ([adr/karar-kaydi.md](../adr/karar-kaydi.md)) |
 | Eski portalın portu (2026-10-25, Hakan) | Sürüyor, aşama A–H: altyapı → kimlik/ofis → portföy + kurum hesapları → senkron + Python ACL → beyanname → SGK → çalışma alanı → kapanış. Yeşil kapsam: gerçek akışlar; kurumla konuşanlar canlı doğrulamaya kadar kırmızı (D33) |
+| Portföy ve kurum hesapları (aşama C) | Firma kartı (ekle/düzenle/arşivle), liste + CSV, sistem genelinde VKN tekilliği (HMAC), kapsam RLS'i, müşavir/firma GİB hesabı (Vault), hash zincirli denetim kaydı. Yeşil: `firmalar.liste.*`, `firmalar.kart.*`, `firmalar.kurum_hesaplari.view_status/edit_credentials` (9/107) |
 | Kimlik ve web (aşama B) | `apps/web` Next.js 16 (BFF, nonce'lu CSP, HttpOnly oturum, CSRF), GoTrue girişi, rol şablonları + miraslı yetki, ofis/kullanıcı açma komutu (`hesap-ac`), demo hesabı. Yeşil: `oturum.giris.login` |
 | Altyapı (aşama A) | Compose: kontrol düzlemi (Supabase Postgres + GoTrue), 2 shard (Vault), Redis, RabbitMQ, S3 (SeaweedFS), `migrate` görevi; Helm iskeleti (`helm lint` yeşil, kümede koşulmadı); migration çalıştırıcı, `ShardRouter`, pgTAP koşucusu. Testler: `node tools/deploy/yigin.mjs test` |
 | Depo yeniden yapılanması (D28) | **Uygulandı (2026-10-24, `yeniden-yapilanma` dalı)**: tüm eski klasörler `eski/` altında, yeni iskelet kökte. Ekip pull sonrası `node tools/ajan/eski-yerel-tasi.mjs --uygula` çalıştırır |

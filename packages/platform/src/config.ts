@@ -33,6 +33,11 @@ export const sessionSchema = z.object({
   EWORKS_ORTAM: z.enum(['gelistirme', 'demo', 'uretim']).default('uretim'),
 });
 
+/** VKN/TCKN'nin kontrol düzlemindeki HMAC özeti için anahtar (07 §2.2); kaybedilirse dizin yeniden kurulmalı. */
+export const taxIdSchema = z.object({
+  TAX_ID_HMAC_KEY: secret(32),
+});
+
 export const messagingSchema = z.object({
   RABBITMQ_URL: z.string().startsWith('amqp'),
 });

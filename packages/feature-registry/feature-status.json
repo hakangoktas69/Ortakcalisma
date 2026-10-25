@@ -91,73 +91,73 @@
     "context": "workspace"
   },
   "firmalar.liste.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "portfolio"
   },
   "firmalar.liste.export": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 5,
     "context": "portfolio"
   },
   "firmalar.liste": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 2,
     "total": 2,
-    "tests": 0,
+    "tests": 9,
     "context": "portfolio"
   },
   "firmalar.kart.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 8,
     "context": "portfolio"
   },
   "firmalar.kart.create": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 8,
     "context": "portfolio"
   },
   "firmalar.kart.edit": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "portfolio"
   },
   "firmalar.kart.archive": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "portfolio"
   },
   "firmalar.kart": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 4,
     "total": 4,
-    "tests": 0,
+    "tests": 24,
     "context": "portfolio"
   },
   "firmalar.kurum_hesaplari.view_status": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "credentials"
   },
   "firmalar.kurum_hesaplari.edit_credentials": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "credentials"
   },
   "firmalar.kurum_hesaplari.grant_use": {
@@ -176,9 +176,9 @@
   },
   "firmalar.kurum_hesaplari": {
     "status": "red",
-    "green": 0,
+    "green": 2,
     "total": 4,
-    "tests": 0,
+    "tests": 8,
     "context": "credentials"
   },
   "firmalar.gib_sozlesmeler.view": {
@@ -232,9 +232,9 @@
   },
   "firmalar": {
     "status": "red",
-    "green": 0,
+    "green": 8,
     "total": 15,
-    "tests": 0,
+    "tests": 41,
     "context": "portfolio"
   },
   "beyanname.liste.view": {

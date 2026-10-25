@@ -63,3 +63,17 @@ export async function ayniKoken(req: Request): Promise<boolean> {
     return false;
   }
 }
+
+/** Oturumdan bağlam use-case bağlamı: kullanıcı + etkin ofis (RLS claim'leri, D34). */
+export const baglam = (s: Session) => ({ sub: s.userId, org: s.orgId });
+
+/** JSON gövdeyi boyut sınırıyla okur (kötü niyetli büyük istek belleği doldurmasın). */
+export async function jsonGovde<T>(req: Request, sinir = 32 * 1024): Promise<T | null> {
+  const metin = await req.text();
+  if (metin.length > sinir) return null;
+  try {
+    return JSON.parse(metin) as T;
+  } catch {
+    return null;
+  }
+}

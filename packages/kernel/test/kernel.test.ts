@@ -40,3 +40,14 @@ describe('Period', () => {
     expect(parsePeriod(s)).toEqual({ ok: false, error: 'gecersiz_donem' });
   });
 });
+
+describe('CSV', () => {
+  it('Excel uyumlu: BOM, ; ayraç, CRLF; tırnaklar ikilenir; formül enjeksiyonu etkisizleşir', async () => {
+    const { toCsv } = await import('../src/index.ts');
+    const csv = toCsv([{ a: '=1+1', b: 'x"y' }, { a: '-2', b: null }], [
+      { baslik: 'A', deger: (r: { a: string }) => r.a },
+      { baslik: 'B', deger: (r: { b: string | null }) => r.b },
+    ]);
+    expect(csv).toBe('\ufeff"A";"B"\r\n"\'=1+1";"x""y"\r\n"\'-2";""\r\n');
+  });
+});

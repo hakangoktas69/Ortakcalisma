@@ -32,6 +32,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@eworks/credentials':
+        specifier: workspace:*
+        version: link:../../packages/contexts/credentials
       '@eworks/feature-registry':
         specifier: workspace:*
         version: link:../../packages/feature-registry
@@ -44,6 +47,9 @@ importers:
       '@eworks/platform':
         specifier: workspace:*
         version: link:../../packages/platform
+      '@eworks/portfolio':
+        specifier: workspace:*
+        version: link:../../packages/contexts/portfolio
       ioredis:
         specifier: ^5.8.2
         version: 5.11.1
@@ -108,6 +114,13 @@ importers:
       '@eworks/kernel':
         specifier: workspace:*
         version: link:../../kernel
+      '@eworks/platform':
+        specifier: workspace:*
+        version: link:../../platform
+    devDependencies:
+      '@eworks/testing':
+        specifier: workspace:*
+        version: link:../../testing
 
   packages/contexts/documents:
     dependencies:
@@ -157,6 +170,22 @@ importers:
       '@eworks/kernel':
         specifier: workspace:*
         version: link:../../kernel
+      '@eworks/platform':
+        specifier: workspace:*
+        version: link:../../platform
+    devDependencies:
+      '@eworks/credentials':
+        specifier: workspace:*
+        version: link:../credentials
+      '@eworks/identity-access':
+        specifier: workspace:*
+        version: link:../identity-access
+      '@eworks/sales':
+        specifier: workspace:*
+        version: link:../sales
+      '@eworks/testing':
+        specifier: workspace:*
+        version: link:../../testing
 
   packages/contexts/sales:
     dependencies:

@@ -1,12 +1,14 @@
 import 'server-only';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { Redis } from 'ioredis';
+import { PgCredentialRepository } from '@eworks/credentials';
 import { GoTrueAuthProvider, PgMembershipReader, RedisSessionStore } from '@eworks/identity-access';
-import { databaseSchema, loadConfig, sessionSchema, ShardRouter } from '@eworks/platform';
+import { databaseSchema, loadConfig, sessionSchema, ShardRouter, taxIdSchema } from '@eworks/platform';
+import { PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portfolio';
 
 // BFF bağımlılıkları (süreç başına tek örnek). Yapılandırma açılışta doğrulanır; tarayıcıya hiçbir değer gitmez (D5).
 
-const config = () => ({ ...loadConfig(databaseSchema), ...loadConfig(sessionSchema) });
+const config = () => ({ ...loadConfig(databaseSchema), ...loadConfig(sessionSchema), ...loadConfig(taxIdSchema) });
 
 function kur() {
   const c = config();
@@ -22,6 +24,8 @@ function kur() {
     members: new PgMembershipReader(router),
     ids: { csrf: () => randomBytes(24).toString('base64url') },
     clock: { now: () => new Date() },
+    firmalar: { repo: new PgFirmRepository(router), registry: new PgTaxpayerRegistry(router), hashTaxId: taxIdHasher(c.TAX_ID_HMAC_KEY), newId: randomUUID },
+    kurumHesaplari: new PgCredentialRepository(router),
   };
 }
 

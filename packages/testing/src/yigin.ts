@@ -31,6 +31,7 @@ export const yigin = {
   s3: () => ({ endpoint: need('TEST_S3_ENDPOINT'), accessKey: need('TEST_S3_ACCESS_KEY'), secretKey: need('TEST_S3_SECRET_KEY') }),
   authUrl: () => need('TEST_AUTH_URL'),
   jwtSecret: () => need('TEST_JWT_SECRET'),
+  taxIdKey: () => need('TEST_TAX_ID_HMAC_KEY'),
   webUrl: () => need('TEST_WEB_URL'),
   fakeGibUrl: () => need('TEST_FAKE_GIB_URL'),
 };

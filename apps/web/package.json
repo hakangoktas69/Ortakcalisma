@@ -10,10 +10,12 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@eworks/credentials": "workspace:*",
     "@eworks/feature-registry": "workspace:*",
     "@eworks/identity-access": "workspace:*",
     "@eworks/kernel": "workspace:*",
     "@eworks/platform": "workspace:*",
+    "@eworks/portfolio": "workspace:*",
     "ioredis": "^5.8.2",
     "next": "16.4.0",
     "react": "19.3.0",
