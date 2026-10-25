@@ -47,7 +47,7 @@ input:focus, select:focus, textarea:focus, .dugme:focus-visible, a:focus-visible
 .form { display: grid; gap: .9rem; }
 .form-satir { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
 
-.kart { background: var(--kart); border: 1px solid var(--cizgi); border-radius: var(--yaricap); padding: 1.1rem; }
+.kart { min-width: 0; background: var(--kart); border: 1px solid var(--cizgi); border-radius: var(--yaricap); padding: 1.1rem; }
 .uyari { background: var(--uyari-zemin); color: var(--uyari); border-radius: 8px; padding: .6rem .8rem; margin: 0; }
 .hata { background: var(--kirmizi-zemin); color: var(--kirmizi); border-radius: 8px; padding: .6rem .8rem; margin: 0; }
 .basari { background: var(--yesil-zemin); color: var(--yesil); border-radius: 8px; padding: .6rem .8rem; margin: 0; }
@@ -105,7 +105,7 @@ input:focus, select:focus, textarea:focus, .dugme:focus-visible, a:focus-visible
 .islem-listesi li { display: flex; flex-wrap: wrap; gap: .4rem .6rem; align-items: center; background: #fff; border: 1px solid var(--cizgi); border-radius: 8px; padding: .5rem .75rem; }
 
 /* Tablolar: dar ekranda kaydırılabilir kap içinde, sayfa taşmaz */
-.tablo-kap { width: 100%; overflow-x: auto; background: #fff; border: 1px solid var(--cizgi); border-radius: var(--yaricap); }
+.tablo-kap { position: relative; width: 100%; overflow-x: auto; background: #fff; border: 1px solid var(--cizgi); border-radius: var(--yaricap); }
 table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: .9rem; }
 th, td { text-align: left; padding: .55rem .75rem; border-bottom: 1px solid var(--cizgi); vertical-align: top; overflow-wrap: normal; word-break: normal; }
 td:first-child { min-width: 180px; }
@@ -118,6 +118,10 @@ td.sayi { text-align: right; font-variant-numeric: tabular-nums; }
 .etiket.bekliyor { background: var(--uyari-zemin); color: var(--uyari); }
 .kurum-isi { display: grid; gap: .5rem; justify-items: start; margin: .6rem 0; }
 .is-durumu { margin: 0; overflow-wrap: anywhere; }
+.belgeler { display: flex; flex-wrap: wrap; gap: .25rem .6rem; }
+.soluk { color: var(--soluk); }
+table.kontrol td { text-align: center; }
+table.kontrol td:first-child { text-align: left; }
 .sayaclar { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); }
 .sayac { background: #fff; border: 1px solid var(--cizgi); border-radius: var(--yaricap); padding: .9rem 1rem; display: grid; gap: .2rem; color: inherit; }
 a.sayac:hover { text-decoration: none; border-color: var(--birincil); }

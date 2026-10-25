@@ -16,6 +16,7 @@ import psycopg
 from playwright.async_api import async_playwright
 from redis import asyncio as aioredis
 
+from ..institutions.gib.beyannameler import BeyannameHatasi, beyanname_tara, to_declarations
 from ..institutions.gib.giris import GirisBasarisiz, YanlisSifre, giris_yap
 from ..institutions.gib.sozlesmeler import ListeHatasi, sozlesme_listesi_oku, to_contract
 from ..transports.robot.tarayici import Tarayici
@@ -26,6 +27,7 @@ from .hiz import HizSinirlayici
 EXCHANGE, DLX = 'eworks', 'eworks.dlx'
 ROBOT_GIB, SONUC, DLQ = 'robot.gib', 'entegrasyon.sonuc', 'eworks.dlq'
 ARGUMANLAR = {'x-queue-type': 'quorum', 'x-dead-letter-exchange': DLX, 'x-delivery-limit': 5}
+TURLER = ('gib.sozlesmeler', 'gib.beyannameler')
 UUID = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 
 log = logging.getLogger('eworks.entegrasyon')
@@ -72,13 +74,16 @@ class Calisan:
     async def isle(self, ham: bytes):
         m = json.loads(ham)
         org, job, shard, kind = m.get('orgId', ''), m.get('jobId', ''), m.get('shard', ''), m.get('kind', '')
-        if not UUID.match(org) or not UUID.match(job) or shard not in self.a.shardlar or kind != 'gib.sozlesmeler':
+        if not UUID.match(org) or not UUID.match(job) or shard not in self.a.shardlar or kind not in TURLER:
             gunluk('gecersiz_mesaj')
             return
         url = self.a.shardlar[shard]
-        if await asyncio.to_thread(isi_sahiplen, url, org, job) is None:
+        sahiplenilen = await asyncio.to_thread(isi_sahiplen, url, org, job)
+        if sahiplenilen is None:
             gunluk('is_zaten_islenmis')  # en az bir kez teslim: tekrar gelen mesaj etkisiz
             return
+        kind = sahiplenilen['kind']  # tür ve kapsam mesajdan değil, veritabanındaki işten
+        params = sahiplenilen.get('params') or {}
 
         async def ilerleme(metin: str):
             await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'progress', 'message': metin})
@@ -92,20 +97,31 @@ class Calisan:
                 ctx = await t.baglam()
                 try:
                     await ilerleme('GİB girişi yapılıyor (güvenlik kodu otomatik).')
-                    await giris_yap(await ctx.new_page(), kimlik, self.cozucu, ilerleme)
+                    ana = await giris_yap(await ctx.new_page(), kimlik, self.cozucu, ilerleme)
                     await ilerleme('Giriş yapıldı; sözleşme listesine gidiliyor.')
                     kayitlar = await sozlesme_listesi_oku(ctx, ilerleme)
+                    if kind == 'gib.beyannameler':
+                        await ilerleme(f'{len(kayitlar)} sözleşme okundu; e-Beyanname uygulamasına geçiliyor.')
+
+                        async def belge_kaydet(ozet: str, ham: bytes) -> str:
+                            # İçerik özetiyle adreslenir: aynı belge ikinci kez yazılmaz, anahtar ofisle sınırlı
+                            anahtar_pdf = f'org/{org}/belgeler/{ozet}.pdf'
+                            await asyncio.to_thread(self.s3.put_object, Bucket=self.a.s3_bucket, Key=anahtar_pdf, Body=ham, ContentType='application/pdf')
+                            return anahtar_pdf
+                        sorgular = await beyanname_tara(ctx, ana, kayitlar, params, belge_kaydet, ilerleme)
                 finally:
                     await ctx.close()
             anahtar = f'org/{org}/sonuc/{job}.json'
-            govde = json.dumps(to_contract(job, kayitlar, bool(self.a.sahte_gib)), ensure_ascii=False).encode('utf-8')
+            sonuc = (to_declarations(job, kayitlar, params, sorgular, bool(self.a.sahte_gib)) if kind == 'gib.beyannameler'
+                     else to_contract(job, kayitlar, bool(self.a.sahte_gib)))
+            govde = json.dumps(sonuc, ensure_ascii=False).encode('utf-8')
             await asyncio.to_thread(self.s3.put_object, Bucket=self.a.s3_bucket, Key=anahtar, Body=govde, ContentType='application/json')
             await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'ok', 'resultKey': anahtar})
             gunluk('is_tamam', adet=len(kayitlar))
         except YanlisSifre:
             await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'wrong_password'})
             gunluk('hatali_sifre')
-        except (GirisBasarisiz, ListeHatasi) as e:
+        except (GirisBasarisiz, ListeHatasi, BeyannameHatasi) as e:
             await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': str(e)[:500]})
             gunluk('is_basarisiz', tur=type(e).__name__)
         except Exception as e:  # noqa: BLE001 — kurum yanıtı/şifre metni dışarı sızmasın diye sabit metin

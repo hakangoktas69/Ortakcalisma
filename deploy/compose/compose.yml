@@ -169,6 +169,8 @@ services:
       S3_ACCESS_KEY: ${S3_ACCESS_KEY}
       S3_SECRET_KEY: ${S3_SECRET_KEY}
       TAX_ID_HMAC_KEY: ${TAX_ID_HMAC_KEY}
+      # D15: PDF dosyalarının saklama süresi (gün); satırlar kalır
+      DOCUMENT_RETENTION_DAYS: ${DOCUMENT_RETENTION_DAYS:-7}
     deploy:
       resources:
         limits: { memory: 384m }
@@ -239,6 +241,7 @@ services:
     depends_on:
       auth: { condition: service_healthy }
       redis: { condition: service_healthy }
+      s3: { condition: service_healthy }
       db-shard-01: { condition: service_healthy }
       db-shard-02: { condition: service_healthy }
     environment:
@@ -251,6 +254,9 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:?}
       TAX_ID_HMAC_KEY: ${TAX_ID_HMAC_KEY:?}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      S3_ENDPOINT: http://s3:8333
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
     healthcheck:
       test: [CMD, node, -e, "fetch('http://localhost:3000/api/saglik').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
       interval: 5s

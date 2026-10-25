@@ -35,6 +35,9 @@ importers:
       '@eworks/credentials':
         specifier: workspace:*
         version: link:../../packages/contexts/credentials
+      '@eworks/documents':
+        specifier: workspace:*
+        version: link:../../packages/contexts/documents
       '@eworks/feature-registry':
         specifier: workspace:*
         version: link:../../packages/feature-registry
@@ -99,6 +102,9 @@ importers:
       '@eworks/credentials':
         specifier: workspace:*
         version: link:../../packages/contexts/credentials
+      '@eworks/documents':
+        specifier: workspace:*
+        version: link:../../packages/contexts/documents
       '@eworks/identity-access':
         specifier: workspace:*
         version: link:../../packages/contexts/identity-access
@@ -155,6 +161,25 @@ importers:
       '@eworks/kernel':
         specifier: workspace:*
         version: link:../../kernel
+      '@eworks/platform':
+        specifier: workspace:*
+        version: link:../../platform
+    devDependencies:
+      '@eworks/identity-access':
+        specifier: workspace:*
+        version: link:../identity-access
+      '@eworks/portfolio':
+        specifier: workspace:*
+        version: link:../portfolio
+      '@eworks/sales':
+        specifier: workspace:*
+        version: link:../sales
+      '@eworks/tax-filing':
+        specifier: workspace:*
+        version: link:../tax-filing
+      '@eworks/testing':
+        specifier: workspace:*
+        version: link:../../testing
 
   packages/contexts/identity-access:
     dependencies:

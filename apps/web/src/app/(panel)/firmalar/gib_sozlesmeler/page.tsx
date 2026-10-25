@@ -7,7 +7,7 @@ import { isGorunumu, musavirGibHesabi } from '@/bff/isler.ts';
 import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { KurumIsi } from '@/features/sync/KurumIsi.tsx';
-import { FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
+import { FeatureBadge, FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
 
 // GİB e-Beyanname sözleşmeleri (firmalar.gib_sozlesmeler): eski portalın "GİB'den güncelle" akışı. Liste müşavirin GİB
@@ -22,6 +22,14 @@ export default async function GibSozlesmeleri() {
   const mukellef = new Set(sozlesmeler.map((s) => s.firmId)).size;
   const sahte = sozlesmeler.some((s) => s.source === 'sahte_gib');
   const baslatabilir = isAllowed(oturum.grants, 'firmalar.gib_sozlesmeler.sync');
+  const gruplar = new Map<string, { firmId: string; ad: string; turler: string[]; uygun: boolean }>();
+  for (const s of sozlesmeler) {
+    const g = gruplar.get(s.firmId) ?? { firmId: s.firmId, ad: s.firmTitle, turler: [], uygun: false };
+    if (s.contractType && !g.turler.includes(s.contractType)) g.turler.push(s.contractType);
+    g.uygun ||= isIntermediaryContract(s.contractType);
+    gruplar.set(s.firmId, g);
+  }
+  const inceleme = [...gruplar.values()].sort((a, b) => Number(a.uygun) - Number(b.uygun) || a.ad.localeCompare(b.ad, 'tr'));
   return (
     <>
       <Baslik k="firmalar.gib_sozlesmeler" alt="GİB'deki geçerli e-Beyanname sözleşmeleriniz; yeni mükellefler firma listesine otomatik eklenir." />
@@ -58,6 +66,37 @@ export default async function GibSozlesmeleri() {
           <span>Aracılık ve Sorumluluk</span>
         </div>
       </div>
+      {isAllowed(oturum.grants, 'firmalar.gib_sozlesmeler.review') && inceleme.length ? (
+        <section className="kart" aria-labelledby="inceleme">
+          <h2 id="inceleme">
+            Kurum incelemesi <FeatureBadge k="firmalar.gib_sozlesmeler.review" />
+          </h2>
+          <p className="alt">Beyanname yalnız geçerli Aracılık ve Sorumluluk sözleşmesi olan mükellef için, aynı GİB oturumunda okunan sözleşmeyle kanıtlanarak sorgulanır.</p>
+          <div className="tablo-kap">
+            <table>
+              <caption className="gorunmez">Beyanname erişimi</caption>
+              <thead>
+                <tr>
+                  <th>Mükellef</th>
+                  <th>Sözleşme türleri</th>
+                  <th>Beyanname erişimi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inceleme.map((m) => (
+                  <tr key={m.firmId}>
+                    <td>{m.ad}</td>
+                    <td>{m.turler.join(', ')}</td>
+                    <td>
+                      <span className={`etiket ${m.uygun ? 'iyi' : 'kotu'}`}>{m.uygun ? 'Beyanname sorgulanabilir' : 'Sözleşme türü uygun değil'}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
       <div className="tablo-kap">
         <table>
           <caption className="gorunmez">GİB e-Beyanname sözleşmeleri</caption>

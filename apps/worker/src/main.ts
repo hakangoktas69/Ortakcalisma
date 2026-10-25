@@ -3,6 +3,7 @@
 import { randomUUID } from 'node:crypto';
 import { setTimeout as bekle } from 'node:timers/promises';
 import { PgCredentialRepository } from '@eworks/credentials';
+import { PgDocumentRepository, purgeExpired, retentionDays, S3FileStore } from '@eworks/documents';
 import {
   databaseSchema,
   Depo,
@@ -19,7 +20,7 @@ import {
 } from '@eworks/platform';
 import { PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portfolio';
 import { failStaleJobs, PgJobRepository } from '@eworks/sync';
-import { PgContractRepository } from '@eworks/tax-filing';
+import { PgContractRepository, PgDeclarationRepository } from '@eworks/tax-filing';
 import { sonucuIsle, type UygulayiciDeps } from './uygulayici.ts';
 
 const SIFIR = '00000000-0000-0000-0000-000000000000';
@@ -56,7 +57,10 @@ export async function main(env = process.env) {
     creds: new PgCredentialRepository(router),
     firmalar: { repo: new PgFirmRepository(router), registry: new PgTaxpayerRegistry(router), hashTaxId: taxIdHasher(tx.TAX_ID_HMAC_KEY), newId: randomUUID },
     sozlesmeler: new PgContractRepository(router),
+    beyannameler: new PgDeclarationRepository(router),
+    belgeler: new PgDocumentRepository(router),
     sonucOku: (k) => depo.json(k),
+    sonucSil: (k) => depo.sil(k),
   };
   let calisiyor = true;
   const dur = () => {
@@ -80,6 +84,9 @@ export async function main(env = process.env) {
   gunluk('isci_basladi', { shardlar: router.shardIds });
 
   let sonTemizlik = 0;
+  let sonBelgeTemizligi = 0;
+  const saklamaGunu = retentionDays(env.DOCUMENT_RETENTION_DAYS);
+  const dosyalar = new S3FileStore(depo);
   while (calisiyor) {
     try {
       const n = await outboxTasi(router, ch);
@@ -90,6 +97,15 @@ export async function main(env = process.env) {
         for (const o of rows) {
           const n2 = await failStaleJobs({ org: o.id }, { jobs: deps.jobs });
           if (n2) gunluk('takili_is', { adet: n2 });
+        }
+      }
+      // D15: süresi dolan PDF dosyaları saatte bir silinir (satırlar kalır)
+      if (Date.now() - sonBelgeTemizligi > 3_600_000) {
+        sonBelgeTemizligi = Date.now();
+        const { rows } = await router.control.query<{ id: string }>(`select id from directory.organizations where status = 'active'`);
+        for (const o of rows) {
+          const n3 = await purgeExpired({ org: o.id }, { repo: deps.belgeler, files: dosyalar }, saklamaGunu);
+          if (n3) gunluk('belge_temizligi', { adet: n3, gun: saklamaGunu });
         }
       }
     } catch (e) {

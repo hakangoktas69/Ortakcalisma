@@ -84,6 +84,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     docker(compose('down', ...(geri.includes('--sil') ? ['-v'] : [])));
   } else if (komut === 'test' || komut === 'e2e') {
     sirlariTamamla();
+    // Testler yalnız sahte GİB'e gider: kurum hız bütçesi test süresini uzatmasın (üretim/demo varsayılanı 60/dk)
+    process.env.GIB_ISTEK_DK ??= '600';
     yiginiKaldir();
     const env = envOku();
     const hedef = komut === 'test' ? 'ci' : 'e2e';

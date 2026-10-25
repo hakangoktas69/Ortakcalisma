@@ -46,7 +46,7 @@ export class PgJobRepository implements JobRepository {
     );
   }
   async setMessage(ctx: Ctx, id: string, message: string) {
-    await this.tx(ctx, (c) => c.query(`update sync.jobs set status_message = $3 where org_id = $1 and id = $2 and status in ('queued', 'running')`, [ctx.org, id, message]));
+    await this.tx(ctx, (c) => c.query(`update sync.jobs set status_message = $3, last_progress_at = now() where org_id = $1 and id = $2 and status in ('queued', 'running')`, [ctx.org, id, message]));
   }
   accountOwner(ctx: Ctx, id: string) {
     return this.tx(ctx, async (c) =>
@@ -61,7 +61,7 @@ export class PgJobRepository implements JobRepository {
   }
   staleRunning(ctx: Ctx, olderThanMinutes: number) {
     return this.tx(ctx, async (c) =>
-      (await c.query<{ id: string }>(`select id from sync.jobs where org_id = $1 and status = 'running' and started_at < now() - make_interval(mins => $2)`, [ctx.org, olderThanMinutes])).rows.map((r) => r.id),
+      (await c.query<{ id: string }>(`select id from sync.jobs where org_id = $1 and status = 'running' and coalesce(last_progress_at, started_at) < now() - make_interval(mins => $2)`, [ctx.org, olderThanMinutes])).rows.map((r) => r.id),
     );
   }
 }

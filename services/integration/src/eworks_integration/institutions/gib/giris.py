@@ -126,8 +126,8 @@ async def _sonuc_bekle(page, gonderim: asyncio.Event, sure_sn: float) -> str:
     return 'bilinmiyor'
 
 
-async def giris_yap(page, kimlik: dict, cozucu, ilerleme=None, deneme_siniri: int = 6) -> None:
-    """Başarıda döner; hatalı şifrede YanlisSifre, diğer durumlarda GirisBasarisiz fırlatır. Kimlik sözlüğü sonda temizlenir."""
+async def giris_yap(page, kimlik: dict, cozucu, ilerleme=None, deneme_siniri: int = 6) -> str:
+    """Başarıda girişten sonraki adresi döner (uygulama seçim ekranı); hatalı şifrede YanlisSifre, diğer durumlarda GirisBasarisiz fırlatır. Kimlik sözlüğü sonda temizlenir."""
     try:
         await page.goto(GIRIS, wait_until='domcontentloaded')
         for deneme in range(1, deneme_siniri + 1):
@@ -157,7 +157,7 @@ async def giris_yap(page, kimlik: dict, cozucu, ilerleme=None, deneme_siniri: in
                 page.remove_listener('requestfinished', _bitti)
                 page.remove_listener('requestfailed', _bitti)
             if sonuc == 'tamam':
-                return
+                return page.url
             if sonuc == 'sifre':
                 raise YanlisSifre()
             if ilerleme:

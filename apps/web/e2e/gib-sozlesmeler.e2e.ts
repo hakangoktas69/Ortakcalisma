@@ -35,7 +35,7 @@ test.describe('GİB sözleşmeleri', () => {
     await expect(durum).toContainText('45 sözleşme');
     await expect(durum).toContainText('sahte GİB');
     await expect(page.getByText('Bu ortamdaki liste sahte GİB sunucusundan (demo) okundu')).toBeVisible();
-    await expect(page.locator('tbody tr')).toHaveCount(45);
+    await expect(page.getByRole('table', { name: 'GİB e-Beyanname sözleşmeleri' }).locator('tbody tr')).toHaveCount(45);
     await tasmaYok(page);
     // Yeni mükellefler firma listesinde; ikinci senkron yeni firma açmaz, mevcutlarla eşleşir
     await page.goto('/firmalar/liste');

@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eworks.local/contracts/integration/eworks.gib.declarations.v1.schema.json",
+  "title": "GİB e-Beyanname listesi ve belgeleri — ACL sonucu",
+  "description": "Python ACL'in tek GİB oturumunda okuduğu sözleşme listesi (erişim kanıtı) ve kapsamdaki mükellef × ay sorgularının sonuçları. Belgeler S3'te içerik özetiyle (org/<ofis>/belgeler/<sha256>.pdf) saklanır; burada yalnız anahtarları vardır. Uygulayıcı apps/worker'daki tax-filing ve documents use-case'leridir. Eski robotun eworks.gib.review.v1 / eworks.declarations.sync.v1 biçimlerinden türetilmiştir.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "jobId",
+    "sourceType",
+    "observedAt",
+    "contracts",
+    "scope",
+    "queries"
+  ],
+  "$defs": {
+    "month": {
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+    },
+    "day": {
+      "type": "string",
+      "format": "date"
+    },
+    "identity": {
+      "type": "string",
+      "pattern": "^\\d{10,11}$"
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "key",
+        "sha256",
+        "size"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "declaration",
+            "tax_accrual",
+            "sgk_accrual",
+            "sgk_service"
+          ]
+        },
+        "key": {
+          "type": "string",
+          "pattern": "^org/[0-9a-f-]{36}/belgeler/[0-9a-f]{64}\\.pdf$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 20971520
+        }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recordId",
+        "type",
+        "periodStart",
+        "periodEnd",
+        "uploadedAt",
+        "taxStatus",
+        "sgkStatus",
+        "branch",
+        "reference",
+        "referenceType",
+        "documents",
+        "documentWarnings"
+      ],
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,100}$|^encoded-[0-9a-f]{64}$"
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_-]{1,30}$"
+        },
+        "periodStart": {
+          "$ref": "#/$defs/month"
+        },
+        "periodEnd": {
+          "$ref": "#/$defs/month"
+        },
+        "uploadedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "taxStatus": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "sgkStatus": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "branch": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "referenceType": {
+          "enum": [
+            "source_filename",
+            "source_record_id"
+          ]
+        },
+        "documents": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/document"
+          }
+        },
+        "documentWarnings": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "schema": {
+      "const": "eworks.gib.declarations.v1"
+    },
+    "jobId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "sourceType": {
+      "enum": [
+        "gib_live",
+        "sahte_gib"
+      ]
+    },
+    "observedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contracts": {
+      "description": "Aynı oturumda okunan Geçerli E-Beyanname Sözleşmeleri Listesi (eworks.gib.contracts.v1 ile aynı satırlar)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "contracts"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "contracts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100000,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "taxNumber",
+              "identityNumber",
+              "name",
+              "taxOffice",
+              "number",
+              "date",
+              "service",
+              "registeredAt",
+              "type"
+            ],
+            "properties": {
+              "taxNumber": {
+                "type": "string",
+                "pattern": "^([0-9]{10})?$"
+              },
+              "identityNumber": {
+                "type": "string",
+                "pattern": "^([0-9]{11})?$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "taxOffice": {
+                "type": "string",
+                "maxLength": 120
+              },
+              "number": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "date": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "service": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "registeredAt": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "type": {
+                "type": "string",
+                "maxLength": 200
+              }
+            }
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startDate",
+        "endDate"
+      ],
+      "properties": {
+        "startDate": {
+          "$ref": "#/$defs/day"
+        },
+        "endDate": {
+          "$ref": "#/$defs/day"
+        }
+      }
+    },
+    "queries": {
+      "type": "array",
+      "maxItems": 50000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identity",
+          "startDate",
+          "endDate",
+          "outcome",
+          "records"
+        ],
+        "properties": {
+          "identity": {
+            "$ref": "#/$defs/identity"
+          },
+          "startDate": {
+            "$ref": "#/$defs/day"
+          },
+          "endDate": {
+            "$ref": "#/$defs/day"
+          },
+          "outcome": {
+            "enum": [
+              "ok",
+              "empty",
+              "failed",
+              "no_access"
+            ],
+            "description": "empty: GİB'in açık 'bulunamamıştır' yanıtı; no_access: aynı oturumda Aracılık ve Sorumluluk sözleşmesi yok"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "access": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "method",
+              "contractNumbers"
+            ],
+            "properties": {
+              "method": {
+                "const": "same_session_contract"
+              },
+              "contractNumbers": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              }
+            }
+          },
+          "records": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": {
+              "$ref": "#/$defs/record"
+            }
+          }
+        }
+      }
+    }
+  }
+}

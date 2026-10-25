@@ -3,7 +3,8 @@
 Robot gerçek GİB adreslerine (https://dijital.gib.gov.tr, https://intvrg.gib.gov.tr) gider; demo/test ortamında tarayıcı
 bağlamı bu istekleri buraya yönlendirir (/dijital/…, /intvrg/…). Sayfa yapısı eski robotun canlıda gözlenen akışını izler:
 giriş + CAPTCHA → "Geçiş Yapılabilecek Uygulamalar" → İnternet Vergi Dairesi + yönlendirme onayı → E-Beyanname Yetki
-Bilgileri → Geçerli E-Beyanname Sözleşmeleri Listesi (sayfalı, "Tümünü Göster", alt bilgide toplam).
+Bilgileri → Geçerli E-Beyanname Sözleşmeleri Listesi (sayfalı, "Tümünü Göster", alt bilgide toplam); e-Beyanname kartı +
+yönlendirme onayı → https://ebeyanname.gib.gov.tr (Beyanname Ara, liste, PDF'ler, MUHSGK SGK bildirimleri; ebeyanname.py).
 
 Veri sentetiktir: kullanıcı koduna göre tohumlanmış, kontrol hanesi geçerli ama sahte VKN/TCKN (99 önekli TCKN).
 Hesap kuralı: SAHTE_GIB_SIFRE (vars. demo-gib-sifre) ile her kullanıcı kodu girer; başka şifre "hatalı".
@@ -23,6 +24,8 @@ from urllib.parse import parse_qs, urlsplit
 
 from PIL import Image, ImageDraw, ImageFont
 
+from . import ebeyanname as ebyn
+
 TITLE = 'Geçerli E-Beyanname Sözleşmeleri Listesi'
 HEADERS = ('Mükellef Vergi Kimlik Numarası', 'Mükellef TC Kimlik Numarası', 'Mükellef Unvanı', 'Mükellef Vergi Dairesi',
            'Sözleşme Numarası', 'Sözleşme Tarihi', 'Hizmet Sözleşmesi Tarih ve No', 'Sisteme Giriş Tarihi', 'Sözleşme Türü')
@@ -37,6 +40,9 @@ _captcha: dict[str, str] = {}          # oturum çerezi → beklenen kod
 _dvd_oturum: dict[str, str] = {}       # dijital oturum → kullanıcı kodu
 _ivd_belirtec: dict[str, str] = {}     # tek kullanımlık İVD geçiş belirteci → kullanıcı kodu
 _ivd_oturum: dict[str, str] = {}       # intvrg oturum → kullanıcı kodu
+_ebyn_belirtec: dict[str, str] = {}    # tek kullanımlık e-Beyanname geçiş belirteci → kullanıcı kodu
+_ebyn_oturum: dict[str, str] = {}      # e-Beyanname oturumu → kullanıcı kodu
+_ebyn_kayit: dict[tuple[str, str], dict] = {}  # (oturum, oid) → listelenen beyanname (belge/SGK detayı için)
 
 
 def _vkn(rnd: random.Random) -> str:
@@ -131,7 +137,13 @@ def _anasayfa() -> bytes:
 <h1>Dijital Vergi Dairesi</h1>
 <section><h2>Geçiş Yapılabilecek Uygulamalar</h2>
 <div class="kart" onclick="document.getElementById('onay').hidden=false"><p>İnternet Vergi Dairesi</p></div>
-<div class="kart"><p>e-Beyanname</p></div></section>
+<div class="kart" onclick="document.getElementById('onayByn').hidden=false"><p>e-Beyanname</p></div></section>
+<div id="onayByn" hidden><div>
+<h3>Yönlendirmeyi Onaylıyor Musunuz?</h3>
+<p>e-Beyanname uygulamasına geçiş yapmak üzeresiniz. Bu işlemle birlikte aktif e-Beyanname oturumlarınız da sonlandırılacaktır. Devam etmek istiyor musunuz?</p>
+<button type="button" onclick="document.getElementById('onayByn').hidden=true">İPTAL ET</button>
+<button type="button" onclick="fetch('/portal/api/ebyn',{method:'POST'}).then(r=>r.json()).then(j=>{location.href='https://ebeyanname.gib.gov.tr/eyeksite?token='+j.belirtec})">ONAYLA</button>
+</div></div>
 <div id="onay" hidden><div>
 <h3>Yönlendirmeyi Onaylıyor Musunuz?</h3>
 <p>İnternet Vergi Dairesi uygulamasına geçiş yapmak üzeresiniz. Bu işlemle birlikte aktif İnternet Vergi Dairesi oturumlarınız da sonlandırılacaktır. Devam etmek istiyor musunuz?</p>
@@ -157,6 +169,14 @@ def _liste(kullanici: str, tumu: bool) -> bytes:
     alt = f'<tr><td colspan="{len(HEADERS) + 1}">1 - {len(gorunen)} listeleniyor. Toplam : {len(kayitlar)} {dugme}</td></tr>'
     baslik = '<tr>' + ''.join(f'<th>{h}</th>' for h in HEADERS) + '<th>Görüntüle</th></tr>'
     return _sayfa(TITLE, f'<h1>{TITLE}</h1><table>{baslik}{satir}{alt}</table>')
+
+
+def _beyannameler(kullanici: str, kimlik: str) -> list[dict] | None:
+    """Yalnız müşavirin sözleşme listesindeki mükellefin beyannameleri (yetki yoksa None)."""
+    for s in sozlesmeler(kullanici):
+        if kimlik in (s['taxNumber'], s['identityNumber']):
+            return ebyn.beyannameler(kimlik, s['name'], s['taxOffice'])
+    return None
 
 
 class Isleyici(BaseHTTPRequestHandler):
@@ -226,6 +246,42 @@ class Isleyici(BaseHTTPRequestHandler):
             if kullanici is None:
                 return self._yanit(403, _sayfa('Yetkisiz', '<p>Oturum bulunamadı.</p>'))
             return self._yanit(200, _liste(kullanici, q.get('tumu', ['0'])[0] == '1'))
+        if u.path == '/ebeyanname/eyeksite':
+            belirtec = q.get('token', [''])[0]
+            with _kilit:
+                kullanici = _ebyn_belirtec.pop(belirtec, None)
+                if kullanici is None and self._cerez('EBYN') not in _ebyn_oturum:
+                    return self._yanit(403, _sayfa('Yetkisiz', '<p>Oturum bulunamadı.</p>'))
+                cerez = None
+                if kullanici is not None:
+                    oturum = secrets.token_hex(16)
+                    _ebyn_oturum[oturum] = kullanici
+                    cerez = f'EBYN={oturum}'
+            return self._yanit(200, _sayfa('e-Beyanname', ebyn.uygulama_sayfasi()), cerez=cerez)
+        if u.path == '/ebeyanname/eyeksite/sgk':
+            oturum = self._cerez('EBYN') or ''
+            k = _ebyn_kayit.get((oturum, q.get('oid', [''])[0]))
+            if k is None or not k['sgk']:
+                return self._json({'hata': 'Hata: SGK bildirimi bulunamadı.'})
+            return self._json({'donem': k['donem'], 'vergiDurum': k['vergiDurum'], 'satirlar': k['sgk']})
+        if u.path == '/ebeyanname/eyeksite/belge':
+            oturum = self._cerez('EBYN') or ''
+            k = _ebyn_kayit.get((oturum, q.get('oid', [''])[0]))
+            tur = q.get('tur', [''])[0]
+            if k is None:
+                return self._yanit(200, _sayfa('Hata', '<p>Belge bulunamadı.</p>'))
+            if tur == 'beyanname':
+                govde = ebyn.beyanname_pdf(k)
+            elif tur == 'tahakkuk' and q.get('toid', [''])[0] == k['tahakkukOid']:
+                govde = ebyn.tahakkuk_pdf(k)
+            elif tur in ('sgk_tahakkuk', 'sgk_hizmet'):
+                s = next((x for x in k['sgk'] if x['oid'] == q.get('soid', [''])[0]), None)
+                if s is None:
+                    return self._yanit(200, _sayfa('Hata', '<p>EBIL_GD_BILDIRGE Kayıt Yok</p>'))
+                govde = ebyn.sgk_tahakkuk_pdf(k, s) if tur == 'sgk_tahakkuk' else ebyn.hizmet_pdf(k, s)
+            else:
+                return self._yanit(404, b'')
+            return self._yanit(200, govde, 'application/pdf')
         return self._yanit(404, _sayfa('Bulunamadı', '<p>Sayfa bulunamadı.</p>'))
 
     def do_POST(self):  # noqa: N802
@@ -250,6 +306,29 @@ class Isleyici(BaseHTTPRequestHandler):
                 _dvd_oturum[yeni] = kullanici
                 _captcha.pop(oturum or '', None)
             return self._json({'tamam': True}, cerez=f'DVD={yeni}')
+        if u.path == '/dijital/portal/api/ebyn':
+            kullanici = _dvd_oturum.get(self._cerez('DVD') or '')
+            if kullanici is None:
+                return self._yanit(403, b'{}', 'application/json')
+            belirtec = secrets.token_urlsafe(24)
+            with _kilit:
+                _ebyn_belirtec[belirtec] = kullanici
+            return self._json({'belirtec': belirtec})
+        if u.path == '/ebeyanname/eyeksite/ara':
+            oturum = self._cerez('EBYN') or ''
+            kullanici = _ebyn_oturum.get(oturum)
+            if kullanici is None:
+                return self._json({'hata': 'Hata: Oturum süreniz dolmuştur.'})
+            try:
+                istek = json.loads(govde or b'{}')
+            except ValueError:
+                return self._json({'hata': 'Hata: İstek geçersiz.'})
+            yanit = ebyn.ara(lambda kimlik: _beyannameler(kullanici, kimlik), istek)
+            if 'satirlar' in yanit:
+                with _kilit:
+                    for k in _beyannameler(kullanici, str(istek.get('kimlik'))) or []:
+                        _ebyn_kayit[(oturum, k['oid'])] = k
+            return self._json(yanit)
         if u.path == '/dijital/portal/api/ivd':
             kullanici = _dvd_oturum.get(self._cerez('DVD') or '')
             if kullanici is None:

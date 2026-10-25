@@ -89,8 +89,19 @@ async def visible_target(context, label, diagnostics=None):
     return next(iter(matches.values())) if matches else None
 
 
+ONAY_METNI = {
+    'İnternet Vergi Dairesi': ('İnternet Vergi Dairesi uygulamasına geçiş yapmak üzeresiniz.', 'aktif İnternet Vergi Dairesi oturumlarınız da sonlandırılacaktır.',
+                               'Devam etmek istiyor musunuz?'),
+    'e-Beyanname': ('e-Beyanname uygulamasına geçiş yapmak üzeresiniz.', 'aktif e-Beyanname oturumlarınız da sonlandırılacaktır.', 'Devam etmek istiyor musunuz?'),
+}
+
+
 async def confirm_ivd_transition(context):
-    """Sadece gözlenen İVD yönlendirme uyarısı; başka onaylara dokunmaz."""
+    return await confirm_transition(context, 'İnternet Vergi Dairesi')
+
+
+async def confirm_transition(context, uygulama: str):
+    """Yalnız gözlenen yönlendirme uyarısı (İVD / e-Beyanname); metni tam eşleşmeyen onaylara dokunmaz."""
     targets = []
     for page in context.pages:
         if not gib_alani(page.url):
@@ -105,18 +116,14 @@ async def confirm_ivd_transition(context):
                 if await panel.count() != 1:
                     continue
                 text = ' '.join((await panel.inner_text()).split())
-                if not all(part in text for part in (
-                    'İnternet Vergi Dairesi uygulamasına geçiş yapmak üzeresiniz.',
-                    'aktif İnternet Vergi Dairesi oturumlarınız da sonlandırılacaktır.',
-                    'Devam etmek istiyor musunuz?',
-                )):
+                if not all(part in text for part in ONAY_METNI[uygulama]):
                     continue
                 button = panel.get_by_role('button', name='ONAYLA', exact=True)
                 cancel = panel.get_by_role('button', name='İPTAL ET', exact=True)
                 if await button.count() == 1 and await cancel.count() == 1 and await button.is_visible() and await button.is_enabled():
                     targets.append(button)
     if len(targets) > 1:
-        raise BelirsizHedef('Birden fazla İVD yönlendirme uyarısı var.')
+        raise BelirsizHedef(f'Birden fazla {uygulama} yönlendirme uyarısı var.')
     if not targets:
         return False
     await targets[0].click(timeout=5000)

@@ -19,7 +19,7 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `genel_bakis.panel.view` | workspace | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Takvim | `genel_bakis.takvim` | workspace | 🔴 0/1 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `genel_bakis.takvim.view` | workspace | 🔴 | 0 |
-| **Firmalarım** | `firmalar` | portfolio | 🔴 9/15 | 53 |
+| **Firmalarım** | `firmalar` | portfolio | 🔴 10/15 | 57 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Firma listesi | `firmalar.liste` | portfolio | 🟢 2/2 | 9 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `firmalar.liste.view` | portfolio | 🟢 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dışa aktar | `firmalar.liste.export` | portfolio | 🟢 | 5 |
@@ -33,24 +33,24 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bilgileri gir | `firmalar.kurum_hesaplari.edit_credentials` | credentials | 🟢 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kullanım izni ver | `firmalar.kurum_hesaplari.grant_use` | credentials | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mükellef onayı | `firmalar.kurum_hesaplari.consent` | credentials | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;GİB e-Beyanname sözleşmeleri | `firmalar.gib_sozlesmeler` | tax-filing | 🔴 1/3 | 12 |
+| &nbsp;&nbsp;&nbsp;&nbsp;GİB e-Beyanname sözleşmeleri | `firmalar.gib_sozlesmeler` | tax-filing | 🔴 2/3 | 16 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `firmalar.gib_sozlesmeler.view` | tax-filing | 🟢 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GİB'den güncelle | `firmalar.gib_sozlesmeler.sync` | tax-filing | 🔴 canlı | 8 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kurum incelemesi | `firmalar.gib_sozlesmeler.review` | tax-filing | 🔴 | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kurum incelemesi | `firmalar.gib_sozlesmeler.review` | tax-filing | 🟢 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Müşavir devri | `firmalar.devir` | portfolio | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Devir başlat | `firmalar.devir.start` | portfolio | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;İtiraz et | `firmalar.devir.object` | portfolio | 🔴 | 0 |
-| **e-Beyanname** | `beyanname` | tax-filing | 🔴 0/9 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;e-Beyanname görüntüleme | `beyanname.liste` | tax-filing | 🔴 0/2 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `beyanname.liste.view` | tax-filing | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dışa aktar | `beyanname.liste.export` | tax-filing | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;e-Beyanname kontrol | `beyanname.kontrol` | tax-filing | 🔴 0/1 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `beyanname.kontrol.view` | tax-filing | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Beyanname / tahakkuk PDF | `beyanname.belge` | documents | 🔴 0/2 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `beyanname.belge.view` | documents | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PDF indir | `beyanname.belge.download` | documents | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Beyanname senkronu | `beyanname.senkron` | sync | 🔴 0/2 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Senkron başlat | `beyanname.senkron.start` | sync | 🔴 canlı | 0 |
+| **e-Beyanname** | `beyanname` | tax-filing | 🔴 5/9 | 25 |
+| &nbsp;&nbsp;&nbsp;&nbsp;e-Beyanname görüntüleme | `beyanname.liste` | tax-filing | 🟢 2/2 | 8 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `beyanname.liste.view` | tax-filing | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dışa aktar | `beyanname.liste.export` | tax-filing | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;e-Beyanname kontrol | `beyanname.kontrol` | tax-filing | 🟢 1/1 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `beyanname.kontrol.view` | tax-filing | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Beyanname / tahakkuk PDF | `beyanname.belge` | documents | 🟢 2/2 | 8 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `beyanname.belge.view` | documents | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PDF indir | `beyanname.belge.download` | documents | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Beyanname senkronu | `beyanname.senkron` | sync | 🔴 0/2 | 5 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Senkron başlat | `beyanname.senkron.start` | sync | 🔴 canlı | 5 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;İptal et | `beyanname.senkron.cancel` | sync | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Pilot bölge ayarları | `beyanname.pilot_bolge` | tax-filing | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `beyanname.pilot_bolge.view` | tax-filing | 🔴 | 0 |

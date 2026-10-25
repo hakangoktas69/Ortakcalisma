@@ -2,6 +2,18 @@
   "name": "@eworks/documents",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@eworks/kernel": "workspace:*" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@eworks/kernel": "workspace:*",
+    "@eworks/platform": "workspace:*"
+  },
+  "devDependencies": {
+    "@eworks/identity-access": "workspace:*",
+    "@eworks/portfolio": "workspace:*",
+    "@eworks/sales": "workspace:*",
+    "@eworks/tax-filing": "workspace:*",
+    "@eworks/testing": "workspace:*"
+  }
 }

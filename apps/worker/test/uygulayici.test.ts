@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { CredentialRepository } from '@eworks/credentials';
 import type { Firm, FirmRepository } from '@eworks/portfolio';
 import type { Job, JobRepository } from '@eworks/sync';
-import type { ContractRepository } from '@eworks/tax-filing';
+import type { DocumentRepository } from '@eworks/documents';
+import type { ContractRepository, DeclarationRepository } from '@eworks/tax-filing';
 import { fakeVkn, seededRandom } from '@eworks/testing';
 import { sonucuIsle, type UygulayiciDeps } from '../src/uygulayici.ts';
 
@@ -10,12 +11,15 @@ const ORG = '11111111-1111-4111-8111-111111111111';
 const JOB = '22222222-2222-4222-8222-222222222222';
 const rnd = seededRandom(5);
 
-function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status'] } = {}) {
-  const is: Job = { id: JOB, kind: 'gib.sozlesmeler', accountId: 'h-1', status: opts.status ?? 'running', statusMessage: null, resultSummary: null, createdAt: '', startedAt: null, finishedAt: null };
+function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status']; kind?: Job['kind'] } = {}) {
+  const is: Job = { id: JOB, kind: opts.kind ?? 'gib.sozlesmeler', accountId: 'h-1', status: opts.status ?? 'running', statusMessage: null, resultSummary: null, createdAt: '', startedAt: null, finishedAt: null };
   const girisler: string[] = [];
   const firmalar = new Map<string, Firm>();
   const yazilan: number[] = [];
   const nesneler = new Map<string, unknown>();
+  const beyannameler: string[] = [];
+  const belgeler: string[] = [];
+  const silinen: string[] = [];
   const jobs: JobRepository = {
     activeFor: async () => null,
     insertWithOutbox: async () => {},
@@ -43,9 +47,20 @@ function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status'] } = 
     creds,
     firmalar: { repo, registry: { reserve: async () => 'ok', activate: async () => {}, release: async () => {} }, hashTaxId: (t) => t, newId: () => `f-${++n}` },
     sozlesmeler,
+    beyannameler: {
+      upsert: async (_c, _f, r) => {
+        beyannameler.push(r.recordId);
+        return { id: `b-${r.recordId}`, created: true };
+      },
+      list: async () => [],
+      get: async () => null,
+      types: async () => [],
+    } as DeclarationRepository,
+    belgeler: { upsert: async (_c: unknown, x: { key: string }) => void belgeler.push(x.key) } as unknown as DocumentRepository,
     sonucOku: async (k) => nesneler.get(k),
+    sonucSil: async (k) => void silinen.push(k),
   };
-  return { d, is, girisler, firmalar, yazilan, nesneler };
+  return { d, is, girisler, firmalar, yazilan, nesneler, beyannameler, belgeler, silinen };
 }
 
 const liste = (adet: number) => ({
@@ -115,5 +130,32 @@ describe('entegrasyon sonucu uygulayıcı', () => {
     const k = kur();
     expect(await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'progress', message: 'Giriş yapılıyor.' }, k.d)).toBe('ilerleme');
     expect(k.is).toMatchObject({ status: 'running', statusMessage: 'Giriş yapılıyor.' });
+  });
+  it('[F:beyanname.senkron.start] beyanname sonucu: aynı oturumun sözleşmeleri uygulanır, yalnız Aracılık ve Sorumluluk kanıtlı sorgular yazılır, ham sonuç silinir', async () => {
+    const k = kur({ kind: 'gib.beyannameler' });
+    const l = liste(2);
+    const [a, b] = l.contracts;
+    const sha = 'a'.repeat(64);
+    const kayit = (id: string) => ({ recordId: id, type: 'KDV1', periodStart: '2026-08', periodEnd: '2026-08', uploadedAt: '2026-09-20T10:00:00+03:00',
+      taxStatus: 'Onaylandı', sgkStatus: '', branch: '0', reference: `${a!.taxNumber}_KDV1.xml`, referenceType: 'source_filename', documentWarnings: [],
+      documents: [{ kind: 'declaration', key: `org/${ORG}/belgeler/${sha}.pdf`, sha256: sha, size: 1000 }] });
+    k.nesneler.set(anahtar, {
+      schema: 'eworks.gib.declarations.v1', jobId: JOB, sourceType: 'sahte_gib', observedAt: '2026-10-25T10:00:00Z',
+      contracts: { count: l.count, contracts: l.contracts }, scope: { startDate: '2026-09-01', endDate: '2026-09-30' },
+      queries: [
+        { identity: a!.taxNumber, startDate: '2026-09-01', endDate: '2026-09-30', outcome: 'ok', access: { method: 'same_session_contract', contractNumbers: [a!.number] }, records: [kayit('r1')] },
+        // Kanıttaki sözleşme numarası listede bu mükellefin değil → yazılmaz
+        { identity: b!.taxNumber, startDate: '2026-09-01', endDate: '2026-09-30', outcome: 'ok', access: { method: 'same_session_contract', contractNumbers: [a!.number] }, records: [kayit('r2')] },
+        { identity: b!.taxNumber, startDate: '2026-08-01', endDate: '2026-08-31', outcome: 'empty', access: { method: 'same_session_contract', contractNumbers: [b!.number] }, records: [] },
+      ],
+    });
+    expect(await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'ok', resultKey: anahtar }, k.d)).toBe('uygulandi');
+    expect(k.beyannameler).toEqual(['r1']);
+    expect(k.belgeler).toHaveLength(1);
+    expect(k.firmalar.size).toBe(2);
+    expect(k.is.status).toBe('succeeded');
+    expect(k.is.statusMessage).toContain('3 sorgu · 1 beyanname (1 yeni) · 1 belge');
+    expect(k.is.statusMessage).toContain('1 mükellefte Aracılık ve Sorumluluk sözleşmesi yok');
+    expect(k.silinen).toEqual([anahtar]);
   });
 });

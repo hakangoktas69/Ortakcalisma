@@ -7,7 +7,7 @@ Mali müşavir ofisleri için çok kiracılı SaaS: GİB e-Beyanname ve SGK veri
 ## Özellik durumu
 
 <!-- ozellik-durumu:baslangic — pnpm features üretir, elle düzenlemeyin -->
-**10/107 işlem yeşil** (18 modül). 🔴 Oturum 1/4 · 🔴 Ana Sayfa 0/2 · 🔴 Firmalarım 9/15 · 🔴 e-Beyanname 0/9 · 🔴 e-Tebligat 0/2 · 🔴 SGK 0/11 · 🔴 e-Defter 0/2 · 🔴 Dilekçeler 0/4 · 🔴 Faturalar 0/4 · 🔴 Görevler 0/4 · 🔴 Notlar 0/2 · 🔴 Uyarılar ve bildirimler 0/2 · 🔴 Raporlar 0/8 · 🔴 Ödeme 0/9 · 🔴 Yönetim 0/11 · 🔴 Ayarlar 0/7 · 🔴 Destek 0/4 · 🔴 Satış portalı 0/7. Ayrıntı: [docs/ozellik-durumu.md](docs/ozellik-durumu.md)
+**16/107 işlem yeşil** (18 modül). 🔴 Oturum 1/4 · 🔴 Ana Sayfa 0/2 · 🔴 Firmalarım 10/15 · 🔴 e-Beyanname 5/9 · 🔴 e-Tebligat 0/2 · 🔴 SGK 0/11 · 🔴 e-Defter 0/2 · 🔴 Dilekçeler 0/4 · 🔴 Faturalar 0/4 · 🔴 Görevler 0/4 · 🔴 Notlar 0/2 · 🔴 Uyarılar ve bildirimler 0/2 · 🔴 Raporlar 0/8 · 🔴 Ödeme 0/9 · 🔴 Yönetim 0/11 · 🔴 Ayarlar 0/7 · 🔴 Destek 0/4 · 🔴 Satış portalı 0/7. Ayrıntı: [docs/ozellik-durumu.md](docs/ozellik-durumu.md)
 <!-- ozellik-durumu:bitis -->
 
 ## Bağlam haritası

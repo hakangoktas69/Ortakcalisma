@@ -64,7 +64,7 @@ export async function finishJob(ctx: Ctx, id: string, to: Extract<JobStatus, 'su
   return d.jobs.setStatus(ctx, id, from, to, message.slice(0, 500), summary);
 }
 
-/** İşçi: takılı kalan işleri başarısız sayar (çöken robot işi sonsuza dek "çalışıyor" görünmesin). */
+/** İşçi: takılı kalan (son ilerlemesinden beri sessiz) işleri başarısız sayar; çöken robot işi sonsuza dek "çalışıyor" görünmesin. */
 export async function failStaleJobs(ctx: Ctx, d: { jobs: JobRepository }, limitMinutes = 20) {
   const ids = await d.jobs.staleRunning(ctx, limitMinutes);
   for (const id of ids) await d.jobs.setStatus(ctx, id, ['running'], 'failed', 'İş zaman aşımına uğradı; yeniden başlatın.');

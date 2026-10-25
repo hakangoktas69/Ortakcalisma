@@ -55,5 +55,5 @@ def yukle(env: dict[str, str] | None = None) -> Ayarlar:
         rabbitmq_url=gerekli('RABBITMQ_URL'), redis_url=gerekli('REDIS_URL'), s3_endpoint=gerekli('S3_ENDPOINT'),
         s3_bucket=e.get('S3_BUCKET', 'eworks-belgeler'), s3_erisim=gerekli('S3_ACCESS_KEY'), s3_gizli=gerekli('S3_SECRET_KEY'),
         s3_bolge=e.get('S3_REGION', 'tr-1'), shardlar=shard_cozumle(gerekli('SHARD_DATABASE_URLS')), ortam=ortam, sahte_gib=sahte,
-        gib_istek_dk=hiz, is_zaman_asimi_sn=int(e.get('IS_ZAMAN_ASIMI_SN', '900')),
+        gib_istek_dk=hiz, is_zaman_asimi_sn=int(e.get('IS_ZAMAN_ASIMI_SN', '7200')),
     )

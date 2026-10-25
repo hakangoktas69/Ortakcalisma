@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@eworks/credentials": "workspace:*",
+    "@eworks/documents": "workspace:*",
     "@eworks/feature-registry": "workspace:*",
     "@eworks/identity-access": "workspace:*",
     "@eworks/kernel": "workspace:*",

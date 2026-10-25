@@ -4,9 +4,21 @@ import { fileURLToPath } from 'node:url';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { recordLoginResult, type CredentialRepository } from '@eworks/credentials';
+import { registerDocuments, type DocumentRepository } from '@eworks/documents';
 import { createFirmFromSource, firmsByTaxIds, refreshFirmFromSource, type FirmDeps } from '@eworks/portfolio';
 import { finishJob, recordProgress, type JobRepository } from '@eworks/sync';
-import { importFilingContracts, type ContractList, type ContractRepository, type FirmPort } from '@eworks/tax-filing';
+import {
+  declarationSummaryText,
+  importDeclarations,
+  importFilingContracts,
+  type ContractList,
+  type ContractRepository,
+  type DeclarationQuery,
+  type DeclarationRepository,
+  type DocumentPort,
+  type FirmPort,
+  type ImportSummary,
+} from '@eworks/tax-filing';
 
 // Entegrasyon sonucunu uygulayan işçi mantığı (06 §4: alan kuralları burada, Python ACL tablolara yazmaz).
 // Bağlamlar yalnız public API'leriyle birleştirilir (bileşim kökü).
@@ -17,16 +29,31 @@ const ajv = new Ajv2020({ allErrors: false, strict: true });
 addFormats.default(ajv);
 const sonucMesajiGecerli = ajv.compile(sema('events/integration.sonuc.v1.schema.json'));
 const sozlesmeListesiGecerli = ajv.compile(sema('integration/eworks.gib.contracts.v1.schema.json'));
+const beyannameSonucuGecerli = ajv.compile(sema('integration/eworks.gib.declarations.v1.schema.json'));
 
 export type SonucMesaji = { orgId: string; jobId: string; outcome: 'ok' | 'wrong_password' | 'failed' | 'progress'; resultKey?: string; message?: string };
-export type SozlesmeSonucu = ContractList & { schema: 'eworks.gib.contracts.v1'; jobId: string; sourceType: 'gib_live' | 'sahte_gib'; observedAt: string };
+type Kaynak = 'gib_live' | 'sahte_gib';
+export type SozlesmeSonucu = ContractList & { schema: 'eworks.gib.contracts.v1'; jobId: string; sourceType: Kaynak; observedAt: string };
+export type BeyannameSonucu = {
+  schema: 'eworks.gib.declarations.v1';
+  jobId: string;
+  sourceType: Kaynak;
+  observedAt: string;
+  contracts: ContractList;
+  scope: { startDate: string; endDate: string };
+  queries: DeclarationQuery[];
+};
 
 export type UygulayiciDeps = {
   jobs: JobRepository;
   creds: CredentialRepository;
   firmalar: FirmDeps;
   sozlesmeler: ContractRepository;
+  beyannameler: DeclarationRepository;
+  belgeler: DocumentRepository;
   sonucOku: (anahtar: string) => Promise<unknown>;
+  /** Uygulanan ham sonuç silinir (02 §9: ham sonuç saklanmaz); silinemezse iş yine tamamlanır. */
+  sonucSil: (anahtar: string) => Promise<void>;
 };
 
 /** portfolio use-case'lerini tax-filing'in FirmPort'una bağlar. */
@@ -42,12 +69,20 @@ export const firmaPortu = (firmalar: FirmDeps): FirmPort => ({
   },
 });
 
+/** documents use-case'ini tax-filing'in DocumentPort'una bağlar. */
+export const belgePortu = (repo: DocumentRepository): DocumentPort => ({
+  register: (ctx, docs) => registerDocuments(ctx, docs, { repo }),
+});
+
 const LISTE_HATASI: Record<string, string> = {
   sayi_uyusmuyor: 'GİB toplamı ile okunan satır sayısı uyuşmadı; liste uygulanmadı.',
   kimlik_gecersiz: 'Listede geçersiz VKN/TCKN var; liste uygulanmadı.',
   eksik_alan: 'Listede eksik alan var; liste uygulanmadı.',
   tekrarlanan_sozlesme: 'Listede tekrarlanan sözleşme var; liste uygulanmadı.',
 };
+
+const sozlesmeMetni = (x: ImportSummary, kaynak: Kaynak) =>
+  `${x.sozlesme} sözleşme · ${x.mukellef} mükellef · ${x.yeni} yeni / ${x.eslesen} eşleşen${x.cakisan ? ` · ${x.cakisan} başka ofiste kayıtlı` : ''}${x.gecersiz ? ` · ${x.gecersiz} geçersiz kimlik` : ''}${kaynak === 'sahte_gib' ? ' · kaynak: sahte GİB (demo)' : ''}`;
 
 /** Tek bir sonuç mesajını işler. Geçersiz mesaj fırlatır (kuyruk ölü mektuba gönderir). İdempotent: kesinleşmiş iş tekrar değişmez. */
 export async function sonucuIsle(ham: unknown, d: UygulayiciDeps): Promise<string> {
@@ -58,8 +93,8 @@ export async function sonucuIsle(ham: unknown, d: UygulayiciDeps): Promise<strin
     await recordProgress(ctx, m.jobId, m.message ?? 'Çalışıyor.', d);
     return 'ilerleme';
   }
-  const sahip = await d.jobs.accountOwner(ctx, m.jobId);
-  if (!sahip) throw new Error('İş bulunamadı');
+  const [sahip, is] = await Promise.all([d.jobs.accountOwner(ctx, m.jobId), d.jobs.get(ctx, m.jobId)]);
+  if (!sahip || !is) throw new Error('İş bulunamadı');
   if (m.outcome === 'wrong_password') {
     await recordLoginResult(ctx, sahip.accountId, 'wrong_password', d.creds);
     await finishJob(ctx, m.jobId, 'wrong_password', 'Kurum kullanıcı kodu veya şifresi hatalı. Hesap, yeni bilgi girilene dek kullanılmayacak.', d);
@@ -71,6 +106,16 @@ export async function sonucuIsle(ham: unknown, d: UygulayiciDeps): Promise<strin
   }
   if (!m.resultKey || !m.resultKey.startsWith(`org/${m.orgId}/`)) throw new Error('Sonuç anahtarı ofisle eşleşmiyor');
   const sonuc = await d.sonucOku(m.resultKey);
+  try {
+    return is.kind === 'gib.beyannameler' ? await beyannameUygula(ctx, m, sonuc, sahip, d) : await sozlesmeUygula(ctx, m, sonuc, sahip, d);
+  } finally {
+    await d.sonucSil(m.resultKey).catch(() => {});
+  }
+}
+
+type Sahip = { accountId: string; ownerKind: 'advisor' | 'firm'; ownerId: string };
+
+async function sozlesmeUygula(ctx: { org: string }, m: SonucMesaji, sonuc: unknown, sahip: Sahip, d: UygulayiciDeps) {
   if (!sozlesmeListesiGecerli(sonuc) || (sonuc as SozlesmeSonucu).jobId !== m.jobId) {
     await finishJob(ctx, m.jobId, 'failed', 'Kurum sonucu beklenen biçimde değil; veri yazılmadı.', d);
     return 'gecersiz_sonuc';
@@ -83,8 +128,30 @@ export async function sonucuIsle(ham: unknown, d: UygulayiciDeps): Promise<strin
     await finishJob(ctx, m.jobId, 'failed', LISTE_HATASI[r.error] ?? 'Liste uygulanmadı.', d);
     return 'liste_hatasi';
   }
-  const x = r.summary;
-  const metin = `${x.sozlesme} sözleşme · ${x.mukellef} mükellef · ${x.yeni} yeni / ${x.eslesen} eşleşen${x.cakisan ? ` · ${x.cakisan} başka ofiste kayıtlı` : ''}${x.gecersiz ? ` · ${x.gecersiz} geçersiz kimlik` : ''}${s.sourceType === 'sahte_gib' ? ' · kaynak: sahte GİB (demo)' : ''}`;
-  await finishJob(ctx, m.jobId, 'succeeded', metin, d, { ...x, kaynak: s.sourceType, gozlem: s.observedAt });
+  await finishJob(ctx, m.jobId, 'succeeded', sozlesmeMetni(r.summary, s.sourceType), d, { ...r.summary, kaynak: s.sourceType, gozlem: s.observedAt });
+  return 'uygulandi';
+}
+
+/** Beyanname sonucu: önce aynı oturumun sözleşme listesi (firmalar + erişim kanıtı), sonra sorgu sonuçları ve belgeler. */
+async function beyannameUygula(ctx: { org: string }, m: SonucMesaji, sonuc: unknown, sahip: Sahip, d: UygulayiciDeps) {
+  if (!beyannameSonucuGecerli(sonuc) || (sonuc as BeyannameSonucu).jobId !== m.jobId) {
+    await finishJob(ctx, m.jobId, 'failed', 'Kurum sonucu beklenen biçimde değil; veri yazılmadı.', d);
+    return 'gecersiz_sonuc';
+  }
+  if (sahip.ownerKind !== 'advisor') throw new Error('Beyanname listesi müşavir hesabıyla okunur');
+  await recordLoginResult(ctx, sahip.accountId, 'ok', d.creds);
+  const s = sonuc as BeyannameSonucu;
+  const k = await importFilingContracts(ctx, { jobId: m.jobId, advisorId: sahip.ownerId, source: s.sourceType, list: s.contracts }, { firms: firmaPortu(d.firmalar), contracts: d.sozlesmeler });
+  if (!k.ok) {
+    // Erişim kanıtı (sözleşme listesi) doğrulanmadıysa hiçbir beyanname uygulanmaz
+    await finishJob(ctx, m.jobId, 'failed', LISTE_HATASI[k.error] ?? 'Sözleşme listesi uygulanmadı; beyannameler yazılmadı.', d);
+    return 'liste_hatasi';
+  }
+  const x = await importDeclarations(
+    ctx,
+    { jobId: m.jobId, source: s.sourceType, contracts: s.contracts.contracts, queries: s.queries },
+    { firms: firmaPortu(d.firmalar), declarations: d.beyannameler, documents: belgePortu(d.belgeler) },
+  );
+  await finishJob(ctx, m.jobId, 'succeeded', declarationSummaryText(x, s.sourceType), d, { ...x, kaynak: s.sourceType, gozlem: s.observedAt, kapsam: s.scope });
   return 'uygulandi';
 }

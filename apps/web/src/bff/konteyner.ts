@@ -3,14 +3,15 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { Redis } from 'ioredis';
 import { PgCredentialRepository } from '@eworks/credentials';
 import { GoTrueAuthProvider, PgMembershipReader, RedisSessionStore } from '@eworks/identity-access';
-import { databaseSchema, loadConfig, sessionSchema, ShardRouter, taxIdSchema } from '@eworks/platform';
+import { PgDocumentRepository, S3FileStore } from '@eworks/documents';
+import { databaseSchema, Depo, loadConfig, sessionSchema, ShardRouter, storageSchema, taxIdSchema } from '@eworks/platform';
 import { PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portfolio';
 import { PgJobRepository } from '@eworks/sync';
-import { PgContractRepository } from '@eworks/tax-filing';
+import { PgContractRepository, PgDeclarationRepository } from '@eworks/tax-filing';
 
 // BFF bağımlılıkları (süreç başına tek örnek). Yapılandırma açılışta doğrulanır; tarayıcıya hiçbir değer gitmez (D5).
 
-const config = () => ({ ...loadConfig(databaseSchema), ...loadConfig(sessionSchema), ...loadConfig(taxIdSchema) });
+const config = () => ({ ...loadConfig(databaseSchema), ...loadConfig(sessionSchema), ...loadConfig(taxIdSchema), ...loadConfig(storageSchema) });
 
 function kur() {
   const c = config();
@@ -30,6 +31,11 @@ function kur() {
     kurumHesaplari: new PgCredentialRepository(router),
     isler: { jobs: new PgJobRepository(router), newId: randomUUID },
     sozlesmeler: { contracts: new PgContractRepository(router) },
+    beyannameler: { declarations: new PgDeclarationRepository(router) },
+    belgeler: {
+      repo: new PgDocumentRepository(router),
+      files: new S3FileStore(new Depo({ endpoint: c.S3_ENDPOINT, bucket: c.S3_BUCKET, accessKey: c.S3_ACCESS_KEY, secretKey: c.S3_SECRET_KEY, region: c.S3_REGION })),
+    },
   };
 }
 

@@ -196,17 +196,17 @@
     "context": "tax-filing"
   },
   "firmalar.gib_sozlesmeler.review": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "tax-filing"
   },
   "firmalar.gib_sozlesmeler": {
     "status": "red",
-    "green": 1,
+    "green": 2,
     "total": 3,
-    "tests": 12,
+    "tests": 16,
     "context": "tax-filing"
   },
   "firmalar.devir.start": {
@@ -232,72 +232,72 @@
   },
   "firmalar": {
     "status": "red",
-    "green": 9,
+    "green": 10,
     "total": 15,
-    "tests": 53,
+    "tests": 57,
     "context": "portfolio"
   },
   "beyanname.liste.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "tax-filing"
   },
   "beyanname.liste.export": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "tax-filing"
   },
   "beyanname.liste": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 2,
     "total": 2,
-    "tests": 0,
+    "tests": 8,
     "context": "tax-filing"
   },
   "beyanname.kontrol.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "tax-filing"
   },
   "beyanname.kontrol": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "tax-filing"
   },
   "beyanname.belge.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "documents"
   },
   "beyanname.belge.download": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "documents"
   },
   "beyanname.belge": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 2,
     "total": 2,
-    "tests": 0,
+    "tests": 8,
     "context": "documents"
   },
   "beyanname.senkron.start": {
     "status": "red",
     "green": 0,
     "total": 1,
-    "tests": 0,
+    "tests": 5,
     "context": "sync"
   },
   "beyanname.senkron.cancel": {
@@ -311,7 +311,7 @@
     "status": "red",
     "green": 0,
     "total": 2,
-    "tests": 0,
+    "tests": 5,
     "context": "sync"
   },
   "beyanname.pilot_bolge.view": {
@@ -337,9 +337,9 @@
   },
   "beyanname": {
     "status": "red",
-    "green": 0,
+    "green": 5,
     "total": 9,
-    "tests": 0,
+    "tests": 25,
     "context": "tax-filing"
   },
   "tebligat.liste.view": {

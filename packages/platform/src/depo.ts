@@ -1,4 +1,4 @@
-import { CreateBucketCommand, GetObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { CreateBucketCommand, DeleteObjectCommand, DeleteObjectsCommand, GetObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import type { Readable } from 'node:stream';
 
 // S3 uyumlu nesne deposu (D35: Compose'da SeaweedFS). Anahtarlar ofis önekli: org/<org_id>/… — ofisler arası karışmaz.
@@ -29,6 +29,28 @@ export class Depo {
   async akis(anahtar: string): Promise<{ govde: Readable; boyut: number | undefined; tur: string | undefined }> {
     const r = await this.s3.send(new GetObjectCommand({ Bucket: this.bucket, Key: anahtar }));
     return { govde: r.Body as Readable, boyut: r.ContentLength, tur: r.ContentType };
+  }
+
+  /** Nesne yoksa null (süresi dolup silinmiş belge). */
+  async akisVarsa(anahtar: string) {
+    try {
+      return await this.akis(anahtar);
+    } catch (e) {
+      if ((e as { name?: string }).name === 'NoSuchKey' || (e as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode === 404) return null;
+      throw e;
+    }
+  }
+
+  async sil(anahtar: string) {
+    await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: anahtar }));
+  }
+
+  /** Toplu silme (en çok 1000 anahtar/istek). */
+  async topluSil(anahtarlar: readonly string[]) {
+    for (let i = 0; i < anahtarlar.length; i += 1000) {
+      const parca = anahtarlar.slice(i, i + 1000);
+      await this.s3.send(new DeleteObjectsCommand({ Bucket: this.bucket, Delete: { Objects: parca.map((Key) => ({ Key })), Quiet: true } }));
+    }
   }
 
   async json<T>(anahtar: string, sinir = 50 * 1024 * 1024): Promise<T> {

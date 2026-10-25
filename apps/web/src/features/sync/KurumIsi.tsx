@@ -11,7 +11,8 @@ export type IsDurumu = { id: string; durum: string; etiket: string; mesaj: strin
 
 const SINIF: Record<string, string> = { succeeded: 'iyi', failed: 'kotu', wrong_password: 'kotu', cancelled: '', queued: 'bekliyor', running: 'bekliyor' };
 
-export function KurumIsi({ csrf, uc, dugme, ilk, baslatabilir }: { csrf: string; uc: string; dugme: string; ilk: IsDurumu | null; baslatabilir: boolean }) {
+/** İş durumu + başlatma; formlu ekranlar (beyanname senkronu) da kullanır. */
+export function useKurumIsi(ilk: IsDurumu | null) {
   const router = useRouter();
   const [is, setIs] = useState<IsDurumu | null>(ilk);
   const [hata, setHata] = useState<string | null>(null);
@@ -33,26 +34,20 @@ export function KurumIsi({ csrf, uc, dugme, ilk, baslatabilir }: { csrf: string;
     };
   }, [is?.id, is?.bitti, router]);
 
-  const suruyor = is !== null && !is.bitti;
+  const baslat = async (uc: string, csrf: string, govde?: unknown) => {
+    setBekliyor(true);
+    setHata(null);
+    const r = await istek<{ isId: string }>(uc, 'POST', csrf, govde);
+    setBekliyor(false);
+    if (r.ok) setIs({ id: r.veri.isId, durum: 'queued', etiket: 'Sırada', mesaj: null, bitti: false });
+    else setHata(r.mesaj);
+  };
+  return { is, hata, bekliyor, suruyor: is !== null && !is.bitti, baslat };
+}
+
+export function IsDurumuSatiri({ is, hata }: { is: IsDurumu | null; hata: string | null }) {
   return (
-    <div className="kurum-isi">
-      {baslatabilir ? (
-        <button
-          type="button"
-          className="dugme birincil"
-          disabled={bekliyor || suruyor}
-          onClick={async () => {
-            setBekliyor(true);
-            setHata(null);
-            const r = await istek<{ isId: string }>(uc, 'POST', csrf);
-            setBekliyor(false);
-            if (r.ok) setIs({ id: r.veri.isId, durum: 'queued', etiket: 'Sırada', mesaj: null, bitti: false });
-            else setHata(r.mesaj);
-          }}
-        >
-          {suruyor ? 'Çalışıyor…' : dugme}
-        </button>
-      ) : null}
+    <>
       {hata ? (
         <p className="hata" role="alert">
           {hata}
@@ -63,6 +58,20 @@ export function KurumIsi({ csrf, uc, dugme, ilk, baslatabilir }: { csrf: string;
           Son iş: <span className={`etiket ${SINIF[is.durum] ?? ''}`}>{is.etiket}</span> {is.mesaj ? <span>{is.mesaj}</span> : null}
         </p>
       ) : null}
+    </>
+  );
+}
+
+export function KurumIsi({ csrf, uc, dugme, ilk, baslatabilir }: { csrf: string; uc: string; dugme: string; ilk: IsDurumu | null; baslatabilir: boolean }) {
+  const k = useKurumIsi(ilk);
+  return (
+    <div className="kurum-isi">
+      {baslatabilir ? (
+        <button type="button" className="dugme birincil" disabled={k.bekliyor || k.suruyor} onClick={() => k.baslat(uc, csrf)}>
+          {k.suruyor ? 'Çalışıyor…' : dugme}
+        </button>
+      ) : null}
+      <IsDurumuSatiri is={k.is} hata={k.hata} />
     </div>
   );
 }
