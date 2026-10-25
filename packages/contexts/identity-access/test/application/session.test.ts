@@ -14,6 +14,7 @@ function fakes(opts: { orgs?: { orgId: string; name: string }[]; role?: 'musavir
     createUser: async () => 'exists',
   };
   const members: MembershipReader = {
+    staff: async () => [],
     orgsOf: async () => opts.orgs ?? [{ orgId: 'o-1', name: 'Ofis' }],
     membership: async () => (opts.role === null ? null : { role: opts.role ?? 'musavir', displayName: 'Ad Soyad', overrides: [{ key: 'sgk', effect: 'deny' }] }),
   };

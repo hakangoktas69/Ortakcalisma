@@ -35,9 +35,13 @@ export interface SessionStore {
 export type Membership = { readonly role: Role; readonly displayName: string; readonly overrides: readonly Override[] };
 
 /** Üyelik okuyucu: kullanıcının ofisleri kontrol düzleminden, rolü ve kişiye özel izinleri ofisin shard'ından. */
+export type OfficeMember = { userId: string; displayName: string; role: Role };
+
 export interface MembershipReader {
   orgsOf(userId: string): Promise<readonly { orgId: string; name: string }[]>;
   membership(orgId: string, userId: string): Promise<Membership | null>;
+  /** Ofisin iç kullanıcıları (mükellef kullanıcıları hariç) — görev sorumlusu seçimi; okuyanın kendi claim'leriyle. */
+  staff(orgId: string, userId: string): Promise<readonly OfficeMember[]>;
 }
 
 export type IdGen = { csrf(): string };

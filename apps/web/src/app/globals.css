@@ -125,6 +125,10 @@ table.kontrol td:first-child { text-align: left; }
 .sayaclar { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); }
 .sayac { background: #fff; border: 1px solid var(--cizgi); border-radius: var(--yaricap); padding: .9rem 1rem; display: grid; gap: .2rem; color: inherit; }
 a.sayac:hover { text-decoration: none; border-color: var(--birincil); }
+.sayac[data-uyari='true'] strong { color: var(--kirmizi); }
+.notlar { list-style: none; padding: 0; margin: 0; display: grid; gap: .6rem; }
+.not-metni { margin: .3rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+textarea { resize: vertical; }
 .sayac[aria-current='true'] { border-color: var(--birincil); box-shadow: inset 0 0 0 1px var(--birincil); }
 .sayac strong { font-size: 1.6rem; }
 .sayac span { color: var(--soluk); font-size: .85rem; }

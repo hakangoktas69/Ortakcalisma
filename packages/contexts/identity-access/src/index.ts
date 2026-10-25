@@ -3,7 +3,7 @@
 export const CONTEXT = 'identity-access' as const;
 
 export { covers, effectiveGrants, escalations, isAllowed, ROLE_TEMPLATES, ROLES, type Grants, type Override, type Role } from './domain/permissions.ts';
-export type { AuthProvider, IdGen, Membership, MembershipReader, Session, SessionStore, Tokens, VerifiedUser } from './application/ports.ts';
+export type { AuthProvider, IdGen, Membership, MembershipReader, OfficeMember, Session, SessionStore, Tokens, VerifiedUser } from './application/ports.ts';
 export { authorize, claimsOf, currentSession, login, logout, type AuthzError, type LoginDeps, type LoginError } from './application/session.ts';
 export { GoTrueAuthProvider } from './infrastructure/gotrue.ts';
 export { RedisSessionStore } from './infrastructure/redis-session-store.ts';

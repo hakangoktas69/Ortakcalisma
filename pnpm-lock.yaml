@@ -62,6 +62,9 @@ importers:
       '@eworks/tax-filing':
         specifier: workspace:*
         version: link:../../packages/contexts/tax-filing
+      '@eworks/workspace':
+        specifier: workspace:*
+        version: link:../../packages/contexts/workspace
       ioredis:
         specifier: ^5.8.2
         version: 5.11.1
@@ -315,6 +318,22 @@ importers:
       '@eworks/kernel':
         specifier: workspace:*
         version: link:../../kernel
+      '@eworks/platform':
+        specifier: workspace:*
+        version: link:../../platform
+    devDependencies:
+      '@eworks/identity-access':
+        specifier: workspace:*
+        version: link:../identity-access
+      '@eworks/portfolio':
+        specifier: workspace:*
+        version: link:../portfolio
+      '@eworks/sales':
+        specifier: workspace:*
+        version: link:../sales
+      '@eworks/testing':
+        specifier: workspace:*
+        version: link:../../testing
 
   packages/feature-registry: {}
 

@@ -20,6 +20,7 @@
     "@eworks/social-security": "workspace:*",
     "@eworks/sync": "workspace:*",
     "@eworks/tax-filing": "workspace:*",
+    "@eworks/workspace": "workspace:*",
     "ioredis": "^5.8.2",
     "next": "16.4.0",
     "react": "19.3.0",

@@ -62,8 +62,7 @@ def beyannameler(kimlik: str, unvan: str, vd: str, bugun: date | None = None) ->
         turler = []
         if sirket or rnd.random() < .5:
             turler.append(('KDV1', donem))
-        if rnd.random() < .9:
-            turler.append(('MUHSGK', donem))
+        turler.append(('MUHSGK', donem))  # her ay: SGK akışı her mükellefte sınanır
         if a in (2, 5, 8, 11):
             bas = da - 2
             turler.append(('KGECICI' if sirket else 'GGECICI', f'{bas:02d}/{dy}-{da:02d}/{dy}'))

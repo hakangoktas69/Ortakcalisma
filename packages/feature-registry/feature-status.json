@@ -56,17 +56,17 @@
     "context": "identity-access"
   },
   "genel_bakis.panel.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "workspace"
   },
   "genel_bakis.panel": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "workspace"
   },
   "genel_bakis.takvim.view": {
@@ -85,9 +85,9 @@
   },
   "genel_bakis": {
     "status": "red",
-    "green": 0,
+    "green": 1,
     "total": 2,
-    "tests": 0,
+    "tests": 4,
     "context": "workspace"
   },
   "firmalar.liste.view": {
@@ -630,59 +630,59 @@
     "context": null
   },
   "gorevler.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "workspace"
   },
   "gorevler.create": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "workspace"
   },
   "gorevler.assign": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "workspace"
   },
   "gorevler.close": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "workspace"
   },
   "gorevler": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 4,
     "total": 4,
-    "tests": 0,
+    "tests": 16,
     "context": "workspace"
   },
   "notlar.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "workspace"
   },
   "notlar.create": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 4,
     "context": "workspace"
   },
   "notlar": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 2,
     "total": 2,
-    "tests": 0,
+    "tests": 8,
     "context": "workspace"
   },
   "bildirimler.view": {

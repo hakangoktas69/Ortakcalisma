@@ -21,6 +21,19 @@ export class PgMembershipReader implements MembershipReader {
     return rows;
   }
 
+  async staff(orgId: string, userId: string) {
+    const pool = await this.router.poolFor(orgId);
+    return withUser(pool, { sub: userId, org: orgId }, async (c) =>
+      (
+        await c.query<{ userId: string; displayName: string; role: Role }>(
+          `select user_id as "userId", display_name as "displayName", role from identity_access.memberships
+            where org_id = $1 and role <> 'mukellef' order by display_name collate "tr-TR-x-icu"`,
+          [orgId],
+        )
+      ).rows,
+    );
+  }
+
   async membership(orgId: string, userId: string): Promise<Membership | null> {
     const pool = await this.router.poolFor(orgId);
     return withUser(pool, { sub: userId, org: orgId }, async (c) => {

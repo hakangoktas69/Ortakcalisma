@@ -14,9 +14,9 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;İki adımlı doğrulama | `oturum.mfa` | identity-access | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kur | `oturum.mfa.setup` | identity-access | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Doğrula | `oturum.mfa.verify` | identity-access | 🔴 | 0 |
-| **Ana Sayfa** | `genel_bakis` | workspace | 🔴 0/2 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Genel bakış | `genel_bakis.panel` | workspace | 🔴 0/1 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `genel_bakis.panel.view` | workspace | 🔴 | 0 |
+| **Ana Sayfa** | `genel_bakis` | workspace | 🔴 1/2 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Genel bakış | `genel_bakis.panel` | workspace | 🟢 1/1 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `genel_bakis.panel.view` | workspace | 🟢 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Takvim | `genel_bakis.takvim` | workspace | 🔴 0/1 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `genel_bakis.takvim.view` | workspace | 🔴 | 0 |
 | **Firmalarım** | `firmalar` | portfolio | 🔴 10/15 | 57 |
@@ -96,14 +96,14 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `faturalar.fis.view` | — (atanmadı) | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Tevkifat kontrol | `faturalar.tevkifat` | — (atanmadı) | 🔴 0/1 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `faturalar.tevkifat.view` | — (atanmadı) | 🔴 | 0 |
-| **Görevler** | `gorevler` | workspace | 🔴 0/4 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `gorevler.view` | workspace | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Oluştur | `gorevler.create` | workspace | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Ata | `gorevler.assign` | workspace | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Kapat | `gorevler.close` | workspace | 🔴 | 0 |
-| **Notlar** | `notlar` | workspace | 🔴 0/2 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `notlar.view` | workspace | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Oluştur | `notlar.create` | workspace | 🔴 | 0 |
+| **Görevler** | `gorevler` | workspace | 🟢 4/4 | 16 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `gorevler.view` | workspace | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Oluştur | `gorevler.create` | workspace | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Ata | `gorevler.assign` | workspace | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Kapat | `gorevler.close` | workspace | 🟢 | 4 |
+| **Notlar** | `notlar` | workspace | 🟢 2/2 | 8 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `notlar.view` | workspace | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Oluştur | `notlar.create` | workspace | 🟢 | 4 |
 | **Uyarılar ve bildirimler** | `bildirimler` | notifications | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `bildirimler.view` | notifications | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Okundu işaretle | `bildirimler.mark_read` | notifications | 🔴 | 0 |
