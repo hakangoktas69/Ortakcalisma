@@ -26,4 +26,4 @@ Ardından Claude Code / Codex'te yeni oturum açın. Mükellef Takip'i çalışt
 
 ## Taşımadan önce açılmış dallar
 
-Eski yollardaki (`mukellef-takip/...`, `mert/...`) bir dal birleştirilirken git yeniden adlandırmayı çoğunlukla kendiliğinden tanır. Çakışma çıkarsa dalın sahibi değişikliğini `eski/` altındaki yeni yola taşır (`git rebase main`, gerekirse dosyayı `git mv` ile).
+Eski yollardaki (`mukellef-takip/...`, `mert/...`) bir dal birleştirilirken git yeniden adlandırmayı çoğunlukla kendiliğinden tanır. Çakışma çıkarsa dalın sahibi değişikliğini `eski/` altındaki yeni yola taşır. Rebase değil merge: kişisel dalda `node tools/ajan/birlestir.mjs guncelle`, çakışmayı orada çöz, doğrula, sonra `birlestir.mjs dev` (D37). Pull sonrası adımlar ve konum çakışmasının çözümü: ekip hafızası `docs/ai/memory/eworks-yeniden-yapilanma.md`.
