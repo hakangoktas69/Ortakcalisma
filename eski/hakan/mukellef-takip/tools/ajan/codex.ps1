@@ -1,5 +1,5 @@
 ﻿# Codex kullananlar için: ekip değişikliklerini al (guncelle) veya bitirdiğin işi tamamlat (bitir).
-# Kullanım: powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\codex.ps1 [-Mod guncelle|bitir] [-Yeni]
+# Kullanım: powershell -ExecutionPolicy Bypass -File eski\hakan\mukellef-takip\tools\ajan\codex.ps1 [-Mod guncelle|bitir] [-Yeni]
 #   -Yeni: "bitir"de istemi panoya kopyalamak yerine yeni oturum başlatır (işin yapıldığı oturumda vermek daha iyidir).
 #   -Ajan: Codex'in kendisi çalıştırır (AGENTS.md talimatı); çıktı Codex'e talimattır.
 
@@ -16,7 +16,7 @@ if ($Ajan -and -not $Mod) { throw '-Ajan ile -Mod verilmeli.' }
 $Mod = Select-Mod $Mod
 
 if ($Mod -eq 'guncelle') {
-  if ($Ajan) { Invoke-AjanGuncelle 'mukellef-takip\tools\ajan\codex.ps1'; return }
+  if ($Ajan) { Invoke-AjanGuncelle 'eski\hakan\mukellef-takip\tools\ajan\codex.ps1'; return }
   $aralik = Invoke-Cek
   if (-not $aralik) { return }
   # Codex'te SessionStart kancası yok: hafıza değişikliklerini de istem okutur

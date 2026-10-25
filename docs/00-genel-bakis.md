@@ -21,4 +21,30 @@ Eworks, mali müşavir ofislerinin kurum (GİB, SGK) verilerini müşavirin ve m
 | [ozellik-durumu.md](ozellik-durumu.md) | Modül → sayfa → işlem, kırmızı/yeşil (üretilir) |
 | [ai/](ai/vizyon.md) | Ajan bağlamı; [ai/memory/](ai/memory/MEMORY.md) ekip hafızası; `ai/beceriler/` beceri kaynakları |
 | [gelistirici-rehberi/](gelistirici-rehberi/ddd.md) | [DDD](gelistirici-rehberi/ddd.md) ve [TDD](gelistirici-rehberi/tdd.md) uygulama rehberleri (koddan örneklerle); Claude Code ve Codex ile çalışma, ekip senkronu; [canlı GİB doğrulaması](gelistirici-rehberi/canli-dogrulama.md) |
-| [arsiv/mevcut-durum/](arsiv/mevcut-durum/README.md) | Eski Eworks pilotunun analizi (yalnız referans) |
+
+## Arşiv (yalnız referans)
+
+Yeni geliştirme yapılmaz; klasör düzeni: [eski/README.md](../eski/README.md).
+
+### eski/eworks
+
+| Belge | İçerik |
+|---|---|
+| [arsiv/mevcut-durum/](arsiv/mevcut-durum/README.md) | Eski Eworks pilotunun analizi; kaynak kod `eski/mert/eworks/` |
+
+### eski/mukellef-portal
+
+Mükellef Takip (D32, arşiv): `eski/hakan/mukellef-takip/`. Satış portalı deseni (ADR 0009) → `apps/sales`, DDD/test düzeni → `packages/contexts`.
+
+| Belge | İçerik |
+|---|---|
+| [README](../eski/hakan/mukellef-takip/README.md) · [belge dizini](../eski/hakan/mukellef-takip/docs/README.md) | Yapı, çalıştırma; junior/senior/mimar okuma yolları |
+| [00 genel bakış](../eski/hakan/mukellef-takip/docs/00-genel-bakis.md) | Aktörler, sistem bağlamı (C4) |
+| [01 stratejik tasarım](../eski/hakan/mukellef-takip/docs/01-stratejik-tasarim/01-is-alani-ve-alt-alanlar.md) | İş alanı, [ortak dil](../eski/hakan/mukellef-takip/docs/01-stratejik-tasarim/02-ortak-dil.md), [bağlam haritası](../eski/hakan/mukellef-takip/docs/01-stratejik-tasarim/03-baglam-haritasi.md), [iş akışları](../eski/hakan/mukellef-takip/docs/01-stratejik-tasarim/04-is-akislari.md) |
+| [02 bağlamlar](../eski/hakan/mukellef-takip/docs/02-baglamlar/README.md) | 13 bounded context sayfası |
+| [03 taktiksel tasarım](../eski/hakan/mukellef-takip/docs/03-taktiksel-tasarim/01-katmanlar.md) | Katmanlar, yapı taşları, olaylar ve outbox, tutarlılık, çapraz kesen konular, taktik borç |
+| [04 mimari](../eski/hakan/mukellef-takip/docs/04-mimari/01-calisma-zamani.md) | Çalışma zamanı, [veri modeli](../eski/hakan/mukellef-takip/docs/04-mimari/02-veri-modeli.md), [güvenlik mimarisi](../eski/hakan/mukellef-takip/docs/04-mimari/03-guvenlik-mimarisi.md) |
+| [05 geliştirici rehberi](../eski/hakan/mukellef-takip/docs/05-gelistirici-rehberi/01-ilk-gun.md) | İlk gün, tarifler, kod inceleme, tuzaklar, Claude Code |
+| [adr/](../eski/hakan/mukellef-takip/docs/adr/0001-moduler-monolit.md) | ADR 0001–0009 (modüler monolit … [satış modülü](../eski/hakan/mukellef-takip/docs/adr/0009-satis-modulu.md)) |
+| [ai/](../eski/hakan/mukellef-takip/docs/ai/architecture.md) | Kısa ajan bağlamı: mimari, bağlamlar, kurallar, [güvenlik/KVKK](../eski/hakan/mukellef-takip/docs/ai/security-kvkk.md), yol haritası |
+| [satis/](../eski/hakan/mukellef-takip/satis/README.md) | Satış modülü (api + web) |

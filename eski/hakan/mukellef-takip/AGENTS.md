@@ -1,4 +1,4 @@
-> **ARŞİV (2026-10-24, D32 / K-39).** Mükellef Takip artık geliştirilmiyor; bu klasör referans olarak `eski/` altında duruyor. Depo kökü Eworks SaaS projesidir: `../../CLAUDE.md`, `../../AGENTS.md`. Ekip hafızası kök `docs/ai/memory/`; buradaki `docs/ai/memory/` yalnız Mükellef Takip kayıtlarını tutar. CI yalnız elle tetiklenir. Bu klasörde değişiklik yapmadan önce kullanıcıya sor.
+> **ARŞİV (2026-10-24, D32 / K-39).** Mükellef Takip artık geliştirilmiyor; bu klasör referans olarak `eski/hakan/` altında duruyor. Depo kökü Eworks SaaS projesidir: `../../../CLAUDE.md`, `../../../AGENTS.md`. Ekip hafızası kök `docs/ai/memory/`; buradaki `docs/ai/memory/` yalnız Mükellef Takip kayıtlarını tutar. CI yalnız elle tetiklenir. Bu klasörde değişiklik yapmadan önce kullanıcıya sor.
 
 # Mükellef Takip — kodlama ajanı talimatları (Codex vb.)
 

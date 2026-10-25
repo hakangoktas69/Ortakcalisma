@@ -50,13 +50,13 @@ Ortakcalisma/                        ← depo kökü = Eworks SaaS monoreposu
 
 | Bugün | Taşımadan sonra | İşlem |
 |---|---|---|
-| Ekip hafızası `mukellef-takip/docs/ai/memory/` | **`docs/ai/memory/`** (kök) | Yeni dizin. Eworks kayıtları (`eworks-*`) ve genel ekip düzeni kayıtları (`ekip-hafizasi-duzeni`, `claude-baglami-depoda`, `ajan-senkron-betikleri`) yeni yollara göre **uyarlanarak** kopyalanır. Mükellef Takip'e özgü kayıtlar `eski/mukellef-takip/docs/ai/memory/`'de kalır |
+| Ekip hafızası `mukellef-takip/docs/ai/memory/` | **`docs/ai/memory/`** (kök) | Yeni dizin. Eworks kayıtları (`eworks-*`) ve genel ekip düzeni kayıtları (`ekip-hafizasi-duzeni`, `claude-baglami-depoda`, `ajan-senkron-betikleri`) yeni yollara göre **uyarlanarak** kopyalanır. Mükellef Takip'e özgü kayıtlar `eski/hakan/mukellef-takip/docs/ai/memory/`'de kalır |
 | Kök `.claude/settings.json` → `mukellef-takip/tools/claude/*.mjs` | → `tools/claude/*.mjs` (kök) | Betikler kopyalanır ve uyarlanır: bağlam yolları, `MEMORY.md` yolu, `memory:check` |
 | `autoMemoryDirectory` (geliştiricinin `.claude/settings.local.json`) eski yolu gösteriyor | Yeni yol | `session-start.mjs` değiştirilir: değer **bilinen eski yol** ise yenisiyle değiştirilir (bugün yalnız uyarı veriyor), başka bir değerse uyarı verilir |
 | `mukellef-takip/tools/ajan/{ortak,claude,codex}.ps1` | `tools/ajan/` (kök) | `$BaglamYollari` yeni yapıya göre: `CLAUDE.md`, `AGENTS.md`, `docs/ai`, `docs/adr`, `docs/baglamlar`, `docs/hedef-mimari` |
 | `hkazaz/eworks/CLAUDE.md` + `ai/` | Kök `CLAUDE.md` + `docs/ai/*.md` | Hedef mimariye göre yeniden yazılır. Mevcut-durum bağlamı `docs/arsiv/` altına |
 | `.github/workflows/mukellef-takip.yml` | `eski/` yoluna göre yol filtresi **veya** devre dışı | Karar: §5 |
-| `eski/mukellef-takip/.claude/settings.json` | Değişmez | `CLAUDE_PROJECT_DIR`'e göre görelidir. `eski/mukellef-takip` ayrı proje olarak açılırsa kendi kancaları çalışır |
+| `eski/hakan/mukellef-takip/.claude/settings.json` | Değişmez | `CLAUDE_PROJECT_DIR`'e göre görelidir. `eski/hakan/mukellef-takip` ayrı proje olarak açılırsa kendi kancaları çalışır |
 | `.vscode/extensions.json` | Kökte kalır | — |
 
 ## 3a. Git'in taşımadığı ve yol bağımlı şeyler (24.10 denetimi)
@@ -66,20 +66,20 @@ Ortakcalisma/                        ← depo kökü = Eworks SaaS monoreposu
 | Öğe | Bugünkü yer | Sorun | Yapılacak |
 |---|---|---|---|
 | Kök `.claude/settings.local.json` | kök | `autoMemoryDirectory` = `mukellef-takip/docs/ai/memory` (mutlak yol) + kişisel izinler | Kökte kalır; `autoMemoryDirectory` yeni `docs/ai/memory`'ye çevrilir (yeni `session-start.mjs` eski yolu tanıyıp düzeltir) |
-| `mukellef-takip/.claude/settings.local.json` | gitignore | Taşınmaz | Yerel betik `eski/mukellef-takip/.claude/` altına taşır |
+| `mukellef-takip/.claude/settings.local.json` | gitignore | Taşınmaz | Yerel betik `eski/hakan/mukellef-takip/.claude/` altına taşır |
 | `hkazaz/docker/mert/.env`, `supabase/{functions,migrations,.temp,.branches}` | gitignore (yalnız Hakan'da) | Taşınmaz; Docker denemesi bunlara bağlı | Yerel betik `eski/hkazaz/...` altına taşır |
 | `mukellef-takip/infra/docker/secrets/` | gitignore | Taşınmaz; Docker sırları | Yerel betik taşır |
 | `node_modules/`, `dist/`, `.next/`, `coverage/`, `src/generated/` (Prisma), `*.tsbuildinfo`, playwright raporları, `.mypy_cache/` | gitignore | Taşınmaz, eski yerde çöp kalır | Taşınmaz; silinir, gerekirse `eski/` altında yeniden kurulur (`npm ci`, `prisma generate`) |
 | `mert/eworks/.../jobs/`, `.ocr-venv/`, `.env` (varsa) | gitignore | Taşınmaz; kişisel veri içerebilir | Yerel betik taşır; `jobs/` kişisel veri içerdiği için taşımak yerine **silinmesi** önerilir |
 | `core.hooksPath` (`npm run hooks:install` çalıştıranlarda) | git yerel ayarı = `mukellef-takip/.githooks` | Depo köküne göreli; taşınınca kanca bulunamaz | Yeni değer `tools/git-hooks` (5.9) |
 | `mukellef-takip/.gitattributes` (`docs/ai/memory/MEMORY.md merge=union`, LF kuralları) | `mukellef-takip/` | Yeni kök hafızası için geçerli değil | Kök `.gitattributes` yazılır (aynı kurallar + yeni yollar) |
-| `.github/workflows/mukellef-takip.yml` | kök | `paths: mukellef-takip/**`, `working-directory: mukellef-takip` | §5 kararına göre `eski/mukellef-takip` yollarına çevrilir veya kapatılır; yeni `eworks.yml` |
+| `.github/workflows/mukellef-takip.yml` | kök | `paths: mukellef-takip/**`, `working-directory: mukellef-takip` | §5 kararına göre `eski/hakan/mukellef-takip` yollarına çevrilir veya kapatılır; yeni `eworks.yml` |
 | Kök `CLAUDE.md`, `AGENTS.md`, `README.md` | kök | Klasör tablosu ve `mukellef-takip/...` yolları | `eski/` altına taşınır; yenileri yazılır |
 | Kök `.claude/settings.json` kancaları | `mukellef-takip/tools/claude/*.mjs` | Yol kırılır | `tools/claude/*.mjs` |
 | `.claude/skills/{hafiza,oryantasyon}` | `mukellef-takip/.claude/skills` | Kökte beceri yok | `docs/ai/beceriler/` kaynak → üretilir (5.9) |
 | Ekip hafızası rehberi | `mukellef-takip/docs/05-gelistirici-rehberi/05-claude-code.md` | Yeni yapıyı anlatmıyor | `docs/gelistirici-rehberi/claude-codex.md` yeniden yazılır |
 | `npm run memory:check` | `mukellef-takip/package.json` | Kökte yok | Kök `package.json`'da `memory:check` + `ajan:senkron` |
-| Compose imaj adları `mukellef-takip/*:local` | `eski/mukellef-takip/infra/docker` | Yol değil, yalnız ad | Değişmez |
+| Compose imaj adları `mukellef-takip/*:local` | `eski/hakan/mukellef-takip/infra/docker` | Yol değil, yalnız ad | Değişmez |
 
 ## 4. Uygulama adımları (onaydan sonra)
 
@@ -100,7 +100,7 @@ Ortakcalisma/                        ← depo kökü = Eworks SaaS monoreposu
 
 ## 5. Kararlar (önceden bekleyenler)
 
-- **Mükellef Takip arşivdir** (D32, K-39): `.github/workflows/mukellef-takip.yml` yalnız elle tetiklenir (`workflow_dispatch`), çalışma dizini `eski/mukellef-takip`; eski pre-push kancası etkisizdir.
+- **Mükellef Takip arşivdir** (D32, K-39): `.github/workflows/mukellef-takip.yml` yalnız elle tetiklenir (`workflow_dispatch`), çalışma dizini `eski/hakan/mukellef-takip`; eski pre-push kancası etkisizdir.
 - **Ekip duyurusu** taşımadan önce yapıldı; taşıma 24.10.2026'da uygulandı.
 
 ## 6. Uygulamada plandan farklar (24.10)

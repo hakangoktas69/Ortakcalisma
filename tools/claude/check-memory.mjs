@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Ekip hafızası denetimi (docs/ai/memory) — pnpm verify, pre-commit/pre-push kancaları ve CI'da çalışır.
-// Başka bir hafıza dizini için: node tools/claude/check-memory.mjs --dizin eski/mukellef-takip/docs/ai/memory
+// Başka bir hafıza dizini için: node tools/claude/check-memory.mjs --dizin eski/hakan/mukellef-takip/docs/ai/memory
 //   • her kayıt: ön bilgi (frontmatter) var, name = dosya adı, description dolu, metadata.type ∈ feedback|project|reference
 //   • MEMORY.md her kaydı tam bir kez listeler, olmayan dosyaya bağlantı vermez, 200 satırı aşmaz (Claude fazlasını yüklemez)
 //   • kişisel veri / sır kalıpları yok: geçerli TCKN, IBAN, e-posta (test alan adları hariç), cep telefonu, anahtar/parola

@@ -12,9 +12,9 @@ Ortakcalisma deposunda birden çok proje (Mükellef Takip, Eworks pilotu, analiz
 
 1. Tüm üst klasörler ve eski kök bağlam dosyaları `git mv` ile `eski/` altına taşınır (geçmiş korunur). Eworks SaaS monoreposu depo kökünde kurulur (D28).
 2. Eworks belgeleri `docs/hedef-mimari/` (hedef) ve `docs/arsiv/mevcut-durum/` (eski pilotun analizi) altına; karar kaydı `docs/adr/karar-kaydi.md`'ye taşınır.
-3. Ekip hafızası köke (`docs/ai/memory/`) alınır; Eworks ve genel ekip kayıtları uyarlanır, Mükellef Takip'e özgü kayıtlar `eski/mukellef-takip/docs/ai/memory/`'de kalır.
+3. Ekip hafızası köke (`docs/ai/memory/`) alınır; Eworks ve genel ekip kayıtları uyarlanır, Mükellef Takip'e özgü kayıtlar `eski/hakan/mukellef-takip/docs/ai/memory/`'de kalır.
 4. Claude ↔ Codex senkronu tek kaynaktan üretimle kurulur (D31): `tools/ajan/senkron.mjs`, git kancaları `tools/git-hooks`.
-5. **Mükellef Takip arşivdir** (D32): geliştirme sürmez; CI iş akışı yalnız elle tetiklenir, yolları `eski/mukellef-takip`'e çevrilir.
+5. **Mükellef Takip arşivdir** (D32): geliştirme sürmez; CI iş akışı yalnız elle tetiklenir, yolları `eski/hakan/mukellef-takip`'e çevrilir.
 
 ## Seçenekler
 
@@ -26,5 +26,5 @@ Ortakcalisma deposunda birden çok proje (Mükellef Takip, Eworks pilotu, analiz
 
 - `git pull` yalnız izlenen dosyaları taşır: her makinede bir kez `node tools/ajan/eski-yerel-tasi.mjs --uygula` (yerel `.env`, sırlar, `settings.local.json` taşınır; derleme çıktıları silinir; eski `autoMemoryDirectory` ve `core.hooksPath` düzeltilir).
 - Taşımadan önce açılmış dallar eski yollardadır; git yeniden adlandırmayı çoğunlukla tanır, çakışmada dal sahibi `eski/` yoluna taşır.
-- `eski/mukellef-takip` ayrı proje olarak açılırsa kendi `.claude` kancaları çalışır; kök kancaları yalnız yeni yapıyı yönetir.
+- `eski/hakan/mukellef-takip` ayrı proje olarak açılırsa kendi `.claude` kancaları çalışır; kök kancaları yalnız yeni yapıyı yönetir.
 - Arşivdeki `CLAUDE.md`/`AGENTS.md` dosyaları `docs/arsiv` altında `*.eski.md` adını alır (ajan bağlamı olarak yüklenmesin diye).

@@ -26,7 +26,7 @@ Hakan, Eworks portalının (Mükellef Takip'ten **ayrı** ürün) yüzlerce kull
 - **Ölçek ve hız:** 500 ofis, hesap başına 60 istek/dk, gece 20:00–09:00. Başlangıç hızı 60 istek/dk (D25; 30'un yerine).
 - **Satış portalı:** `apps/sales` (ADR 0009 deseni). Ofis, müşavir ve mükellef hesapları satıştan açılır, mükellef onayı satış sözleşmesiyle alınır.
 - **Depo (D28):** Tüm eski klasörler `eski/` altında, Eworks SaaS depo kökünde — **2026-10-24'te uygulandı** ([[eworks-yeniden-yapilanma]]). Veri taşıma yok (D29); `eski/mert/eworks` yeniden yapılandırılan projenin kaynağı.
-- **Mükellef Takip (D32, 2026-10-24):** `eski/mukellef-takip` **arşivdir**; geliştirme sürmez, CI (`.github/workflows/mukellef-takip.yml`) yalnız elle tetiklenir.
+- **Mükellef Takip (D32, 2026-10-24):** `eski/hakan/mukellef-takip` **arşivdir**; geliştirme sürmez, CI (`.github/workflows/mukellef-takip.yml`) yalnız elle tetiklenir.
 - **Canlı doğrulama (D33, 2026-10-25):** Kurumla konuşan özellik (`live: true`: GİB sözleşme güncelleme, beyanname senkronu, SGK senkronları) sahte GİB testleri geçse de `packages/feature-registry/canli-dogrulamalar.json` kaydı girilene kadar kırmızıdır. Canlı koşu Hakan'ın hesabıyla, oturuma katılarak yapılır.
 - **Shard erişimi (D34):** PostgREST yok; BFF/işçi shard'a `pg` ile bağlanır, her işlemde `set local role authenticated` + `request.jwt.claims`. Yardımcılar `app.uid()`, `app.active_org()`, `app.is_system(org)` (yalnız `eworks_worker` oturumunda). `supabase/postgres` imajında `auth.uid()` bu claim'den dolmadı (2026-10-25 denemesi), bu yüzden kullanılmaz.
 - **Nesne deposu (D35):** S3 uyumlu; Compose'da SeaweedFS (MinIO imajları Docker Hub'dan kalktı).

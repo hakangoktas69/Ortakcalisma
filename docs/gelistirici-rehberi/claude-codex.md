@@ -70,7 +70,7 @@ Claude Code `autoMemoryDirectory` ayarını güvenlik gereği paylaşılan `sett
 | Kişiye özel tercih | `CLAUDE.local.md` / `~/.codex/AGENTS.md` |
 | Kişisel veri, sır, gerçek mükellef/müşavir bilgisi | **hiçbir yer** (`check-memory` + gitleaks) |
 
-`node tools/claude/check-memory.mjs` her kaydın ön bilgisini, `MEMORY.md` tutarlılığını ve 200 satır sınırını, kişisel veri/sır kalıplarını denetler. Arşivdeki hafıza için: `--dizin eski/mukellef-takip/docs/ai/memory`.
+`node tools/claude/check-memory.mjs` her kaydın ön bilgisini, `MEMORY.md` tutarlılığını ve 200 satır sınırını, kişisel veri/sır kalıplarını denetler. Arşivdeki hafıza için: `--dizin eski/hakan/mukellef-takip/docs/ai/memory`.
 
 ## Beceriler
 
@@ -101,4 +101,4 @@ Sonra Claude Code / Codex'te yeni oturum açın.
 | "autoMemoryDirectory başka bir dizini gösteriyor" | `settings.local.json`'da bilinçli olmayan bir değer var: satırı silin, kanca doğrusunu yazar |
 | `pre-push` "senkron değil" diyor | `node tools/ajan/senkron.mjs --yaz`, değişiklikleri commitleyin; `AGENTS.md`'ye elle kural yazdıysanız kaynağa taşıyın |
 | Kancalar çalışmıyor | `git config core.hooksPath` → `tools/git-hooks` olmalı: `node tools/ajan/senkron.mjs --kanca-kur` |
-| `eski/mukellef-takip` üzerinde çalışmak gerekiyor | Arşivdir (D32). Gerekirse o klasörü ayrı proje olarak açın; kendi `.claude` kancaları çalışır |
+| `eski/hakan/mukellef-takip` üzerinde çalışmak gerekiyor | Arşivdir (D32). Gerekirse o klasörü ayrı proje olarak açın; kendi `.claude` kancaları çalışır |

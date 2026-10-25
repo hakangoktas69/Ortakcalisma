@@ -1,5 +1,5 @@
 ﻿# Claude Code kullananlar için: ekip değişikliklerini al (guncelle) veya bitirdiğin işi tamamlat (bitir).
-# Kullanım: powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\claude.ps1 [-Mod guncelle|bitir] [-Yeni]
+# Kullanım: powershell -ExecutionPolicy Bypass -File eski\hakan\mukellef-takip\tools\ajan\claude.ps1 [-Mod guncelle|bitir] [-Yeni]
 #   -Yeni: "bitir"de istemi panoya kopyalamak yerine yeni oturum başlatır (işin yapıldığı oturumda vermek daha iyidir).
 #   -Ajan: Claude'un kendisi çalıştırır (SessionStart ve Stop kancaları); çıktı Claude'a talimattır.
 
@@ -16,7 +16,7 @@ if ($Ajan -and -not $Mod) { throw '-Ajan ile -Mod verilmeli.' }
 $Mod = Select-Mod $Mod
 
 if ($Mod -eq 'guncelle') {
-  if ($Ajan) { Invoke-AjanGuncelle 'mukellef-takip\tools\ajan\claude.ps1'; return }
+  if ($Ajan) { Invoke-AjanGuncelle 'eski\hakan\mukellef-takip\tools\ajan\claude.ps1'; return }
   $aralik = Invoke-Cek
   if (-not $aralik) { return }
   # SessionStart kancası ekip hafızasındaki son değişiklikleri zaten bildirir; istem belge değişikliklerini özetletir

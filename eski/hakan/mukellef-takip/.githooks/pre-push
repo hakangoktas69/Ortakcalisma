@@ -1,0 +1,4 @@
+#!/bin/sh
+# ARŞİV (D32): Mükellef Takip eski/hakan/mukellef-takip altında referans olarak durur; push öncesi doğrulama kapatıldı.
+# Depo kancaları artık tools/git-hooks'tadır (kök: node tools/ajan/senkron.mjs --kanca-kur).
+exit 0

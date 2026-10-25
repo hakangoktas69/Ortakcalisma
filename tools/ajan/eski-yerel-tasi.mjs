@@ -9,9 +9,10 @@
 //   ... --jobs-sil                                  mert/**/jobs/ (kişisel veri içerir) taşımak yerine siler
 //
 // Ne yapar:
-//   • eski üst klasörlerde (mukellef-takip, mert, hkazaz, hakan, yunus) kalan her şey izlenmeyen dosyadır (izlenenleri
-//     git pull zaten taşıdı). Derleme çıktıları ve bağımlılıklar silinir (eski/ altında gerekirse yeniden kurulur),
-//     jobs/ dizinleri uyarılır (--jobs-sil ile silinir), geri kalanlar eski/<aynı yol>'a taşınır.
+//   • eski üst klasörlerde (mukellef-takip, mert, hkazaz, hakan, yunus) ve eski/mukellef-takip'te (2026-10-25'te
+//     eski/hakan/mukellef-takip'e taşındı) kalan her şey izlenmeyen dosyadır (izlenenleri git pull zaten taşıdı).
+//     Derleme çıktıları ve bağımlılıklar silinir (yeni yerinde gerekirse yeniden kurulur), jobs/ dizinleri uyarılır
+//     (--jobs-sil ile silinir), geri kalanlar TASIMALAR'daki hedefe aynı göreli yolla taşınır.
 //   • kökteki .mypy_cache silinir.
 //   • kök .claude/settings.local.json içindeki autoMemoryDirectory eski ekip hafızasını gösteriyorsa yenisine çevrilir.
 //   • git core.hooksPath eski mukellef-takip/.githooks ise tools/git-hooks yapılır.
@@ -22,7 +23,15 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ESKI_HAFIZA, ESKI_KANCA } from './ortak.mjs';
 
-export const ESKI_KLASORLER = ['mukellef-takip', 'mert', 'hkazaz', 'hakan', 'yunus'];
+// Kaynak klasör → hedef. mukellef-takip önce eski/, sonra eski/hakan/ altına taşındı; iki eski yer de yeni hedefe gider.
+export const TASIMALAR = [
+  ['mukellef-takip', 'eski/hakan/mukellef-takip'],
+  ['eski/mukellef-takip', 'eski/hakan/mukellef-takip'],
+  ['mert', 'eski/mert'],
+  ['hkazaz', 'eski/hkazaz'],
+  ['hakan', 'eski/hakan'],
+  ['yunus', 'eski/yunus'],
+];
 const SILINECEK_DIZIN = new Set([
   'node_modules', 'dist', '.next', 'coverage', 'playwright-report', 'test-results', '.turbo',
   '.mypy_cache', '__pycache__', '.pytest_cache', '.ruff_cache',
@@ -46,27 +55,29 @@ export function planla(kok, { jobsSil = false } = {}) {
       if (silinecekMi(yol, ad, dizin) || st.isSymbolicLink() || (dizin && ad === 'jobs')) return true;
       return dizin && !SANAL_ORTAM.has(ad) && ozelIcerir(yol);
     });
-  const gez = (mutlak) => {
+  const gez = (mutlak, kaynak, hedefKok) => {
     for (const ad of readdirSync(mutlak)) {
       const yol = join(mutlak, ad);
       const st = lstatSync(yol);
       const dizin = st.isDirectory() && !st.isSymbolicLink();
       const gorece = relative(kok, yol).replaceAll('\\', '/');
+      const hedef = hedefKok + gorece.slice(kaynak.length);
       if (silinecekMi(yol, ad, dizin) || st.isSymbolicLink()) {
         isler.push({ tur: 'sil', yol: gorece });
-      } else if (dizin && ad === 'jobs' && gorece.startsWith('mert/')) {
+      } else if (dizin && ad === 'jobs' && kaynak === 'mert') {
         isler.push({ tur: jobsSil ? 'sil' : 'uyar', yol: gorece, neden: 'jobs/ kişisel veri içerebilir; --jobs-sil ile silin' });
-      } else if (dizin && !SANAL_ORTAM.has(ad) && (existsSync(join(kok, 'eski', gorece)) || ozelIcerir(yol))) {
-        gez(yol); // hedefte dizin var ya da içinde ayıklanacak şey var: içeriği tek tek ele al
-      } else if (existsSync(join(kok, 'eski', gorece))) {
-        isler.push({ tur: 'uyar', yol: gorece, neden: `eski/${gorece} zaten var; elle karşılaştırın` });
+      } else if (dizin && !SANAL_ORTAM.has(ad) && (existsSync(join(kok, hedef)) || ozelIcerir(yol))) {
+        gez(yol, kaynak, hedefKok); // hedefte dizin var ya da içinde ayıklanacak şey var: içeriği tek tek ele al
+      } else if (existsSync(join(kok, hedef))) {
+        isler.push({ tur: 'uyar', yol: gorece, neden: `${hedef} zaten var; elle karşılaştırın` });
       } else {
-        isler.push({ tur: 'tasi', yol: gorece, hedef: `eski/${gorece}` });
+        isler.push({ tur: 'tasi', yol: gorece, hedef });
       }
     }
   };
-  for (const k of ESKI_KLASORLER) {
-    if (existsSync(join(kok, k)) && lstatSync(join(kok, k)).isDirectory()) gez(join(kok, k));
+  for (const [kaynak, hedefKok] of TASIMALAR) {
+    const mutlak = join(kok, kaynak);
+    if (existsSync(mutlak) && lstatSync(mutlak).isDirectory()) gez(mutlak, kaynak, hedefKok);
   }
   if (existsSync(join(kok, '.mypy_cache'))) isler.push({ tur: 'sil', yol: '.mypy_cache' });
 
@@ -112,7 +123,7 @@ export function uygula(kok, isler) {
     for (const ad of readdirSync(d)) bosalt(join(d, ad));
     if (readdirSync(d).length === 0) rmdirSync(d);
   };
-  for (const k of ESKI_KLASORLER) bosalt(join(kok, k));
+  for (const [kaynak] of TASIMALAR) bosalt(join(kok, kaynak));
 }
 
 const ETIKET = { sil: 'sil   ', tasi: 'taşı  ', uyar: 'UYARI ', hafiza: 'ayar  ', kanca: 'kanca ' };

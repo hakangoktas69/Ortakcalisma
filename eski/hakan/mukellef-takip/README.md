@@ -49,12 +49,12 @@ Ajan bağlamı depodadır ve git ile paylaşılır: kurallar `CLAUDE.md` + `docs
 
 ```powershell
 # Claude kullanıyorsan
-powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\claude.ps1 -Mod guncelle
-powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\claude.ps1 -Mod bitir
+powershell -ExecutionPolicy Bypass -File eski\hakan\mukellef-takip\tools\ajan\claude.ps1 -Mod guncelle
+powershell -ExecutionPolicy Bypass -File eski\hakan\mukellef-takip\tools\ajan\claude.ps1 -Mod bitir
 
 # Codex kullanıyorsan
-powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\codex.ps1 -Mod guncelle
-powershell -ExecutionPolicy Bypass -File mukellef-takip\tools\ajan\codex.ps1 -Mod bitir
+powershell -ExecutionPolicy Bypass -File eski\hakan\mukellef-takip\tools\ajan\codex.ps1 -Mod guncelle
+powershell -ExecutionPolicy Bypass -File eski\hakan\mukellef-takip\tools\ajan\codex.ps1 -Mod bitir
 ```
 
 | Komut | Ne zaman | Ne yapar |
