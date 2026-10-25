@@ -31,6 +31,8 @@
 6. **Canlı GİB doğrulaması:** `firmalar.gib_sozlesmeler.sync`, `beyanname.senkron.start`, `sgk.ebildirge.sync` sahte GİB'e karşı geçiyor; canlı koşu Hakan'ın hesabıyla ([canli-dogrulama.md](../gelistirici-rehberi/canli-dogrulama.md)). Canlı GİB güvenlik kodunda ddddocr başarısı bilinmiyor (sahte sunucuda 30/30).
 7. **Bağlamlar arası okuma birleşimleri:** tax-filing, social-security, workspace sorguları firma unvanı için `portfolio.firms` ile birleşir (kural 5'ten sapma). Okuma modeline ya da portfolio API'sine taşınmalı.
 8. **Yönetim ekranları yok:** personel ataması, kişiye özel izin, ofis kullanıcısı daveti, mükellef kullanıcıları — şimdilik yalnız `hesap-ac` komutu.
+9. **ACL kapsam eşiği zorlanmıyor:** "ACL ayrıştırıcıları %90" kuralı için `services/integration`'da pytest kapsam ölçümü yok (TS tarafı `pnpm verify`/CI'da zorlanıyor).
+10. **Keşif kodu ifadesi onay bekliyor:** [tdd.md §5.3](../gelistirici-rehberi/tdd.md#53-netleşmemiş-iş-ve-keşif) "deneme kodu olduğu gibi birleştirilmez" ifadesi kuraldan çıkarım; ekip onayı ya da çıkarılması bekleniyor.
 
 Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri analizi (Hakan). Sonuç gelince [02 §1a](../hedef-mimari/02-kurum-entegrasyon-robotu.md) `integrations` tablosu ve [03 §1a](../hedef-mimari/03-kaynak-verimliligi-ve-kapasite.md) hesapları güncellenir.
 

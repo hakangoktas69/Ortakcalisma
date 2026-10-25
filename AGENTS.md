@@ -39,11 +39,12 @@ Güncel dizin (`MEMORY.md`):
 - [Claude bağlamı depoda](docs/ai/memory/claude-baglami-depoda.md) — kalıcı proje bilgisi CLAUDE.md + docs/ai + bu hafızada, git ile sürümlenir; kişisel tercih buraya yazılmaz
 - [Ekip hafızası düzeni](docs/ai/memory/ekip-hafizasi-duzeni.md) — bu dizin SessionStart kancasıyla otomatik hafıza dizini olur; eski yol kendiliğinden düzeltilir; rehber docs/gelistirici-rehberi/claude-codex.md
 - [Ajan senkron betikleri](docs/ai/memory/ajan-senkron-betikleri.md) — tools/ajan/{guncelle,bitir,senkron}.mjs + git kancaları; AGENTS.md, MEMORY.md dizini ve beceriler üretilir
-- [Eworks hedef mimarisi](docs/ai/memory/eworks-hedef-mimari.md) — kararlar D1–D35: Next.js BFF, web servis birincil, istek/dk sınırı, yetki, DDD/TDD, 10 yıl + sharding, satış portalı, eski/, Claude↔Codex, Mükellef Takip arşiv, canlı doğrulama (D33), shard pg (D34), S3 (D35)
-- [Eworks açık konular](docs/ai/memory/eworks-acik-konular.md) — 60/dk–500 ofis uyumsuzluğu, shard donanımı, bağlama atanmamış modüller, CODEOWNERS, Codex beceri desteği
+- [Eworks hedef mimarisi](docs/ai/memory/eworks-hedef-mimari.md) — kararlar D1–D36: Next.js BFF, web servis birincil, istek/dk sınırı, yetki, DDD/TDD (gelistir becerisi), 10 yıl + sharding, satış portalı, eski/, Claude↔Codex, Mükellef Takip arşiv, canlı doğrulama (D33), shard pg (D34), S3 (D35), aynı oturum sözleşme kanıtı (D36)
+- [Eworks açık konular](docs/ai/memory/eworks-acik-konular.md) — 60/dk–500 ofis uyumsuzluğu, shard donanımı, bağlama atanmamış modüller, CODEOWNERS, Codex beceri desteği, canlı GİB, okuma birleşimleri, yönetim ekranları, ACL kapsamı, keşif kodu ifadesi
 - [Eworks yeniden yapılanma](docs/ai/memory/eworks-yeniden-yapilanma.md) — 2026-10-24 uygulandı: her makinede eski-yerel-tasi betiği, git'in taşımadığı dosyalar, açık dallar, yeniden adlandırılan dosyalar
 - [Eworks çalışma biçimi](docs/ai/memory/eworks-calisma-bicimi.md) — her karar D-NN + K-NN + durum + hafıza birlikte; açık konular hafızada; geri alınması zor iş yalnız onayla
-- [Eworks dokümantasyonu](docs/ai/memory/eworks-dokumantasyonu.md) — hedef mimari docs/hedef-mimari, eski pilot analizi docs/arsiv/mevcut-durum, karar kaydı docs/adr
+- [Eworks dokümantasyonu](docs/ai/memory/eworks-dokumantasyonu.md) — hedef mimari docs/hedef-mimari, DDD/TDD ve diğer rehberler docs/gelistirici-rehberi, eski pilot analizi docs/arsiv/mevcut-durum, karar kaydı docs/adr
+- [Paralel oturumlar](docs/ai/memory/paralel-oturumlar.md) — aynı çalışma ağacında birden çok ajan oturumu; başkasının değişikliğini geri alma, commit'leri iş başına ayır, karışık dosyayı satır bazında böl
 <!-- senkron:bitis hafiza -->
 
 <!-- senkron:baslangic beceriler -->

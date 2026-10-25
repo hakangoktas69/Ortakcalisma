@@ -18,6 +18,7 @@ Hakan, Eworks hedef mimarisi oturumlarında (2026-10-23/24) şu iş biçimini is
 - Kullanıcı yanıtlarını madde madde verir. Her maddenin yanıtı ayrı bir karara dönüştürülür. Yanıtın kapsamı belirsizse (ör. "60/dk" toplam mı, hesap başına mı) varsayım yapılmaz; açık konuya yazılır ve sorulur.
 - Klasör taşıma veya başkasının klasörüne yazma gibi fiziksel ve geri alınması zor işlerde önce kapsam sorulur, plan gösterilip onay beklenir. İstemde doldurulmamış seçenek (yer tutucu) varsa varsayılmaz, sorulur (2026-10-24 yeniden yapılanma istemi).
 - Belgeler Türkçe yazılır, mermaid diyagramları çizilerek (mermaid-cli) doğrulanır, göreli bağlantılar denetlenir (`node tools/docs/baglanti-denetle.mjs`), hafıza değişikliğinden sonra `check-memory` koşulur. Commit istenmedikçe yapılmaz; push ayrıca istenir.
+- Kavramsal giriş belgesi ("X nedir", ör. `ddd-nedir.md`) ile uygulama rehberi birlikte varsa rehber, girişin tanım hiyerarşisini ve sırasını izler; Hakan bunu iki rehberde ayrıca denetletti (2026-10-25). Kullanıcının verdiği metin içeri alınırken içerik korunur; yazım düzeltmesi ve proje kuralıyla çelişen ifade ayrıca bildirilir.
 - Kurumun erişim denetimini atlatmaya yönelik istekler (ör. hesap başına IP rotasyonu/spoofing) tasarıma alınmaz. Gerekçe (K-22) yazılır ve meşru alternatif önerilir.
 
 **Why:** Kararlar çok sayıda ve birbirine bağlı (D1–D35). Tek bir yerde unutulan güncelleme belgeler ile hafıza arasında çelişki üretti (ör. 30 → 60 istek/dk değişikliğinin bir hafıza satırında eski kalması, 2026-10-24'te düzeltildi).
