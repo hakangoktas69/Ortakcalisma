@@ -28,6 +28,7 @@
     "server-only": "0.0.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@eworks/sales": "workspace:*",
     "@eworks/testing": "workspace:*",
     "@playwright/test": "1.64.1",

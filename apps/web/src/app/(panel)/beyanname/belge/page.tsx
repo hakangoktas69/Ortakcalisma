@@ -5,6 +5,7 @@ import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
+import { TabloKap } from '@/shared/ui/TabloKap.tsx';
 
 // Beyanname / tahakkuk PDF (beyanname.belge): alınan belgeler. Dosyalar saklama süresi (D15, vars. 7 gün) dolunca silinir;
 // satır "silindi" olarak kalır, senkron belgeyi yeniden alır. Her indirme denetim kaydına yazılır.
@@ -20,7 +21,7 @@ export default async function Belgeler() {
   return (
     <>
       <Baslik k="beyanname.belge" alt="GİB'den alınan beyanname ve tahakkuk PDF'leri. Dosyalar saklama süresi dolunca silinir, kayıt kalır." />
-      <div className="tablo-kap">
+      <TabloKap etiket="Beyanname belgeleri">
         <table>
           <caption className="gorunmez">Belgeler</caption>
           <thead>
@@ -67,7 +68,7 @@ export default async function Belgeler() {
             )}
           </tbody>
         </table>
-      </div>
+      </TabloKap>
     </>
   );
 }

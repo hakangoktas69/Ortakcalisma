@@ -9,6 +9,7 @@ import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { KurumIsi } from '@/features/sync/KurumIsi.tsx';
 import { FeatureBadge, FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
+import { TabloKap } from '@/shared/ui/TabloKap.tsx';
 
 // GİB e-Beyanname sözleşmeleri (firmalar.gib_sozlesmeler): eski portalın "GİB'den güncelle" akışı. Liste müşavirin GİB
 // hesabıyla robotla okunur; yeni mükellefler için firma kartı açılır, mevcutlar eşleşir. Kaynaktan kalkan kayıt silinmez.
@@ -72,7 +73,7 @@ export default async function GibSozlesmeleri() {
             Kurum incelemesi <FeatureBadge k="firmalar.gib_sozlesmeler.review" />
           </h2>
           <p className="alt">Beyanname yalnız geçerli Aracılık ve Sorumluluk sözleşmesi olan mükellef için, aynı GİB oturumunda okunan sözleşmeyle kanıtlanarak sorgulanır.</p>
-          <div className="tablo-kap">
+          <TabloKap etiket="Kurum incelemesi">
             <table>
               <caption className="gorunmez">Beyanname erişimi</caption>
               <thead>
@@ -94,10 +95,10 @@ export default async function GibSozlesmeleri() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TabloKap>
         </section>
       ) : null}
-      <div className="tablo-kap">
+      <TabloKap etiket="GİB sözleşme listesi">
         <table>
           <caption className="gorunmez">GİB e-Beyanname sözleşmeleri</caption>
           <thead>
@@ -131,7 +132,7 @@ export default async function GibSozlesmeleri() {
             )}
           </tbody>
         </table>
-      </div>
+      </TabloKap>
     </>
   );
 }

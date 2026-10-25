@@ -15,7 +15,7 @@ export function Kabuk({ oturum, children }: { oturum: Session; children: React.R
   return (
     <div className="kabuk">
       <header className="ust">
-        <label htmlFor="menu-ac" className="menu-dugme" aria-label="Menüyü aç/kapat">
+        <label htmlFor="menu-ac" className="menu-dugme">
           ☰ Menü
         </label>
         <Link href="/" className="marka">
@@ -32,7 +32,7 @@ export function Kabuk({ oturum, children }: { oturum: Session; children: React.R
           </form>
         </div>
       </header>
-      <input type="checkbox" id="menu-ac" className="menu-ac" />
+      <input type="checkbox" id="menu-ac" className="menu-ac" aria-label="Menüyü aç/kapat" />
       <nav className="menu" aria-label="Ana menü">
         <ul>
           {menu.map((m) => {

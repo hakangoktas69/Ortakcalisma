@@ -3,6 +3,11 @@
 # aynı commit'e sahnelenir; ekip hafızası denetlenir (09 §5). Acil durumda: git commit --no-verify (CI yine denetler).
 command -v node >/dev/null 2>&1 || { echo "ajan senkronu: node bulunamadı, atlandı (CI denetler)" >&2; exit 0; }
 root=$(git rev-parse --show-toplevel)
+# Ortak dala doğrudan commit yok (D37); birleştirme commit'i serbest. Kanca yardımcı bekçidir: birleştirme sırasında
+# sahnelenen ek değişiklik ve --no-verify geçer; asıl koruma GitHub dal korumasıdır (durum.md açık konu 4)
+if ! git rev-parse -q --verify MERGE_HEAD >/dev/null; then
+  node "$root/tools/ajan/dal-denetle.mjs" "$(git symbolic-ref --short -q HEAD)" || exit 1
+fi
 node "$root/tools/ajan/senkron.mjs" --yaz --sessiz || exit 1
 if git diff --cached --name-only | grep -q '^docs/ai/memory/'; then
   node "$root/tools/claude/check-memory.mjs" || exit 1

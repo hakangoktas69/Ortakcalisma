@@ -40,7 +40,7 @@ Güncel dizin (`MEMORY.md`):
 - [Ekip hafızası düzeni](docs/ai/memory/ekip-hafizasi-duzeni.md) — bu dizin SessionStart kancasıyla otomatik hafıza dizini olur; eski yol kendiliğinden düzeltilir; rehber docs/gelistirici-rehberi/claude-codex.md
 - [Ajan senkron betikleri](docs/ai/memory/ajan-senkron-betikleri.md) — tools/ajan/{guncelle,bitir,senkron}.mjs + git kancaları; AGENTS.md, MEMORY.md dizini ve beceriler üretilir
 - [Eworks hedef mimarisi](docs/ai/memory/eworks-hedef-mimari.md) — kararlar D1–D37: Next.js BFF, web servis birincil, istek/dk sınırı, yetki, DDD/TDD (gelistir becerisi), 10 yıl + sharding, satış portalı, eski/, Claude↔Codex, Mükellef Takip arşiv, canlı doğrulama (D33), shard pg (D34), S3 (D35), aynı oturum sözleşme kanıtı (D36), üç aşamalı ajan süreci (D37)
-- [Eworks açık konular](docs/ai/memory/eworks-acik-konular.md) — 60/dk–500 ofis uyumsuzluğu, shard donanımı, bağlama atanmamış modüller, CODEOWNERS, Codex beceri desteği, canlı GİB, okuma birleşimleri, yönetim ekranları, ACL kapsamı, keşif kodu ifadesi, web/BFF logu yok
+- [Eworks açık konular](docs/ai/memory/eworks-acik-konular.md) — 60/dk–500 ofis uyumsuzluğu, shard donanımı, bağlama atanmamış modüller, CODEOWNERS, Codex beceri desteği, canlı GİB, okuma birleşimleri, yönetim ekranları, ACL kapsamı, keşif kodu ifadesi, web/BFF logu yok, VKN maskeleme
 - [Eworks yeniden yapılanma](docs/ai/memory/eworks-yeniden-yapilanma.md) — 2026-10-24 uygulandı: her makinede eski-yerel-tasi betiği, git'in taşımadığı dosyalar, açık dallar, yeniden adlandırılan dosyalar
 - [Eworks çalışma biçimi](docs/ai/memory/eworks-calisma-bicimi.md) — her karar D-NN + K-NN + durum + hafıza birlikte; açık konular hafızada; geri alınması zor iş yalnız onayla
 - [Eworks dokümantasyonu](docs/ai/memory/eworks-dokumantasyonu.md) — hedef mimari docs/hedef-mimari, DDD/TDD ve diğer rehberler docs/gelistirici-rehberi, eski pilot analizi docs/arsiv/mevcut-durum, karar kaydı docs/adr
@@ -52,7 +52,7 @@ Güncel dizin (`MEMORY.md`):
 
 İstek aşağıdakilerden birine uyuyorsa ilgili dosyayı oku ve adımlarını uygula (Claude'a özgü araç adlarını kendi araçlarınla karşıla):
 
-- **gelistir** → `docs/ai/beceriler/gelistir.md` — Kod değiştiren her işte üç aşamalı akış — A) önce projeyi ve işi anla, B) etki/risk/güvenlik analiziyle planla ve DDD + TDD ile uygula, C) tutarlılık, fonksiyonel ve dört ekran görsel/UX doğrulaması. Yeni özellik, işlem, ekran, uç, kural, migration, hata düzeltme ya da refactor. "Şu özelliği ekle", "şunu geliştir", "hatayı düzelt", "uç/ekran/tablo ekle", "/gelistir" dendiğinde ya da packages/, apps/, services/, supabase/ altında kod yazmadan önce kullan.
+- **gelistir** → `docs/ai/beceriler/gelistir.md` — Kod değiştiren her işte üç aşamalı akış — A) önce projeyi ve işi anla, iş dalı aç; B) etki/risk/güvenlik/bağımlılık analiziyle planla, DDD + TDD ile uygula; C) tutarlılık, fonksiyonel, dört ekran görsel/erişilebilirlik/UX doğrulaması, bağımsız inceleme, PR açıklaması ve kıdemli onayı. Yeni özellik, işlem, ekran, uç, kural, migration, hata düzeltme ya da refactor. "Şu özelliği ekle", "şunu geliştir", "hatayı düzelt", "uç/ekran/tablo ekle", "/gelistir" dendiğinde ya da packages/, apps/, services/, supabase/ altında kod yazmadan önce kullan.
 - **hafiza** → `docs/ai/beceriler/hafiza.md` — Ekip hafızasına (docs/ai/memory) kayıt ekler veya günceller, kişisel Claude hafızasındaki proje kayıtlarını ekip hafızasına aktarır, hafızayı denetler. "Bunu hatırla", "hafızaya yaz", "ekip bilsin", "/hafiza aktar", "/hafiza denetle" dendiğinde kullan.
 - **oryantasyon** → `docs/ai/beceriler/oryantasyon.md` — Projeye yeni katılan geliştiriciyi karşılar — rolüne göre okuma yolu, güncel durum, ortam kontrolü ve ilk işi önerir. "Projeye yeni katıldım", "nereden başlamalıyım", "projeyi anlat", "/oryantasyon" dendiğinde kullan.
 <!-- senkron:bitis beceriler -->
@@ -61,6 +61,6 @@ Güncel dizin (`MEMORY.md`):
 ## Akış (zorunlu)
 
 - **Oturum başında**, kullanıcı başka bir şey istese de önce: `node tools/ajan/guncelle.mjs --ajan codex` — çıktısı varsa (ekipten gelen değişiklik, değişen bağlam dosyaları) ona uy. Ağ izni yoksa çıktı bunu söyler.
-- **İşi bitirmeden ve commitlemeden önce**: `node tools/ajan/bitir.mjs --ajan codex` — çıktısındaki adımların hepsini uygula (kaynak belgeler, hafıza, senkron, testler, commit).
+- **İşi bitirmeden ve commitlemeden önce**: `node tools/ajan/bitir.mjs --ajan codex` — çıktısındaki adımların hepsini uygula (kaynak belgeler, hafıza, senkron, bağımsız inceleme, testler, iş dalında commit, PR taslağı).
 - Kural, mimari veya durum değişikliği bu dosyaya **yazılmaz**: `CLAUDE.md`, `docs/ai/*.md`, `docs/adr/karar-kaydi.md` veya ilgili `docs/baglamlar/` sayfasına yazılır. Bu dosyaya elle eklenen içerik `senkron --denetle`'de (pre-push, CI) hata verir.
 <!-- senkron:bitis akis -->

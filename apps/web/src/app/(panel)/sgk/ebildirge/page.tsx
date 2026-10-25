@@ -11,6 +11,7 @@ import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { BeyannameSenkronFormu } from '@/features/tax-filing/BeyannameSenkronFormu.tsx';
 import { FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
+import { TabloKap } from '@/shared/ui/TabloKap.tsx';
 
 // e-Bildirge (sgk.ebildirge): MUHSGK beyannamelerinin SGK bildirimleri — işyeri × ay, durum, çalışan sayısı, SGK tahakkuk ve
 // hizmet listesi PDF'leri. Kaynak GİB e-Beyanname içindeki SGK bildirimleridir (eski portalın SGK ekranı). Çalışan kimliği tutulmaz.
@@ -61,7 +62,7 @@ export default async function EBildirge({ searchParams }: { searchParams: Promis
           Süz
         </button>
       </form>
-      <div className="tablo-kap">
+      <TabloKap etiket="SGK bildirimleri">
         <table>
           <caption className="gorunmez">SGK bildirimleri</caption>
           <thead>
@@ -115,7 +116,7 @@ export default async function EBildirge({ searchParams }: { searchParams: Promis
             )}
           </tbody>
         </table>
-      </div>
+      </TabloKap>
       <p className="alt">
         {satirlar.length} kayıt listeleniyor.{satirlar.some((s) => s.source === 'sahte_gib') ? ' Bu ortamdaki kayıtlar sahte GİB sunucusundan (demo).' : ''}
       </p>

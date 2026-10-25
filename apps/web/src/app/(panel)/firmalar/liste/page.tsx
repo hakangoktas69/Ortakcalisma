@@ -6,6 +6,7 @@ import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
+import { TabloKap } from '@/shared/ui/TabloKap.tsx';
 
 // Firmalarım (firmalar.liste): eski portalın firma listesi — sayaçlar, süzgeçler, CSV, GİB hesabı durumu.
 const SEGMENTLER: [Segment, string][] = [
@@ -92,7 +93,7 @@ export default async function FirmaListesi({ searchParams }: { searchParams: Pro
           Süz
         </button>
       </form>
-      <div className="tablo-kap">
+      <TabloKap etiket="Firma listesi">
         <table>
           <caption className="gorunmez">Firmalar</caption>
           <thead>
@@ -132,7 +133,7 @@ export default async function FirmaListesi({ searchParams }: { searchParams: Pro
             )}
           </tbody>
         </table>
-      </div>
+      </TabloKap>
       <p className="alt">{firmalar.length} kayıt listeleniyor.</p>
     </>
   );

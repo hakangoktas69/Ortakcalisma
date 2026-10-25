@@ -1,6 +1,6 @@
 ---
 name: gelistir
-description: Kod değiştiren her işte üç aşamalı akış — A) önce projeyi ve işi anla, B) etki/risk/güvenlik analiziyle planla ve DDD + TDD ile uygula, C) tutarlılık, fonksiyonel ve dört ekran görsel/UX doğrulaması. Yeni özellik, işlem, ekran, uç, kural, migration, hata düzeltme ya da refactor. "Şu özelliği ekle", "şunu geliştir", "hatayı düzelt", "uç/ekran/tablo ekle", "/gelistir" dendiğinde ya da packages/, apps/, services/, supabase/ altında kod yazmadan önce kullan.
+description: Kod değiştiren her işte üç aşamalı akış — A) önce projeyi ve işi anla, iş dalı aç; B) etki/risk/güvenlik/bağımlılık analiziyle planla, DDD + TDD ile uygula; C) tutarlılık, fonksiyonel, dört ekran görsel/erişilebilirlik/UX doğrulaması, bağımsız inceleme, PR açıklaması ve kıdemli onayı. Yeni özellik, işlem, ekran, uç, kural, migration, hata düzeltme ya da refactor. "Şu özelliği ekle", "şunu geliştir", "hatayı düzelt", "uç/ekran/tablo ekle", "/gelistir" dendiğinde ya da packages/, apps/, services/, supabase/ altında kod yazmadan önce kullan.
 ---
 
 # Geliştir: anla → planla ve uygula → doğrula
@@ -15,7 +15,8 @@ Bu akış bir süreç kuralıdır (D37 / K-44). Üç aşamayı sırayla uygula. 
 - Belirsizliği tahminle kapatma. En fazla 3 somut, seçenekli soru sor; önerdiğin seçeneği gerekçesiyle başa koy.
 - İstek bir kuralı çiğniyorsa (kiracı izolasyonu, şifre, kişisel veri, hız sınırı, testsiz kod, `NEXT_PUBLIC_*`, `eski/`'de geliştirme) **yapma**; nedenini sade anlat, meşru yolu öner.
 - "Hızlıca", "testi sonra yaz", "şimdilik böyle olsun" istekleri testleri, doğrulamayı ve kuralları askıya almaz. İş büyükse küçük, kendi başına çalışan dilimlere böl.
-- Geri alınması zor işlerde (migration'da veri silme/dönüştürme, klasör taşıma, yetki ağacından anahtar silme, başkasının alanı, push) önce sor.
+- Geri alınması zor işlerde (migration'da veri silme/dönüştürme, klasör taşıma, yetki ağacından anahtar silme, başkasının alanı, push, PR açma) önce sor.
+- **Kıdemli onayı:** iş hassas bir alana dokunuyorsa (veritabanı şeması/RLS, kurum şifresi, kimlik/yetki/denetim, oturum/CSRF/CSP, shard bağlantısı, kurumla konuşan kod, dağıtım/CI/kancalar, bağımlılık; liste `tools/ajan/ortak.mjs` `HASSAS_ALANLAR`) bunu planda söyle. Birleştirmeden önce proje sorumlusu onaylar (CODEOWNERS belirlenene kadar, açık konu).
 
 ## A. Önce: projeyi ve işi özümse (koda dokunmadan)
 
@@ -23,6 +24,7 @@ Bu akış bir süreç kuralıdır (D37 / K-44). Üç aşamayı sırayla uygula. 
 - Bağlamda ekip hafızası (`MEMORY.md` içeriği) yoksa `docs/ai/memory/MEMORY.md`'yi oku ve SessionStart kancasının çalışmadığını kullanıcıya bir kez söyle. İşe değen hafıza kayıtlarını aç.
 - `docs/ai/durum.md`: süren iş, açık konular. İş bir açık konuya değiyorsa söyle. `docs/ozellik-durumu.md`: ilgili özellik kırmızı mı yeşil mi.
 - `git status` ve `git log --oneline -10`. Başka oturumun commitlenmemiş değişikliği varsa ona dokunma (`paralel-oturumlar` hafıza kaydı).
+- **İş dalı:** ortak daldaysan (`main`, `master`, `dev`, `yeniden-yapilanma`; liste `tools/ajan/ortak.mjs`) koda dokunmadan önce `git switch -c is/<kısa-ad>`. Ortak dala doğrudan commit pre-commit kancasında reddedilir; birleştirme PR ile yapılır. Bir iş dalı = bir iş; ilgisiz değişiklik ayrı dala.
 
 **A2. Yapı.**
 - İşin **bağlamını** belirle: `docs/ai/mimari.md` bağlam tablosu → `docs/baglamlar/<ctx>.md` → `packages/contexts/<ctx>/src/index.ts`. İş iki bağlama da uyuyorsa ya da yeni bağlam gerektiriyorsa **dur ve sor**; yeni bağlam bir karardır (D-NN/K-NN).
@@ -45,6 +47,8 @@ Bu akış bir süreç kuralıdır (D37 / K-44). Üç aşamayı sırayla uygula. 
 **B1. Etki analizi.** Dokunacağın her öğe için kimin kullandığını ara (`Grep`): fonksiyonu çağıranlar, `index.ts` dışa aktarımının tüketicileri, olay aboneleri, değişen tabloyu okuyan sorgular ve görünümler, `contracts/` şemasının iki tarafı (TS + Python), etkilenen e2e testleri, yetki ağacı değişikliğinin rol şablonlarına etkisi. Migration'ın **mevcut veride** ne yapacağını yaz (boş tablo varsayma; 10 yıllık veri, D23).
 
 **B2. Paradigma içinde kal.** Yeni kütüphane, yeni katman, yeni iletişim biçimi, bağlam sınırı aşan sorgu, kuralın istisnası = karar. Bunları kendi başına yapma; gerekçeyle sor.
+- **Yeni bağımlılık** (npm/pip paketi) yalnız onayla ve şu denetimle: mevcut paket ya da Node/Python yerleşiği işi görmüyor mu; bakımı süren, yaygın paket; **sabit sürüm** (`-E`, aralık yok); lisans MIT/BSD/Apache/ISC/MPL dışındaysa (ör. GPL, AGPL, ticari) dur ve sor; güvenlik açığı denetimi (`pnpm audit --prod`, Python'da `uvx pip-audit`); ekleme Node 24 container'ında yapılır, kilit dosyası (`pnpm-lock.yaml`, `uv.lock`) aynı commit'e girer. Ad, sürüm, lisans ve denetim sonucu PR açıklamasına yazılır.
+- **Migration geri alma planı:** uygulanmış migration değiştirilmez, geri dönüş yeni migration'dır (ileri düzeltme). Veri silen ya da dönüştüren değişiklik iki adımda yapılır: önce yeni yapı eklenir ve doldurulur, eski yapı ayrı bir sonraki işte kaldırılır. Planda "mevcut veride ne olur, sorun çıkarsa hangi migration düzeltir" yazılır.
 
 **B3. Olası hataları önceden listele** ve her birini bir teste dönüştür:
 - Boş/eksik/çok uzun girdi, sınır değerler, Türkçe karakter, yinelenen kayıt.
@@ -102,12 +106,13 @@ Etiketi (`@F:` / `[F:]`) yalnız o özelliği gerçekten doğrulayan teste koy. 
 - Her yeni testin önce kırmızı görüldüğünü ve şimdi yeşil olduğunu raporla.
 
 **C3. Görsel ve UX testleri** (arayüz değiştiyse zorunlu).
-- `node tools/deploy/yigin.mjs e2e`: kabul testleri dört ekran sınıfında (375 / 768 / 1366 / 1920). Her ekran testi `tasmaYok` ve `hataTopla` ile biter.
+- `node tools/deploy/yigin.mjs e2e`: kabul testleri dört ekran sınıfında (375 / 768 / 1366 / 1920). Her ekran denetimi `ekranDenetle` ile yapılır (yatay taşma yok + axe-core WCAG 2.1 A/AA ciddi/kritik ihlal yok), test `hataTopla` boşken biter. İhlal testi gevşeterek değil ekranı düzelterek giderilir.
 - Değişen ekranın en az 375 ve 1366 genişliğinde ekran görüntüsünü al ve **kendin incele** (geçici betik scratchpad'de; görüntü depoya girmez, demo verisiyle).
-- UX kontrol listesi: yükleniyor durumu; boş liste mesajı; hata mesajı sade Türkçe ve ne yapılacağını söylüyor; işlem süren düğme tekrar tıklanamıyor; başarı geri bildirimi görünüyor; her alanın etiketi var ve klavyeyle kullanılabiliyor; telefonda dokunma hedefi yeterli; tablo kendi kabında kayıyor, sayfa taşmıyor; uzun firma unvanı kırılıyor; VKN/TCKN maskeli (`maskTaxId`); tamamlanmamış işlem `<FeatureGate>`/`<FeatureBadge>` ile kırmızı.
+- UX kontrol listesi (otomatik taramanın yakalamadıkları): yükleniyor durumu; boş liste mesajı; hata mesajı sade Türkçe ve ne yapılacağını söylüyor; işlem süren düğme tekrar tıklanamıyor; başarı geri bildirimi görünüyor; sayfa yalnız klavyeyle (Tab, Enter, ok tuşları) kullanılabiliyor ve odak görünüyor; telefonda dokunma hedefi yeterli; tablo kendi kabında kayıyor, sayfa taşmıyor; uzun firma unvanı kırılıyor; VKN/TCKN maskeli (`maskTaxId`); tamamlanmamış işlem `<FeatureGate>`/`<FeatureBadge>` ile kırmızı.
 
-**C4. Son güvenlik bakışı.** B4 listesini bu kez `git diff` üzerinde uygula. Yetki, kimlik, kurum hesabı, dosya ya da kişisel veriye dokunan değişiklikte kullanıcıya `/security-review` (Claude) ile ek inceleme öner.
+**C4. Son güvenlik bakışı ve bağımsız inceleme.** B4 listesini bu kez `git diff` üzerinde uygula. Sonra diff'i işi yazan bakıştan bağımsız incelet: Claude'da `code-review` becerisi (hassas alan değiştiyse ayrıca `security-review`); Codex'te kullanıcıdan Codex'in `/review` komutunu bu dalda çalıştırmasını iste. Her bulguyu düzelt (düzeltme de TDD: önce test) ya da neden düzeltmediğini rapora yaz.
 
 **C5. Rapor ve bitiş.**
 - `node tools/ajan/bitir.mjs --ajan claude|codex` çıktısındaki adımları uygula.
-- Kullanıcıya sade rapor: (1) iş dilinde ne değişti; (2) hangi testler önce kırmızıydı, şimdi ne yeşil; (3) hangi doğrulama koşuldu, hangisi **koşulamadı** ve nedeni; (4) kalan risk ya da açık konu; (5) kullanıcının elle bakabileceği yer (ekran yolu, demo hesabı).
+- İş dalında commitle. **PR açıklaması** taslağını `.github/pull_request_template.md` bölümlerine göre hazırla: iş dilinde değişiklik ve kabul ölçütü (A); etki, riskler, güvenlik, bağımlılık, migration geri alma planı (B); doğrulama sonuçları, bağımsız inceleme bulguları, koşulamayanlar (C); kıdemli onayı gereken hassas alanlar (`bitir.mjs` çıktısı). Push ve PR yalnız kullanıcı isteyince.
+- Kullanıcıya sade rapor: (1) iş dilinde ne değişti; (2) hangi testler önce kırmızıydı, şimdi ne yeşil; (3) hangi doğrulama koşuldu, hangisi **koşulamadı** ve nedeni; (4) kalan risk ya da açık konu; (5) kıdemli onayı gerekip gerekmediği; (6) kullanıcının elle bakabileceği yer (ekran yolu, demo hesabı).

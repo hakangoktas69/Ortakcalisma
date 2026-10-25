@@ -25,7 +25,7 @@ Hata düzeltme de TDD'dir: önce hatayı üreten test. Kural ihlali, yetkisizlik
 | İşçi | Vitest | `apps/worker/test` | in-memory |
 | Yetki anahtarı bildirimi | Vitest (rota taraması) | `apps/web/src/bff/yetki-anahtarlari.test.ts` | yok |
 | BFF ucu, UI bileşeni | — | henüz yok; ilk yazan `apps/web/src/app/api/<ctx>/…test.ts`, `apps/web/src/features/<ctx>/test` | — |
-| Kabul | Playwright (375 / 768 / 1366 / 1920) | `apps/web/e2e/*.e2e.ts` | çalışan yığın, sahte kurum sunucusu |
+| Kabul | Playwright (375 / 768 / 1366 / 1920) + axe-core erişilebilirlik | `apps/web/e2e/*.e2e.ts` | çalışan yığın, sahte kurum sunucusu |
 | ACL | pytest | `services/integration/tests` | sahte kurum sunucusu |
 | Sözleşme | JSON Schema | her iki taraf | — |
 

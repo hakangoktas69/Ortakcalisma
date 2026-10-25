@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { girisYap, hataTopla, kullanicilar, menuyuAc, tasmaYok } from './yardim.ts';
+import { ekranDenetle, girisYap, hataTopla, kullanicilar, menuyuAc } from './yardim.ts';
 
 test.describe('oturum', () => {
   test('@F:oturum.giris.login ofis kullanıcısı giriş yapar, panelde ofisini görür, çıkış yapar', async ({ page }) => {
@@ -7,11 +7,11 @@ test.describe('oturum', () => {
     const k = kullanicilar();
     await page.goto('/');
     await expect(page).toHaveURL(/\/giris$/);
-    await tasmaYok(page);
+    await ekranDenetle(page);
     await girisYap(page, k.yonetici);
     await expect(page.getByText(k.ofisAdi)).toBeVisible();
     await expect(page.getByText(k.yonetici.ad)).toBeVisible();
-    await tasmaYok(page);
+    await ekranDenetle(page);
     // Oturum çerezi HttpOnly; belirteçler tarayıcıda yok (D5)
     const cerez = (await page.context().cookies()).find((c) => c.name.endsWith('ew_sid'));
     expect(cerez?.httpOnly).toBe(true);
@@ -69,7 +69,7 @@ test.describe('menü ve yetki', () => {
     await expect(page.locator('nav [data-modul="yonetim"]')).toHaveCount(0);
     await page.goto('/yonetim/kullanicilar');
     await expect(page.getByRole('heading', { name: 'Yetkiniz yok' })).toBeVisible();
-    await tasmaYok(page);
+    await ekranDenetle(page);
   });
 
   test('tamamlanmamış bölüm herkese kırmızı "Geliştiriliyor" olarak görünür (D30)', async ({ page }) => {
@@ -78,6 +78,6 @@ test.describe('menü ve yetki', () => {
     await page.goto('/odeme/aylik_liste');
     await expect(page.getByRole('heading', { name: /Aylık ödeme listesi/ })).toBeVisible();
     await expect(page.locator('h1 .rozet.kirmizi')).toContainText('Geliştiriliyor');
-    await tasmaYok(page);
+    await ekranDenetle(page);
   });
 });

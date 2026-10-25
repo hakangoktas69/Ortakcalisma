@@ -13,6 +13,34 @@ export const BAGLAM_YOLLARI = ['CLAUDE.md', 'AGENTS.md', 'apps', 'packages', 'do
 export const baglamDosyasiMi = (yol) =>
   /(^|\/)(CLAUDE|AGENTS)\.md$/.test(yol) || /^docs\/(ai|adr|baglamlar|hedef-mimari)\//.test(yol);
 
+// Ortak dallar (D37): iş bu dallara doğrudan commitlenmez; `is/<kısa-ad>` dalında yapılır, PR ile birleşir.
+export const ORTAK_DALLAR = ['main', 'master', 'dev', 'yeniden-yapilanma'];
+export const ortakDalMi = (dal) => ORTAK_DALLAR.includes(dal);
+
+// Kıdemli onayı isteyen alanlar (D37). CODEOWNERS belirlenene kadar (açık konu) PR'ı proje sorumlusu onaylar.
+export const HASSAS_ALANLAR = [
+  { desen: /^supabase\//, neden: 'veritabanı şeması, RLS, migration' },
+  { desen: /^packages\/contexts\/credentials\//, neden: 'kurum şifresi, hesap kullanım hakkı' },
+  { desen: /^packages\/contexts\/(identity-access|audit)\/|^packages\/feature-registry\//, neden: 'kimlik, yetki ağacı, denetim kaydı' },
+  { desen: /^apps\/web\/src\/(bff|app\/api)\/|^apps\/web\/next\.config\.ts$|^apps\/web\/src\/(middleware|proxy)\.ts$/, neden: 'oturum, CSRF, BFF uçları ve yetki koruması, CSP' },
+  { desen: /^apps\/worker\//, neden: 'işçi: kurum hesabı kullanım hakkının yeniden denetimi, sonuç uygulama' },
+  { desen: /^tools\/(ajan|claude)\/|^\.claude\/settings\.json$/, neden: 'ajan bekçileri (akış, kancalar, hassas alan listesi)' },
+  { desen: /^packages\/platform\//, neden: 'veritabanı bağlantısı, shard yönlendirme' },
+  { desen: /^services\/integration\/|^contracts\//, neden: 'kurumla konuşan kod, yayımlanmış sözleşme' },
+  { desen: /^deploy\/|^\.github\/|^tools\/git-hooks\//, neden: 'dağıtım, sırlar, CI, git kancaları' },
+  { desen: /(^|\/)(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|pyproject\.toml|uv\.lock)$/, neden: 'bağımlılık (lisans + güvenlik açığı denetimi)' },
+];
+
+/** Dosyaları ilk eşleşen hassas alana göre gruplar: [{ neden, dosyalar }]. */
+export function hassasAlanlar(dosyalar) {
+  const gruplar = new Map();
+  for (const d of dosyalar) {
+    const alan = HASSAS_ALANLAR.find((a) => a.desen.test(d));
+    if (alan) gruplar.set(alan.neden, [...(gruplar.get(alan.neden) ?? []), d]);
+  }
+  return [...gruplar].map(([neden, d]) => ({ neden, dosyalar: d }));
+}
+
 /** Yeniden yapılanma öncesi ekip hafızası (D28); yerel ayarda görülürse yenisiyle değiştirilir. */
 export const ESKI_HAFIZA = /[\\/]mukellef-takip[\\/]docs[\\/]ai[\\/]memory[\\/]?$/i;
 export const ESKI_KANCA = /^(?:\.\/)?mukellef-takip[\\/]\.githooks[\\/]?$/;

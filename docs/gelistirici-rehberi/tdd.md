@@ -139,7 +139,7 @@ test('@F:gorevler.assign yönetici görevi personele atar, personel kendi listes
 ### 5.1 Arayüz ağırlıklı iş
 
 - Görsel ayrıntı test edilmez; **kullanıcının yaptığı iş** test edilir: kabul testi erişilebilir adlarla (`getByLabel`, `getByRole`) form doldurur, sonucu durum mesajından ve tablodan okur.
-- Yerleşim kuralları ortak yardımcılarla tek satırda denetlenir: dört ekran sınıfında yatay taşma yok (`tasmaYok`), konsol hatası yok (`hataTopla`).
+- Yerleşim kuralları ortak yardımcılarla tek satırda denetlenir: dört ekran sınıfında yatay taşma ve WCAG 2.1 A/AA ciddi/kritik erişilebilirlik ihlali yok (`ekranDenetle`, axe-core), konsol hatası yok (`hataTopla`). Otomatik tarama orta/küçük etkili ihlalleri ve klavye akışını garanti etmez; onlar UX kontrol listesindedir.
 - Ekrandaki karar mantığı (gecikme, sayaç, yetkiye göre gösterim) bileşene değil domain'e konur; orada birim testiyle hızlı döner.
 
 ### 5.2 Dış bağımlılık: kurum (GİB/SGK)

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { fakeVkn } from '@eworks/testing';
-import { girisYap, hataTopla, kullanicilar, tasmaYok } from './yardim.ts';
+import { ekranDenetle, girisYap, hataTopla, kullanicilar } from './yardim.ts';
 
 // Firmalarım (portfolio) ve kurum hesapları (credentials) kabul testleri — eski portalın firma ekranının karşılığı.
 
@@ -24,11 +24,11 @@ test.describe('firmalar', () => {
     const unvan = `Kabul Gıda ${Date.now()} Ltd. Şti.`;
     await firmaEkle(page, unvan, fakeVkn());
     await expect(page.getByLabel('Firma / mükellef unvanı')).toHaveValue(unvan);
-    await tasmaYok(page);
+    await ekranDenetle(page);
     await page.goto(`/firmalar/liste?q=${encodeURIComponent(unvan)}`);
     await expect(page.getByRole('link', { name: unvan })).toBeVisible();
     await expect(page.getByText('1 kayıt listeleniyor.')).toBeVisible();
-    await tasmaYok(page);
+    await ekranDenetle(page);
     expect(hatalar).toEqual([]);
   });
 
@@ -44,7 +44,7 @@ test.describe('firmalar', () => {
     await page.getByLabel('VKN / TCKN').fill(vkn.slice(0, 9) + String((Number(vkn[9]) + 1) % 10));
     await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
     await expect(page.getByText('VKN (10 hane) ya da TCKN (11 hane) geçersiz.')).toBeVisible();
-    await tasmaYok(page);
+    await ekranDenetle(page);
   });
 
   test('@F:firmalar.kart.edit @F:firmalar.kart.view kart düzenlenir ve kaydedilir', async ({ page }) => {
@@ -94,7 +94,7 @@ test.describe('firmalar', () => {
     await expect(page.getByText('GİB hesabı Vault’a kaydedildi.')).toBeVisible();
     await page.reload();
     await expect(page.getByText('Müşavir GİB hesabınız: Kayıtlı', { exact: true })).toBeVisible();
-    await tasmaYok(page);
+    await ekranDenetle(page);
   });
 
   test('@F:firmalar.kart.archive arşivlenen firma listeden kalkar', async ({ page }) => {

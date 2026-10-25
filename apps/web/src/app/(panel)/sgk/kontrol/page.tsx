@@ -5,6 +5,7 @@ import { bugun } from '@/bff/beyanname.ts';
 import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
+import { TabloKap } from '@/shared/ui/TabloKap.tsx';
 
 // SGK kontrol listesi (sgk.kontrol): mükellef × son 6 dönem; hücrede işyeri sayısı, toplam çalışan, onay bekleyen bildirim.
 export default async function SgkKontrol() {
@@ -15,7 +16,7 @@ export default async function SgkKontrol() {
   return (
     <>
       <Baslik k="sgk.kontrol" alt="Son altı dönemin SGK bildirimleri: işyeri sayısı ve çalışan sayısı. Boş hücre: bildirim yok ya da o ay senkronlanmadı." />
-      <div className="tablo-kap">
+      <TabloKap etiket="SGK kontrol tablosu">
         <table className="kontrol">
           <caption className="gorunmez">SGK kontrol listesi</caption>
           <thead>
@@ -56,7 +57,7 @@ export default async function SgkKontrol() {
             )}
           </tbody>
         </table>
-      </div>
+      </TabloKap>
     </>
   );
 }

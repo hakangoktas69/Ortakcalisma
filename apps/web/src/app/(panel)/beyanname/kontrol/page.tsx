@@ -4,6 +4,7 @@ import { bugun, sozlesmeliFirmalar } from '@/bff/beyanname.ts';
 import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
+import { TabloKap } from '@/shared/ui/TabloKap.tsx';
 
 // e-Beyanname kontrol (beyanname.kontrol): sözleşmeli mükellef × son 6 vergilendirme dönemi; hücrede verilen beyanname türleri.
 // Kaydı olmayan dönem "—": ya verilmemiş ya da o ay henüz senkronlanmamış (eski portal: "Kontrol edilmedi").
@@ -19,7 +20,7 @@ export default async function BeyannameKontrol() {
   return (
     <>
       <Baslik k="beyanname.kontrol" alt="Sözleşmeli mükelleflerin son altı dönemde verilen beyannameleri. Boş hücre: kayıt yok ya da o ay senkronlanmadı." />
-      <div className="tablo-kap">
+      <TabloKap etiket="Beyanname kontrol tablosu">
         <table className="kontrol">
           <caption className="gorunmez">e-Beyanname kontrol</caption>
           <thead>
@@ -54,7 +55,7 @@ export default async function BeyannameKontrol() {
             )}
           </tbody>
         </table>
-      </div>
+      </TabloKap>
     </>
   );
 }

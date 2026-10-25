@@ -2,7 +2,7 @@ import { randomInt } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { ofisAc } from './genel-kurulum.ts';
-import { girisYap, hataTopla, tasmaYok } from './yardim.ts';
+import { ekranDenetle, girisYap, hataTopla } from './yardim.ts';
 
 // e-Beyanname: uçtan uca gerçek akış — web → kuyruk → Python robotu (aynı oturumda sözleşme listesi + e-Beyanname, PDF'ler)
 // → sahte GİB → S3 → işçi (tax-filing + documents). Sahte GİB canlı doğrulama sayılmaz (D33): "Senkron başlat" canlı kayıt
@@ -33,7 +33,7 @@ test.describe('e-Beyanname', () => {
     await page.reload();
     await expect(page.getByRole('heading', { name: /Kurum incelemesi/ })).toBeVisible();
     await expect(page.getByText('Beyanname sorgulanabilir').first()).toBeVisible();
-    await tasmaYok(page);
+    await ekranDenetle(page);
 
     await page.goto('/beyanname/senkron');
     await page.getByLabel('Gönderim ayı (başlangıç)').fill('2026-08');
@@ -41,7 +41,7 @@ test.describe('e-Beyanname', () => {
     const secim = page.getByLabel('Mükellef');
     const ilkFirma = await secim.locator('option').nth(1).getAttribute('value');
     await secim.selectOption(ilkFirma!);
-    await tasmaYok(page);
+    await ekranDenetle(page);
     await page.getByRole('button', { name: 'Senkronu başlat' }).click();
     const durum = page.getByRole('status');
     await expect(durum).toContainText('Tamamlandı', { timeout: 300_000 });
@@ -53,7 +53,7 @@ test.describe('e-Beyanname', () => {
     await expect(satirlar.first()).toBeVisible();
     expect(await satirlar.count()).toBeGreaterThan(0);
     await expect(page.getByText('Kayıt bulunamadı.')).toHaveCount(0);
-    await tasmaYok(page);
+    await ekranDenetle(page);
     const [pdf] = await Promise.all([page.waitForEvent('download'), satirlar.first().getByRole('link', { name: 'Beyanname', exact: true }).click()]);
     expect(pdf.suggestedFilename()).toMatch(/^[A-Z0-9_-]+-2026-0\d-beyanname\.pdf$/);
     expect(readFileSync((await pdf.path())!).subarray(0, 5).toString()).toBe('%PDF-');
@@ -62,12 +62,12 @@ test.describe('e-Beyanname', () => {
 
     await page.goto('/beyanname/kontrol');
     await expect(page.locator('td[data-donem] .etiket.iyi').first()).toBeVisible();
-    await tasmaYok(page);
+    await ekranDenetle(page);
 
     await page.goto('/beyanname/belge');
     await expect(page.getByRole('link', { name: 'PDF indir' }).first()).toBeVisible();
     await expect(page.getByText('Vergi tahakkuku').first()).toBeVisible();
-    await tasmaYok(page);
+    await ekranDenetle(page);
     expect(hatalar).toEqual([]);
   });
 

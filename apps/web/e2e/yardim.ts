@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page } from '@playwright/test';
 import { KULLANICILAR, type E2eKullanicilar } from './genel-kurulum.ts';
 
@@ -13,9 +14,28 @@ export async function girisYap(page: Page, k: { eposta: string; parola: string }
 }
 
 /** Duyarlı arayüz: sayfa yatay taşmamalı (dört ekran sınıfı). Tablolar kendi kabında kayar. */
-export async function tasmaYok(page: Page) {
+async function tasmaYok(page: Page) {
   const tasma = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(tasma, 'sayfa yatay taşıyor').toBeLessThanOrEqual(1);
+}
+
+/**
+ * Erişilebilirlik (D37): axe-core'un WCAG 2.1 A/AA kurallarında ciddi ya da kritik ihlal yok. Ekran okuyucu, klavye ve
+ * renk karşıtlığı sorunlarını yakalar; orta/küçük etkili ihlaller ve otomatik denetlenemeyen ölçütler kapsam dışıdır
+ * (UX kontrol listesi, gelistir C3). İhlal kimliği ve etkilenen öğeler hata mesajında görünür.
+ */
+async function erisilebilirlik(page: Page) {
+  const sonuc = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+  const ihlaller = sonuc.violations
+    .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+    .map((v) => `${v.id} (${v.nodes.length} öğe): ${v.help} — ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(' | ')}`);
+  expect(ihlaller, 'erişilebilirlik ihlali').toEqual([]);
+}
+
+/** Her ekran denetimi (D37): sayfa taşmıyor ve erişilebilirlik ihlali yok. Ekran boyutuna göre sonuç değişir (dar ekranda kayan tablo), dört sınıfta da koşar. */
+export async function ekranDenetle(page: Page) {
+  await tasmaYok(page);
+  await erisilebilirlik(page);
 }
 
 /** Konsol hatası ve 5xx yanıtları toplar; test sonunda boş olmalı. */

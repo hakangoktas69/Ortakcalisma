@@ -28,6 +28,8 @@ body {
 }
 a { color: var(--birincil); text-decoration: none; }
 a:hover { text-decoration: underline; }
+/* Metin içindeki bağlantı yalnız renkle ayırt edilmez (WCAG 1.4.1) */
+.icerik p a:not(.dugme) { text-decoration: underline; text-underline-offset: .15em; }
 h1 { font-size: 1.45rem; margin: 0 0 .25rem; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 h2 { font-size: 1.15rem; margin: 0 0 .5rem; }
 code { font-size: .8rem; background: #eef1f7; padding: .05rem .3rem; border-radius: 4px; }
@@ -105,6 +107,7 @@ input:focus, select:focus, textarea:focus, .dugme:focus-visible, a:focus-visible
 .islem-listesi li { display: flex; flex-wrap: wrap; gap: .4rem .6rem; align-items: center; background: #fff; border: 1px solid var(--cizgi); border-radius: 8px; padding: .5rem .75rem; }
 
 /* Tablolar: dar ekranda kaydırılabilir kap içinde, sayfa taşmaz */
+.tablo-kap:focus-visible { outline: 3px solid #9db6ff; outline-offset: 2px; }
 .tablo-kap { position: relative; width: 100%; overflow-x: auto; background: #fff; border: 1px solid var(--cizgi); border-radius: var(--yaricap); }
 table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: .9rem; }
 th, td { text-align: left; padding: .55rem .75rem; border-bottom: 1px solid var(--cizgi); vertical-align: top; overflow-wrap: normal; word-break: normal; }

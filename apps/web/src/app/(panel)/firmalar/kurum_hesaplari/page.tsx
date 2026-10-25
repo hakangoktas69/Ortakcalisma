@@ -7,6 +7,7 @@ import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { KurumHesabiFormu } from '@/features/credentials/KurumHesabiFormu.tsx';
 import { FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
+import { TabloKap } from '@/shared/ui/TabloKap.tsx';
 
 // Kurum hesapları (firmalar.kurum_hesaplari): müşavirin kendi GİB hesabı (sözleşme listesi bununla okunur) + firmaların GİB hesap durumu.
 export default async function KurumHesaplari() {
@@ -38,7 +39,7 @@ export default async function KurumHesaplari() {
           ) : null}
         </section>
       ) : null}
-      <div className="tablo-kap">
+      <TabloKap etiket="Firma kurum hesapları">
         <table>
           <caption className="gorunmez">Firmaların GİB hesapları</caption>
           <thead>
@@ -65,7 +66,7 @@ export default async function KurumHesaplari() {
             })}
           </tbody>
         </table>
-      </div>
+      </TabloKap>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { fakeVkn } from '@eworks/testing';
 import { ofisAc } from './genel-kurulum.ts';
-import { girisYap, hataTopla, tasmaYok } from './yardim.ts';
+import { ekranDenetle, girisYap, hataTopla } from './yardim.ts';
 
 // Çalışma alanı: görevler (eski "Takvim ve Görevler"), notlar ve ana sayfa sayaçları. Her test kendi ofisini açar.
 
@@ -21,7 +21,7 @@ test.describe('çalışma alanı', () => {
     const satir = yonetici.getByRole('row', { name: new RegExp(baslik) });
     await expect(satir).toContainText(o.personel.ad);
     await expect(satir).toContainText('Gecikti');
-    await tasmaYok(yonetici);
+    await ekranDenetle(yonetici);
 
     const personel = await (await browser.newContext()).newPage();
     await girisYap(personel, o.personel);
@@ -40,7 +40,7 @@ test.describe('çalışma alanı', () => {
     await yonetici.goto('/');
     await expect(yonetici.locator('.sayac', { hasText: 'Açık görev' })).toBeVisible();
     await expect(yonetici.locator('.sayac', { hasText: 'Firma' }).first()).toBeVisible();
-    await tasmaYok(yonetici);
+    await ekranDenetle(yonetici);
     expect(hatalar).toEqual([]);
   });
 
@@ -60,7 +60,7 @@ test.describe('çalışma alanı', () => {
     await page.getByRole('button', { name: 'Notu kaydet' }).click();
     await expect(page.getByRole('status')).toHaveText('Not eklendi.');
     await expect(page.getByRole('list', { name: 'Notlar' })).toContainText('Ekim KDV için fatura listesi bekleniyor.');
-    await tasmaYok(page);
+    await ekranDenetle(page);
     await page.context().clearCookies();
     await girisYap(page, o.personel);
     await page.goto('/notlar');

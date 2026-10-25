@@ -1,7 +1,7 @@
 import { randomInt } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { ofisAc } from './genel-kurulum.ts';
-import { girisYap, hataTopla, tasmaYok } from './yardim.ts';
+import { ekranDenetle, girisYap, hataTopla } from './yardim.ts';
 
 // GİB e-Beyanname sözleşmeleri: uçtan uca gerçek akış — web → outbox → RabbitMQ → Python robot (başsız tarayıcı, otomatik
 // güvenlik kodu) → sahte GİB → S3 → işçi → tax-filing + portfolio. Sahte GİB canlı doğrulama sayılmaz (D33): bu testler
@@ -36,7 +36,7 @@ test.describe('GİB sözleşmeleri', () => {
     await expect(durum).toContainText('sahte GİB');
     await expect(page.getByText('Bu ortamdaki liste sahte GİB sunucusundan (demo) okundu')).toBeVisible();
     await expect(page.getByRole('table', { name: 'GİB e-Beyanname sözleşmeleri' }).locator('tbody tr')).toHaveCount(45);
-    await tasmaYok(page);
+    await ekranDenetle(page);
     // Yeni mükellefler firma listesinde; ikinci senkron yeni firma açmaz, mevcutlarla eşleşir
     await page.goto('/firmalar/liste');
     const firmaSayisi = await page.locator('tbody tr').count();

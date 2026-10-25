@@ -6,6 +6,7 @@ import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
+import { TabloKap } from '@/shared/ui/TabloKap.tsx';
 
 // e-Beyanname görüntüleme (beyanname.liste): mükellef, tür, yıl süzgeci; belgeler (PDF) satırda; CSV dışa aktarma.
 type Ara = { q?: string; tur?: string; yil?: string };
@@ -59,7 +60,7 @@ export default async function BeyannameListesi({ searchParams }: { searchParams:
           Süz
         </button>
       </form>
-      <div className="tablo-kap">
+      <TabloKap etiket="Beyanname listesi">
         <table>
           <caption className="gorunmez">e-Beyannameler</caption>
           <thead>
@@ -115,7 +116,7 @@ export default async function BeyannameListesi({ searchParams }: { searchParams:
             )}
           </tbody>
         </table>
-      </div>
+      </TabloKap>
       <p className="alt">
         {satirlar.length} kayıt listeleniyor.{satirlar.some((s) => s.source === 'sahte_gib') ? ' Bu ortamdaki kayıtlar sahte GİB sunucusundan (demo).' : ''}
       </p>

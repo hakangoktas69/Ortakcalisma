@@ -38,6 +38,8 @@ Her yeni karar **aynı değişiklikte** dört yere işlenir:
 
 Belge değişikliğinden sonra: göreli bağlantılar (`node tools/docs/baglanti-denetle.mjs`), mermaid çizimi, hafıza değiştiyse `node tools/claude/check-memory.mjs`. Klasör taşıma, başkasının alanına yazma gibi geri alınması zor işlerde önce kapsam sorulur.
 
-## Commit
+## Dal, commit, PR
 
-Türkçe, kısa başlık (ne yapıldığı). Üretilen dosyalar (`AGENTS.md`, `MEMORY.md` dizini, `.claude/skills`, `docs/ozellik-durumu.md`) kaynakla aynı commit'e girer (pre-commit kancası sahneler).
+İş `is/<kısa-ad>` dalında yapılır; ortak dallara (`main`, `master`, `dev`, `yeniden-yapilanma`) doğrudan commit yok, pre-commit kancası reddeder (D37). Birleştirme PR ile, açıklama `.github/pull_request_template.md`'ye göre. Hassas alan (`tools/ajan/ortak.mjs` `HASSAS_ALANLAR`) değiştiyse birleştirmeden önce kıdemli onayı. Yeni bağımlılık sabit sürümle, lisans ve güvenlik açığı denetimiyle eklenir.
+
+Commit: Türkçe, kısa başlık (ne yapıldığı). Üretilen dosyalar (`AGENTS.md`, `MEMORY.md` dizini, `.claude/skills`, `docs/ozellik-durumu.md`) kaynakla aynı commit'e girer (pre-commit kancası sahneler).

@@ -8,6 +8,7 @@ import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { GorevFormu, GorevIslemleri } from '@/features/workspace/Gorevler.tsx';
 import { FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
+import { TabloKap } from '@/shared/ui/TabloKap.tsx';
 
 // Görevler (gorevler): eski portalın "Takvim ve Görevler" ekranı — sayaçlar, süzgeç, görev listesi, yeni görev, durum ve atama.
 type Ara = { q?: string; durum?: string; bana?: string };
@@ -80,7 +81,7 @@ export default async function Gorevler({ searchParams }: { searchParams: Promise
           Süz
         </button>
       </form>
-      <div className="tablo-kap">
+      <TabloKap etiket="Görev listesi">
         <table>
           <caption className="gorunmez">Görevler</caption>
           <thead>
@@ -115,7 +116,7 @@ export default async function Gorevler({ searchParams }: { searchParams: Promise
             )}
           </tbody>
         </table>
-      </div>
+      </TabloKap>
       <p className="alt">{gorunen.length} görev listeleniyor.</p>
     </>
   );
