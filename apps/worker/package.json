@@ -1,0 +1,12 @@
+{
+  "name": "@eworks/worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.ts",
+    "migrate": "node src/migrate.ts"
+  },
+  "dependencies": {
+    "@eworks/platform": "workspace:*"
+  }
+}

@@ -8,9 +8,9 @@
   },
   "scripts": {
     "prepare": "node tools/ajan/senkron.mjs --kanca-kur",
-    "test": "vitest run",
+    "test": "vitest run --project birim",
     "test:watch": "vitest",
-    "test:ci": "vitest run --reporter=default --reporter=junit --outputFile.junit=test-results/vitest.xml",
+    "test:ci": "vitest run --project birim --reporter=default --reporter=junit --outputFile.junit=test-results/vitest.xml",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "arch": "depcruise --config tools/arch/dependency-cruiser.cjs packages apps",
     "features": "node tools/features/uret.ts",
@@ -21,11 +21,17 @@
     "ajan:senkron": "node tools/ajan/senkron.mjs --yaz",
     "ajan:denetle": "node tools/ajan/senkron.mjs --denetle",
     "ajan:test": "node --test \"tools/ajan/test/*.test.mjs\"",
-    "docs:check": "node tools/docs/baglanti-denetle.mjs"
+    "docs:check": "node tools/docs/baglanti-denetle.mjs",
+    "test:int": "vitest run --project entegrasyon && node tools/db/pgtap.ts",
+    "test:yigin": "vitest run --reporter=default --reporter=junit --outputFile.junit=test-results/vitest.xml; s=$?; node tools/db/pgtap.ts; p=$?; exit $((s|p))",
+    "yigin": "node tools/deploy/yigin.mjs",
+    "migrate": "node apps/worker/src/migrate.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.5",
     "dependency-cruiser": "^18.7.0",
+    "pg": "^8.16.3",
     "turbo": "^2.5.8",
     "typescript": "^6.0.2",
     "vitest": "^4.1.11"

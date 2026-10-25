@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eworks-integration
+  labels: {{- include "eworks.labels" (dict "name" "integration") | nindent 4 }}
+spec:
+  replicas: {{ .Values.integration.replicas }}
+  selector:
+    matchLabels: {{- include "eworks.labels" (dict "name" "integration") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "eworks.labels" (dict "name" "integration") | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: integration
+          image: {{ include "eworks.image" (dict "root" . "name" "eworks/integration") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - secretRef: { name: {{ .Values.secrets.existing }} }
+          resources: {{- toYaml .Values.integration.resources | nindent 12 }}
+          {{- include "eworks.guvenlik" . | nindent 10 }}
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: {} }

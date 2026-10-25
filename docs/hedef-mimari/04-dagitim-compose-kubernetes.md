@@ -2,6 +2,7 @@
 
 > Önce: [5.3 Kaynak verimliliği ve kapasite](03-kaynak-verimliligi-ve-kapasite.md)
 > Karar D10: kurulum seçimlidir. Donanıma ve kullanıcı ölçeğine göre aynı imajlarla Compose veya Kubernetes kullanılır.
+> **Not (25.10.2026, D35):** Bu belgede "MinIO" geçen yerler S3 uyumlu nesne deposunu anlatır. MinIO topluluk imajları yayından kalktığı için Compose'da **SeaweedFS** kullanılır; kod S3 portuna yazılır, depo değiştirilebilir.
 
 ## 1. İlke: tek imaj seti, iki dağıtım biçimi
 

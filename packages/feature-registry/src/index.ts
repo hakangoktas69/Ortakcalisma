@@ -11,7 +11,9 @@ export {
   type FeatureKind,
   type FeatureStatus,
   type FeatureTree,
+  type LiveVerification,
   type NodeStatus,
   type TestResult,
 } from './define.ts';
-export { features } from './features.ts';
+export { features, LIVE_ACTIONS } from './features.ts';
+export { liveVerifications } from './live.ts';

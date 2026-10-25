@@ -1,4 +1,5 @@
 // Test yardımcıları. Gerçek kişisel veri hiçbir fikstüre girmez (06 §7.2): VKN/TCKN geçerli ama sahte üretilir.
+export { asRole, yigin } from './yigin.ts';
 
 /** Tohumlu, tekrarlanabilir sözde rastgele sayı üretici (mulberry32). */
 export function seededRandom(seed: number): () => number {

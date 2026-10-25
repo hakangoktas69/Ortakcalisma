@@ -20,5 +20,5 @@ Hakan, Eworks hedef mimarisi oturumlarında (2026-10-23/24) şu iş biçimini is
 - Belgeler Türkçe yazılır, mermaid diyagramları çizilerek (mermaid-cli) doğrulanır, göreli bağlantılar denetlenir (`node tools/docs/baglanti-denetle.mjs`), hafıza değişikliğinden sonra `check-memory` koşulur. Commit istenmedikçe yapılmaz; push ayrıca istenir.
 - Kurumun erişim denetimini atlatmaya yönelik istekler (ör. hesap başına IP rotasyonu/spoofing) tasarıma alınmaz. Gerekçe (K-22) yazılır ve meşru alternatif önerilir.
 
-**Why:** Kararlar çok sayıda ve birbirine bağlı (D1–D32). Tek bir yerde unutulan güncelleme belgeler ile hafıza arasında çelişki üretti (ör. 30 → 60 istek/dk değişikliğinin bir hafıza satırında eski kalması, 2026-10-24'te düzeltildi).
+**Why:** Kararlar çok sayıda ve birbirine bağlı (D1–D35). Tek bir yerde unutulan güncelleme belgeler ile hafıza arasında çelişki üretti (ör. 30 → 60 istek/dk değişikliğinin bir hafıza satırında eski kalması, 2026-10-24'te düzeltildi).
 **How to apply:** Eworks mimari işinde her yanıttan sonra dört yeri birlikte güncelle, sonra tutarlılık taraması yap: eski değerleri `grep`'le ara, bağlantıları ve mermaid'i denetle, `check-memory` ve `senkron --denetle` koş. Yeniden yapılanma notları: [[eworks-yeniden-yapilanma]].

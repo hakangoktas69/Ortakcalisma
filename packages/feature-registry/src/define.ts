@@ -23,6 +23,8 @@ export type FeatureDef = {
   readonly context?: ContextName | null;
   /** İşlem düğümü yeşil olmak için en az bir kabul testi ister. */
   readonly acceptance?: boolean;
+  /** Kurumla konuşur (D33): sahte kurum testlerine ek olarak canlı doğrulama kaydı olmadan yeşil olmaz. */
+  readonly live?: boolean;
   /** Ağaçtaki kaynağı: bugünkü portal ekranı (eski/mert/eworks) ya da yalnız hedef mimaride tanımlı. */
   readonly source?: 'portal' | 'hedef';
 };
@@ -47,13 +49,28 @@ export function contextOf(tree: FeatureTree, key: string): ContextName | null {
 
 export type TestResult = { readonly feature: string; readonly passed: boolean };
 
+/** Canlı kurum doğrulaması (D33): canlı koşudan sonra elle girilen tek kayıt; kanıt ve sayı taşır. */
+export type LiveVerification = {
+  readonly anahtar: string;
+  readonly tarih: string;
+  readonly kim: string;
+  readonly sonuc: string;
+  readonly surum: string;
+};
+
 export type NodeStatus = { readonly status: FeatureStatus; readonly green: number; readonly total: number; readonly tests: number };
 
 /**
  * Durum elle işaretlenmez, test sonuçlarından hesaplanır (06 §8.2):
- * işlem yeşil = en az bir test var ve anahtara bağlı tüm testler geçiyor; ana düğüm yeşil = tüm işlemleri yeşil.
+ * işlem yeşil = en az bir test var ve anahtara bağlı tüm testler geçiyor (kurumla konuşan işlemde ayrıca canlı doğrulama kaydı);
+ * ana düğüm yeşil = tüm işlemleri yeşil.
  */
-export function computeStatus(tree: FeatureTree, results: readonly TestResult[]): Record<string, NodeStatus> {
+export function computeStatus(
+  tree: FeatureTree,
+  results: readonly TestResult[],
+  live: readonly LiveVerification[] = [],
+): Record<string, NodeStatus> {
+  const verified = new Set(live.map((l) => l.anahtar));
   const byKey = new Map<string, TestResult[]>();
   for (const r of results) byKey.set(r.feature, [...(byKey.get(r.feature) ?? []), r]);
   const out: Record<string, NodeStatus> = {};
@@ -64,7 +81,7 @@ export function computeStatus(tree: FeatureTree, results: readonly TestResult[])
     let s: NodeStatus;
     if (kids.length === 0) {
       const rs = byKey.get(key) ?? [];
-      const green = rs.length > 0 && rs.every((r) => r.passed);
+      const green = rs.length > 0 && rs.every((r) => r.passed) && (!tree[key]?.live || verified.has(key));
       s = { status: green ? 'green' : 'red', green: green ? 1 : 0, total: 1, tests: rs.length };
     } else {
       const parts = kids.map(visit);

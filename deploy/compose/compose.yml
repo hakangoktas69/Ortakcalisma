@@ -1,0 +1,146 @@
+# Eworks — Docker Compose yığını (04: Compose veya Kubernetes, aynı imajlar).
+# Kullanım (depo kökünden): node tools/deploy/yigin.mjs up   — sırları üretir, imajları derler, yığını ayağa kaldırır.
+# Sırlar deploy/compose/.env'dedir (gitignore); şablon .env.example. Dışarı yalnız web portu açılır (WEB_PORT).
+name: eworks
+
+x-node: &node
+  build:
+    context: ../..
+    dockerfile: deploy/docker/node.Dockerfile
+    target: worker
+  image: eworks/worker:local
+  restart: unless-stopped
+  read_only: true
+  tmpfs: [/tmp]
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+
+x-shard-db: &shard-db
+  image: supabase/postgres:17.6.1.021
+  restart: unless-stopped
+  environment:
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+  healthcheck:
+    test: [CMD, pg_isready, -U, postgres, -h, localhost]
+    interval: 5s
+    retries: 30
+  deploy:
+    resources:
+      limits: { memory: 768m }
+
+services:
+  # Kontrol düzlemi: GoTrue (kimlik) + dizin (shard eşlemesi, VKN tekilliği)
+  db-control:
+    <<: *shard-db
+    volumes:
+      - db-control:/var/lib/postgresql/data
+      - ./db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:ro
+
+  auth:
+    image: supabase/gotrue:v2.180.0
+    restart: unless-stopped
+    depends_on:
+      db-control: { condition: service_healthy }
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: '9999'
+      API_EXTERNAL_URL: http://auth:9999
+      GOTRUE_SITE_URL: ${PUBLIC_URL:-http://localhost:8080}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@db-control:5432/postgres
+      GOTRUE_JWT_SECRET: ${JWT_SECRET:?}
+      GOTRUE_JWT_EXP: '3600'
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      # Kendi kendine kayıt kapalı (D27): hesaplar satış portalından / hesap açma komutuyla açılır
+      GOTRUE_DISABLE_SIGNUP: 'true'
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: 'true'
+      GOTRUE_MAILER_AUTOCONFIRM: 'true'
+      GOTRUE_RATE_LIMIT_TOKEN_REFRESH: '150'
+    healthcheck:
+      test: [CMD, wget, -qO-, http://localhost:9999/health]
+      interval: 5s
+      retries: 30
+
+  # Kiracı shard'ları (16 mantıksal / 2 fiziksel önerisinin geliştirme karşılığı: 2 shard)
+  db-shard-01:
+    <<: *shard-db
+    volumes: [db-shard-01:/var/lib/postgresql/data]
+
+  db-shard-02:
+    <<: *shard-db
+    volumes: [db-shard-02:/var/lib/postgresql/data]
+
+  redis:
+    image: redis:7.4.6-alpine
+    restart: unless-stopped
+    command: [redis-server, --requirepass, '${REDIS_PASSWORD:?}', --appendonly, 'yes']
+    volumes: [redis:/data]
+    healthcheck:
+      test: [CMD-SHELL, 'redis-cli -a "$$REDIS_PASSWORD" --no-auth-warning ping | grep PONG']
+      interval: 5s
+      retries: 30
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+  rabbitmq:
+    image: rabbitmq:4.1.4-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: eworks
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?}
+    volumes: [rabbitmq:/var/lib/rabbitmq]
+    healthcheck:
+      test: [CMD, rabbitmq-diagnostics, -q, ping]
+      interval: 10s
+      retries: 30
+
+  # Nesne deposu (S3 uyumlu): MinIO topluluk imajları yayından kalktığı için SeaweedFS (D35)
+  s3:
+    image: chrislusf/seaweedfs:3.97
+    restart: unless-stopped
+    command: [server, -ip.bind=0.0.0.0, -dir=/data, -s3, -s3.config=/etc/seaweedfs/s3.json, -volume.max=0, -master.volumeSizeLimitMB=256]
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /etc/seaweedfs
+        printf '{"identities":[{"name":"eworks","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' "$$S3_ACCESS_KEY" "$$S3_SECRET_KEY" > /etc/seaweedfs/s3.json
+        exec /entrypoint.sh "$$@"
+      - --
+    volumes: [s3:/data]
+    healthcheck:
+      test: [CMD-SHELL, 'wget -qS -O /dev/null http://localhost:8333/healthz 2>&1 | grep -q "HTTP/1.1 200"']
+      interval: 5s
+      retries: 30
+
+  # Tek seferlik görevler (profil: gorev) — yigin.mjs altyapıdan sonra `run --rm` ile çalıştırır
+  migrate:
+    <<: *node
+    profiles: [gorev]
+    restart: 'no'
+    command: [node, apps/worker/src/migrate.ts]
+    depends_on:
+      db-control: { condition: service_healthy }
+      db-shard-01: { condition: service_healthy }
+      db-shard-02: { condition: service_healthy }
+      auth: { condition: service_healthy }
+    environment:
+      MIGRATE_CONTROL_URL: postgres://postgres:${POSTGRES_PASSWORD}@db-control:5432/postgres
+      MIGRATE_SHARD_URLS: shard-01=postgres://postgres:${POSTGRES_PASSWORD}@db-shard-01:5432/postgres,shard-02=postgres://postgres:${POSTGRES_PASSWORD}@db-shard-02:5432/postgres
+      CONTROL_DB_PASSWORD: ${CONTROL_DB_PASSWORD:?}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?}
+      WORKER_DB_PASSWORD: ${WORKER_DB_PASSWORD:?}
+      INTEGRATION_DB_PASSWORD: ${INTEGRATION_DB_PASSWORD:?}
+
+volumes:
+  db-control:
+  db-shard-01:
+  db-shard-02:
+  redis:
+  rabbitmq:
+  s3:

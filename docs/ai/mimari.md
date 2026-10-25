@@ -11,7 +11,8 @@
 | İşçi | `apps/worker` | Node: outbox yayıncı, gece planlayıcı, entegrasyon sonucu uygulayıcı, temizlik |
 | Kurum entegrasyonu (ACL) | `services/integration` | Python 3.12: web servis istemcileri, Playwright robotu (yedek), ayrıştırma → `contracts/` |
 | OCR | `services/ocr` | CAPTCHA çözümü (D6) |
-| Veri | `supabase/` | On-prem Supabase: PostgreSQL (kontrol düzlemi + kiracı shard'ları), Vault, Storage + MinIO |
+| Veri | `supabase/` | On-prem Supabase: PostgreSQL (kontrol düzlemi + kiracı shard'ları, Vault), GoTrue. Uygulama shard'a doğrudan `pg` ile bağlanır, RLS JWT claim'leriyle (D34) |
+| Nesne deposu | `deploy/compose` | S3 uyumlu; Compose'da SeaweedFS (D35): beyanname/SGK PDF'leri, ham sonuçlar |
 | Kuyruk, hız sınırı | — | RabbitMQ (durum kaynağı Postgres `jobs`), Redis GCRA |
 
 ## Bounded context'ler

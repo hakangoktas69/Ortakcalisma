@@ -2,6 +2,7 @@
 
 > Önce: [5.1 Genel bakış](01-cok-kiracili-hedef-mimari.md) · Sonra: [5.3 Kaynak verimliliği ve kapasite](03-kaynak-verimliligi-ve-kapasite.md)
 > Kararlar: **D19 (web servis birincil, robot yedek)**, D3 (backend robot), D6 (otomatik CAPTCHA, gece toplu işleri tam otomatik), D7 (aralıklı istek, dakikalık parametre), D8 (müşavir + mükellef hesapları), D9 (kaynak tutumluluğu), D11 (30 istek/dk ile başla, kademeli artır, bağlantı hatasında düşür), D13 (SGK tüm ekranlar, müşavir tetiklemeli toplu çekim), D14 (sabit çıkış IP'si), D15 (PDF saklama parametresi, toplu temizlik).
+> **Not (25.10.2026, D35):** Bu belgede "MinIO" geçen yerler S3 uyumlu nesne deposunu anlatır. MinIO topluluk imajları yayından kalktığı için Compose'da **SeaweedFS** kullanılır; kod S3 portuna yazılır, depo değiştirilebilir.
 
 ## 1. İlke: darboğaz istek bütçesidir
 

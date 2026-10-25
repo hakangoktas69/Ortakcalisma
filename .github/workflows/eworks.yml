@@ -30,8 +30,6 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm arch
       - run: pnpm test:ci
-      - name: Özellik durumu test sonuçlarıyla güncel mi (docs/ozellik-durumu.md, README özeti)
-        run: node tools/features/uret.ts --denetle
       - name: Ajan bağlamı senkron mu (AGENTS.md, MEMORY.md, beceriler)
         run: node tools/ajan/senkron.mjs --denetle
       - run: node tools/claude/check-memory.mjs
@@ -44,6 +42,28 @@ jobs:
           name: test-sonuclari
           path: test-results/
           if-no-files-found: ignore
+
+  yigin:
+    name: Yığın — Compose (Supabase, 2 shard, Redis, RabbitMQ, S3), entegrasyon + pgTAP + arayüz kabul testleri, özellik durumu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - run: node tools/deploy/yigin.mjs test
+      - run: node tools/deploy/yigin.mjs e2e
+      - name: Özellik durumu tüm test sonuçlarıyla güncel mi (docs/ozellik-durumu.md, README özeti)
+        run: node tools/features/uret.ts --denetle
+      - run: node tools/deploy/yigin.mjs helm
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yigin-test-sonuclari
+          path: test-results/
+          if-no-files-found: ignore
+      - if: always()
+        run: node tools/deploy/yigin.mjs down --sil
 
   integration:
     name: Kurum entegrasyonu (Python ACL) — pytest, import kuralları

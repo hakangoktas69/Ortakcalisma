@@ -1,0 +1,22 @@
+{{- if .Values.migrate.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: eworks-migrate
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      containers:
+        - name: migrate
+          image: {{ include "eworks.image" (dict "root" . "name" "eworks/worker") }}
+          command: [node, apps/worker/src/migrate.ts]
+          envFrom:
+            - secretRef: { name: {{ .Values.secrets.existing }} }
+          {{- include "eworks.guvenlik" . | nindent 10 }}
+{{- end }}

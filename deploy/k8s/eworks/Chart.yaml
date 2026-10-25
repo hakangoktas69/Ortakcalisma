@@ -1,0 +1,6 @@
+apiVersion: v2
+name: eworks
+description: Eworks SaaS — Compose ile aynı imajlar (04). İskelet; küme üzerinde henüz koşulmadı.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

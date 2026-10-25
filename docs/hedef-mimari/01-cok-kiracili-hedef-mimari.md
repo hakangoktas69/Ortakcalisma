@@ -39,6 +39,9 @@
 | D30 | **(24.10)** Kırmızı (tamamlanmamış) özellikler **tüm ortamlarda tüm kullanıcılara** görünür ([5.6 §8.4](06-kaynak-kod-yapisi-ddd-tdd.md#84-ortam-davranışı)). |
 | D31 | **(24.10)** Yeni yapıda da Claude/Codex vb. ajanların **bağlam ve hafıza dosyaları git ile paylaşılır ve sürümlenir**. Claude veya Codex ile yapılan değişiklik öteki aracın dosyalarını **otomatik ve karşılıklı** günceller; iş bitirme betikleri her iki tarafı da kurar ([5.9](09-yapay-zeka-ajan-baglami.md)). |
 | D32 | **(24.10)** **Mükellef Takip arşivdir:** `eski/mukellef-takip` altında geliştirme sürmez; CI iş akışı yalnız elle tetiklenir ([ADR 0001](../adr/0001-depo-yeniden-yapilanmasi.md)). |
+| D33 | **(25.10)** **Kurumla konuşan özellikler canlı doğrulama ister:** sahte kurum sunucusuna karşı kabul testleri geçse bile, Hakan'ın hesabıyla canlı koşu yapılıp `packages/feature-registry/canli-dogrulamalar.json`'a kaydı (tarih, kim, sayılarla sonuç, sürüm) girilene kadar kırmızı kalırlar ([5.6 §8](06-kaynak-kod-yapisi-ddd-tdd.md#8-özellik-durumu-ve-ön-yüzde-kırmızıyeşil-işaretleme-d22)). |
+| D34 | **(25.10)** **Shard erişimi doğrudan `pg` ile:** BFF ve işçi shard'a PostgREST yerine doğrudan bağlanır; RLS her işlemde kullanıcı JWT claim'leriyle (`authenticated` rolü) uygulanır ([5.7 §2.1](07-veri-saklama-ve-sharding.md#21-yönlendirme)). |
+| D35 | **(25.10)** **Nesne deposu S3 uyumlu, Compose'da SeaweedFS:** MinIO topluluk imajları yayından kalktığı için (zorunlu değişiklik). Kod S3 portuna yazılır. |
 
 ## 1. Hedefler ve kısıtlar
 

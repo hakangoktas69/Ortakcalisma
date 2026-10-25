@@ -1,0 +1,5 @@
+{
+  "//": "Arşiv (D28): eski/ altındaki .js dosyaları CommonJS kalır; kök package.json type=module bunlara sızmasın.",
+  "private": true,
+  "type": "commonjs"
+}

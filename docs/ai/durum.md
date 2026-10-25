@@ -1,12 +1,14 @@
 # Durum, açık konular ve sıradaki işler
 
-> İşe başlamadan bu dosyaya bak. Son güncelleme: 2026-10-24. Eski Eworks pilotunun durum ve risk listesi (G-NN, M-NN): [arsiv/mevcut-durum/ai/durum-ve-riskler.md](../arsiv/mevcut-durum/ai/durum-ve-riskler.md).
+> İşe başlamadan bu dosyaya bak. Son güncelleme: 2026-10-25. Eski Eworks pilotunun durum ve risk listesi (G-NN, M-NN): [arsiv/mevcut-durum/ai/durum-ve-riskler.md](../arsiv/mevcut-durum/ai/durum-ve-riskler.md).
 
 ## Durum
 
 | Alan | Durum |
 |---|---|
-| Kararlar | D1–D32 alındı ([hedef-mimari/01](../hedef-mimari/01-cok-kiracili-hedef-mimari.md)), karar kaydı K-01…K-39 ([adr/karar-kaydi.md](../adr/karar-kaydi.md)) |
+| Kararlar | D1–D35 alındı ([hedef-mimari/01](../hedef-mimari/01-cok-kiracili-hedef-mimari.md)), karar kaydı K-01…K-42 ([adr/karar-kaydi.md](../adr/karar-kaydi.md)) |
+| Eski portalın portu (2026-10-25, Hakan) | Sürüyor, aşama A–H: altyapı → kimlik/ofis → portföy + kurum hesapları → senkron + Python ACL → beyanname → SGK → çalışma alanı → kapanış. Yeşil kapsam: gerçek akışlar; kurumla konuşanlar canlı doğrulamaya kadar kırmızı (D33) |
+| Altyapı (aşama A) | Compose: kontrol düzlemi (Supabase Postgres + GoTrue), 2 shard (Vault), Redis, RabbitMQ, S3 (SeaweedFS), `migrate` görevi; Helm iskeleti (`helm lint` yeşil, kümede koşulmadı); migration çalıştırıcı, `ShardRouter`, pgTAP koşucusu. Testler: `node tools/deploy/yigin.mjs test` |
 | Depo yeniden yapılanması (D28) | **Uygulandı (2026-10-24, `yeniden-yapilanma` dalı)**: tüm eski klasörler `eski/` altında, yeni iskelet kökte. Ekip pull sonrası `node tools/ajan/eski-yerel-tasi.mjs --uygula` çalıştırır |
 | Mükellef Takip | **Arşiv** (D32): `eski/mukellef-takip`, CI yalnız elle tetiklenir |
 | Kod | Faz 0 iskeleti: `kernel` (TaxId, Period), 12 bağlam paketi (boş), `feature-registry` tam ağaç, `tools/arch`, `tools/features`. Uygulamalar (`apps/*`) ve servisler yalnız iskelet |
@@ -26,7 +28,7 @@ Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri analizi (Ha
 ## Sıradaki işler (Faz 0, [01 §9](../hedef-mimari/01-cok-kiracili-hedef-mimari.md#9-geliştirme-planı-kaba-23-geliştirici))
 
 - [ ] `apps/web` ve `apps/sales` Next.js kurulumu; `FeatureGate`/`FeatureBadge`; ilk kabul testi
-- [ ] Compose profili ve Helm iskeleti; on-prem Supabase (kontrol düzlemi + 2 shard), RabbitMQ, Redis, MinIO
-- [ ] `supabase/migrations` ilk şemalar + pgTAP; `ShardRouter`
+- [x] Compose yığını ve Helm iskeleti; on-prem Supabase (kontrol düzlemi + 2 shard), RabbitMQ, Redis, S3 (aşama A, 2026-10-25)
+- [x] `supabase/migrations` (control/tenant) + pgTAP koşucusu; `ShardRouter` (aşama A)
 - [ ] `services/integration` için sahte kurum sunucusu; taşınacak Python modülleri (01 §8)
 - [ ] CI: `pnpm features` çıktısının PR'da güncel olduğunun denetimi; pytest/pgTAP sonuçlarının özellik durumuna katılması

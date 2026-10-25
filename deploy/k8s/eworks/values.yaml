@@ -1,0 +1,26 @@
+# Compose'daki servislerin Kubernetes karşılığı (04 §1). Veritabanları, Redis, RabbitMQ, S3 ve GoTrue
+# küme dışında yönetilen servis ya da ayrı chart olarak varsayılır; adresleri ve sırları `secrets.existing` içinden gelir.
+image:
+  registry: ""
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+secrets:
+  # Ortam değişkenlerini taşıyan, önceden oluşturulmuş Secret (CONTROL_DATABASE_URL, SHARD_DATABASE_URLS, JWT_SECRET, …)
+  existing: eworks-env
+
+web:
+  replicas: 2
+  port: 3000
+  resources: { requests: { cpu: 100m, memory: 256Mi }, limits: { memory: 512Mi } }
+
+worker:
+  replicas: 1
+  resources: { requests: { cpu: 50m, memory: 128Mi }, limits: { memory: 256Mi } }
+
+integration:
+  replicas: 2
+  resources: { requests: { cpu: 250m, memory: 512Mi }, limits: { memory: 1536Mi } }
+
+migrate:
+  enabled: true

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eworks-web
+  labels: {{- include "eworks.labels" (dict "name" "web") | nindent 4 }}
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels: {{- include "eworks.labels" (dict "name" "web") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "eworks.labels" (dict "name" "web") | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: web
+          image: {{ include "eworks.image" (dict "root" . "name" "eworks/web") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - secretRef: { name: {{ .Values.secrets.existing }} }
+          resources: {{- toYaml .Values.web.resources | nindent 12 }}
+          {{- include "eworks.guvenlik" . | nindent 10 }}
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+          ports:
+            - { name: http, containerPort: {{ .Values.web.port }} }
+          readinessProbe:
+            httpGet: { path: /api/saglik, port: http }
+          livenessProbe:
+            httpGet: { path: /api/saglik, port: http }
+      volumes:
+        - { name: tmp, emptyDir: {} }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eworks-web
+spec:
+  selector: {{- include "eworks.labels" (dict "name" "web") | nindent 4 }}
+  ports:
+    - { name: http, port: 80, targetPort: http }

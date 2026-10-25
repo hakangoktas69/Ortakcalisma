@@ -1,10 +1,30 @@
 import { defineConfig } from 'vitest/config';
 
-// Tek koşucu: bağlam paketleri, çekirdek, özellik kaydı ve araçlar. Testler @F:<anahtar> / [F:<anahtar>] ile özelliğe bağlanır.
+// İki proje: birim (bağımlılıksız, her yerde) ve entegrasyon (*.int.test.ts — gerçek Postgres/Redis/RabbitMQ/S3/GoTrue;
+// `node tools/deploy/yigin.mjs test` yığının ağında koşturur). Testler @F:<anahtar> / [F:<anahtar>] ile özelliğe bağlanır.
+const ortak = ['**/node_modules/**', 'eski/**', 'apps/web/e2e/**', 'apps/web/.next/**'];
+
 export default defineConfig({
   test: {
-    include: ['packages/**/test/**/*.test.ts', 'apps/**/test/**/*.test.ts', 'tools/**/*.test.ts'],
-    exclude: ['**/node_modules/**'],
+    projects: [
+      {
+        test: {
+          name: 'birim',
+          include: ['packages/**/test/**/*.test.ts', 'apps/**/test/**/*.test.ts', 'apps/**/src/**/*.test.ts', 'tools/**/*.test.ts'],
+          exclude: [...ortak, '**/*.int.test.ts'],
+        },
+      },
+      {
+        test: {
+          name: 'entegrasyon',
+          include: ['**/*.int.test.ts'],
+          exclude: ortak,
+          fileParallelism: false,
+          testTimeout: 60_000,
+          hookTimeout: 120_000,
+        },
+      },
+    ],
     coverage: {
       provider: 'v8',
       include: ['packages/**/src/**/*.ts'],

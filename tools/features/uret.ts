@@ -11,6 +11,7 @@ import {
   contextOf,
   featureTags,
   features,
+  liveVerifications,
   parentOf,
   type FeatureTree,
   type NodeStatus,
@@ -41,6 +42,7 @@ export function renderMarkdown(tree: FeatureTree, status: Record<string, NodeSta
     '',
     '> **Üretilen dosya — elle düzenlemeyin.** Kaynak: `packages/feature-registry/src/features.ts` + test sonuçları; üretici `pnpm features` ([06 §8](hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#8-özellik-durumu-ve-ön-yüzde-kırmızıyeşil-işaretleme-d22)).',
     '> 🔴 tamamlanmadı (kabul testi yok ya da biri geçmiyor) · 🟢 tamamlandı. Sayılar: yeşil işlem / toplam işlem, test sayısı.',
+    '> "canlı": kurumla konuşan işlem (D33) — sahte kurum testlerine ek olarak `packages/feature-registry/canli-dogrulamalar.json` kaydı ister.',
     '',
     '| Özellik | Anahtar | Bağlam | Durum | Testler |',
     '|---|---|---|---|---|',
@@ -51,7 +53,7 @@ export function renderMarkdown(tree: FeatureTree, status: Record<string, NodeSta
     if (!f || !s) return;
     const pad = depth === 0 ? `**${f.title}**` : `${'&nbsp;&nbsp;'.repeat(depth * 2)}${f.title}`;
     const ctx = contextOf(tree, key) ?? '— (atanmadı)';
-    const progress = f.kind === 'action' ? '' : ` ${s.green}/${s.total}`;
+    const progress = f.kind === 'action' ? (f.live ? ' canlı' : '') : ` ${s.green}/${s.total}`;
     lines.push(`| ${pad} | \`${key}\` | ${ctx} | ${icon(s)}${progress} | ${s.tests} |`);
     for (const c of childrenOf(tree, key)) walk(c, depth + 1);
   };
@@ -78,7 +80,7 @@ export function generate(root: string, resultsDir: string) {
   if (existsSync(dir)) {
     for (const f of readdirSync(dir).filter((x) => x.endsWith('.xml'))) results.push(...parseJunit(readFileSync(join(dir, f), 'utf8')));
   }
-  const status = computeStatus(features, results);
+  const status = computeStatus(features, results, liveVerifications);
   const unknown = [...new Set(results.map((r) => r.feature))].filter((k) => !features[k]).sort();
   const json = JSON.stringify(
     Object.fromEntries(Object.entries(status).map(([k, s]) => [k, { ...s, context: contextOf(features, k) }])),

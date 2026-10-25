@@ -2,6 +2,7 @@
 
 > Önce: [5.2 Kurum entegrasyon robotu](02-kurum-entegrasyon-robotu.md) · Sonra: [5.4 Dağıtım](04-dagitim-compose-kubernetes.md)
 > Kararlar: D7 (dakikalık istek parametresi), D8 (ofis başına binlerce hesap), D9 (tutumlu kaynak kullanımı, büyük veri küçük parçalarla).
+> **Not (25.10.2026, D35):** Bu belgede "MinIO" geçen yerler S3 uyumlu nesne deposunu anlatır. MinIO topluluk imajları yayından kalktığı için Compose'da **SeaweedFS** kullanılır; kod S3 portuna yazılır, depo değiştirilebilir.
 
 ## 1. Kapasite hesabı — robot
 

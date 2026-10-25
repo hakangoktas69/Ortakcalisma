@@ -27,7 +27,19 @@ const actions = (key: string, list: Record<string, string>, source: Src): Tree =
 
 const V = { view: 'Görüntüle' };
 
-export const features: Readonly<Tree> = {
+// Kurumla konuşan işlemler (D33): kuruma istek atar ya da kurumdan veri çeker; canlı doğrulama kaydı ister.
+export const LIVE_ACTIONS = [
+  'firmalar.gib_sozlesmeler.sync',
+  'beyanname.senkron.start',
+  'tebligat.liste.sync',
+  'sgk.ebildirge.sync',
+  'sgk.ise_giris_cikis.sync',
+  'sgk.erapor.sync',
+  'sgk.erapor.approve',
+  'sgk.is_kazasi.sync',
+] as const;
+
+const tree: Tree = {
   ...mod('oturum', 'Oturum', 'identity-access', 'portal',
     page('oturum.giris', 'Giriş', { login: 'Giriş yap' }, 'portal'),
     page('oturum.sifre_sifirlama', 'Şifremi unuttum', { reset: 'Şifre sıfırla' }, 'portal'),
@@ -126,3 +138,7 @@ export const features: Readonly<Tree> = {
     page('satis.ekip', 'Satış ekibi', { ...V, invite: 'Davet et' }, 'hedef'),
   ),
 };
+
+for (const k of LIVE_ACTIONS) tree[k] = { ...tree[k]!, live: true };
+
+export const features: Readonly<Tree> = tree;

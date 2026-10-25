@@ -1,0 +1,13 @@
+**/node_modules
+**/.next
+**/.turbo
+**/test-results
+**/playwright-report
+**/__pycache__
+**/.venv
+.git
+eski
+deploy/compose/.env*
+**/.env
+**/.env.*
+!**/.env.example

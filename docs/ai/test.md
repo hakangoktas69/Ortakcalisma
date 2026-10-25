@@ -32,8 +32,8 @@ Kapsam eşikleri: domain + application %90 satır / %80 dal; ACL ayrıştırıc�
 
 ## Özellik durumu
 
-- `pnpm test:ci` JUnit çıktısı bırakır (`test-results/`); `pnpm features` (`tools/features/uret.ts`) etiketleri toplayıp `packages/feature-registry/feature-status.json`, [docs/ozellik-durumu.md](../ozellik-durumu.md) ve README özetini üretir.
-- Kırmızı: anahtara bağlı test yok, ya da biri başarısız/atlanmış. Yeşil: en az bir test var ve hepsi geçiyor. Ana düğüm alt işlemlerden hesaplanır (ör. "e-Bildirge 2/3").
+- Koşucular: `pnpm test` (birim), `node tools/deploy/yigin.mjs test` (birim + `*.int.test.ts` entegrasyon + pgTAP; Compose yığınının ağında), `node tools/deploy/yigin.mjs e2e` (Playwright). Hepsi JUnit bırakır (`test-results/`); `pnpm features` (`tools/features/uret.ts`) etiketleri toplayıp `packages/feature-registry/feature-status.json`, [docs/ozellik-durumu.md](../ozellik-durumu.md) ve README özetini üretir.
+- Kırmızı: anahtara bağlı test yok, ya da biri başarısız/atlanmış. **Kurumla konuşan işlem** (`live: true`, D33) ayrıca `packages/feature-registry/canli-dogrulamalar.json` kaydı ister: sahte GİB testleri geçse de canlı koşu kaydı girilene kadar kırmızıdır. Yeşil: en az bir test var ve hepsi geçiyor. Ana düğüm alt işlemlerden hesaplanır (ör. "e-Bildirge 2/3").
 - Ön yüzde `<FeatureGate>`/`<FeatureBadge>`: kırmızı düğüm kırmızı çerçeve + "Geliştiriliyor" metni ve simgesi; **tüm ortamlarda tüm kullanıcılara** görünür (D30); uygulanmamış işlem sunucuda 501.
 
 ## Bir işi tamamlarken

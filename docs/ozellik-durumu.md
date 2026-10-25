@@ -2,6 +2,7 @@
 
 > **Üretilen dosya — elle düzenlemeyin.** Kaynak: `packages/feature-registry/src/features.ts` + test sonuçları; üretici `pnpm features` ([06 §8](hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#8-özellik-durumu-ve-ön-yüzde-kırmızıyeşil-işaretleme-d22)).
 > 🔴 tamamlanmadı (kabul testi yok ya da biri geçmiyor) · 🟢 tamamlandı. Sayılar: yeşil işlem / toplam işlem, test sayısı.
+> "canlı": kurumla konuşan işlem (D33) — sahte kurum testlerine ek olarak `packages/feature-registry/canli-dogrulamalar.json` kaydı ister.
 
 | Özellik | Anahtar | Bağlam | Durum | Testler |
 |---|---|---|---|---|
@@ -34,7 +35,7 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mükellef onayı | `firmalar.kurum_hesaplari.consent` | credentials | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;GİB e-Beyanname sözleşmeleri | `firmalar.gib_sozlesmeler` | tax-filing | 🔴 0/3 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `firmalar.gib_sozlesmeler.view` | tax-filing | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GİB'den güncelle | `firmalar.gib_sozlesmeler.sync` | tax-filing | 🔴 | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GİB'den güncelle | `firmalar.gib_sozlesmeler.sync` | tax-filing | 🔴 canlı | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kurum incelemesi | `firmalar.gib_sozlesmeler.review` | tax-filing | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Müşavir devri | `firmalar.devir` | portfolio | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Devir başlat | `firmalar.devir.start` | portfolio | 🔴 | 0 |
@@ -49,7 +50,7 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `beyanname.belge.view` | documents | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PDF indir | `beyanname.belge.download` | documents | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Beyanname senkronu | `beyanname.senkron` | sync | 🔴 0/2 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Senkron başlat | `beyanname.senkron.start` | sync | 🔴 | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Senkron başlat | `beyanname.senkron.start` | sync | 🔴 canlı | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;İptal et | `beyanname.senkron.cancel` | sync | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Pilot bölge ayarları | `beyanname.pilot_bolge` | tax-filing | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `beyanname.pilot_bolge.view` | tax-filing | 🔴 | 0 |
@@ -57,24 +58,24 @@
 | **e-Tebligat** | `tebligat` | — (atanmadı) | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;e-Tebligat listesi | `tebligat.liste` | — (atanmadı) | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `tebligat.liste.view` | — (atanmadı) | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Güncelle | `tebligat.liste.sync` | — (atanmadı) | 🔴 | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Güncelle | `tebligat.liste.sync` | — (atanmadı) | 🔴 canlı | 0 |
 | **SGK** | `sgk` | social-security | 🔴 0/11 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;SGK kontrol listesi | `sgk.kontrol` | social-security | 🔴 0/1 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.kontrol.view` | social-security | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;e-Bildirge | `sgk.ebildirge` | social-security | 🔴 0/3 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.ebildirge.view` | social-security | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PDF indir | `sgk.ebildirge.download` | social-security | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.ebildirge.sync` | social-security | 🔴 | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.ebildirge.sync` | social-security | 🔴 canlı | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;İşe giriş çıkış | `sgk.ise_giris_cikis` | social-security | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.ise_giris_cikis.view` | social-security | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.ise_giris_cikis.sync` | social-security | 🔴 | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.ise_giris_cikis.sync` | social-security | 🔴 canlı | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;SGK e-Rapor | `sgk.erapor` | social-security | 🔴 0/3 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.erapor.view` | social-security | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.erapor.sync` | social-security | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Çalışmazlık onayı | `sgk.erapor.approve` | social-security | 🔴 | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.erapor.sync` | social-security | 🔴 canlı | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Çalışmazlık onayı | `sgk.erapor.approve` | social-security | 🔴 canlı | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;İş kazası | `sgk.is_kazasi` | social-security | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.is_kazasi.view` | social-security | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.is_kazasi.sync` | social-security | 🔴 | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toplu güncelle | `sgk.is_kazasi.sync` | social-security | 🔴 canlı | 0 |
 | **e-Defter** | `edefter` | — (atanmadı) | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;e-Defter berat durumu | `edefter.liste` | — (atanmadı) | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `edefter.liste.view` | — (atanmadı) | 🔴 | 0 |

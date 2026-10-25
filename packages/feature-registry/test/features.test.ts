@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { childrenOf, computeStatus, contextOf, featureTags, features, parentOf } from '../src/index.ts';
+import { childrenOf, computeStatus, contextOf, featureTags, features, LIVE_ACTIONS, liveVerifications, parentOf } from '../src/index.ts';
 
 describe('özellik ağacı', () => {
   const keys = Object.keys(features);
@@ -79,5 +79,38 @@ describe('durum hesabı', () => {
     expect(featureTags('[F:sgk.ebildirge.sync] e-Bildirge toplu')).toEqual(['sgk.ebildirge.sync']);
     expect(featureTags('@F:sgk.erapor.view @F:sgk.kontrol.view listeler')).toEqual(['sgk.erapor.view', 'sgk.kontrol.view']);
     expect(featureTags('etiketsiz')).toEqual([]);
+  });
+});
+
+describe('canlı doğrulama (D33)', () => {
+  const tree = {
+    gib: { title: 'GİB', kind: 'module' },
+    'gib.sozlesme': { title: 'Sözleşmeler', kind: 'page' },
+    'gib.sozlesme.view': { title: 'Görüntüle', kind: 'action', acceptance: true },
+    'gib.sozlesme.sync': { title: 'Güncelle', kind: 'action', acceptance: true, live: true },
+  } as const;
+  const results = [
+    { feature: 'gib.sozlesme.view', passed: true },
+    { feature: 'gib.sozlesme.sync', passed: true },
+  ];
+  const kayit = { anahtar: 'gib.sozlesme.sync', tarih: '2026-10-25', kim: 'test', sonuc: '3 sözleşme', surum: 'abc1234' };
+
+  it('kurumla konuşan işlem sahte kurum testleri geçse de kayıt olmadan kırmızı', () => {
+    expect(computeStatus(tree, results)['gib.sozlesme.sync']?.status).toBe('red');
+    expect(computeStatus(tree, results)['gib.sozlesme.view']?.status).toBe('green');
+  });
+
+  it('canlı kayıt + yeşil testler → yeşil; testler kırmızıysa kayıt yetmez', () => {
+    expect(computeStatus(tree, results, [kayit])['gib']?.status).toBe('green');
+    expect(computeStatus(tree, [{ feature: 'gib.sozlesme.sync', passed: false }], [kayit])['gib.sozlesme.sync']?.status).toBe('red');
+  });
+
+  it('kayıtlı anahtarlar ağaçta var ve kurumla konuşan işleme ait', () => {
+    for (const l of liveVerifications) {
+      expect(features[l.anahtar]?.live, l.anahtar).toBe(true);
+      expect(l.tarih).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(l.surum).toMatch(/^[0-9a-f]{7,40}$/);
+    }
+    for (const k of LIVE_ACTIONS) expect(features[k]?.live, k).toBe(true);
   });
 });

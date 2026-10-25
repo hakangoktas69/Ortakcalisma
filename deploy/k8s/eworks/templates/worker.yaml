@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eworks-worker
+  labels: {{- include "eworks.labels" (dict "name" "worker") | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels: {{- include "eworks.labels" (dict "name" "worker") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "eworks.labels" (dict "name" "worker") | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: worker
+          image: {{ include "eworks.image" (dict "root" . "name" "eworks/worker") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - secretRef: { name: {{ .Values.secrets.existing }} }
+          resources: {{- toYaml .Values.worker.resources | nindent 12 }}
+          {{- include "eworks.guvenlik" . | nindent 10 }}
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: {} }

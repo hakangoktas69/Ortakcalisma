@@ -14,7 +14,7 @@ Eworks, mali müşavir ofislerinin kurum (GİB, SGK) verilerini müşavirin ve m
 
 | Klasör | İçerik |
 |---|---|
-| [hedef-mimari/](hedef-mimari/01-cok-kiracili-hedef-mimari.md) | Kararlar D1–D32 ve gerekçeli ayrıntı: 01 genel, 02 kurum entegrasyonu, 03 kapasite, 04 dağıtım, 05 yetki ve hesap, 06 kaynak kod DDD/TDD, 07 veri saklama ve sharding, 08 depo yeniden yapılanması, 09 ajan bağlamı |
+| [hedef-mimari/](hedef-mimari/01-cok-kiracili-hedef-mimari.md) | Kararlar D1–D35 ve gerekçeli ayrıntı: 01 genel, 02 kurum entegrasyonu, 03 kapasite, 04 dağıtım, 05 yetki ve hesap, 06 kaynak kod DDD/TDD, 07 veri saklama ve sharding, 08 depo yeniden yapılanması, 09 ajan bağlamı |
 | [adr/](adr/README.md) | Karar kaydı (`K-NN`) ve uzun ADR'ler |
 | [baglamlar/](baglamlar/README.md) | Bounded context sayfaları |
 | [ozellik-durumu.md](ozellik-durumu.md) | Modül → sayfa → işlem, kırmızı/yeşil (üretilir) |

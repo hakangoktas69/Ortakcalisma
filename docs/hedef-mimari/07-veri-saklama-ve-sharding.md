@@ -28,8 +28,8 @@ flowchart TB
     S1[("shard-01<br/>portfolio, credentials (Vault),<br/>sync, tax_filing, social_security,<br/>documents, workspace,<br/>notifications, audit")]
     S2[("shard-02 …")]
     SN[("shard-N")]
-    PR1["PostgREST-01"]
-    PR2["PostgREST-02"]
+    PR1["pg havuzu shard-01<br/>(JWT claim + RLS, D34)"]
+    PR2["pg havuzu shard-02"]
   end
   BFF["BFF / worker<br/>ShardRouter (Redis önbellekli)"]
   BFF --> AU
@@ -48,8 +48,8 @@ flowchart TB
 
 ### 2.1 Yönlendirme
 
-- `ShardRouter`, oturumdaki aktif ofisin shard'ını `shard_map`'ten okur (Redis'te önbelleklidir). BFF, o shard'ın PostgREST'ine kullanıcının JWT'siyle konuşur, RLS her shard'da yerel çalışır.
-- GoTrue tektir. Tüm shard'lardaki PostgREST aynı JWT anahtarını doğrular. `auth.uid()` JWT'den okunur. Shard'larda `auth.users` tablosu bulunmadığı için `user_id` sütunlarına yabancı anahtar kurulmaz.
+- `ShardRouter`, oturumdaki aktif ofisin shard'ını kontrol düzlemindeki `directory.organizations`'tan okur (süreç içinde kısa süre önbelleklidir). **D34 (25.10):** BFF ve işçi shard'a PostgREST üzerinden değil doğrudan `pg` havuzuyla bağlanır; her işlemde `set local role authenticated` + `request.jwt.claims` (GoTrue JWT'sinden doğrulanmış kimlik ve etkin ofis) yazılır, RLS her shard'da yerel çalışır. Giriş rolleri (`eworks_app`, `eworks_worker`, `eworks_integration`) NOINHERIT'tir; rol değiştirmeden tabloya erişemezler.
+- GoTrue tektir. JWT'yi BFF doğrular; kimlik RLS'e `app.uid()` ile geçer (`auth.uid()` kullanılmaz). Sistem işleri `app.is_system(org)` ile yalnız işçi rolünde ve tek ofis için geçerlidir. Shard'larda `auth.users` tablosu bulunmadığı için `user_id` sütunlarına yabancı anahtar kurulmaz.
 - İş mesajları (RabbitMQ) `shard_id` taşır. İşçiler bağlantıyı shard'a göre havuzdan alır.
 - Kullanıcı birden çok ofise üyeyse (ör. bir mükellef kullanıcının farklı ofislerdeki firmaları) ofis listesi `user_orgs`'tan gelir. Ofis seçilince shard değişir.
 
@@ -102,8 +102,8 @@ Uygulama düzeyinde kiracı sharding'i Compose ve Kubernetes'te aynı biçimde �
 | Yedekleme | Fiziksel sunucu başına pgBackRest (sürekli WAL + günlük tam). Shard bazında PITR. Kontrol düzlemi ayrıca yedeklenir |
 | Geri yükleme tatbikatı | Ayda bir, rastgele bir shard |
 | İzleme | Shard bazında boyut, p95, bağlantı, replikasyon gecikmesi, bölüm sayısı. Ofis bazında "en büyük 20 kiracı" |
-| Compose | Kontrol DB + 2 shard sunucusu (her biri birden çok mantıksal veritabanı). Shard başına bir PostgREST konteyneri |
-| Kubernetes | CloudNativePG: kontrol kümesi + shard kümeleri. PostgREST shard başına Deployment |
+| Compose | Kontrol DB + 2 shard sunucusu (her biri birden çok mantıksal veritabanı). Uygulama shard'a doğrudan bağlanır (D34) |
+| Kubernetes | CloudNativePG: kontrol kümesi + shard kümeleri |
 | Test | Testlerde en az 2 shard: kiracılar arası sızıntı, yönlendirme ve VKN tekilliği testleri |
 
 ## 5. Kod yapısına etkisi (5.6'ya ek)
