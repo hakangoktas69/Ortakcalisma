@@ -51,10 +51,25 @@ node tools/deploy/yigin.mjs up
 3. Veritabanı şemasını kurar (migration), demo ofisini ve kullanıcısını açar.
 4. Uygulamayı başlatır: web, işçi, kurum entegrasyonu ve **sahte GİB** (gerçek GİB'e hiçbir istek gitmez).
 
-Bitince `✔ Yığın ayakta: http://localhost:8080` yazar. Tarayıcıda aç ve gir:
+Bitince `✔ Yığın ayakta: http://localhost:8080` yazar. Tarayıcıda aç ve demo hesabıyla gir.
 
-- E-posta: `demo@eworks.test`
-- Parola: `deploy/compose/.env` dosyasındaki `DEMO_SIFRE` değeri
+### Demo hesabı ve test şifreleri
+
+Bu hesaplar yalnız kendi bilgisayarındaki demo/test kurulumu içindir; üretimde (VPS) demo hesabı ve sahte GİB açılmaz.
+
+| Ne | Değer | Nereden |
+|---|---|---|
+| Portal e-postası | `demo@eworks.test` | Sabit. `.env`'de `DEMO_EPOSTA=` satırı varsa o adres geçerlidir |
+| Portal parolası | Her bilgisayarda farklı, rastgele | `deploy/compose/.env` → `DEMO_SIFRE=` satırında `=`'den sonraki kısmın tamamı |
+| Demo ofisi / kullanıcının rolü | "Demo Mali Müşavirlik", ofis yöneticisi (`ofis_admin`) | `DEMO_OFIS`, `DEMO_AD` ile değiştirilebilir |
+| Sahte GİB şifresi | `demo-gib-sifre` | Portalda "GİB hesabı" kaydederken: kullanıcı kodu **herhangi** bir değer, şifre bu. Başka şifre "hatalı şifre" sonucunu verir (bu durumu sınamak için). `.env`'de `SAHTE_GIB_SIFRE` ile değiştirilebilir |
+
+- E-posta yazıp herhangi bir parola denemek çalışmaz: parola yalnız `demo@eworks.test` hesabına aittir.
+- Parolayı görmek: VS Code'da `deploy/compose/.env` dosyasını aç, ya da terminalde `grep '^DEMO_SIFRE=' deploy/compose/.env` (PowerShell: `Select-String -Path deploy\compose\.env -Pattern '^DEMO_SIFRE='`).
+- `.env` ilk `up`/`gelistir`'de üretilir ve git'e girmez; her ekip üyesinin parolası farklıdır. Parolayı sohbete, belgeye, commit'e yazma.
+- Hesap açıldıktan sonra `DEMO_SIFRE`'yi **değiştirme**: demo hesabı her kurulumda yeniden denenir ama parolası güncellenmez; kurulum `Kullanıcı var, parola farklı` hatasıyla durur. Eski değeri geri koy ya da tüm verileri silip baştan kur (`node tools/deploy/yigin.mjs down --sil`, sonra `up`).
+- Arayüz kabul testleri (`yigin.mjs e2e`) demo hesabını kullanmaz: her koşuda kendi geçici ofisini, yöneticisini (`yonetici-…@eworks.test`) ve personelini rastgele parolayla açar. Testçi olarak elle sınarken demo hesabını kullan.
+- Ek kullanıcı (ör. personel rolüyle sınamak için): `HESAP_SIFRE=… node tools/deploy/yigin.mjs hesap-ac uye --ofis-id <uuid> --eposta a@eworks.test --ad "Ad Soyad" --rol personel` (parola en az 12 karakter). Demo ofisinin kimliği (`<uuid>`) kurulum çıktısında `✔ Ofis hazır: …` satırındadır; komut argümansız çalışınca kullanımı yazar.
 
 Kırmızı çerçeveli ve "Geliştiriliyor" yazan bölümler henüz yapılmadı (bu bilinçli, D30). Firmalar → "GİB'den güncelle" gibi kurum işleri sahte GİB'le çalışır.
 
@@ -276,6 +291,8 @@ Canlı ortam: [VPS kurulum rehberi](vps-kurulum.md) — sunucu hazırlığı, al
 | `EADDRINUSE 127.0.0.1:8765` | 8765'te başka bir şey çalışıyor (ör. Eworks 2 pilot portalı) | Onu kapat ya da geçici olarak başka portta çalıştır: `pnpm --filter @eworks/web exec next dev -p 8766 -H 127.0.0.1` |
 | VS Code: "Docker: … bağlan" bağlanamıyor | Yığın `debug` kipinde değil | `node tools/deploy/yigin.mjs debug`; Python için "Python Debugger" eklentisi kurulu olmalı |
 | VS Code: kesme noktası gri kalıyor (bağlanmadı) | Container eski kodla çalışıyor ya da dosya Docker'daki web'e ait | `yigin.mjs debug` ile yeniden derle; web için §6 |
+| Girişte "E-posta ya da parola hatalı." | E-posta `demo@eworks.test` değil, parola eksik/fazla kopyalandı ya da demo hesabı henüz açılmadı | E-posta ve `DEMO_SIFRE` için §3 "Demo hesabı"; hesap yoksa `node tools/deploy/yigin.mjs gelistir` (ya da `up`) açar |
+| Kurulumda `Kullanıcı var, parola farklı` | Demo hesabı açıldıktan sonra `.env`'deki `DEMO_SIFRE` değişti | Eski değeri geri koy ya da `node tools/deploy/yigin.mjs down --sil` (tüm veriler silinir), sonra `up` |
 | `Kullanıcı açılamadı (500)` | Veritabanı yeniden oluşunca kimlik servisi eski bağlantıda kaldı (`yigin.mjs` bunu algılayıp kimlik servisini kendisi yeniden başlatır) | `docker restart eworks-auth-1`, sonra komutu tekrar çalıştır |
 | Giriş sayfası açılmıyor, container'lar yeniden başlıyor | Docker'a ayrılan bellek az | Docker Desktop → Resources → en az 6 GB |
 | `pnpm verify`: "üretilen blokların dışına elle içerik eklenmiş" | `AGENTS.md`, `MEMORY.md` gibi üretilen bir dosya elle değişti | `node tools/ajan/senkron.mjs --yaz`; kuralı `CLAUDE.md` ya da `docs/ai`'ye yaz |
