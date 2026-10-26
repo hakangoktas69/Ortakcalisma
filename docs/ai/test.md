@@ -39,7 +39,7 @@ Kapsam eşikleri: domain + application (+ `packages/kernel`) %90 satır / %80 da
 
 - Koşucular: `pnpm test` (birim), `node tools/deploy/yigin.mjs test` (birim + `*.int.test.ts` entegrasyon + pgTAP; Compose yığınının ağında), `node tools/deploy/yigin.mjs e2e` (Playwright). Hepsi JUnit bırakır (`test-results/`); `pnpm features` (`tools/features/uret.ts`) etiketleri toplayıp `packages/feature-registry/feature-status.json`, [docs/ozellik-durumu.md](../ozellik-durumu.md) ve README özetini üretir.
 - Kırmızı: anahtara bağlı **kabul testi** (Playwright, `test-results/e2e*.xml`) yok, ya da anahtara bağlı herhangi bir test (birim, entegrasyon, pgTAP, kabul) başarısız/atlanmış. Birim testleri de etiketlenir ama tek başına yeşil yapmaz. **Kurumla konuşan işlem** (`live: true`, D33) ayrıca `packages/feature-registry/canli-dogrulamalar.json` kaydı ister: sahte GİB testleri geçse de canlı koşu kaydı girilene kadar kırmızıdır. Yeşil: en az bir test var ve hepsi geçiyor. Ana düğüm alt işlemlerden hesaplanır (ör. "e-Bildirge 2/3").
-- Ön yüzde `<FeatureGate>`/`<FeatureBadge>`: kırmızı düğüm kırmızı çerçeve + "Geliştiriliyor" metni ve simgesi; **tüm ortamlarda tüm kullanıcılara** görünür (D30); uygulanmamış işlem sunucuda 501.
+- Ön yüzde `<FeatureGate>`/`<FeatureBadge>`: kırmızı düğüm kırmızı çerçeve + "Geliştiriliyor" metni ve simgesi; yalnız **`gelistirme` / `debug` kipinde ve e2e koşusunda** görünür, `demo` / `uretim` kipinde portal normal görünümündedir (D39, `OZELLIK_DURUMU_GOSTER`); uygulanmamış işlem sunucuda her kipte 501.
 
 ## Bir işi tamamlarken
 

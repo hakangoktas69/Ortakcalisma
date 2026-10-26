@@ -17,6 +17,10 @@ test('web ortam dosyası yığına yalnız 127.0.0.1 üzerinden bağlanır, geli
   const e = satirlar(webEnv(SIRLAR));
   assert.equal(e.EWORKS_ORTAM, 'gelistirme');
   assert.equal(e.COOKIE_SECURE, 'false');
+  assert.equal(e.YIGIN_KIPI, 'gelistirme', 'logo yanındaki kip etiketi');
+  assert.equal(webEnv({ ...SIRLAR, YIGIN_KIPI: 'debug' }).match(/^YIGIN_KIPI=(.*)$/m)?.[1], 'debug');
+  assert.equal(webEnv({ ...SIRLAR, YIGIN_KIPI: 'demo' }).match(/^YIGIN_KIPI=(.*)$/m)?.[1], 'gelistirme', "Docker'sız web her zaman geliştirmedir");
+  assert.equal(e.OZELLIK_DURUMU_GOSTER, 'true', "Docker'sız web yalnız gelistirme/debug kipinde: TDD rozetleri görünür");
   assert.equal(e.CONTROL_DATABASE_URL, `postgres://eworks_control:kontrol@127.0.0.1:${GELISTIRME_PORTLARI.dbControl}/postgres`);
   assert.equal(e.SHARD_DATABASE_URLS,
     `shard-01=postgres://eworks_app:uygulama@127.0.0.1:${GELISTIRME_PORTLARI.dbShard01}/postgres,shard-02=postgres://eworks_app:uygulama@127.0.0.1:${GELISTIRME_PORTLARI.dbShard02}/postgres`);

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { FeatureBadge } from './FeatureBadge.tsx';
 import { donusHedefi, kategoriBul } from './kategoriler.ts';
-import { altlar, ozellik } from './ozellik.ts';
+import { altlar, durumGosterilir, ozellik } from './ozellik.ts';
 import { Simge, type SimgeAdi } from './Simge.tsx';
 
 /** Bir üst düzeye dönüş ("← e-Beyanname", "← Günlük Yönetim"); kural `donusHedefi`'nde. */
@@ -40,7 +40,7 @@ export type Kart = { anahtar: string; baslik: string; aciklama?: string; simge: 
 
 /**
  * Lacivert kategori/modül kartları (Mert'in category-tile'ı). Kart bir bağlantıdır; özellik anahtarı verilirse
- * durumu (kırmızı "Geliştiriliyor") kartın içinde görünür. `data-modul` testler ve gezinme için kartın anahtarıdır.
+ * geliştirme görünümünde durumu (kırmızı "Geliştiriliyor") kartın içinde görünür (D39). `data-modul` testler ve gezinme için kartın anahtarıdır.
  */
 export function Kartlar({ kartlar, etiket, buyuk = false }: { kartlar: Kart[]; etiket: string; buyuk?: boolean }) {
   return (
@@ -69,8 +69,16 @@ export function Kartlar({ kartlar, etiket, buyuk = false }: { kartlar: Kart[]; e
   );
 }
 
-/** Henüz uygulanmamış sayfa/modül: tüm işlemleri durumlarıyla listelenir (06 §8.3). */
+/** Henüz uygulanmamış sayfa/modül: geliştirme görünümünde tüm işlemleri durumlarıyla listelenir (06 §8.3); demo ve
+ * üretimde (D39) yalnız sade bir "yakında" metni, işlem anahtarı ve TDD dili olmadan. */
 export function Gelistiriliyor({ k }: { k: string }) {
+  if (!durumGosterilir()) {
+    return (
+      <section>
+        <Baslik k={k} alt="Bu bölüm yakında kullanıma açılacak." />
+      </section>
+    );
+  }
   const islemler = altlar(k).flatMap((a) => (ozellik(a)?.kind === 'action' ? [a] : altlar(a)));
   return (
     <section>

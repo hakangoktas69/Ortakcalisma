@@ -4,11 +4,12 @@ import type { Session } from '@eworks/identity-access';
 import logo from './eworks-logo.png';
 import { FeatureBadge } from './FeatureBadge.tsx';
 import { KATEGORILER } from './kategoriler.ts';
+import { KipEtiketi } from './KipEtiketi.tsx';
 import { Konum } from './Konum.tsx';
 import { gorunur, yol } from './ozellik.ts';
 import { Simge } from './Simge.tsx';
 
-// Uygulama kabuğu (Mert'in Eworks tasarımı): üst çubuk (logo, konum, Takvim, Bildirimler, kullanıcı, çıkış) + içerik.
+// Uygulama kabuğu (Mert'in Eworks tasarımı): üst çubuk (logo, yığın kipi, konum, Takvim, Bildirimler, kullanıcı, çıkış) + içerik.
 // Yan menü yoktur; gezinme ana sayfadaki kategori kartlarıyla yapılır (yalnız yetkili modül/sayfalar, 05 §3.4).
 
 const MENU_DISI = new Set(['oturum', 'satis', 'genel_bakis']);
@@ -52,6 +53,7 @@ export function Kabuk({ oturum, children }: { oturum: Session; children: React.R
           <Link href="/" className="marka" aria-label="Eworks ana sayfa">
             <img src={logo.src} alt="" width={115} height={35} />
           </Link>
+          <KipEtiketi />
           <span className="konum">
             <span className="konum-kok">Eworks /</span>
             <Konum basliklar={basliklar(oturum)} />

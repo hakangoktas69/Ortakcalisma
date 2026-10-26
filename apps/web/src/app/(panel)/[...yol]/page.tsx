@@ -4,7 +4,7 @@ import { MODUL_SIMGESI } from '@/shared/ui/kategoriler.ts';
 import { altlar, gorunur, gorunurSayfalar, ozellik, yol } from '@/shared/ui/ozellik.ts';
 import { Baslik, Gelistiriliyor, Kartlar, Yasak } from '@/shared/ui/Sayfa.tsx';
 
-// Özellik ağacındaki her modül/sayfa erişilebilir; henüz uygulanmamış olanlar "Geliştiriliyor" olarak gösterilir (D22, D30).
+// Özellik ağacındaki her modül/sayfa erişilebilir; henüz uygulanmamış olanlar geliştirme kipinde "Geliştiriliyor", demo/üretimde "yakında" olarak gösterilir (D22, D39).
 // Uygulanmış sayfaların kendi rotası vardır ve bu genel rotadan önce eşleşir. Sayfalı modül (ör. /beyanname) alt sayfa
 // kartlarıyla açılır; kartlar yalnız kullanıcının görebildiği sayfalardır ve her biri özellik durumunu gösterir.
 export default async function GenelSayfa({ params }: { params: Promise<{ yol: string[] }> }) {

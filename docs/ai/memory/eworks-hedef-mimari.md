@@ -1,6 +1,6 @@
 ---
 name: eworks-hedef-mimari
-description: Eworks çok kiracılı SaaS hedef mimarisi kararları D1–D38 (2026-10-23/26, Hakan) — Next.js BFF, web servis birincil/robot yedek, istek/dk sınırı, hiyerarşik yetki, DDD/TDD, 10 yıl + sharding, satış portalı, eski/ yeniden yapılanma, Claude↔Codex senkron; Mükellef Takip arşiv; canlı doğrulama koşulu, shard'a doğrudan pg, S3 = SeaweedFS, beyanname/SGK aynı oturum sözleşme kanıtıyla; ajanla geliştirme üç aşamalı süreç (junior kullanıcı); kurum erişim yolu parametresi robot | servis (D38)
+description: Eworks çok kiracılı SaaS hedef mimarisi kararları D1–D39 (2026-10-23/26, Hakan) — Next.js BFF, web servis birincil/robot yedek, istek/dk sınırı, hiyerarşik yetki, DDD/TDD, 10 yıl + sharding, satış portalı, eski/ yeniden yapılanma, Claude↔Codex senkron; Mükellef Takip arşiv; canlı doğrulama koşulu, shard'a doğrudan pg, S3 = SeaweedFS, beyanname/SGK aynı oturum sözleşme kanıtıyla; ajanla geliştirme üç aşamalı süreç (junior kullanıcı); kurum erişim yolu parametresi robot | servis (D38); TDD rozetleri yalnız gelistirme/debug kipinde (D39)
 metadata:
   type: project
 ---
@@ -21,7 +21,7 @@ Hakan, Eworks portalının (Mükellef Takip'ten **ayrı** ürün) yüzlerce kull
 - **PDF saklama:** 7 gün (parametre), parçalı temizlik + yönetici toplu temizliği.
 - **Kaynaklar:** Servisler kaynak sınırlı çalışır; büyük veri parçalı işlenir. Robot kapasitesini CPU değil **istek bütçesi** belirler.
 - **Kod yapısı:** DDD (D20–D22). 12 bounded context (`identity-access`, `organization`, `portfolio`, `credentials`, `sync`, `tax-filing`, `social-security`, `documents`, `workspace`, `notifications`, `audit`, `sales`) + Python `integration` ACL. Her bağlam aynı adla `packages/contexts/<ctx>`, `apps/web/src/features/<ctx>`, `app/api/<ctx>`, DB şeması ve testte görünür. Alan kuralı yalnız TS'tedir; Python alan tablolarına yazmaz.
-- **TDD:** Özellik ağacı = yetki ağacı (`packages/feature-registry`). Testler `@F:anahtar` ile etiketlenir, durum test sonuçlarından hesaplanır (`pnpm features`). Ön yüzde tamamlanmayan modül/sayfa/buton **kırmızıdır** ve **tüm ortamlarda tüm kullanıcılara görünür** (D30). Uygulanmamış işlem 501 döner.
+- **TDD:** Özellik ağacı = yetki ağacı (`packages/feature-registry`). Testler `@F:anahtar` ile etiketlenir, durum test sonuçlarından hesaplanır (`pnpm features`). Ön yüzde tamamlanmayan modül/sayfa/buton **kırmızıdır**; bu TDD görünümü yalnız `gelistirme`/`debug` yığın kipinde (ve e2e'de) açılır, `demo`/`uretim`'de portal normal görünümündedir (D39, 2026-10-26; D30'un "her ortamda herkese" hükmünün yerine). Uygulanmamış işlem her kipte 501 döner.
 - **Veri:** İş verisi **10 yıl** saklanır (devirde eski ofisteki veri dahil). **Sharding baştan** (D24): kontrol düzlemi (GoTrue, ofis dizini, `shard_map`, VKN tekilliği, satış) + `org_id` ile kiracı shard'ları (16 mantıksal / 2 fiziksel başlangıç, shard başına PostgREST). Shard içinde zamana göre bölümleme. Şema Citus'a hazır (PK `(org_id, id)`).
 - **Ölçek ve hız:** 500 ofis, hesap başına 60 istek/dk, gece 20:00–09:00. Başlangıç hızı 60 istek/dk (D25; 30'un yerine).
 - **Satış portalı:** `apps/sales` (ADR 0009 deseni). Ofis, müşavir ve mükellef hesapları satıştan açılır, mükellef onayı satış sözleşmesiyle alınır.

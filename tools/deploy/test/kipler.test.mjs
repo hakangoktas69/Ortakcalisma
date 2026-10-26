@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { composeDosyalari, kipGecisi, profil, testKipiDenetle, uretimDenetle } from '../yigin.mjs';
+import { composeDosyalari, kipGecisi, ozellikDurumuGoster, profil, webKipOrtami, testKipiDenetle, uretimDenetle } from '../yigin.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const oku = (yol) => readFileSync(join(KOK, yol), 'utf8').replace(/\r\n/g, '\n');
@@ -48,6 +48,8 @@ test('üretim katmanı: dışarıya yalnız ters vekil açılır; sahte GİB yok
   assert.match(servis(yml, 'web'), /ports: !reset \[\]/);
   assert.match(servis(yml, 'web'), /EWORKS_ORTAM: uretim/);
   assert.match(servis(yml, 'web'), /COOKIE_SECURE: 'true'/);
+  assert.match(servis(yml, 'web'), /OZELLIK_DURUMU_GOSTER: 'false'/);
+  assert.match(servis(yml, 'web'), /YIGIN_KIPI: uretim/);
   assert.match(servis(yml, 'integration'), /EWORKS_ORTAM: uretim/);
   assert.match(servis(yml, 'integration'), /GIB_SAHTE_SUNUCU: ''/);
   for (const [s, b] of ['web', 'integration'].map((s) => [s, servis(yml, s)])) assert.deepEqual(yayinlanan(b), [], s);
@@ -122,4 +124,30 @@ test("Windows'ta pnpm komutları pnpm.cmd ile (PowerShell AllSigned politikası 
   for (const t of JSON.parse(oku('.vscode/tasks.json')).tasks.filter((t) => /^pnpm /.test(t.command))) {
     assert.equal(t.windows?.command, t.command.replace(/^pnpm /, 'pnpm.cmd '), t.label);
   }
+});
+
+test('TDD özellik durumu (kırmızı/yeşil rozetler) yalnız gelistirme ve debug kipinde görünür; demo ve üretimde portal normal görünümde (D39)', () => {
+  assert.equal(ozellikDurumuGoster({ YIGIN_KIPI: 'gelistirme' }), 'true');
+  assert.equal(ozellikDurumuGoster({ YIGIN_KIPI: 'debug' }), 'true');
+  assert.equal(ozellikDurumuGoster({ YIGIN_KIPI: 'demo' }), 'false');
+  assert.equal(ozellikDurumuGoster({}), 'false');
+  assert.equal(ozellikDurumuGoster({ YIGIN_KIPI: 'uretim' }), 'false');
+  // Kabul testleri rozetleri doğrular: e2e her kipte görünür kipte koşar; üretim katmanı ise değeri her durumda kapatır
+  assert.equal(ozellikDurumuGoster({ YIGIN_KIPI: 'demo' }, { e2e: true }), 'true');
+  assert.equal(ozellikDurumuGoster({ YIGIN_KIPI: 'uretim' }, { e2e: true }), 'false');
+  // Değer verilmezse web normal görünümde açılır (Helm/üretim varsayılanı)
+  assert.match(servis(oku('deploy/compose/compose.yml'), 'web'), /OZELLIK_DURUMU_GOSTER: \$\{OZELLIK_DURUMU_GOSTER:-false\}/);
+  // Logo yanındaki kip etiketi: web kipi .env'deki YIGIN_KIPI'den alır (üretim katmanı uretim'e sabitler → etiket yok)
+  assert.match(servis(oku('deploy/compose/compose.yml'), 'web'), /YIGIN_KIPI: \$\{YIGIN_KIPI:-demo\}/);
+});
+
+test("web'in kip ortamı yalnız kayıtlı kipten türer: eski GELISTIRME_KATMANI da gelistirme etiketi alır; e2e yalnız rozetleri açar", () => {
+  assert.deepEqual(webKipOrtami({ YIGIN_KIPI: 'demo' }), { YIGIN_KIPI: 'demo', OZELLIK_DURUMU_GOSTER: 'false' });
+  assert.deepEqual(webKipOrtami({ GELISTIRME_KATMANI: '1' }), { YIGIN_KIPI: 'gelistirme', OZELLIK_DURUMU_GOSTER: 'true' });
+  assert.deepEqual(webKipOrtami({ YIGIN_KIPI: 'demo' }, { e2e: true }), { YIGIN_KIPI: 'demo', OZELLIK_DURUMU_GOSTER: 'true' });
+  assert.deepEqual(webKipOrtami({ YIGIN_KIPI: 'uretim' }, { e2e: true }), { YIGIN_KIPI: 'uretim', OZELLIK_DURUMU_GOSTER: 'false' });
+  // Kabukta kalmış değer demo yığınını rozetli açamaz: betik her compose çağrısında değeri kipten yeniden yazar (??= değil)
+  const kaynak = oku('tools/deploy/yigin.mjs');
+  assert.match(kaynak, /Object\.assign\(process\.env, webKipOrtami\(/);
+  assert.doesNotMatch(kaynak, /process\.env\.OZELLIK_DURUMU_GOSTER \?\?=/);
 });

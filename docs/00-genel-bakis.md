@@ -35,7 +35,7 @@ Eworks, mali müşavir ofislerinin kurum (GİB, SGK) verilerini müşavirin ve m
 | [baglamlar/](baglamlar/README.md) | Bounded context sayfaları |
 | [ozellik-durumu.md](ozellik-durumu.md) | Modül → sayfa → işlem, kırmızı/yeşil (üretilir) |
 | [ai/](ai/vizyon.md) | Ajan bağlamı; [ai/memory/](ai/memory/MEMORY.md) ekip hafızası; `ai/beceriler/` beceri kaynakları |
-| [gelistirici-rehberi/](gelistirici-rehberi/baslangic.md) | [Başlangıç](gelistirici-rehberi/baslangic.md) (VS Code, hata ayıklama), [VPS kurulumu](gelistirici-rehberi/vps-kurulum.md), [terimler](gelistirici-rehberi/terimler.md); [DDD](gelistirici-rehberi/ddd.md) ve [TDD](gelistirici-rehberi/tdd.md) uygulama rehberleri (koddan örneklerle); Claude Code ve Codex ile çalışma, ekip senkronu; [canlı GİB doğrulaması](gelistirici-rehberi/canli-dogrulama.md) |
+| [gelistirici-rehberi/](gelistirici-rehberi/baslangic.md) | [Başlangıç](gelistirici-rehberi/baslangic.md) (VS Code, hata ayıklama), [yığın kipleri](gelistirici-rehberi/kipler.md) (demo / gelistirme / debug / uretim), [VPS kurulumu](gelistirici-rehberi/vps-kurulum.md), [terimler](gelistirici-rehberi/terimler.md); [DDD](gelistirici-rehberi/ddd.md) ve [TDD](gelistirici-rehberi/tdd.md) uygulama rehberleri (koddan örneklerle); Claude Code ve Codex ile çalışma, ekip senkronu; [canlı GİB doğrulaması](gelistirici-rehberi/canli-dogrulama.md) |
 
 ## Arşiv (yalnız referans)
 

@@ -157,6 +157,7 @@ Yedekler sunucu dışına, şifreli olarak taşınmalı. **Sınanmadı:** geri y
 
 ## 10. Yapma
 
+- Kiplerin karşılaştırması ve `uretim`'i kendi bilgisayarında ayrı yığında denemek: [Yığın kipleri](kipler.md).
 - `debug` ya da `gelistir` kipini sunucuda kullanma (hata ayıklama ve veritabanı portları açılır); betik bunu `--uretimden-cik` olmadan reddeder.
 - `.env`'i, yedekleri, günlük dosyalarını sunucu dışına şifresiz çıkarma; repoya ekleme.
 - `GIB_SAHTE_SUNUCU`'ya değer verme (betik ve uygulama zaten reddeder).

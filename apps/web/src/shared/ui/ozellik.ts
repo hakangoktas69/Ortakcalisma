@@ -8,6 +8,13 @@ export type Durum = { status: 'red' | 'green'; green: number; total: number; tes
 
 const tablo = durumlar as Record<string, Durum>;
 
+/**
+ * TDD özellik durumu (kırmızı/yeşil rozet, kırmızı çerçeve) ekranda görünsün mü (D39). Yalnız geliştirme ve hata ayıklama
+ * kipinde: yığın betiği OZELLIK_DURUMU_GOSTER=true yazar. Verilmezse demo/üretim görünümü (portal normal renklerinde).
+ * Sunucuda, her istekte okunur; tarayıcıya ortam değişkeni gitmez (D5).
+ */
+export const durumGosterilir = (env: Record<string, string | undefined> = process.env): boolean => env['OZELLIK_DURUMU_GOSTER'] === 'true';
+
 export const durum = (anahtar: string): Durum => tablo[anahtar] ?? { status: 'red', green: 0, total: 1, tests: 0 };
 export const ozellik = (anahtar: string): FeatureDef | undefined => features[anahtar];
 export const altlar = (anahtar: string) => childrenOf(features, anahtar);
