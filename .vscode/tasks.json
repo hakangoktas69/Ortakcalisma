@@ -1,15 +1,90 @@
 {
   "version": "2.0.0",
   "tasks": [
-    { "label": "Yığın: up", "detail": "Tüm yığın Docker'da → http://localhost:8080", "type": "shell", "command": "node tools/deploy/yigin.mjs up", "problemMatcher": [] },
-    { "label": "Yığın: gelistir", "detail": "Altyapı portları 127.0.0.1'de + apps/web/.env.local; ardından 'Web: dev (8765)'", "type": "shell", "command": "node tools/deploy/yigin.mjs gelistir", "problemMatcher": [] },
-    { "label": "Yığın: debug", "detail": "gelistir + işçi (9230) ve entegrasyon (5678) hata ayıklama portları", "type": "shell", "command": "node tools/deploy/yigin.mjs debug", "problemMatcher": [] },
-    { "label": "Yığın: demo kipine dön", "detail": "Geliştirme/hata ayıklama portlarını kapatır", "type": "shell", "command": "node tools/deploy/yigin.mjs up --kip demo", "problemMatcher": [] },
-    { "label": "Yığın: test", "detail": "Entegrasyon + pgTAP + Python testleri", "type": "shell", "command": "node tools/deploy/yigin.mjs test", "problemMatcher": [] },
-    { "label": "Yığın: e2e", "detail": "Arayüz kabul testleri, dört ekran", "type": "shell", "command": "node tools/deploy/yigin.mjs e2e", "problemMatcher": [] },
-    { "label": "Yığın: down", "detail": "Durdur (veriler kalır)", "type": "shell", "command": "node tools/deploy/yigin.mjs down", "problemMatcher": [] },
-    { "label": "Web: dev (8765)", "detail": "Docker'sız web, anında yenilenir (önce 'Yığın: gelistir')", "type": "shell", "command": "pnpm --filter @eworks/web dev", "isBackground": true, "problemMatcher": [] },
-    { "label": "pnpm test", "detail": "Birim testleri", "type": "shell", "command": "pnpm test", "group": "test", "problemMatcher": [] },
-    { "label": "pnpm verify", "detail": "Commit'ten önce: tip, mimari, testler + kapsam, belgeler", "type": "shell", "command": "pnpm verify", "group": { "kind": "test", "isDefault": true }, "problemMatcher": [] }
+    {
+      "label": "Yığın: up",
+      "detail": "Tüm yığın Docker'da → http://localhost:8080",
+      "type": "shell",
+      "command": "node tools/deploy/yigin.mjs up",
+      "problemMatcher": []
+    },
+    {
+      "label": "Yığın: gelistir",
+      "detail": "Altyapı portları 127.0.0.1'de + apps/web/.env.local; ardından 'Web: dev (8765)'",
+      "type": "shell",
+      "command": "node tools/deploy/yigin.mjs gelistir",
+      "problemMatcher": []
+    },
+    {
+      "label": "Yığın: debug",
+      "detail": "gelistir + işçi (9230) ve entegrasyon (5678) hata ayıklama portları",
+      "type": "shell",
+      "command": "node tools/deploy/yigin.mjs debug",
+      "problemMatcher": []
+    },
+    {
+      "label": "Yığın: demo kipine dön",
+      "detail": "Geliştirme/hata ayıklama portlarını kapatır",
+      "type": "shell",
+      "command": "node tools/deploy/yigin.mjs up --kip demo",
+      "problemMatcher": []
+    },
+    {
+      "label": "Yığın: test",
+      "detail": "Entegrasyon + pgTAP + Python testleri",
+      "type": "shell",
+      "command": "node tools/deploy/yigin.mjs test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Yığın: e2e",
+      "detail": "Arayüz kabul testleri, dört ekran",
+      "type": "shell",
+      "command": "node tools/deploy/yigin.mjs e2e",
+      "problemMatcher": []
+    },
+    {
+      "label": "Yığın: down",
+      "detail": "Durdur (veriler kalır)",
+      "type": "shell",
+      "command": "node tools/deploy/yigin.mjs down",
+      "problemMatcher": []
+    },
+    {
+      "label": "Web: dev (8765)",
+      "detail": "Docker'sız web, anında yenilenir (önce 'Yığın: gelistir')",
+      "type": "shell",
+      "command": "pnpm --filter @eworks/web dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "windows": {
+        "command": "pnpm.cmd --filter @eworks/web dev"
+      }
+    },
+    {
+      "label": "pnpm test",
+      "detail": "Birim testleri",
+      "type": "shell",
+      "command": "pnpm test",
+      "group": "test",
+      "problemMatcher": [],
+      "windows": {
+        "command": "pnpm.cmd test"
+      }
+    },
+    {
+      "label": "pnpm verify",
+      "detail": "Commit'ten önce: tip, mimari, testler + kapsam, belgeler",
+      "type": "shell",
+      "command": "pnpm verify",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "windows": {
+        "command": "pnpm.cmd verify"
+      }
+    }
   ]
 }

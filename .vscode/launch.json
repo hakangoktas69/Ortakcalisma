@@ -6,6 +6,7 @@
       "type": "node-terminal",
       "request": "launch",
       "command": "pnpm --filter @eworks/web dev",
+      "windows": { "command": "pnpm.cmd --filter @eworks/web dev" },
       "cwd": "${workspaceFolder}",
       "serverReadyAction": {
         "pattern": "- Local:\\s+(https?://\\S+)",
@@ -19,6 +20,7 @@
       "type": "node-terminal",
       "request": "launch",
       "command": "pnpm --filter @eworks/web dev",
+      "windows": { "command": "pnpm.cmd --filter @eworks/web dev" },
       "cwd": "${workspaceFolder}"
     },
     {

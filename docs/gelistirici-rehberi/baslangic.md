@@ -115,6 +115,7 @@ Kod değiştirmenin kuralları ve adımları (önce test, sonra kod): [gelistir 
 
 - Chrome yerine Edge kullanıyorsan "Web: tarayıcı" yapılandırmasında `"type": "chrome"` → `"type": "msedge"`; "sunucu + tarayıcı"da `"action": "debugWithChrome"` → `"debugWithEdge"`.
 - `pnpm` bulunamadı hatası: VS Code'u kapatıp aç (PATH yenilenir) ya da `corepack enable` (§2).
+- Windows'ta yapılandırmalar ve görevler `pnpm.cmd` kullanır: PowerShell'in `AllSigned` politikası imzasız `pnpm.ps1`'i engeller (§12).
 
 ## 7. Docker'da hata ayıklama
 
@@ -148,6 +149,7 @@ Depodaki [.vscode/launch.json](../../.vscode/launch.json) hazırdır, ayrıca bi
       "type": "node-terminal",
       "request": "launch",
       "command": "pnpm --filter @eworks/web dev",
+      "windows": { "command": "pnpm.cmd --filter @eworks/web dev" },
       "cwd": "${workspaceFolder}",
       "serverReadyAction": {
         "pattern": "- Local:\\s+(https?://\\S+)",
@@ -161,6 +163,7 @@ Depodaki [.vscode/launch.json](../../.vscode/launch.json) hazırdır, ayrıca bi
       "type": "node-terminal",
       "request": "launch",
       "command": "pnpm --filter @eworks/web dev",
+      "windows": { "command": "pnpm.cmd --filter @eworks/web dev" },
       "cwd": "${workspaceFolder}"
     },
     {
@@ -249,6 +252,7 @@ Canlı ortam: [VPS kurulum rehberi](vps-kurulum.md) — sunucu hazırlığı, al
 | `Cannot find matching keyid` (corepack / pnpm) | Node 20 ile gelen eski corepack, npm'in yeni imza anahtarını tanımıyor | Node 24 kur; ya da `npm install -g corepack@latest`; geçici çözüm `npx pnpm@10.18.3 install` |
 | `pnpm verify` Node sürümü / TypeScript hatası | Node 24'ten eski | Node 24 kur; ya da `sh tools/deploy/dogrula.sh` (aynı denetimler Node 24 container'ında) |
 | `port is already allocated` | 8080 ya da geliştirme/hata ayıklama portları başka programda | `deploy/compose/.env`'de `WEB_PORT=8081` gibi değiştir; geliştirme portları `GELISTIRME_*_PORT`, hata ayıklama `HATA_AYIKLAMA_ISCI_PORT`, `HATA_AYIKLAMA_PYTHON_PORT` (launch.json'daki portu da aynı yap; bkz. [deploy/README.md](../../deploy/README.md)) |
+| `pnpm.ps1 cannot be loaded … is not digitally signed` (PowerShell) | Makinenin PowerShell politikası `AllSigned`; npm/corepack'in `pnpm.ps1`'i imzasız | Komutu `pnpm.cmd` ile yaz (`pnpm.cmd --filter @eworks/web dev`) ya da Git Bash kullan. VS Code yapılandırmaları ve görevleri Windows'ta bunu kendiliğinden yapar. Politikayı gevşetmek gerekmez |
 | `EADDRINUSE 127.0.0.1:8765` | 8765'te başka bir şey çalışıyor (ör. Eworks 2 pilot portalı) | Onu kapat ya da geçici olarak başka portta çalıştır: `pnpm --filter @eworks/web exec next dev -p 8766 -H 127.0.0.1` |
 | VS Code: "Docker: … bağlan" bağlanamıyor | Yığın `debug` kipinde değil | `node tools/deploy/yigin.mjs debug`; Python için "Python Debugger" eklentisi kurulu olmalı |
 | VS Code: kesme noktası gri kalıyor (bağlanmadı) | Container eski kodla çalışıyor ya da dosya Docker'daki web'e ait | `yigin.mjs debug` ile yeniden derle; web için §6 |

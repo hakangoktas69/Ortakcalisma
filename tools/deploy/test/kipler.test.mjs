@@ -112,3 +112,14 @@ test('test ve e2e üretim kipinde çalışmaz (gerçek GİB ve üretim veritaban
   assert.throws(() => testKipiDenetle({ YIGIN_KIPI: 'uretim' }), /üretim/);
   for (const k of ['demo', 'gelistirme', 'debug']) assert.doesNotThrow(() => testKipiDenetle({ YIGIN_KIPI: k }));
 });
+
+test("Windows'ta pnpm komutları pnpm.cmd ile (PowerShell AllSigned politikası imzasız pnpm.ps1'i engeller)", () => {
+  const launch = JSON.parse(oku('.vscode/launch.json'));
+  for (const c of launch.configurations.filter((c) => c.type === 'node-terminal')) {
+    assert.match(c.command, /^pnpm /, c.name);
+    assert.equal(c.windows?.command, c.command.replace(/^pnpm /, 'pnpm.cmd '), c.name);
+  }
+  for (const t of JSON.parse(oku('.vscode/tasks.json')).tasks.filter((t) => /^pnpm /.test(t.command))) {
+    assert.equal(t.windows?.command, t.command.replace(/^pnpm /, 'pnpm.cmd '), t.label);
+  }
+});
