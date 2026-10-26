@@ -7,6 +7,7 @@
 
 @theme inline {
   --font-sans: var(--font-jakarta);
+  /* Marka / birincil: indigo (Linear/Mercury tarzı). Nötr gri = Tailwind slate (zemin #F8FAFC, kenar #E2E8F0). */
   --color-brand-50: var(--color-indigo-50);
   --color-brand-100: var(--color-indigo-100);
   --color-brand-200: var(--color-indigo-200);
@@ -21,11 +22,11 @@
 }
 
 @theme {
-  /* Kenar çubuğu: koyu mürekkep laciverti (temadan bağımsız) */
-  --color-ink-700: oklch(34% 0.05 272);
-  --color-ink-800: oklch(26% 0.045 272);
-  --color-ink-900: oklch(20.5% 0.04 272);
-  --color-ink-950: oklch(16% 0.035 272);
+  /* Kenar çubuğu / hero: koyu slate (temadan bağımsız) */
+  --color-ink-700: oklch(37.2% 0.044 257.287);
+  --color-ink-800: oklch(27.9% 0.041 260.031);
+  --color-ink-900: oklch(20.8% 0.042 265.755);
+  --color-ink-950: oklch(12.9% 0.042 264.695);
 }
 
 /* gen-theme:start */

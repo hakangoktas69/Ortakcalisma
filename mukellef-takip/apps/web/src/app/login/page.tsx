@@ -33,7 +33,7 @@ export default function LoginPage() {
 
   function finish(r: { accessToken: string; mustChangePassword?: boolean }) {
     setToken(r.accessToken);
-    router.replace(r.mustChangePassword ? "/sifre-degistir" : "/");
+    router.replace(r.mustChangePassword ? "/sifre-degistir" : "/ozet");
   }
 
   async function onSubmit(e: React.FormEvent) {
