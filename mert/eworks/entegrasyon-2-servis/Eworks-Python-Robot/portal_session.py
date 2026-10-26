@@ -61,9 +61,12 @@ async def run(folder, access_token):
 
     async def credentials_provider():
         return await asyncio.to_thread(fetch_firm_credentials, access_token,
-            owner, scope['firmId'], scope['identity'])
+            owner, scope['firmId'], scope['identity'], include_scope=True)
 
     credentials = await credentials_provider()
+    verified_identities = credentials.pop('verifiedIdentities', (scope['identity'],))
+    if scope['identity'] not in verified_identities:
+        raise ValueError('Firma kimlik kapsamı doğrulanamadı.')
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(channel='chrome', headless=False)
         try:
@@ -91,13 +94,15 @@ async def run(folder, access_token):
                     url = urlsplit(page.url)
                     if url.hostname == 'dijital.gib.gov.tr' and url.path == '/portal/login':
                         try:
-                            await assistant.suggest(page)
+                            notice = await assistant.suggest(page)
+                            if notice:
+                                status('running', notice)
                         except Exception:
                             status('running', 'GİB doğrulamasını açılan pencerede tamamlayın.')
                     else:
                         account = await observe_readonly_account_identity(page)
                         if account.get('identity'):
-                            if account['identity'] != scope['identity']:
+                            if account['identity'] not in verified_identities:
                                 raise ValueError('Açılan GİB hesabı seçilen mükellefle eşleşmiyor; geçiş durduruldu.')
                             verified = True
                             status('running', 'Mükellef hesabı doğrulandı; seçilen portal açılıyor.')

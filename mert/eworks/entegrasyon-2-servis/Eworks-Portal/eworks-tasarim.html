@@ -1375,6 +1375,8 @@ async function openSelectedPortal(id){
  if(!/^\d{10,11}$/.test(identity)){toast('Firma VKN/TCKN bilgisini tamamlayın.');return;}
  portalSession.busy=true;portalSession.owner=owner;portalStatus('Firma portalı hazırlanıyor…');render();
  try{
+   await authFetch('/auth/v1/user');
+   if(cloud.session?.user?.id!==owner)throw Error('Eworks oturumu değişti.');
    const connection=await fetch('api/connection',{cache:'no-store'});if(!connection.ok)throw Error('Yerel robot bağlantısı kurulamadı.');const config=await connection.json();if(!config.ready)throw Error(config.message||'Robot hazır değil.');portalSession.token=config.token;
    const response=await fetch('api/portal/open',{method:'POST',headers:portalSessionHeaders(),body:JSON.stringify({ownerId:owner,portalSession:{firmId:f.id,identity,target:id}})});const value=await response.json();if(!response.ok)throw Error(value.message||'Portal açılamadı.');
    if(cloud.session?.user?.id!==owner)throw Error('Eworks oturumu değişti.');portalSession.jobId=value.jobId;

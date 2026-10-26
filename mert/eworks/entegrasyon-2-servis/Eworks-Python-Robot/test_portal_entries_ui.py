@@ -16,6 +16,7 @@ class PortalUI(unittest.IsolatedAsyncioTestCase):
    if path=='/demo-cleanup.js':return await r.fulfill(body=HTML.with_name('demo-cleanup.js').read_text(encoding='utf-8'),content_type='application/javascript')
    if path=='/institution-review.js':return await r.fulfill(body=HTML.with_name('institution-review.js').read_text(encoding='utf-8'),content_type='application/javascript')
    if path=='/auth/v1/token':value=dict(access_token='synthetic',refresh_token='synthetic',expires_in=3600,user=dict(id=OWNER,email='test@example.invalid'))
+   elif path=='/auth/v1/user':value=dict(id=OWNER)
    elif path=='/rest/v1/rpc/eworks_security_check':value=True
    elif path=='/rest/v1/eworks_state':value=[dict(revision=1,payload=dict(firms=[dict(id='fixture-1',name='SENTETİK FİRMA BİR',taxNumber='1234567890',type='Limited',contracts=[dict(number='synthetic-contract')]),dict(id='fixture-2',name='SENTETİK FİRMA İKİ',identityNumber='12345678901',type='Şahıs')],tasks=[]))]
    elif path=='/rest/v1/rpc/eworks_commit':

@@ -4,7 +4,7 @@ import requests
 from cloud_credentials import URL, PUBLISHABLE_KEY
 
 
-def fetch_firm_credentials(access_token, owner, firm_id, identity):
+def fetch_firm_credentials(access_token, owner, firm_id, identity, *, include_scope=False):
     if (not isinstance(firm_id, str) or not 1 <= len(firm_id.strip()) <= 160
             or not isinstance(identity, str) or not identity.isdigit()
             or len(identity) not in (10, 11)):
@@ -26,6 +26,11 @@ def fetch_firm_credentials(access_token, owner, firm_id, identity):
                 or not isinstance(value.get('password'), str)
                 or not 1 <= len(value['password']) <= 1024):
             raise ValueError()
-        return {'username': value['username'], 'password': value['password']}
+        credentials = {'username': value['username'], 'password': value['password']}
+        if include_scope:
+            credentials['verifiedIdentities'] = tuple(dict.fromkeys(v for v in
+                (value.get('taxNumber'), value.get('identityNumber'))
+                if isinstance(v, str) and v.isascii() and v.isdigit() and len(v) in (10,11)))
+        return credentials
     except (requests.RequestException, ValueError, TypeError, AttributeError):
         raise ValueError('Firmaya özel GİB hesabı doğrulanamadı. Müşavir hesabı kullanılmadı.') from None

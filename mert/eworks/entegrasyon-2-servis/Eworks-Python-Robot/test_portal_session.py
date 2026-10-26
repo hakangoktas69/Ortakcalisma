@@ -27,6 +27,6 @@ class PortalCredentialTests(unittest.IsolatedAsyncioTestCase):
                  patch('portal_session.async_playwright') as browser:
                 with self.assertRaises(ValueError):
                     await run(folder,'synthetic-access')
-                fetch.assert_called_once_with('synthetic-access','synthetic-owner','firm-1','1234567890')
+                fetch.assert_called_once_with('synthetic-access','synthetic-owner','firm-1','1234567890',include_scope=True)
                 browser.assert_not_called()
                 self.assertFalse((folder/'portal-session-result.json').exists())

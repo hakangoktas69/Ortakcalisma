@@ -10,7 +10,18 @@ from pathlib import Path
 def interpreter_path():
     root = Path(__file__).resolve().parent
     configured = os.environ.get('EWORKS_OCR_PYTHON')
-    return Path(configured) if configured else root / '.ocr-venv' / 'Scripts' / 'python.exe'
+    if configured:
+        return Path(configured)
+    # Başlatıcı dışında çalışan firma oturumları da özel yerel ayarı kullanır.
+    # Bu dosya paylaşım paketine girmez; şifre veya görüntü içermez.
+    try:
+        runtime = json.loads((root.parent / '.local-runtime.json').read_text(encoding='utf-8-sig'))
+        candidate = runtime.get('ocrPython')
+        if isinstance(candidate, str) and Path(candidate).is_absolute() and Path(candidate).is_file():
+            return Path(candidate)
+    except (OSError, ValueError, TypeError, AttributeError):
+        pass
+    return root / '.ocr-venv' / 'Scripts' / 'python.exe'
 
 
 def read_local_suggestion(image_bytes):

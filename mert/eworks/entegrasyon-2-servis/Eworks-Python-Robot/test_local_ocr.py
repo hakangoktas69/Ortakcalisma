@@ -27,3 +27,16 @@ class LocalTests(unittest.TestCase):
             self.assertEqual(read_local_suggestion(b'IMAGE-BYTES'), 'AB7X2')
             self.assertNotIn('IMAGE-BYTES', str(run.call_args.args))
             self.assertIn('input', run.call_args.kwargs)
+
+
+class RuntimePathTests(unittest.TestCase):
+    def test_private_runtime_is_used_without_launcher_environment(self):
+        import tempfile,json
+        import local_ocr
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);robot=root/'robot';robot.mkdir()
+            interpreter=root/'python.exe';interpreter.touch()
+            (root/'.local-runtime.json').write_text(json.dumps({'ocrPython':str(interpreter.resolve())}))
+            with patch.dict('os.environ',{},clear=True),patch.object(local_ocr,'__file__',str(robot/'local_ocr.py')):
+                self.assertEqual(local_ocr.interpreter_path(),interpreter.resolve())

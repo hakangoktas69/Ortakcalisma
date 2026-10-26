@@ -38,3 +38,13 @@ class FirmCredentialsTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             fetch_firm_credentials('synthetic-token',OWNER,'TEST-FIRM',IDENTITY)
         self.assertEqual(post.call_count,1)
+
+    @patch('firm_credentials.requests.post')
+    def test_alternate_identity_comes_only_from_verified_server_firm(self, post):
+        post.return_value=self.response(identityNumber='12345678901',untrustedIdentity='0987654321')
+        result=fetch_firm_credentials('synthetic-token',OWNER,'TEST-FIRM',IDENTITY,include_scope=True)
+        self.assertEqual(result['verifiedIdentities'],(IDENTITY,'12345678901'))
+        self.assertNotIn('0987654321',result['verifiedIdentities'])
+        post.return_value=self.response(ownerId='wrong',identityNumber='12345678901')
+        with self.assertRaises(ValueError):
+            fetch_firm_credentials('synthetic-token',OWNER,'TEST-FIRM',IDENTITY,include_scope=True)
