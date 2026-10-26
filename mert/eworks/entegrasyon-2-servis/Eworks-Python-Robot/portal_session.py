@@ -14,7 +14,7 @@ from institution_scope import observe_readonly_account_identity
 from local_files import atomic_json
 from navigation_adapter import visible_target, confirm_ivd_transition, focus_requested
 
-TARGETS = {'digital', 'ivd', 'ledger', 'declarations'}
+TARGETS = {'digital', 'ivd', 'ledger', 'declarations', 'notices'}
 
 
 def validate_scope(value):
@@ -31,12 +31,12 @@ def validate_scope(value):
 async def open_target(context, page, target, credentials_provider):
     if target == 'digital':
         return 'account_verified'
-    if target in ('ledger', 'declarations'):
+    if target in ('ledger', 'declarations', 'notices'):
         from institution_discovery import inspect_module_screen
         result = await inspect_module_screen(context,
-            'ledgers' if target == 'ledger' else 'declarations',
+            'ledgers' if target == 'ledger' else target,
             credentials_provider, preferred_page=page, keep_open=True)
-        return result.get('state', 'target_requires_user')
+        return result if target == 'notices' else result.get('state', 'target_requires_user')
     control = await visible_target(context, 'İnternet Vergi Dairesi')
     if control is None:
         more = await visible_target(context, 'Hepsini gör')
@@ -71,6 +71,10 @@ async def run(folder, access_token):
         browser = await playwright.chromium.launch(channel='chrome', headless=False)
         try:
             context = await browser.new_context()  # Her firma için ayrı çerez deposu.
+            if scope['target'] == 'notices':
+                from notice_probe import NoticeProbe
+                probe = NoticeProbe(folder)
+                context.on('response', probe.observe)
             page = await context.new_page()
             context.set_default_timeout(10000)
             await page.goto('https://dijital.gib.gov.tr/portal/login', wait_until='domcontentloaded')
@@ -117,7 +121,8 @@ async def run(folder, access_token):
                         'schema': 'eworks.portal-session.v1', 'ownerId': owner,
                         'requestId': request['requestId'], 'firmId': scope['firmId'],
                         'target': scope['target'], 'accountVerified': True,
-                        'navigationState': result, 'imported': False})
+                        'navigationState': result.get('state') if isinstance(result,dict) else result,
+                        **({'inspection': result} if isinstance(result,dict) else {}), 'imported': False})
                     status('running', 'Firma hesabı doğrulandı. Portal penceresi açık; hedef uygulama ek giriş/yetki isterse pencerede tamamlayın. Veri aktarımı yapılmıyor.')
                 await asyncio.sleep(2)
             return {'schema': 'eworks.portal-session.v1', 'ownerId': owner,
