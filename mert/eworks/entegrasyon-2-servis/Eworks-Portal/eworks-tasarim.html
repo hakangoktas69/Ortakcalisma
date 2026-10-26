@@ -493,6 +493,7 @@ footer{left:18px;right:18px;font-size:10px}
 @media(max-width:1000px){#portalApp .firm-account-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:580px){#portalApp .firm-account-grid{grid-template-columns:1fr}}
 
+#portalApp .firm-table .firm-status-chip.tax-plate-chip b{width:auto;min-width:21px;padding:0 6px;font-size:10px;white-space:nowrap}
 </style></head>
 <body data-default-view="login"><div id="cloudStatus" role="status" style="position:fixed;top:0;left:0;right:0;z-index:99998;padding:8px;background:#e6f5ef;text-align:center;font:12px Segoe UI">Supabase hesabınızla giriş yapın · GİB şifresi kullanmayın</div><section id="cloudFailure" hidden style="position:fixed;inset:20% 8%;z-index:100001;background:white;padding:28px;border:2px solid #c2415b;border-radius:16px;box-shadow:0 0 0 200vmax #0008"><h2>Değişiklikler veritabanına kaydedilemedi</h2><p id="cloudFailureText"></p><button data-cloud-retry>Kaydetmeyi Tekrar Dene</button> <button data-cloud-backup>Kaydedilmemiş JSON Yedeğini İndir</button><p>Kaydetme tamamlanmadan sekmeyi kapatmayın. Listeyi yenilemek bekleyen düzenlemeleri kaybettirebilir.</p></section><div style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#fff2c6;color:#674b00;padding:6px;text-align:center;font:12px Segoe UI">Developer · İkinci entegrasyon · Canlı kayıtlar</div><div id="loginPage">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1122,7 +1123,7 @@ function firmLiveStatus(f,kind){
 function firmStatusChip(f,letter,label,kind){
  const check=firmLiveStatus(f,kind),state=check.status==='active'?'Aktif':check.status==='inactive'?'Aktif değil':'Canlı doğrulama yok',cls=check.status==='active'?'ok':check.status==='inactive'?'inactive':'unknown';
  const detail=label+': '+state+(check.checkedAt?' · Son kaynak doğrulaması: '+new Date(check.checkedAt).toLocaleDateString('tr-TR'):'');
- return `<span class="firm-status-chip ${cls}" data-live-status="${check.status}" title="${safe(detail)}" aria-label="${safe(detail)}"><b>${letter}</b><span>${safe(state)}</span></span>`;
+ return `<span class="firm-status-chip ${cls}${kind==='taxPlate'?' tax-plate-chip':''}" data-live-status="${check.status}" title="${safe(detail)}" aria-label="${safe(detail)}"><b>${kind==='taxPlate'?'Vergi Levhası':letter}</b><span>${safe(state)}</span></span>`;
 }
 function firmsPage(){const all=data.firms,q=normalizedSearch(UI.search);const visible=all.filter(f=>firmQuickMatch(f,UI.firmQuickFilter)&&firmSegment(f,UI.firmSegment||'all')&&(UI.status==='all'||f.status===UI.status)&&(UI.company==='all'||f.type===UI.company)&&(!UI.firmOwner||UI.firmOwner==='all'||f.assignedStaff===UI.firmOwner)&&(!q||q.split(' ').every(token=>normalizedSearch(Object.values(f).join(' ')).includes(token)))).sort((a,b)=>q?firmSearchRank(a,q)-firmSearchRank(b,q):0);
 const contact=(kind,value)=>{const valid=String(value||'').trim();if(!valid)return `<span class="firm-contact disabled">${ico(kind==='phone'?'phone':'mail')} ${kind==='phone'?'Telefon yok':'E-posta yok'}</span>`;return kind==='phone'?`<a class="firm-contact" href="tel:${safe(valid.replace(/[^+\d]/g,''))}">${ico('phone')} Telefon</a>`:`<a class="firm-contact" href="mailto:${safe(valid)}">${ico('mail')} E-posta</a>`};
