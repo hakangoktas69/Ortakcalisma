@@ -9,3 +9,5 @@ Bu kayıtlar `mert/eworks/` projesine aittir; gerçek müşteri verisi içermez.
 5. [İkinci entegrasyonun kurulumu](../../../entegrasyon-2-servis/README.md)
 
 Bu dosyalar sohbetin tamamı veya özel iş checkpoint'leri değildir. Ekibe gerekli kararlar, doğrulanmış sonuçlar ve sonraki adımlar özetlenir. Yalnız bilgisayardaki özel çalışma alanında bulunan dosyalara ekip arkadaşlarının otomatik erişimi yoktur.
+
+Takvim geliştirmesi: [Mali Müşavir Takvimi, kaynaklar ve hatırlatma davranışı](takvim.md).
