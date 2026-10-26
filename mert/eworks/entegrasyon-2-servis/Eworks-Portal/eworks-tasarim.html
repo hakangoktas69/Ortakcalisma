@@ -760,12 +760,10 @@ const NAV=[
  {id:'petitions',title:'Dilekçeler',icon:'clipboard',children:[['petitions-all','Tüm Dilekçeler'],['petitions-debt','Borç Durum Yazısı']]},
  {id:'invoices',title:'Faturalar',icon:'invoice',children:[['invoices-e','e-Faturalar'],['invoices-archive','e-Arşiv Faturalar'],['invoices-receipts','Fiş Takip'],['invoices-withhold','Tevkifat Kontrol']]}
  ]],
- ['OFİS',[
+ ['OFİS VE DESTEK',[
  {id:'payments',title:'Ödeme',icon:'wallet',children:[['payments-month','Aylık Ödeme Listesi'],['payments-cash','Cari Kasa'],['payments-debt','Vergi & SGK Borçları'],['payments-online','Online Ödeme'],['payments-fees','Ücret Yönetimi'],['payments-stats','İstatistikler'],['payments-settings','Ödeme Ayarları']]},
  {id:'accounts',title:'Kullanıcılar',icon:'users',children:[['accounts-office','Ofis Kullanıcıları'],['accounts-clients','Mükellef Kullanıcıları']]},
- {id:'settings',title:'Ayarlar',icon:'settings',children:[['settings-profile','Bilgilerim'],['settings-comms','SMS / WhatsApp / Mail'],['settings-groups','Mükellef Grupları'],['settings-install','Portal Kullanımı']]}
- ]],
- ['DESTEK',[
+ {id:'settings',title:'Ayarlar',icon:'settings',children:[['settings-profile','Bilgilerim'],['settings-comms','SMS / WhatsApp / Mail'],['settings-groups','Mükellef Grupları'],['settings-install','Portal Kullanımı']]},
  {id:'expert',title:'Uzmana Sor',icon:'message'},{id:'suggest',title:'Öneriler',icon:'spark'},{id:'faq',title:'Sıkça Sorulan Sorular',icon:'help'},{id:'news',title:'Yenilikler',icon:'megaphone'}
  ]]
 ];
@@ -1045,9 +1043,8 @@ document.addEventListener('click',async e=>{
 
 const CATEGORIES=[
  {id:'daily',title:'Günlük Yönetim',icon:'home',description:'Mükellefler, beyannameler ve günlük işler',items:NAV[0][1].filter(n=>n.id!=='overview')},
- {id:'office',title:'Ofis',icon:'chart',description:'Kullanıcılar ve ofis ayarları',items:NAV[1][1].filter(n=>n.id!=='payments')},
+ {id:'office',title:'Ofis ve Destek',icon:'chart',description:'Kullanıcılar, ofis ayarları, yardım ve yenilikler',items:NAV[1][1].filter(n=>n.id!=='payments')},
  {id:'payment',title:'Ödeme',icon:'wallet',description:'Ödemeler, borçlar ve ücret takibi',items:NAV[1][1].find(n=>n.id==='payments').children.map(([id,title])=>({id,title,icon:'wallet'}))},
- {id:'support',title:'Destek',icon:'help',description:'Uzman desteği, yardım ve yenilikler',items:NAV[2][1]}
 ];
 function hubTile(item,attribute,description){return `<button type="button" class="category-tile" ${attribute}><span class="tile-symbol">${ico(item.icon||'grid','side-icon')}</span><span class="tile-copy"><b>${safe(item.title)}</b><small>${safe(description||'')}</small>${item.children?'<em>'+item.children.length+' alt bölüm</em>':''}</span><span class="tile-arrow">${ico('right')}</span></button>`}
 function overview(){return `<div class="hub-heading"><span class="hub-kicker">EWORKS ÇALIŞMA ALANI</span><h1>İşlerinizi tek merkezden yönetin</h1><p>Başlamak için bir bölüm seçin.</p></div><div class="category-grid">${hubTile(CATEGORIES[0],'data-category="daily"',CATEGORIES[0].description)}${hubTile({title:'Takvim',icon:'calendar'},'data-nav="calendar"','Vergi takvimi, önemli günler ve kişisel hatırlatmalar')}${CATEGORIES.slice(1).map(c=>hubTile(c,'data-category="'+c.id+'"',c.description)).join('')}</div>`}
