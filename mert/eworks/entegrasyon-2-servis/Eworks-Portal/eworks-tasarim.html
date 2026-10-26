@@ -95,9 +95,9 @@ footer{left:18px;right:18px;font-size:10px}
 #portalApp .firm-status-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid #e3ebf5;background:#f8fafd;color:#506985;border-radius:7px;padding:5px 7px;font-size:10px;font-weight:750;white-space:nowrap}
 #portalApp .firm-status-chip b{display:grid;place-items:center;width:17px;height:17px;border-radius:5px;background:#eaf3fe;color:#2166a3;font-size:10px}
 #portalApp .firm-status-chip.ok{background:#eff8f5;border-color:#dcefe8;color:#287763}
-#portalApp .firm-status-chip.ok b{background:#dff3eb;color:#16866e}
-#portalApp .firm-status-chip.warn{background:#fff8e7;border-color:#f5e8bd;color:#926b17}
-#portalApp .firm-status-chip.warn b{background:#fff0c6;color:#a87812}
+#portalApp .firm-status-chip.ok b{background:#16866e;color:#fff}
+#portalApp .firm-status-chip.inactive{background:#fff1f2;border-color:#fecdd3;color:#b42336}
+#portalApp .firm-status-chip.inactive b{background:#dc3545;color:#fff}
 #portalApp .firm-status-chip.unknown{background:#f4f6f9;border-color:#e5eaf0;color:#74849a}
 #portalApp .firm-status-chip.unknown b{background:#e9eef4;color:#74849a}
 #portalApp .firm-contacts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -107,7 +107,7 @@ footer{left:18px;right:18px;font-size:10px}
 #portalApp .firm-status-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;color:#7d90a7;font-size:10px}
 #portalApp .firm-status-legend span{display:inline-flex;align-items:center;gap:5px}
 #portalApp .firm-status-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#16866e}
-#portalApp .firm-status-legend .legend-warn{background:#d89b14}
+#portalApp .firm-status-legend .legend-inactive{background:#dc3545}
 #portalApp .firm-status-legend .legend-unknown{background:#91a0b2}
 #portalApp .firm-table td{vertical-align:middle}
 @media(max-width:1000px){#portalApp .firm-table{min-width:1000px}}
@@ -1102,8 +1102,29 @@ function triggerSearchPreserve(id,value){
  if(start!==null&&start!==undefined)input.setSelectionRange(start,end,direction||'none');
 }
 function firmSearchRank(f,q){const name=normalizedSearch(f.name);return name===q?0:name.startsWith(q)?1:name.includes(q)?2:3;}
+function firmLiveStatus(f,kind){
+ const owner=cloud.session?.user?.id,ids=[f.taxNumber,f.identityNumber].filter(v=>typeof v==='string'&&/^[0-9]{10,11}$/.test(v));
+ const sources={gib:'gib_live',sgk:'sgk_live',taxPlate:'tax_plate_live'},checks=[];
+ const scoped=c=>c&&c.ownerId===owner&&c.firmId===f.id&&ids.includes(c.identity)&&ids.includes(c.observedIdentity);
+ const dated=c=>Number.isFinite(Date.parse(c.checkedAt))&&Date.parse(c.checkedAt)<=Date.now()+300000;
+ // Manuel durum metinleri ve şifre kaydının varlığı canlı doğrulama değildir.
+ for(const c of (Array.isArray(f.liveInstitutionChecks)?f.liveInstitutionChecks:[])){
+  if(scoped(c)&&c.institution===kind&&c.sourceType===sources[kind]&&c.authorizationVerified===true&&['active','inactive'].includes(c.status)&&dated(c))checks.push(c);
+ }
+ if(kind==='gib')for(const scope of Object.values(data.institutionScopes||{})){
+  if(scope?.module!=='notices'||scope.ownerId!==owner||scope.firmId!==f.id||scope.state!=='firm_account_verified'||scope.complete!==true||!ids.includes(scope.identity)||!ids.includes(scope.observedAccountIdentity))continue;
+  const witness=data.notes.some(n=>n.page==='notices'&&n.sourceType==='gib_notice_live'&&n.authorizationVerified===true&&n.ownerId===owner&&n.firmId===f.id&&n.identity===scope.identity);
+  const c={status:'active',checkedAt:scope.importedAt};if(witness&&dated(c))checks.push(c);
+ }
+ checks.sort((a,b)=>Date.parse(b.checkedAt)-Date.parse(a.checkedAt));
+ return checks[0]||{status:'unknown',checkedAt:null};
+}
+function firmStatusChip(f,letter,label,kind){
+ const check=firmLiveStatus(f,kind),state=check.status==='active'?'Aktif':check.status==='inactive'?'Aktif değil':'Canlı doğrulama yok',cls=check.status==='active'?'ok':check.status==='inactive'?'inactive':'unknown';
+ const detail=label+': '+state+(check.checkedAt?' · Son kaynak doğrulaması: '+new Date(check.checkedAt).toLocaleDateString('tr-TR'):'');
+ return `<span class="firm-status-chip ${cls}" data-live-status="${check.status}" title="${safe(detail)}" aria-label="${safe(detail)}"><b>${letter}</b><span>${safe(state)}</span></span>`;
+}
 function firmsPage(){const all=data.firms,q=normalizedSearch(UI.search);const visible=all.filter(f=>firmQuickMatch(f,UI.firmQuickFilter)&&firmSegment(f,UI.firmSegment||'all')&&(UI.status==='all'||f.status===UI.status)&&(UI.company==='all'||f.type===UI.company)&&(!UI.firmOwner||UI.firmOwner==='all'||f.assignedStaff===UI.firmOwner)&&(!q||q.split(' ').every(token=>normalizedSearch(Object.values(f).join(' ')).includes(token)))).sort((a,b)=>q?firmSearchRank(a,q)-firmSearchRank(b,q):0);
-const statusChip=(letter,label,state)=>{const cls=state==='Aktif'?'ok':state==='Kontrol gerekli'?'warn':'unknown';return `<span class="firm-status-chip ${cls}" title="${safe(label)}: ${safe(state)}"><b>${letter}</b><span>${safe(state)}</span></span>`};
 const contact=(kind,value)=>{const valid=String(value||'').trim();if(!valid)return `<span class="firm-contact disabled">${ico(kind==='phone'?'phone':'mail')} ${kind==='phone'?'Telefon yok':'E-posta yok'}</span>`;return kind==='phone'?`<a class="firm-contact" href="tel:${safe(valid.replace(/[^+\d]/g,''))}">${ico('phone')} Telefon</a>`:`<a class="firm-contact" href="mailto:${safe(valid)}">${ico('mail')} E-posta</a>`};
 const stats=[['approved','Onaylanmış',all.filter(isApproved).length,'check'],['pending','Onay Bekleyen',all.filter(f=>!isApproved(f)).length,'clock'],['simple','Basit Usul',all.filter(f=>f.taxRegime==='Basit Usul').length,'receipt'],['corporate','Kurumsal',all.filter(f=>firmKind(f)==='corporate').length,'building'],['personal','Şahıs',all.filter(f=>firmKind(f)==='personal').length,'users'],['all','Toplam',all.length,'firms']];
 const active=UI.firmSegment||'all';
@@ -1117,7 +1138,7 @@ ${UI.firmDistribution?distributionPanel(UI.firmDistribution,summaries.find(x=>x[
 <div class="filterbar firm-filter"><input id="innerSearch" class="grow" placeholder="VKN, TCKN, unvan veya faaliyet kodu ile ara…" value="${safe(UI.search)}"/><select id="typeFilter"><option value="all">Tüm mükellefler</option>${[...new Set(all.map(f=>f.type))].map(type=>`<option value="${safe(type)}" ${UI.company===type?'selected':''}>${safe(type)}</option>`).join('')}</select><select id="firmOwnerFilter"><option value="all">Tüm sorumlular</option>${[...new Set(all.map(f=>f.assignedStaff).filter(Boolean))].map(name=>`<option value="${safe(name)}" ${UI.firmOwner===name?'selected':''}>${safe(name)}</option>`).join('')}</select><select id="statusFilter"><option value="all">Tüm durumlar</option>${[...new Set(all.map(f=>f.status))].map(status=>`<option value="${safe(status)}" ${UI.status===status?'selected':''}>${safe(status)}</option>`).join('')}</select><button class="btn" data-resetfilters>${ico('refresh')} Temizle</button></div>
 ${firmQuickFilters()}
 <div class="firm-selection-line"><span><b>${visible.length}</b> mükellef listeleniyor · <b id="firmSelectionCount">${UI.selected.size}</b> seçili</span><span>Kartlara tıklayarak listeyi filtreleyebilirsiniz.</span></div>
-<div class="paper table-card"><div class="table-header"><div><strong>Mükellef listesi</strong><div class="firm-status-legend" style="margin-top:7px"><span><i></i> Aktif</span><span><i class="legend-warn"></i> Kontrol gerekli</span><span><i class="legend-unknown"></i> Kontrol edilmedi</span></div></div><small>Düzenle düğmesinden mükellef bilgilerini güncelleyin</small></div><div class="table-scroll"><table class="firm-table"><colgroup><col class="firm-col-select"/><col class="firm-col-name"/><col class="firm-col-id"/><col class="firm-col-status"/><col class="firm-col-contact"/><col class="firm-col-action"/></colgroup><thead><tr><th><input type="checkbox" id="selectAllFirms" ${visible.length&&visible.every(f=>UI.selected.has(f.id))?'checked':''} aria-label="Görünen firmaları seç"/></th><th>Firma / Mükellef</th><th>VKN / TCKN</th><th>Kurum / e-Belge</th><th>İletişim</th><th>İşlem</th></tr></thead><tbody>${visible.map(f=>`<tr><td><input class="firm-checkbox" type="checkbox" value="${safe(f.id)}" ${UI.selected.has(f.id)?'checked':''} aria-label="${safe(f.name)} seç"/></td><td><span class="row-title">${safe(f.name)}</span><span class="row-sub">${safe(f.type)} · ${safe(f.city)}</span><span class="row-sub">${safe(f.taxRegime||'Vergilendirme belirtilmedi')}</span></td><td><span class="row-title">${safe(f.taxNumber||f.identityNumber||'—')}</span><span class="row-sub">${safe(f.ref)}</span><span class="row-sub">${safe(f.activityCode||'')}</span></td><td><div class="firm-statuses">${statusChip('G','GİB',f.gibStatus||'Kontrol edilmedi')}${statusChip('S','SGK',f.sgkStatus||'Kontrol edilmedi')}${statusChip('V','Vergi levhası',f.taxPlateStatus||'Kontrol edilmedi')}</div>${firmInlineEDoc(f)}</td><td><div class="firm-contacts">${contact('phone',f.phone)}${contact('mail',f.email)}</div></td><td><div class="firm-row-actions"><button class="btn blue small" data-editfirm="${safe(f.id)}">Düzenle</button></div></td></tr>`).join('')||'<tr><td colspan="6"><div class="empty-list">Bu filtrelere uygun mükellef bulunamadı.</div></td></tr>'}</tbody></table></div></div>`;
+<div class="paper table-card"><div class="table-header"><div><strong>Mükellef listesi</strong><div class="firm-status-legend" style="margin-top:7px"><span><i></i> Canlı aktif</span><span><i class="legend-inactive"></i> Canlı aktif değil</span><span><i class="legend-unknown"></i> Doğrulanmadı</span></div></div><small>Düzenle düğmesinden mükellef bilgilerini güncelleyin</small></div><div class="table-scroll"><table class="firm-table"><colgroup><col class="firm-col-select"/><col class="firm-col-name"/><col class="firm-col-id"/><col class="firm-col-status"/><col class="firm-col-contact"/><col class="firm-col-action"/></colgroup><thead><tr><th><input type="checkbox" id="selectAllFirms" ${visible.length&&visible.every(f=>UI.selected.has(f.id))?'checked':''} aria-label="Görünen firmaları seç"/></th><th>Firma / Mükellef</th><th>VKN / TCKN</th><th>Kurum / e-Belge</th><th>İletişim</th><th>İşlem</th></tr></thead><tbody>${visible.map(f=>`<tr><td><input class="firm-checkbox" type="checkbox" value="${safe(f.id)}" ${UI.selected.has(f.id)?'checked':''} aria-label="${safe(f.name)} seç"/></td><td><span class="row-title">${safe(f.name)}</span><span class="row-sub">${safe(f.type)} · ${safe(f.city)}</span><span class="row-sub">${safe(f.taxRegime||'Vergilendirme belirtilmedi')}</span></td><td><span class="row-title">${safe(f.taxNumber||f.identityNumber||'—')}</span><span class="row-sub">${safe(f.ref)}</span><span class="row-sub">${safe(f.activityCode||'')}</span></td><td><div class="firm-statuses">${firmStatusChip(f,'G','GİB erişimi','gib')}${firmStatusChip(f,'S','SGK erişimi','sgk')}${firmStatusChip(f,'V','Vergi levhası','taxPlate')}</div>${firmInlineEDoc(f)}</td><td><div class="firm-contacts">${contact('phone',f.phone)}${contact('mail',f.email)}</div></td><td><div class="firm-row-actions"><button class="btn blue small" data-editfirm="${safe(f.id)}">Düzenle</button></div></td></tr>`).join('')||'<tr><td colspan="6"><div class="empty-list">Bu filtrelere uygun mükellef bulunamadı.</div></td></tr>'}</tbody></table></div></div>`;
 }
 function firmAccountCards(f){
  const input=(key,label)=>`<label class="form-field">${safe(label)}<input name="${key}" aria-label="${safe(label)}" value="${safe(f[key]??'')}" maxlength="160" autocomplete="off" placeholder="Bilgi girin"/></label>`;
