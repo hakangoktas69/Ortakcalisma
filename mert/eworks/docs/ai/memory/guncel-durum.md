@@ -30,3 +30,6 @@ Bu aşama ekran ve proje ayrımıdır. Canlı e-Defter endpoint/alan sözleşmes
 Firma kartı ayrıntıları Düzenle ile açılır. Günlük Yönetim > Portal Kısayolları ekranı ve firmaya özel GİB oturum açılış yolu eklendi. Canlı giriş henüz doğrulanmadı; SGK/e-Arşiv yalnız giriş bağlantısıdır. Ayrıntı: [26 Ekim günlüğü](../../gunluk/2026-10-26.md). Önceki toplu iş duraklatılmıştır.
 
 Takvim yenilendi: 2026 GİB kaynak snapshotı, tatiller ve kalıcı kişisel hatırlatmalar. [Kapsam ve güncellik](takvim.md).
+
+## Güncel dal kuralı — 26 Ekim 2026
+Kullanıcı bundan sonraki işlerin dev dalına aktarılmasını yasakladı. Yalnız `mert/eworks-ikinci-entegrasyon` kişisel dalına küçük commit/push yapılacak; Git Flow ve dev/main birleştirmesi kullanılmayacak. Önceki dev geçmişi korunur.

@@ -4,12 +4,13 @@ Kapsam: `mert/eworks/`.
 
 ## Git / Sourcetree
 
-1. Kaydedilmemiş çalışmaları commit/stash ile koruyun. `dev` dalına geçip `Pull` ile güncelleyin.
-2. Git Flow ayarlarında production=`main`, development=`dev`, feature prefix=`feature/` kullanın. Varsayılan `develop` ayrı bir dal olarak açılmamalı.
-3. `Git Flow → Start New Feature` ile işe özel dal açın. İkinci entegrasyonu yalnız kendi dizininde değiştirin; ilk entegrasyonu arşiv olarak koruyun.
-4. Kodla birlikte güncel durum ve çalışma günlüğünü de güncelleyin. Dosyaları sır/kişisel veri kontrolünden geçirin, ilgili testleri çalıştırın ve commit oluşturun.
-5. Bitirmeden önce uzaktaki `dev` güncellemelerini alın ve feature dalına birleştirin. Çakışmaları çözün, etkilenen testleri tekrar çalıştırın.
-6. `Finish Feature`, işi yerel `dev` dalına birleştirir. Ardından `dev` dalını push edin. Koruma kuralı varsa aynı feature'dan `dev` hedefli PR kullanın; force push yapmayın.
+26 Ekim 2026 itibarıyla kullanıcı eski Git Flow akışını kaldırdı.
+
+1. Çalışma dalı `mert/eworks-ikinci-entegrasyon`. Kod değişikliklerini küçük, bağımsız commitler halinde burada hazırlayın.
+2. Yalnız ikinci entegrasyonu ve kendi dokümanlarını değiştirin; ilk entegrasyon arşivi ve tarihsel dalı korunur.
+3. Sır/kişisel veri denetimi ve ilgili kontrollerden sonra commit ve yalnız kişisel dala push yapın.
+4. Git Flow feature start/finish kullanmayın. `dev`/`main` dallarına merge veya push yapmayın. Ekip sorumlusu kodu yeni yapıya kendisi uyarlayacak.
+5. Daha önce `dev`e gönderilmiş commitleri geri almayın; mevcut geçmişi değiştirmeyin ve force push yapmayın.
 
 ## Canlı işe devam etmeden önce
 
