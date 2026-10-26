@@ -5,7 +5,7 @@
 # TDD uygulama rehberi
 
 > TDD'ye yeniyseniz önce: [TDD nedir, ne işe yarar?](tdd-nedir.md) — red–green–refactor döngüsü, avantajları, ne zaman kullanılır.
-> Hedef ve gerekçe: [hedef-mimari/06 §7–§8](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#7-tdd-süreci-d22) (D22, D30, D33). Kısa kurallar: [ai/test.md](../ai/test.md). Katmanlar ve sınırlar: [ddd.md](ddd.md).
+> Hedef ve gerekçe: [hedef-mimari/06 §7–§8](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#7-tdd-süreci-d22) (D22, D33, D39). Kısa kurallar: [ai/test.md](../ai/test.md). Katmanlar ve sınırlar: [ddd.md](ddd.md).
 
 Sayfa, [tdd-nedir.md](tdd-nedir.md)'deki sırayı izler: TDD bu projede nedir (§1), döngü nasıl işler (§2), avantajlar nasıl elde edilir (§3), örnekler (§4), zorlayıcı durumlar (§5). Sonda başvuru bölümü vardır: test katmanları, etiketler, kurallar, komutlar (§6).
 
@@ -19,7 +19,7 @@ Sayfa, [tdd-nedir.md](tdd-nedir.md)'deki sırayı izler: TDD bu projede nedir (�
 | Kırmızı | Test başarısız | İşlem tamamlanmadı: anahtara bağlı kabul testi yok ya da bir testi geçmiyor |
 | Yeşil | Test geçiyor | En az bir kabul testi var ve anahtara bağlı tüm testler geçiyor; kurumla konuşan işlemde canlı doğrulama kaydı da var (D33) |
 | Kim çevirir | Geliştirici, dakikalar içinde | CI, test sonuçlarından (`pnpm features`); **elle çevrilmez** |
-| Nerede görünür | Test çıktısı | Arayüzde tüm kullanıcılara "Geliştiriliyor" (D30), [ozellik-durumu.md](../ozellik-durumu.md) |
+| Nerede görünür | Test çıktısı | Arayüzde `gelistirme`/`debug` kipinde "Geliştiriliyor" (D39; demo/üretimde gizli), [ozellik-durumu.md](../ozellik-durumu.md) |
 
 Özellik ağacı = yetki ağacı = durum kaynağı: [features.ts](../../packages/feature-registry/src/features.ts). Kayda giren her işlem kırmızı başlar; sunucuda uygulanmamış işlem `501` döner. Bir özellik, içinde onlarca test düzeyi döngüsü dönerek yeşile ulaşır (§4.2).
 
@@ -156,7 +156,7 @@ test('@F:gorevler.assign yönetici görevi personele atar, personel kendi listes
 
 - Kural belirsizse test yazılamaz; bu bir eksikliktir, kodla kapatılmaz. Varsayım yapılmaz: açık konuya yazılır ve sorulur ([kurallar](../ai/kurallar.md#kararlar-ve-belgeler-nasıl-işlenir)).
 - Kurum ekranını ya da bir kütüphaneyi tanımak için deneme kodu yazılabilir. "Testsiz kod yok" kuralı gereği bu kod olduğu gibi birleştirilmez; öğrenilen davranış önce teste dönüşür, kod döngüyle yeniden yazılır.
-- İşlem kayıtta kırmızı durabilir. Kırmızı görünmek (D30) eksik işi gizlemekten iyidir.
+- İşlem kayıtta kırmızı durabilir. Geliştirme kipinde kırmızı görünmek (D39) eksik işi gizlemekten iyidir.
 
 ## 6. Başvuru
 

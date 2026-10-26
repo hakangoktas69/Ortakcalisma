@@ -88,6 +88,8 @@ export function webEnv(env, { adres = () => '127.0.0.1', portlar } = {}) {
   const degerler = {
     EWORKS_ORTAM: 'gelistirme',
     COOKIE_SECURE: 'false',
+    OZELLIK_DURUMU_GOSTER: 'true', // Docker'sız web yalnız gelistirme/debug kipinde (D39)
+    YIGIN_KIPI: env.YIGIN_KIPI === 'debug' ? 'debug' : 'gelistirme', // logo yanındaki kip etiketi
     CONTROL_DATABASE_URL: db('db-control', 'eworks_control', env.CONTROL_DB_PASSWORD, p.dbControl),
     SHARD_DATABASE_URLS: `shard-01=${db('db-shard-01', 'eworks_app', env.APP_DB_PASSWORD, p.dbShard01)},shard-02=${db('db-shard-02', 'eworks_app', env.APP_DB_PASSWORD, p.dbShard02)}`,
     AUTH_URL: `http://${adres('auth')}:${p.auth}`,
@@ -122,6 +124,21 @@ export function kip(env) {
   if (!KIPLER.includes(k)) throw new Error(`YIGIN_KIPI ${KIPLER.join(' | ')} olmalı`);
   return k;
 }
+
+/** TDD özellik durumu (kırmızı/yeşil rozetler) web'de görünsün mü (D39): yalnız gelistirme ve debug kipinde; demo ve
+ * üretimde portal normal görünümündedir. Kabul testleri rozetleri doğruladığından e2e her test kipinde görünür kipte koşar;
+ * üretim katmanı değeri ayrıca 'false'a sabitler. compose.yml web servisine ${OZELLIK_DURUMU_GOSTER} ile geçer. */
+export function ozellikDurumuGoster(env, { e2e = false } = {}) {
+  const k = kip(env);
+  return k !== 'uretim' && (e2e || k === 'gelistirme' || k === 'debug') ? 'true' : 'false';
+}
+
+/** compose.yml web servisine giden kip ortamı: logo yanındaki kip etiketi ve TDD rozetleri. Yalnız kayıtlı kipten türer
+ * (eski GELISTIRME_KATMANI dahil); kabukta kalmış değerler etiketle rozetleri birbirinden ayıramaz. */
+export const webKipOrtami = (env, { e2e = false } = {}) => ({ YIGIN_KIPI: kip(env), OZELLIK_DURUMU_GOSTER: ozellikDurumuGoster(env, { e2e }) });
+
+/** e2e koşusu süresince true: kabul testleri rozetleri doğrular; koşu bitince web kipin görünümüne döner. */
+let e2eRozetleri = false;
 
 /** Compose profili: üretimde HER ZAMAN uretim (kabukta kalmış YIGIN_PROFIL=demo demo hesabını ve sahte GİB'i açamasın);
  * diğer kiplerde YIGIN_PROFIL açıkça verilirse o, yoksa demo. */
@@ -183,6 +200,8 @@ function yiginiKaldir(ek = []) {
 
 const compose = (...args) => {
   const env = envOku();
+  // Kipten türetilir (.env'e yazılmaz), her çağrıda yeniden yazılır; docker süreci bu ortamı devralır
+  Object.assign(process.env, webKipOrtami(env, { e2e: e2eRozetleri }));
   return ['compose', '-p', PROJE, '--env-file', ENV, ...composeDosyalari(env).flatMap((d) => ['-f', d]), '--profile', profil(env), ...args];
 };
 
@@ -282,6 +301,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     testKipiDenetle(envOku());
     // Testler yalnız sahte GİB'e gider: kurum hız bütçesi test süresini uzatmasın (üretim/demo varsayılanı 60/dk)
     process.env.GIB_ISTEK_DK ??= '600';
+    // Kabul testleri TDD rozetlerini doğrular (D39): demo kipinde de e2e süresince rozetler açılır
+    e2eRozetleri = komut === 'e2e';
     yiginiKaldir();
     const env = envOku();
     const hedef = komut === 'test' ? 'ci' : 'e2e';
@@ -309,12 +330,20 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const envArgs = Object.entries(ortam).flatMap(([k, v]) => ['-e', `${k}=${v}`]);
     const ag = execFileSync('docker', compose('ps', '-q', 'db-control'), { encoding: 'utf8', cwd: KOK }).trim();
     const network = execFileSync('docker', ['inspect', '-f', '{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}', ag], { encoding: 'utf8' }).trim().split(' ')[0];
+    if (e2eRozetleri && ozellikDurumuGoster(env) === 'false') {
+      console.log('  Not: e2e süresince TDD rozetleri açık; başarılı koşu sonunda web normal görünüme döner (aksi hâlde: node tools/deploy/yigin.mjs up)');
+    }
     docker(['run', '--rm', '--network', network, ...envArgs, '-v', `${sonuc}:/app/test-results`, `eworks/${hedef}:local`, ...geri]);
     // Python ACL: birim + robot akışı (süreç içi sahte GİB, gerçek tarayıcı) + import kuralları
     if (komut === 'test') {
       // debug kipinde entegrasyon imajı :debug etiketiyle derlenir
       docker(['run', '--rm', '--ipc=host', '-v', `${sonuc}:/out`, `eworks/integration:${kip(env) === 'debug' ? 'debug' : 'local'}`, 'sh', '-c',
         'python3 -m pytest -q -p no:cacheprovider --junitxml=/out/pytest.xml && lint-imports --no-cache']);
+    }
+    if (komut === 'e2e' && ozellikDurumuGoster(env) === 'false') {
+      // Demo kipinde web normal görünümüne döner (testler kırmızıysa docker() önce çıkar: o zaman `up` döndürür)
+      e2eRozetleri = false;
+      docker(compose('up', '-d', '--no-deps', '--wait', 'web'));
     }
   } else {
     console.error('Kullanım: node tools/deploy/yigin.mjs sirlar|up [--kip demo|gelistirme|debug|uretim]|gelistir|debug|uretim|hesap-ac|web-env|down [--sil]|test|e2e|helm');

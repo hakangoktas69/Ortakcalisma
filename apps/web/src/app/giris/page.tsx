@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { oturum } from '@/bff/oturum.ts';
 import logo from '@/shared/ui/eworks-logo.png';
+import { KipEtiketi } from '@/shared/ui/KipEtiketi.tsx';
 import { Simge } from '@/shared/ui/Simge.tsx';
 
 // Giriş ekranı (Mert'in Eworks tasarımı: lacivert zemin, beyaz kart, sarı düğme). Form BFF'e gider; tarayıcıda belirteç yok (D5).
@@ -28,6 +29,7 @@ export default async function Giris({ searchParams }: { searchParams: Promise<{ 
         <form method="post" action="/api/oturum/giris" className="giris-kart">
           <div className="giris-marka">
             <img src={logo.src} alt="Eworks" width={233} height={70} />
+            <KipEtiketi />
             <p className="giris-ust">Dijital iş portalı</p>
           </div>
           <h1>Hoş geldiniz</h1>

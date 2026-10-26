@@ -32,6 +32,8 @@ services:
     environment:
       EWORKS_ORTAM: uretim
       COOKIE_SECURE: 'true'
+      OZELLIK_DURUMU_GOSTER: 'false'
+      YIGIN_KIPI: uretim
 
   integration:
     environment:

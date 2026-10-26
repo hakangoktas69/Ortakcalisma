@@ -114,12 +114,21 @@ test.describe('menü ve yetki', () => {
     await ekranDenetle(page);
   });
 
-  test('tamamlanmamış bölüm herkese kırmızı "Geliştiriliyor" olarak görünür (D30)', async ({ page }) => {
+  test('tamamlanmamış bölüm geliştirme görünümünde kırmızı "Geliştiriliyor" olarak görünür (D39; e2e rozetler açık koşar)', async ({ page }) => {
     const k = kullanicilar();
     await girisYap(page, k.yonetici);
     await page.goto('/odeme/aylik_liste');
     await expect(page.getByRole('heading', { name: /Aylık ödeme listesi/ })).toBeVisible();
     await expect(page.locator('h1 .rozet.kirmizi')).toContainText('Geliştiriliyor');
+    await ekranDenetle(page);
+  });
+
+  test('test yığınında kip adı logo yanında görünür (üretimde görünmez, D39)', async ({ page }) => {
+    const k = kullanicilar();
+    await page.goto('/giris');
+    await expect(page.locator('.kip-etiketi')).toHaveText(/Yığın kipi: (Demo|Geliştirme|Debug)/);
+    await girisYap(page, k.yonetici);
+    await expect(page.locator('.ust .kip-etiketi')).toHaveText(/Yığın kipi: (Demo|Geliştirme|Debug)/);
     await ekranDenetle(page);
   });
 });

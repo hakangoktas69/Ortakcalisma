@@ -23,7 +23,7 @@ Müşavir her ay GİB ve SGK ekranlarını mükellef mükellef açıp beyanname,
 2. **Web servis birincil, robot yedek** (D19). Kuruma giden istekler aralıklı ve sınırlıdır (D7, D25); kurum erişim denetimi atlatılmaz (D14).
 3. **Kullanıcı tarafında kurulum yok** (D2, D3): masaüstü ajanı, eklenti, localhost köprüsü yok. Tarayıcıda gizli bilgi yok (D5).
 4. **Mükellef onayı** olmadan müşavir mükellefin kurum bilgisini kullanmaz; mükellef müşavirin bilgisini hiç kullanamaz (D18).
-5. **Görünür ilerleme:** tamamlanmamış her modül/sayfa/işlem herkese kırmızı görünür (D22, D30).
+5. **Görünür ilerleme:** tamamlanmamış her modül/sayfa/işlem geliştirme kipinde kırmızı görünür ve özellik durumu sayfasında izlenir; demo ve üretimde portal normal görünümündedir (D22, D39).
 6. **Tutumlu kaynak:** büyük veri parçalı işlenir, her servis kaynak sınırlıdır (D9).
 
 ## Kapsam dışı

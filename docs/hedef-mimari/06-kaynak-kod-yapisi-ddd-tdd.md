@@ -335,11 +335,16 @@ Ana düğümler (modül, sayfa) alt düğümlerden hesaplanır. Hepsi yeşilse y
 
 ### 8.4 Ortam davranışı
 
-| Ortam | `FEATURE_STATUS_MODE` | Kırmızı özellik |
+D39 (D30'un yerine): özellik durumu yığın kipine bağlıdır. Web `OZELLIK_DURUMU_GOSTER` ortam değişkenini sunucuda okur (`durumGosterilir`, `apps/web/src/shared/ui/ozellik.ts`); değeri yığın betiği (`tools/deploy/yigin.mjs` `ozellikDurumuGoster`) kipten türetir, verilmezse gizlidir.
+
+| Kip (`YIGIN_KIPI`) | `OZELLIK_DURUMU_GOSTER` | Görünüm |
 |---|---|---|
-| Geliştirme / test | `show` | Kırmızı işaretli görünür, çalıştırılabilir |
-| Pilot | `show` | Kırmızı işaretli görünür (D30) |
-| Üretim | `show` (D30) | **Tüm kullanıcılara** kırmızı işaretli görünür. Henüz uygulanmamış işlem tıklanınca "tamamlanmadı" uyarısı verir, sunucu `501` döner. `hide` modu ileride gerekirse kullanılmak üzere korunur |
+| `gelistirme`, `debug` (Docker'sız web dahil) | `true` | Kırmızı/yeşil rozet, kırmızı çerçeve; uygulanmamış sayfa işlemlerini durumlarıyla listeler; çalıştırılabilir |
+| `yigin.mjs e2e` (demo kipinde de) | `true` | Kabul testleri rozetleri doğrular; sonraki `up` kipin değerine döner |
+| `demo` | `false` | Portal normal renklerinde ve görünümünde; uygulanmamış sayfa yalnız "Bu bölüm yakında kullanıma açılacak." der |
+| `uretim` | `false` (üretim katmanı sabitler) | `demo` gibi. Uygulanmamış işlem sunucuda yine `501` döner |
+
+Üretim dışındaki kipte kip adı (Demo / Geliştirme / Debug) giriş ekranında ve üst çubukta logo yanında yazar (`KipEtiketi`, web `YIGIN_KIPI`); üretimde ya da kip bilinmiyorsa hiçbir şey yazmaz. İlerleme her kipte [ozellik-durumu.md](../ozellik-durumu.md)'den izlenir.
 
 ## 9. Geçiş
 

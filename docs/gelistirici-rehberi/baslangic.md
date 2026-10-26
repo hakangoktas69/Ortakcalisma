@@ -71,7 +71,7 @@ Bu hesaplar yalnız kendi bilgisayarındaki demo/test kurulumu içindir; üretim
 - Arayüz kabul testleri (`yigin.mjs e2e`) demo hesabını kullanmaz: her koşuda kendi geçici ofisini, yöneticisini (`yonetici-…@eworks.test`) ve personelini rastgele parolayla açar. Testçi olarak elle sınarken demo hesabını kullan.
 - Ek kullanıcı (ör. personel rolüyle sınamak için): `HESAP_SIFRE=… node tools/deploy/yigin.mjs hesap-ac uye --ofis-id <uuid> --eposta a@eworks.test --ad "Ad Soyad" --rol personel` (parola en az 12 karakter). Demo ofisinin kimliği (`<uuid>`) kurulum çıktısında `✔ Ofis hazır: …` satırındadır; komut argümansız çalışınca kullanımı yazar.
 
-Kırmızı çerçeveli ve "Geliştiriliyor" yazan bölümler henüz yapılmadı (bu bilinçli, D30). Firmalar → "GİB'den güncelle" gibi kurum işleri sahte GİB'le çalışır.
+`demo` kipinde portal normal görünümündedir; henüz yapılmamış bölümler "yakında" der. Kırmızı çerçeveli, "Geliştiriliyor" rozetli TDD görünümü yalnız `gelistirme` / `debug` kipinde açılır (D39). Firmalar → "GİB'den güncelle" gibi kurum işleri sahte GİB'le çalışır.
 
 ## 4. Kod değiştirirken: geliştirme döngüsü
 

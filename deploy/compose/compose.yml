@@ -255,6 +255,10 @@ services:
     environment:
       EWORKS_ORTAM: ${EWORKS_ORTAM:-demo}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      # TDD rozetleri (D39): yığın betiği kipten yazar (gelistirme/debug/e2e → true); verilmezse normal görünüm
+      OZELLIK_DURUMU_GOSTER: ${OZELLIK_DURUMU_GOSTER:-false}
+      # Logo yanındaki kip etiketi (demo | gelistirme | debug; uretim'de etiket yok): .env'deki YIGIN_KIPI
+      YIGIN_KIPI: ${YIGIN_KIPI:-demo}
       CONTROL_DATABASE_URL: postgres://eworks_control:${CONTROL_DB_PASSWORD}@db-control:5432/postgres
       SHARD_DATABASE_URLS: shard-01=postgres://eworks_app:${APP_DB_PASSWORD}@db-shard-01:5432/postgres,shard-02=postgres://eworks_app:${APP_DB_PASSWORD}@db-shard-02:5432/postgres
       AUTH_URL: http://auth:9999

@@ -27,12 +27,12 @@ Yığını doğrudan `docker compose` ile değil, sırları ve sırayı yöneten
 
 ### Kipler
 
-Kip `deploy/compose/.env`'de (`YIGIN_KIPI`) hatırlanır; sonraki `up`, `test`, `e2e`, `down` aynı katmanlarla çalışır.
+Kip `deploy/compose/.env`'de (`YIGIN_KIPI`) hatırlanır; sonraki `up`, `test`, `e2e`, `down` aynı katmanlarla çalışır. TDD özellik durumu (kırmızı/yeşil rozetler) yalnız `gelistirme` ve `debug` kipinde görünür; `demo` ve `uretim`'de portal normal görünümdedir. `e2e` rozetleri doğruladığı için koşu süresince açar, sonraki `up` kipin görünümüne döner (D39, `OZELLIK_DURUMU_GOSTER`). Üretim dışındaki kipte kip adı logo yanında yazar.
 
 | Kip | Katmanlar | Ne zaman |
 |---|---|---|
-| `demo` (vars.) | `compose.yml` | Uygulamayı denemek, testler; sahte GİB ve demo hesabı |
-| `gelistirme` | + `compose.gelistirme.yml` | Docker'sız web (8765); altyapı portları 127.0.0.1'de |
+| `demo` (vars.) | `compose.yml` | Uygulamayı denemek, testler; sahte GİB ve demo hesabı; portal normal görünümde |
+| `gelistirme` | + `compose.gelistirme.yml` | Docker'sız web (8765); altyapı portları 127.0.0.1'de; TDD rozetleri (kırmızı "Geliştiriliyor") görünür |
 | `debug` | + `compose.gelistirme.yml` + `compose.debug.yml` | VS Code ile Docker'daki işçi/entegrasyonda hata ayıklama; **yalnız kendi bilgisayarında** |
 | `uretim` | + `compose.uretim.yml` (Caddy) | VPS canlı ortam; sahte GİB ve demo hesabı yok |
 

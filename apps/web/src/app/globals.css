@@ -107,6 +107,8 @@ textarea { resize: vertical; }
 .ust-sol { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .marka { display: flex; align-items: center; flex: none; border-radius: 6px; }
 .marka img { width: 115px; height: auto; display: block; }
+/* Yığın kipi (demo / geliştirme / debug; üretimde yok): canlı ortamla karışmasın diye altın zeminli küçük etiket */
+.kip-etiketi { flex: none; padding: .15rem .55rem; border-radius: 999px; background: var(--altin); color: var(--lacivert-koyu); font-size: .72rem; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; }
 .konum { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .konum-kok { font-size: .78rem; font-weight: 700; color: var(--soluk); white-space: nowrap; }
 .konum-baslik { font-size: .9rem; color: #243f60; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
