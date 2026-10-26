@@ -17,7 +17,7 @@
     "features": "node tools/features/uret.ts",
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "verify": "pnpm typecheck && pnpm --filter @eworks/web typecheck && pnpm arch && pnpm test:kapsam && pnpm memory:check && pnpm ajan:denetle && pnpm docs:check",
+    "verify": "pnpm typecheck && pnpm --filter @eworks/web typecheck && pnpm --filter @eworks/sales-portal typecheck && pnpm arch && pnpm test:kapsam && pnpm memory:check && pnpm ajan:denetle && pnpm docs:check",
     "memory:check": "node tools/claude/check-memory.mjs",
     "ajan:senkron": "node tools/ajan/senkron.mjs --yaz",
     "ajan:denetle": "node tools/ajan/senkron.mjs --denetle",

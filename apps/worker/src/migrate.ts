@@ -22,7 +22,7 @@ export async function runAll(env = process.env) {
     for (const id of shards.keys()) {
       await control.query('insert into directory.shards(id) values ($1) on conflict (id) do nothing', [id]);
     }
-    await setRolePasswords(control, { eworks_control: env['CONTROL_DB_PASSWORD'] });
+    await setRolePasswords(control, { eworks_control: env['CONTROL_DB_PASSWORD'], eworks_sales: env['SALES_DB_PASSWORD'] });
   } finally {
     await control.end();
   }
@@ -35,6 +35,7 @@ export async function runAll(env = process.env) {
         eworks_app: env['APP_DB_PASSWORD'],
         eworks_worker: env['WORKER_DB_PASSWORD'],
         eworks_integration: env['INTEGRATION_DB_PASSWORD'],
+        eworks_sales: env['SALES_DB_PASSWORD'],
       });
     } finally {
       await pool.end();

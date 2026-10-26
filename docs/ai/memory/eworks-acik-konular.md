@@ -1,6 +1,6 @@
 ---
 name: eworks-acik-konular
-description: Eworks açık konuları (2026-10-26) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, operasyon logu yok ve hatalar sessizce yutuluyor, ekranda VKN maskeleme uygulanmıyor, Mert'in pilot işi ile D28 çelişkisi, dal adı uyumu, küçük UX (TabloKap odak), servis yolunun gözlenmemiş ağ ayrıntıları, üretim yedeği ve yayın hattı yok
+description: Eworks açık konuları (2026-10-26) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, operasyon logu yok ve hatalar sessizce yutuluyor, ekranda VKN maskeleme uygulanmıyor, Mert'in pilot işi ile D28 çelişkisi, dal adı uyumu, küçük UX (TabloKap odak), servis yolunun gözlenmemiş ağ ayrıntıları, üretim yedeği ve yayın hattı yok, satış lisansı girişi engellemiyor, geçici parola portalda zorunlu değişmiyor, satış portalının üretimde yayımı, satış log yardımcısı, satıştan ofis açmada yarım kalma
 metadata:
   type: project
 ---
@@ -25,7 +25,12 @@ metadata:
 14. **Dal adı uyumu (2026-10-26):** D37 `<ad>/<kısa-iş>` diyor; Mert'in belgeleri `feature/…` diyor; uzakta ikisi de var. Kanca adı denetlemez. Tek kural seçilip duyurulmalı.
 15. **Küçük UX (2026-10-26):** `TabloKap` her ekranda odaklanabilir; geniş ekranda fazladan sekme durağı.
 16. **Servis yolunun gözlenmemiş ağ ayrıntıları (2026-10-26):** Eworks 2 alan adlarını ve uçları veriyor; `cmd` değerleri, sonraki sayfa isteğinin biçimi, tarih biçimi ve geçersiz oturum yanıtı arşivde yok. Sahte e-Beyanname bunlar için kendi seçimini kullanır (`BEYANNAMELISTESI`, `BEYANNAMELISTESI_SAYFA`, yyyymmdd, 401); servis doğrulaması bunlara bağlı değildir (altı tarih biçimi, `cmd` yalnız dolu). Canlı koşuda gözlenip sahte sunucuya işlenmeli; canlı sayfalama tarih alanlarını yeniden gönderirse izinli alan listesi genişletilmeli. Varsayılanın `servis` olması (D38) canlı kayıt öncesi üretimde de bu yolu açar.
-17. **Üretim yedeği ve yayın hattı yok (2026-10-26):** VPS'te yalnız elle yedek (`pg_dumpall`, S3 arşivi, `.env`); otomatik şifreli yedek ve geri yükleme sınaması (Vault anahtarı dahil) yok. İmajlar sunucuda kaynaktan derleniyor; CI imaj yayını, sürüm etiketi, kesintisiz güncelleme, gözlem/uyarı yok.
+17. **Üretim yedeği ve yayın hattı yok (2026-10-26):** VPS'te yalnız elle yedek (`pg_dumpall`, S3 arşivi, `.env`); otomatik şifreli yedek ve geri yükleme sınaması (Vault anahtarı dahil) yok
+18. **Lisans girişi engellemiyor (D40):** satış lisansı yalnız kayıt; engelleme identity-access değişikliği + süresi dolunca ekran kararı ister; lisans uzatma/ödeme bekliyor.
+19. **Geçici parola portalda zorunlu değişmiyor:** satışçı müşavirin geçici parolasını bilir; portal girişine zorunlu değiştirme gerekir (hassas alan).
+20. **Satış portalı üretimde yalnız 127.0.0.1 (SSH tüneli):** uzaktan çalışma için alan adı + TLS + IP kısıtı/VPN kararı.
+21. **Satış portalının log yardımcısı yerel** (`apps/sales/src/bff/gunluk.ts`); ortak yardımcı (açık konu 11) gelince taşınır.
+22. **Satıştan ofis açma tek işlem değil:** GoTrue kullanıcısı açıldıktan sonra kesinti olursa e-posta kalır, yeniden deneme `eposta_kullanimda` verir; telafi GoTrue silme ucu + identity-access değişikliği ister, şimdilik elle kurtarma.. İmajlar sunucuda kaynaktan derleniyor; CI imaj yayını, sürüm etiketi, kesintisiz güncelleme, gözlem/uyarı yok.
 
 Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri Hakan tarafından analiz ediliyor (2026-10-24). Sonuç gelince 02 §1a'daki `integrations` tablosu ve 03 §1a hesapları güncellenir.
 

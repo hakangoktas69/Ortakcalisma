@@ -60,6 +60,8 @@ describe('ofis açma (D27)', () => {
     expect(await openOffice({ officeName: 'X', admin: { ...admin, email: 'gecersiz' } }, f.d)).toEqual({ ok: false, error: 'gecersiz_bilgi' });
     await openOffice({ officeName: 'X', admin }, f.d);
     expect(await openOffice({ officeName: 'Y', admin: { ...admin, password: 'baska-guclu-parola' } }, f.d)).toEqual({ ok: false, error: 'kullanici_var_parola_farkli' });
+    // Kullanıcı açılamadıysa ofis de açılmaz (yarım ofis kalmaz)
+    expect(f.orgs.size).toBe(1);
   });
 
   it('personel ofise müşavir kaydı olmadan eklenir', async () => {

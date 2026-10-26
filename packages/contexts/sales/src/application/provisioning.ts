@@ -1,4 +1,5 @@
 import { err, ok, type Result } from '@eworks/kernel';
+import { validEmail } from '../domain/sales-user.ts';
 
 // Ofis ve kullanıcı açma (D27: hesaplar satış portalından açılır, kendi kendine kayıt yok). Satış portalı ekranı yapılana
 // kadar bu use-case'i `apps/worker/src/hesap-ac.ts` komutu çağırır; satis.* özellikleri bu yüzden kırmızıdır.
@@ -20,8 +21,9 @@ export interface Directory {
 }
 
 export interface TenantProvisioner {
-  createOrganization(orgId: string, name: string): Promise<void>;
-  addMember(orgId: string, m: { userId: string; role: MemberRole; displayName: string; advisorId?: string }): Promise<void>;
+  createOrganization(orgId: string, name: string, by?: string): Promise<void>;
+  /** `by`: işlemi yapan satış kullanıcısı (satış portalından); ofisin denetim kaydına yazılır. */
+  addMember(orgId: string, m: { userId: string; role: MemberRole; displayName: string; advisorId?: string }, by?: string): Promise<void>;
   isMember(orgId: string, userId: string): Promise<boolean>;
 }
 
@@ -29,7 +31,8 @@ export type ProvisionDeps = { identity: Identity; directory: Directory; tenant: 
 
 export type NewUser = { email: string; password: string; name: string };
 
-const validUser = (u: NewUser) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u.email) && u.password.length >= 12 && u.name.trim().length > 0;
+// E-posta kuralı satış formuyla aynı (domain); parola yalnız uzunlukla sınırlı (komutla açılan demo parolaları rakamsız olabilir)
+const validUser = (u: NewUser) => validEmail(u.email.trim().toLowerCase()) && u.password.length >= 12 && u.name.trim().length > 0;
 
 /** Kullanıcıyı açar ya da (aynı parolayla) var olanı bulur — tekrarlanabilir hesap açma için. */
 async function userId(u: NewUser, d: ProvisionDeps): Promise<string | null> {
@@ -41,20 +44,23 @@ async function userId(u: NewUser, d: ProvisionDeps): Promise<string | null> {
 
 export type ProvisionError = 'gecersiz_bilgi' | 'kullanici_var_parola_farkli';
 
-/** Yeni ofis + yöneticisi (aynı zamanda müşavir: portföy sahibi olabilsin). Ofis adı mevcutsa onu kullanır. */
-export async function openOffice(input: { officeName: string; admin: NewUser }, d: ProvisionDeps): Promise<Result<{ orgId: string; userId: string }, ProvisionError>> {
+/**
+ * Yeni ofis + yöneticisi (aynı zamanda müşavir: portföy sahibi olabilsin). Ofis adı mevcutsa onu kullanır.
+ * Önce kullanıcı: e-posta başka parolayla kayıtlıysa ofis hiç açılmaz (yarım ofis kalmaz).
+ */
+export async function openOffice(input: { officeName: string; admin: NewUser; by?: string }, d: ProvisionDeps): Promise<Result<{ orgId: string; userId: string }, ProvisionError>> {
   if (!input.officeName.trim() || !validUser(input.admin)) return err('gecersiz_bilgi');
+  const uid = await userId(input.admin, d);
+  if (!uid) return err('kullanici_var_parola_farkli');
   let orgId = (await d.directory.organizationByName(input.officeName.trim()))?.id;
   if (!orgId) {
     orgId = d.newId();
     const shardId = await d.directory.leastLoadedShard();
     await d.directory.createOrganization({ id: orgId, name: input.officeName.trim(), shardId });
-    await d.tenant.createOrganization(orgId, input.officeName.trim());
+    await d.tenant.createOrganization(orgId, input.officeName.trim(), input.by);
   }
-  const uid = await userId(input.admin, d);
-  if (!uid) return err('kullanici_var_parola_farkli');
   if (!(await d.tenant.isMember(orgId, uid))) {
-    await d.tenant.addMember(orgId, { userId: uid, role: 'ofis_admin', displayName: input.admin.name.trim(), advisorId: d.newId() });
+    await d.tenant.addMember(orgId, { userId: uid, role: 'ofis_admin', displayName: input.admin.name.trim(), advisorId: d.newId() }, input.by);
     await d.directory.addUserOrg(uid, orgId);
   }
   return ok({ orgId, userId: uid });

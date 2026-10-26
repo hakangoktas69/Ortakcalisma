@@ -83,3 +83,24 @@ test('geliştirme kipi .env içinde hatırlanır: sonraki up/test/e2e port katma
   assert.deepEqual(ad(composeDosyalari({})), ['compose.yml']);
   assert.deepEqual(ad(composeDosyalari({ GELISTIRME_KATMANI: '1' })), ['compose.yml', 'compose.gelistirme.yml']);
 });
+
+test('satış portalının sırları üretilir ve compose sales servisinin istediği her sır üretilenler arasındadır', async () => {
+  const { mkdtempSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { envOku, sirlariTamamla } = await import('../yigin.mjs');
+  const dizin = mkdtempSync(join(tmpdir(), 'yigin-'));
+  try {
+    const yol = join(dizin, '.env');
+    sirlariTamamla(yol);
+    const env = envOku(yol);
+    for (const k of ['SALES_DB_PASSWORD', 'SALES_TOTP_KEY']) assert.match(env[k] ?? '', /^[A-Za-z0-9]{32,}$/, k);
+    assert.equal(env.SATIS_PORT, '8081');
+    const compose = readFileSync(join(KOK, 'deploy', 'compose', 'compose.yml'), 'utf8');
+    const sales = compose.slice(compose.indexOf('\n  sales:'), compose.indexOf('\nvolumes:'));
+    const zorunlu = [...sales.matchAll(/\$\{([A-Z0-9_]+):\?\}/g)].map((m) => m[1]);
+    assert.ok(zorunlu.length > 0);
+    for (const k of zorunlu) assert.ok(env[k], `${k} üretilmiyor`);
+  } finally {
+    rmSync(dizin, { recursive: true, force: true });
+  }
+});

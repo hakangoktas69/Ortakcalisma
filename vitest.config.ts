@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 // İki proje: birim (bağımlılıksız, her yerde) ve entegrasyon (*.int.test.ts — gerçek Postgres/Redis/RabbitMQ/S3/GoTrue;
 // `node tools/deploy/yigin.mjs test` yığının ağında koşturur). Testler @F:<anahtar> / [F:<anahtar>] ile özelliğe bağlanır.
-const ortak = ['**/node_modules/**', 'eski/**', 'apps/web/e2e/**', 'apps/web/.next/**'];
+const ortak = ['**/node_modules/**', 'eski/**', 'apps/*/e2e/**', 'apps/*/.next/**'];
 
 export default defineConfig({
   test: {

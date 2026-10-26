@@ -11,7 +11,7 @@
 | Bileşen | Yer | Teknoloji |
 |---|---|---|
 | Portal + BFF | `apps/web` | Next.js App Router; oturum Redis'te, `__Host-` HttpOnly çerez |
-| Satış portalı | `apps/sales` | Next.js, ayrı imaj, `sales_user` DB rolü |
+| Satış portalı | `apps/sales` | Next.js, ayrı imaj, `eworks_sales` DB rolü (D40) |
 | İşçi | `apps/worker` | Node: outbox yayıncı, gece planlayıcı, entegrasyon sonucu uygulayıcı, temizlik |
 | Kurum entegrasyonu (ACL) | `services/integration` | Python 3.12: web servis istemcileri, Playwright robotu (yedek), ayrıştırma → `contracts/` |
 | OCR | `services/ocr` | CAPTCHA çözümü (D6) |

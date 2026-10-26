@@ -7,7 +7,8 @@
   },
   "dependencies": {
     "@eworks/kernel": "workspace:*",
-    "@eworks/platform": "workspace:*"
+    "@eworks/platform": "workspace:*",
+    "ioredis": "^5.8.2"
   },
   "devDependencies": {
     "@eworks/testing": "workspace:*"
