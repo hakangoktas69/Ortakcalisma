@@ -1,11 +1,11 @@
 ---
 name: eworks-acik-konular
-description: Eworks açık konuları (2026-10-25) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, web/BFF'te operasyon logu yok, ekranda VKN maskeleme uygulanmıyor
+description: Eworks açık konuları (2026-10-26) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, operasyon logu yok ve hatalar sessizce yutuluyor, ekranda VKN maskeleme uygulanmıyor, Mert'in pilot işi ile D28 çelişkisi, dal adı uyumu, küçük UX (TabloKap odak)
 metadata:
   type: project
 ---
 
-2026-10-25 itibarıyla Eworks hedef mimarisinde açık konular (aynı liste `docs/ai/durum.md`'de):
+2026-10-26 itibarıyla Eworks hedef mimarisinde açık konular (aynı liste `docs/ai/durum.md`'de):
 
 1. **Hız ve ölçek tutarlılığı:** 500 ofis × 1.505 ≈ 752.500 kurum hesabı var. Gece penceresi 20:00–09:00. Hepsini bir gecede taramak için web serviste ≈ 3.216 istek/dk gerekir. 60 istek/dk toplam başlangıç hızıyla tam tarama ≈ 54 gece sürer, robotla ≈ 536 gece (`docs/hedef-mimari/03-kaynak-verimliligi-ve-kapasite.md` §1a). Netleşmesi gerekenler:
    - "60 istek/dk ile başla" ve "hesap başına 60 istek/dk" ifadelerinin kapsamı (toplam mı, kurum mu, servis mi robot mu, hesap mı?);
@@ -19,8 +19,11 @@ metadata:
 8. **Yönetim ekranları yok:** personel ataması, kişiye özel izin, davet, mükellef kullanıcıları; şimdilik `hesap-ac` komutu.
 9. **ACL kapsam eşiği zorlanmıyor (2026-10-25):** kurallarda "ACL ayrıştırıcıları %90" yazılı, ama `services/integration`'da pytest kapsam ölçümü (`pytest-cov`, `--cov-fail-under`) yok; TS tarafı (domain + application + kernel %90/%80) `pnpm verify` ve CI'da zorlanıyor. Eklemek imaj bağımlılığı ve CI adımı ister.
 10. **Keşif kodu ifadesi onay bekliyor (2026-10-25):** `docs/gelistirici-rehberi/tdd.md` §5.3'teki "deneme kodu olduğu gibi birleştirilmez; öğrenilen davranış önce teste dönüşür" ifadesi yazılı bir kural değil, "testsiz kod yok" kuralından çıkarıldı. Ekip onaylarsa kurallara işlenir, onaylamazsa rehberden çıkarılır.
-11. **Web/BFF'te operasyon logu yok (2026-10-26):** ACL JSON olay logu (`gunluk`), işçi `console.error` kullanıyor; `apps/web`'de ortak log yardımcısı yok. `api/gorevler` ve `api/notlar` uçları her hatayı (veritabanı kesintisi dahil) "Firma bulunamadı" 404'üne katlıyor ve loglamıyor; kesinti kullanıcıya yanlış mesajla, ekibe hiç görünmez. Kural `docs/ai/kurallar.md` "Hata ve log"da; tek log yardımcısı (kişisel veri süzgeçli) ve bu uçların düzeltilmesi bekliyor.
+11. **Operasyon logu yok, hatalar sessizce yutuluyor (2026-10-26):** `apps/web`'de ortak log yardımcısı yok. Örnekler: `api/gorevler` ve `api/notlar` her hatayı (veritabanı kesintisi dahil) "Firma bulunamadı" 404'üne katlıyor ve loglamıyor; `apps/worker/src/uygulayici.ts` ham kurum sonucunu S3'ten silemezse yutuyor (ham sonuç depoda kalabilir, KVKK); `packages/platform/src/depo.ts` kova oluşturma hatasını yutuyor. Kural `docs/ai/kurallar.md` "Hata ve log"da; tek log yardımcısı (kişisel veri süzgeçli) ve bu üç yerin düzeltilmesi bekliyor.
 12. **Ekranda VKN/TCKN maskeleme uygulanmıyor (2026-10-26):** kural 8 "ekranda maskelenir (`maskTaxId`)" diyor, `maskTaxId` (`packages/kernel`) hiçbir ekranda çağrılmıyor; firma listesi/kartı tam numarayı gösteriyor. Müşavirin kendi portföyünde tam numara gerekebilir; hangi ekran ve rolde maskeleneceği kararı bekliyor.
+13. **Mert'in pilot işi ile D28 çelişkisi (2026-10-26):** Mert 23.10'da `dev`'de `entegrasyon-2-servis`'i aktif ana proje ilan etti (kendi tanımıyla aynı oturumda servis taşıma, belge tekrarı, e-Defter hazırlığı; canlı doğrulama notları). D28 ile bu iş `eski/mert/eworks` altında arşiv. Hangi kısımların yeni yapıya testleriyle taşınacağı kararı ve Mert'e bildirim bekliyor; iddiaları doğrulanmadı.
+14. **Dal adı uyumu (2026-10-26):** D37 `<ad>/<kısa-iş>` diyor; Mert'in belgeleri `feature/…` diyor; uzakta ikisi de var. Kanca adı denetlemez. Tek kural seçilip duyurulmalı.
+15. **Küçük UX (2026-10-26):** `TabloKap` her ekranda odaklanabilir; geniş ekranda fazladan sekme durağı.
 
 Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri Hakan tarafından analiz ediliyor (2026-10-24). Sonuç gelince 02 §1a'daki `integrations` tablosu ve 03 §1a hesapları güncellenir.
 
