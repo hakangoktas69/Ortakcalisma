@@ -1,0 +1,21 @@
+# Hata ayıklama katmanı (geliştirme katmanının üstüne): işçi Node inspector'la, entegrasyon debugpy ile dinler; VS Code bağlanır
+# (.vscode/launch.json: "Docker: işçiye bağlan (9230)", "Docker: entegrasyona bağlan (Python 5678)").
+# Yalnız `node tools/deploy/yigin.mjs debug` kullanır. Bilgisayara açılan portlar yalnız 127.0.0.1'dedir; ancak hata ayıklayıcılar
+# container'da 0.0.0.0'da dinler, yani yığının iç ağındaki diğer container'lar da erişebilir (yerel demo yığınında kabul edilen risk:
+# sahte kipte robot kurum dışına çıkamaz). Hata ayıklayıcıya bağlanan, o süreçte keyfi kod çalıştırabilir: üretimde ASLA kullanılmaz
+# (`yigin.mjs` üretim kipinden debug'a geçişi --uretimden-cik olmadan reddeder).
+services:
+  worker:
+    # TypeScript kaynak doğrudan çalışır (Node 24 tip ayıklama): VS Code'daki kesme noktaları kaynağa birebir oturur
+    command: [node, --inspect=0.0.0.0:9229, apps/worker/src/main.ts]
+    ports:
+      - '127.0.0.1:${HATA_AYIKLAMA_ISCI_PORT:-9230}:9229'
+  integration:
+    build:
+      target: debug
+    image: eworks/integration:debug
+    command: [python3, -m, debugpy, --listen, 0.0.0.0:5678, -m, eworks_integration.core.calisan]
+    ports:
+      - '127.0.0.1:${HATA_AYIKLAMA_PYTHON_PORT:-5678}:5678'
+  fake-gib:
+    image: eworks/integration:debug

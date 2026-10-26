@@ -1,0 +1,71 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Web: sunucu + tarayıcı (8765)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm --filter @eworks/web dev",
+      "cwd": "${workspaceFolder}",
+      "serverReadyAction": {
+        "pattern": "- Local:\\s+(https?://\\S+)",
+        "uriFormat": "%s",
+        "action": "debugWithChrome",
+        "webRoot": "${workspaceFolder}/apps/web"
+      }
+    },
+    {
+      "name": "Web: yalnız sunucu (8765)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm --filter @eworks/web dev",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Web: tarayıcı (8765)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://127.0.0.1:8765",
+      "webRoot": "${workspaceFolder}/apps/web"
+    },
+    {
+      "name": "Birim testi: açık dosya (Vitest)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": ["run", "--project", "birim", "${fileBasename}"],
+      "cwd": "${workspaceFolder}",
+      "autoAttachChildProcesses": true,
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+    },
+    {
+      "name": "Betik: açık dosya (Node 24)",
+      "type": "node",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Docker: işçiye bağlan (9230)",
+      "type": "node",
+      "request": "attach",
+      "address": "127.0.0.1",
+      "port": 9230,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/app",
+      "restart": true,
+      "skipFiles": ["<node_internals>/**", "/app/node_modules/**"]
+    },
+    {
+      "name": "Docker: entegrasyona bağlan (Python 5678)",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": { "host": "127.0.0.1", "port": 5678 },
+      "pathMappings": [{ "localRoot": "${workspaceFolder}/services/integration", "remoteRoot": "/app" }],
+      "justMyCode": true
+    }
+  ]
+}

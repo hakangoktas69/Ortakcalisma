@@ -55,12 +55,13 @@ eski/                         yeniden yapılanma öncesi depo — arşiv, yeni g
 
 ## Çalıştırma
 
-Node 24 ve pnpm (corepack) gerekir; yerel Node eskiyse komutları `node:24` container'ında koş (`sh tools/deploy/dogrula.sh` = `pnpm verify` container'da).
+Adım adım: [başlangıç rehberi](docs/gelistirici-rehberi/baslangic.md) (VS Code, hata ayıklama), [VPS](docs/gelistirici-rehberi/vps-kurulum.md). Node 24 ve pnpm (corepack) gerekir; yerel Node eskiyse komutları `node:24` container'ında koş (`sh tools/deploy/dogrula.sh` = `pnpm verify` container'da).
 
 ```bash
 node tools/deploy/yigin.mjs up     # Compose yığını: sırlar (deploy/compose/.env), imajlar, altyapı → migrate → uygulama
 node tools/deploy/yigin.mjs test   # birim + entegrasyon (gerçek Postgres/Redis/RabbitMQ/S3/GoTrue) + pgTAP, yığının ağında
 node tools/deploy/yigin.mjs e2e    # arayüz kabul testleri (Playwright, 4 ekran) yığına karşı
+node tools/deploy/yigin.mjs gelistir|debug|uretim   # Docker'sız web 8765 | + VS Code hata ayıklama (9230, 5678) | VPS (Caddy HTTPS)
 corepack enable && pnpm install    # prepare: git kancalarını kurar (core.hooksPath = tools/git-hooks)
 pnpm verify                        # tip, mimari kurallar, birim testleri + kapsam eşiği, yetki anahtarı denetimi, hafıza, ajan senkronu, belge bağlantıları
 pnpm test                          # birim testleri (bağımlılıksız); pnpm test:kapsam = kapsam eşiğiyle

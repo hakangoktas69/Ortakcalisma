@@ -34,6 +34,9 @@ async function erisilebilirlik(page: Page) {
 
 /** Her ekran denetimi (D37): sayfa taşmıyor ve erişilebilirlik ihlali yok. Ekran boyutuna göre sonuç değişir (dar ekranda kayan tablo), dört sınıfta da koşar. */
 export async function ekranDenetle(page: Page) {
+  // Sunucudan yenileme (router.refresh) sırasında <title> kısa süre kalkabiliyordu; tarama ona denk gelirse document-title ihlali
+  // veriyordu (kararsız test). Başlık yerleşene kadar beklenir; her sayfada başlık olduğu da böylece doğrulanır.
+  await expect(page).toHaveTitle(/\S/);
   await tasmaYok(page);
   await erisilebilirlik(page);
 }

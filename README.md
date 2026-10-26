@@ -104,7 +104,7 @@ node tools/deploy/yigin.mjs e2e             # arayüz kabul testleri (dört ekra
 node tools/deploy/yigin.mjs down            # durdur (--sil: verileri de sil)
 ```
 
-Docker ayrıntısı (servisler, portlar, ayarlar): [deploy/README.md](deploy/README.md). Durum ve açık konular: [docs/ai/durum.md](docs/ai/durum.md).
+VS Code ile çalıştırma ve hata ayıklama: [başlangıç §5–7](docs/gelistirici-rehberi/baslangic.md#5-vs-code-ile-çalıştırma); canlı sunucu: [VPS kurulumu](docs/gelistirici-rehberi/vps-kurulum.md). Docker ayrıntısı (servisler, portlar, kipler): [deploy/README.md](deploy/README.md). Durum ve açık konular: [docs/ai/durum.md](docs/ai/durum.md).
 
 ## Katkı
 

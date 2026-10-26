@@ -22,6 +22,7 @@ export const TABLO = {
   [GENEL]: { ebeveyn: KOK, etiket: 'Genel bakış' },
   'docs/gelistirici-rehberi/baslangic.md': { ebeveyn: GENEL, etiket: 'Başlangıç rehberi' },
   'docs/gelistirici-rehberi/terimler.md': { ebeveyn: GENEL, etiket: 'Terimler' },
+  'docs/gelistirici-rehberi/vps-kurulum.md': { ebeveyn: 'docs/gelistirici-rehberi/baslangic.md', etiket: 'VPS kurulumu' },
   'docs/gelistirici-rehberi/ddd-nedir.md': { ebeveyn: GENEL, etiket: 'DDD nedir' },
   'docs/gelistirici-rehberi/ddd.md': { ebeveyn: GENEL, etiket: 'DDD rehberi' },
   'docs/gelistirici-rehberi/tdd-nedir.md': { ebeveyn: GENEL, etiket: 'TDD nedir' },
