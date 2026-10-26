@@ -8,18 +8,22 @@ from urllib.parse import urlsplit
 
 from playwright.async_api import async_playwright
 from captcha_assist import CaptchaAssist
-from cloud_credentials import fill_gib_credentials
+from cloud_credentials import fill_gib_credentials, fetch_credentials
 from firm_credentials import fetch_firm_credentials
 from institution_scope import observe_readonly_account_identity
 from local_files import atomic_json
 from navigation_adapter import visible_target, confirm_ivd_transition, focus_requested
 
-TARGETS = {'digital', 'ivd', 'ledger', 'declarations', 'notices'}
+TARGETS = {'digital', 'ivd', 'ledger', 'declarations', 'notices', 'taxplates'}
 
 
 def validate_scope(value):
     if not isinstance(value, dict) or value.get('target') not in TARGETS:
         raise ValueError('Geçersiz portal hedefi.')
+    if value.get('target') == 'taxplates':
+        if value.get('accessMode') != 'advisor' or value.get('selection') != 'latest_available':
+            raise ValueError('Vergi levhası için müşavir ve en güncel levha kapsamı gerekli.')
+        return dict(target='taxplates', accessMode='advisor', selection='latest_available')
     firm_id, identity = value.get('firmId'), value.get('identity')
     if (not isinstance(firm_id, str) or not 1 <= len(firm_id.strip()) <= 160
             or not isinstance(identity, str) or not identity.isascii()
@@ -29,6 +33,9 @@ def validate_scope(value):
 
 
 async def open_target(context, page, target, credentials_provider):
+    if target == 'taxplates':
+        from tax_plate_discovery import inspect_tax_plate_screen
+        return await inspect_tax_plate_screen(context)
     if target == 'digital':
         return 'account_verified'
     if target in ('ledger', 'declarations', 'notices'):
@@ -59,13 +66,16 @@ async def run(folder, access_token):
     def status(state, message):
         atomic_json(folder/'status.json', {'state': state, 'message': message})
 
+    advisor = scope.get('accessMode') == 'advisor'
     async def credentials_provider():
+        if advisor:
+            return await asyncio.to_thread(fetch_credentials, access_token, owner)
         return await asyncio.to_thread(fetch_firm_credentials, access_token,
             owner, scope['firmId'], scope['identity'], include_scope=True)
 
     credentials = await credentials_provider()
-    verified_identities = credentials.pop('verifiedIdentities', (scope['identity'],))
-    if scope['identity'] not in verified_identities:
+    verified_identities = credentials.pop('verifiedIdentities', (() if advisor else (scope['identity'],)))
+    if not advisor and scope['identity'] not in verified_identities:
         raise ValueError('Firma kimlik kapsamı doğrulanamadı.')
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(channel='chrome', headless=False)
@@ -78,6 +88,10 @@ async def run(folder, access_token):
                 from notice_service import NoticeListCollector
                 notice_collector = NoticeListCollector(folder)
                 context.on('response', notice_collector.observe)
+            if advisor:
+                from tax_plate_discovery import TaxPlateProbe
+                tax_probe = TaxPlateProbe(folder)
+                context.on('response', tax_probe.observe)
             page = await context.new_page()
             context.set_default_timeout(10000)
             await page.goto('https://dijital.gib.gov.tr/portal/login', wait_until='domcontentloaded')
@@ -109,7 +123,7 @@ async def run(folder, access_token):
                     else:
                         account = await observe_readonly_account_identity(page)
                         if account.get('identity'):
-                            if account['identity'] not in verified_identities:
+                            if not advisor and account['identity'] not in verified_identities:
                                 raise ValueError('Açılan GİB hesabı seçilen mükellefle eşleşmiyor; geçiş durduruldu.')
                             verified = True
                             observed_identity = account['identity']
@@ -132,13 +146,17 @@ async def run(folder, access_token):
                             notice_read = dict(state='list_request_failed', complete=False)
                     atomic_json(folder/'portal-session-result.json', {
                         'schema': 'eworks.portal-session.v1', 'ownerId': owner,
-                        'requestId': request['requestId'], 'firmId': scope['firmId'],
+                        'requestId': request['requestId'], 'firmId': scope.get('firmId'),
+                        'accessMode': scope.get('accessMode','firm'),
+                        **({'clientAuthorizationVerified': False} if advisor else {}),
                         'target': scope['target'], 'accountVerified': True,
                         'navigationState': result.get('state') if isinstance(result,dict) else result,
                         **({'inspection': result} if isinstance(result,dict) else {}),
                         **({'noticeRead': notice_read} if notice_read is not None else {}), 'imported': False})
                     if notice_read is not None:
                         status('running', str(notice_read.get('count'))+' tebligat mevcut liste filtresinde doğrulandı. Belgeler açılmadı; Eworks aktarımı yapılmadı.' if notice_read.get('complete') else 'e-Tebligat listesi tam doğrulanamadı: '+notice_read.get('message',notice_read['state']))
+                    elif advisor:
+                        status('running', 'Müşavir hesabı gözlendi; vergi levhası erişim yolu incelendi. Mükellef yetkisi ve belge aktarımı henüz doğrulanmadı.')
                     else:
                         status('running', 'Firma hesabı doğrulandı. Portal penceresi açık; hedef uygulama ek giriş/yetki isterse pencerede tamamlayın. Veri aktarımı yapılmıyor.')
                 await asyncio.sleep(2)

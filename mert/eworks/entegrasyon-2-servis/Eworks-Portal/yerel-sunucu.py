@@ -243,7 +243,7 @@ class Handler(SimpleHTTPRequestHandler):
             job_id=uuid.uuid4().hex
             JOBS[job_id]={'id':job_id,'ownerId':owner,'kind':kind,'state':'queued','message':'GİB aktarımı sıraya alındı.'}
             if kind=='declarations':JOBS[job_id]['scope']=scope
-            if kind=='portal_session':JOBS[job_id]['portalSession']={'firmId':config['portalSession']['firmId'],'target':config['portalSession']['target'],'identity':config['portalSession']['identity']}
+            if kind=='portal_session':JOBS[job_id]['portalSession']=dict(config['portalSession'])
         threading.Thread(target=run_job,args=(job_id,config,access_token),daemon=True).start()
         return self.reply(202,{'jobId':job_id,'state':'queued'})
     def end_headers(self):

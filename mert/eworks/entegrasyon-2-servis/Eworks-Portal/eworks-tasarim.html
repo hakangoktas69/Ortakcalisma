@@ -1361,6 +1361,7 @@ let portalFirmId='',portalTab='gib';
 const PORTAL_DESTINATIONS=[
  {id:'digital',group:'gib',title:'Dijital Vergi Dairesi',url:'https://dijital.gib.gov.tr/portal/login',automatic:true,description:'Seçilen mükellefin GİB hesabıyla giriş.'},
  {id:'ivd',group:'gib',title:'İnternet Vergi Dairesi',url:'https://intvrg.gib.gov.tr/',automatic:true,description:'Mükellef hesabından İVD geçişi.'},
+ {id:'taxplates',group:'gib',title:'Mükelleflerin Vergi Levhaları',url:'https://dijital.gib.gov.tr/portal/',automatic:true,description:'Mali müşavir hesabından en güncel vergi levhaları için erişim yolunu kontrol edin.'},
  {id:'notices',group:'gib',title:'e-Tebligat',url:'https://dijital.gib.gov.tr/portal/',automatic:true,description:'Seçilen firmanın e-Tebligat listesini kontrol edin; belge açılmaz.'},
  {id:'ledger',group:'gib',title:'e-Defter',url:'https://edefter.gib.gov.tr/global/login',automatic:true,description:'Mükellefin e-Defter uygulamasını açın.'},
  {id:'declarations',group:'gib',title:'e-Beyanname',url:'https://ebeyanname.gib.gov.tr/',automatic:true,description:'Mükellef hesabından uygulama geçişini deneyin.'},
@@ -1379,7 +1380,7 @@ function portalEntriesPage(){
  ${f?`<p><strong>${safe(f.name)}</strong></p>${group==='gib'?`<button class="btn small" data-firm-gib-account="${safe(f.id)}">Firma GİB Hesabı</button>`:''}`:''}
  <p class="small-note">${group==='gib'?'Otomatik giriş, seçilen firmanın kayıtlı GİB hesabını kullanır. Ek doğrulama veya yetki istenirse açılan pencereden devam edin.':'SGK bağlantıları giriş sayfasını açar. SGK için otomatik giriş henüz bağlı değil.'}</p>
  <p id="portalSessionStatus" role="status">${safe(portalSession.message)}</p>${portalSession.busy?'<div class="actions"><button class="btn" data-portal-action="focus">Portal Penceresini Göster</button><button class="btn" data-portal-action="cancel">Oturumu Kapat</button></div>':''}</section>
- <div class="module-grid">${PORTAL_DESTINATIONS.filter(d=>d.group===group).map(d=>`<section class="paper panel-padding"><h3>${safe(d.title)}</h3><p>${safe(d.description)}</p><button class="btn blue" data-openportal="${d.id}" ${!f||portalSession.busy?'disabled':''}>${ico('arrow')} ${d.automatic?'Mükellef Portalını Aç':'Giriş Sayfasını Aç'}</button><p style="margin-top:12px"><a href="${safe(d.url)}" target="_blank" rel="noopener noreferrer">Genel giriş sayfası ↗</a></p></section>`).join('')}</div>`;
+ <div class="module-grid">${PORTAL_DESTINATIONS.filter(d=>d.group===group).map(d=>`<section class="paper panel-padding"><h3>${safe(d.title)}</h3><p>${safe(d.description)}</p><button class="btn blue" data-openportal="${d.id}" ${(!f&&d.id!=='taxplates')||portalSession.busy?'disabled':''}>${ico('arrow')} ${d.automatic?'Mükellef Portalını Aç':'Giriş Sayfasını Aç'}</button><p style="margin-top:12px"><a href="${safe(d.url)}" target="_blank" rel="noopener noreferrer">Genel giriş sayfası ↗</a></p></section>`).join('')}</div>`;
 }
 function firmDrawer(id){editFirm(id);}
 function portalSessionHeaders(){return {'Content-Type':'application/json','X-Eworks-Token':portalSession.token,'X-Eworks-Owner':portalSession.owner,Authorization:'Bearer '+(cloud.session?.access_token||'')};}
@@ -1390,18 +1391,19 @@ async function portalSessionAction(action){
 }
 async function openSelectedPortal(id){
  const d=PORTAL_DESTINATIONS.find(x=>x.id===id),f=data.firms.find(x=>x.id===portalFirmId);
- if(!d||!f){toast('Önce mükellef seçin.');return;}
+ const advisor=id==='taxplates';
+ if(!d||(!f&&!advisor)){toast('Önce mükellef seçin.');return;}
  if(!d.automatic){window.open(d.url,'_blank','noopener,noreferrer');return;}
  if(portalSession.busy)return;
- const owner=cloud.session?.user?.id,identity=String(f.taxNumber||f.identityNumber||'').trim();
+ const owner=cloud.session?.user?.id,identity=String(f?.taxNumber||f?.identityNumber||'').trim();
  if(!cloud.ready||!owner){toast('Eworks hesabınıza giriş yapın.');return;}
- if(!/^\d{10,11}$/.test(identity)){toast('Firma VKN/TCKN bilgisini tamamlayın.');return;}
+ if(!advisor&&!/^\d{10,11}$/.test(identity)){toast('Firma VKN/TCKN bilgisini tamamlayın.');return;}
  portalSession.busy=true;portalSession.owner=owner;portalStatus('Firma portalı hazırlanıyor…');render();
  try{
    await authFetch('/auth/v1/user');
    if(cloud.session?.user?.id!==owner)throw Error('Eworks oturumu değişti.');
    const connection=await fetch('api/connection',{cache:'no-store'});if(!connection.ok)throw Error('Yerel robot bağlantısı kurulamadı.');const config=await connection.json();if(!config.ready)throw Error(config.message||'Robot hazır değil.');portalSession.token=config.token;
-   const response=await fetch('api/portal/open',{method:'POST',headers:portalSessionHeaders(),body:JSON.stringify({ownerId:owner,portalSession:{firmId:f.id,identity,target:id}})});const value=await response.json();if(!response.ok)throw Error(value.message||'Portal açılamadı.');
+   const response=await fetch('api/portal/open',{method:'POST',headers:portalSessionHeaders(),body:JSON.stringify({ownerId:owner,portalSession:advisor?{target:'taxplates',accessMode:'advisor',selection:'latest_available'}:{firmId:f.id,identity,target:id}})});const value=await response.json();if(!response.ok)throw Error(value.message||'Portal açılamadı.');
    if(cloud.session?.user?.id!==owner)throw Error('Eworks oturumu değişti.');portalSession.jobId=value.jobId;
    const poll=async()=>{
      if(cloud.session?.user?.id!==owner){portalSession.busy=false;portalStatus('Eworks oturumu değişti; portal durumunu kontrol edin.');return;}
