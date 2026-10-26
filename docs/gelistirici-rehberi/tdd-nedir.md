@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **TDD nedir**
+<!-- /gezinti -->
+
 # Test-Driven Development (TDD) nedir ve ne işe yarar?
 
 > Kavramsal giriş. Bu döngünün Eworks'te nasıl uygulandığı: [TDD uygulama rehberi](tdd.md). Proje kararları: [hedef-mimari/06 §7–§8](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#7-tdd-süreci-d22).
@@ -50,3 +54,10 @@ Eworks, yukarıdaki listedeki "mutlaka kullanılmalı" grubundadır: vergi ve SG
 | "UI ağırlıklı işte zorlayıcı" | Arayüz dört ekran sınıfında Playwright kabul testleriyle doğrulanır |
 | "Dış bağımlılıklı sistemde zor" | Kurum (GİB/SGK) için sahte kurum sunucusu kullanılır; canlı davranış ayrıca canlı doğrulama kaydıyla kanıtlanır (D33, [canli-dogrulama.md](canli-dogrulama.md)) |
 | Hata düzeltme | Önce hatayı yeniden üreten test, sonra düzeltme |
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **TDD nedir**
+<!-- /gezinti -->

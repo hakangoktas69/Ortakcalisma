@@ -34,8 +34,9 @@ jobs:
         run: node tools/ajan/senkron.mjs --denetle
       - run: node tools/claude/check-memory.mjs
       - name: Ajan senkronu kabul testleri
-        run: node --test "tools/ajan/test/*.test.mjs" "tools/deploy/test/*.test.mjs"
+        run: node --test "tools/ajan/test/*.test.mjs" "tools/deploy/test/*.test.mjs" "tools/docs/test/*.test.mjs"
       - run: node tools/docs/baglanti-denetle.mjs
+      - run: node tools/docs/gezinti.mjs
       - if: always()
         uses: actions/upload-artifact@v4
         with:

@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **02 Kurum entegrasyonu**
+<!-- /gezinti -->
+
 # 5.2 Kurum entegrasyonları — web servis öncelikli, robot yedek (backend, paralel, hız sınırlı)
 
 > Önce: [5.1 Genel bakış](01-cok-kiracili-hedef-mimari.md) · Sonra: [5.3 Kaynak verimliliği ve kapasite](03-kaynak-verimliligi-ve-kapasite.md)
@@ -321,3 +325,10 @@ Ayrıntı: [5.3](03-kaynak-verimliligi-ve-kapasite.md).
   - Kim, ne zaman, hangi filtreyle, kaç dosya sildi bilgisi denetim kaydına yazılır.
 - Parametre değişikliği bir sonraki temizlik işinde geçerli olur. Süre kısaltıldığında ilk koşu büyük olabilir, bu da yine parçalı yürür.
 - Depolama etkisi: 7 günlük saklamada MinIO yalnız son bir haftanın PDF'lerini tutar. 1 TB yerine onlarca GB yeterli olur ([5.3](03-kaynak-verimliligi-ve-kapasite.md)).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **02 Kurum entegrasyonu**
+<!-- /gezinti -->

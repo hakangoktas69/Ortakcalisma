@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Vizyon**
+<!-- /gezinti -->
+
 # Vizyon ve kapsam
 
 > Kısa özet. Ayrıntı ve gerekçe: [hedef-mimari/01](../hedef-mimari/01-cok-kiracili-hedef-mimari.md).
@@ -31,3 +35,10 @@ Müşavir her ay GİB ve SGK ekranlarını mükellef mükellef açıp beyanname,
 ## Barındırma
 
 On-prem Supabase (D4), Türkiye'de; Docker Compose veya Kubernetes, kurulumda seçimli (D10).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Vizyon**
+<!-- /gezinti -->

@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **documents**
+<!-- /gezinti -->
+
 # documents — Belgeler
 
 > Durum: **E aşaması (2026-10-25)**: kurumdan alınan PDF'lerin metaverisi, içerik özetiyle saklama, kapsamlı ve denetimli indirme, D15 saklama temizliği (işçi, saatte bir). Yönetici toplu temizlik ekranı ve tek belgelik "yeniden indir" işi yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil), [02 §9](../hedef-mimari/02-kurum-entegrasyon-robotu.md#9-belge-pdf-saklama-ve-toplu-temizlik-d15). Kod: `packages/contexts/documents` — dışarıya yalnız `src/index.ts`.
@@ -33,3 +37,10 @@
 ## Açık işler
 
 - Yönetici toplu temizlik ekranı (`yonetim.belge_temizligi.run`, önizleme + ofis adıyla onay), ofis bazında kısa saklama süresi, tek belgelik "yeniden indir" işi, `DocumentsPurged` olayı.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **documents**
+<!-- /gezinti -->

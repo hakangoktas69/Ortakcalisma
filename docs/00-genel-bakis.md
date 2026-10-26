@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../README.md) › **Genel bakış**
+<!-- /gezinti -->
+
 # Genel bakış
 
 Eworks, mali müşavir ofislerinin kurum (GİB, SGK) verilerini müşavirin ve mükelleflerin kendi hesaplarıyla toplu çektiği çok kiracılı SaaS portaldır. Bu sayfa yeni geliştiricinin okuma sırasını ve belge haritasını verir.
@@ -59,3 +63,10 @@ Mükellef Takip (D32, arşiv): `eski/hakan/mukellef-takip/`. Satış portalı de
 | [adr/](../eski/hakan/mukellef-takip/docs/adr/0001-moduler-monolit.md) | ADR 0001–0009 (modüler monolit … [satış modülü](../eski/hakan/mukellef-takip/docs/adr/0009-satis-modulu.md)) |
 | [ai/](../eski/hakan/mukellef-takip/docs/ai/architecture.md) | Kısa ajan bağlamı: mimari, bağlamlar, kurallar, [güvenlik/KVKK](../eski/hakan/mukellef-takip/docs/ai/security-kvkk.md), yol haritası |
 | [satis/](../eski/hakan/mukellef-takip/satis/README.md) | Satış modülü (api + web) |
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../README.md) › **Genel bakış**
+<!-- /gezinti -->

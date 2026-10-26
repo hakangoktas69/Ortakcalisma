@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Terimler**
+<!-- /gezinti -->
+
 # Terimler sözlüğü
 
 Belgelerde sık geçen teknik terimlerin kısa, sade açıklaması. İş terimlerinin kod karşılıkları (mükellef = `Taxpayer` gibi): [ai/mimari.md, "Ortak dil"](../ai/mimari.md#ortak-dil-tr--kod).
@@ -27,3 +31,10 @@ Belgelerde sık geçen teknik terimlerin kısa, sade açıklaması. İş terimle
 | **Sahte GİB** | GİB'i taklit eden yerel sunucu; gerçek veri yok | Demo ve testler buna gider (D33: canlı ayrıca doğrulanır) |
 | **Container / imaj** | Uygulamanın çalışması için gereken her şeyin paketlendiği kutu / kalıbı | Docker; `node tools/deploy/yigin.mjs` yönetir |
 | **Compose** | Birden çok container'ı birlikte çalıştırma tanımı | `deploy/compose/compose.yml` |
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Terimler**
+<!-- /gezinti -->

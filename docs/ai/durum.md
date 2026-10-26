@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Durum**
+<!-- /gezinti -->
+
 # Durum, açık konular ve sıradaki işler
 
 > İşe başlamadan bu dosyaya bak. Son güncelleme: 2026-10-26. Eski Eworks pilotunun durum ve risk listesi (G-NN, M-NN): [arsiv/mevcut-durum/ai/durum-ve-riskler.md](../arsiv/mevcut-durum/ai/durum-ve-riskler.md).
@@ -54,3 +58,10 @@ Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri analizi (Ha
 - [x] Eski portalın portu, aşama A–H (2026-10-25)
 - [ ] Canlı GİB doğrulaması (Hakan, açık konu 6)
 - [ ] Yönetim ekranları, `apps/sales`, e-Tebligat, SGK sistemleri, bildirimler
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Durum**
+<!-- /gezinti -->

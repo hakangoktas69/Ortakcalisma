@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **credentials**
+<!-- /gezinti -->
+
 # credentials — Kurum hesapları
 
 > Durum: **C aşaması (2026-10-25)**: müşavir ve firma GİB hesabı (Vault), durum görüntüleme. Kullanım izni, mükellef onayı ve iş için sır okuma (D aşaması) yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil), [05 §4](../hedef-mimari/05-yetki-ve-hesap-modeli.md). Kod: `packages/contexts/credentials` — dışarıya yalnız `src/index.ts`.
@@ -31,3 +35,10 @@
 ## Açık işler
 
 - İş için sır okuma (`eworks_integration` rolü, D aşaması), kullanım izni (`grant_use`), mükellef onayı (`consent`), SGK hesap alanları (kullanıcı adı, işyeri kodu, sistem ve işyeri şifresi).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **credentials**
+<!-- /gezinti -->

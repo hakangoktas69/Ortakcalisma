@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **identity-access**
+<!-- /gezinti -->
+
 # identity-access — Kimlik ve yetki
 
 > Durum: **B aşaması (2026-10-25)**: giriş, oturum, rol şablonları ve miraslı yetki. MFA ve yetki yönetim ekranı yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil), [05 §3](../hedef-mimari/05-yetki-ve-hesap-modeli.md). Kod: `packages/contexts/identity-access` — dışarıya yalnız `src/index.ts`.
@@ -33,3 +37,10 @@
 ## Açık işler
 
 - MFA (`oturum.mfa`), şifre sıfırlama (SMTP gerekir), çok ofisli kullanıcı için ofis değiştirme, kullanıcı ve yetki yönetim ekranları (`yonetim.kullanicilar`).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **identity-access**
+<!-- /gezinti -->

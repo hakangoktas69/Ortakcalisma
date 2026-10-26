@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **08 Depo yeniden yapılanması**
+<!-- /gezinti -->
+
 # 5.8 Depo yeniden yapılanması — `eski/` ve yeni kök
 
 > Önce: [5.6 Kaynak kod yapısı](06-kaynak-kod-yapisi-ddd-tdd.md)
@@ -111,3 +115,10 @@ Ortakcalisma/                        ← depo kökü = Eworks SaaS monoreposu
 - `git mv` Windows'ta klasörü diskte bütün olarak yeniden adlandırdığı için taşımayı yapan makinede yoksayılan dosyalar da taşındı. Diğer makinelerde §3a geçerlidir: `node tools/ajan/eski-yerel-tasi.mjs --uygula`.
 - `AGENTS.md` hafıza bloğu son 14 günün değişikliklerini değil `git log` komutunu içerir ([5.9 §4](09-yapay-zeka-ajan-baglami.md#4-senkronmjs-ne-yapar)).
 - Skill kaynakları `docs/ai/beceriler/`, karar sayısı K-01…K-39, bağlam sayısı 12 (`sales` dahil).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **08 Depo yeniden yapılanması**
+<!-- /gezinti -->

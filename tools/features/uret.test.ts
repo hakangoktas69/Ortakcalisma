@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { computeStatus } from '../../packages/feature-registry/src/index.ts';
-import { parseJunit, renderMarkdown, summary } from './uret.ts';
+import { gezintiyiKoru, parseJunit, renderMarkdown, summary } from './uret.ts';
 
 const xml = `<?xml version="1.0"?>
 <testsuites>
@@ -42,5 +42,20 @@ describe('çıktılar', () => {
 
   it('README özeti', () => {
     expect(summary(tree, status)).toMatch(/^\*\*1\/2 işlem yeşil\*\* \(1 modül\)\. 🔴 SGK 1\/2/);
+  });
+});
+
+describe('gezinti blokları', () => {
+  const ust = '<!-- gezinti — örnek -->\n[README](../README.md) › **Özellik durumu**\n<!-- /gezinti -->\n';
+  const alt = '\n<!-- gezinti — örnek -->\n\n---\n\n[README](../README.md) › **Özellik durumu**\n<!-- /gezinti -->\n';
+
+  it('ozellik-durumu.md yeniden üretilirken tools/docs/gezinti.mjs bloklarını korur', () => {
+    const mevcut = `${ust}\n# Özellik durumu\n\neski tablo\n${alt}`;
+    expect(gezintiyiKoru(mevcut, '# Özellik durumu\n\nyeni tablo\n')).toBe(`${ust}\n# Özellik durumu\n\nyeni tablo\n${alt}`);
+    expect(gezintiyiKoru(mevcut.replace(/\n/g, '\r\n'), 'yeni\n')).toBe(`${ust}\nyeni\n${alt}`);
+  });
+
+  it('blok yoksa üretilen metin olduğu gibi kalır', () => {
+    expect(gezintiyiKoru('# Özellik durumu\n', 'yeni\n')).toBe('yeni\n');
   });
 });

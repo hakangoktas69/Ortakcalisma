@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **09 Ajan bağlamı**
+<!-- /gezinti -->
+
 # 5.9 Yapay zekâ ajan bağlamı ve ekip hafızası (Claude ↔ Codex)
 
 > Önce: [5.8 Depo yeniden yapılanması](08-depo-yeniden-yapilanmasi.md)
@@ -165,3 +169,10 @@ Ajana iş veren geliştiriciler junior varsayılır; isteğin teknik doğruluğu
 | **C. Doğrula** | Plan ↔ diff ↔ iş kuralı tutarlılığı, diff temizliği, `pnpm verify`, yığın testleri, dört ekranda kabul testi + axe-core erişilebilirlik + ekran görüntüsü incelemesi + UX listesi, son güvenlik bakışı, bağımsız inceleme (Claude `code-review`, Codex `/review`), sade rapor (koşulamayan doğrulama ayrı); `dev`'e birleştirme: güncellemeleri kişisel dala çek, çatışmayı iki tarafın amacını analiz ederek kişisel dalda çöz, yeniden doğrula, `--no-ff` birleştir, push kullanıcı onayıyla | Stop kancası → `bitir.mjs` (dal ve hassas alan uyarısı), `birlestir.mjs` (`guncelle` / `dev`), `.github/CODEOWNERS` (`HASSAS_ALANLAR`'dan üretilir), `pnpm verify`, `yigin e2e`, CI |
 
 Dal modeli: `<ad>/<kısa-iş>` → `dev` (ajan, push kullanıcı onayıyla) → `main` (kod sahibi `@hkazaz`, PR şablonu `.github/pull_request_template.md`). Öncelik sırası: güvenlik ve sağlamlık → doğruluk → performans. Kural çiğneyen istek reddedilir, gerekçesi sade anlatılır ve meşru yol önerilir. İnsan için özet: [gelistirici-rehberi/claude-codex.md](../gelistirici-rehberi/claude-codex.md#ajana-iş-verdiğinde-ne-olur-gelistir).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **09 Ajan bağlamı**
+<!-- /gezinti -->

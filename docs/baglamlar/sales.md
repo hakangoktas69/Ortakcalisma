@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **sales**
+<!-- /gezinti -->
+
 # sales — Satış portalı
 
 > Durum: **B aşaması (2026-10-25)**: hesap açma use-case'i ve komutu. Satış portalı ekranı yok, `satis.*` kırmızı. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil), [08 §2](../hedef-mimari/08-depo-yeniden-yapilanmasi.md#2-satış-portalı-d27). Kod: `packages/contexts/sales` — dışarıya yalnız `src/index.ts`.
@@ -27,3 +31,10 @@
 ## Açık işler
 
 - `apps/sales` ekranı, `SalesUser` (zorunlu iki adımlı doğrulama), sözleşme ve mükellef onayı kaydı, ofis dondurma.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **sales**
+<!-- /gezinti -->

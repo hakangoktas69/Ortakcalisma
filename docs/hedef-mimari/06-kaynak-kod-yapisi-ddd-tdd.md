@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **06 Kaynak kod (DDD/TDD)**
+<!-- /gezinti -->
+
 # 5.6 Kaynak kod yapısı — DDD ve TDD
 
 > Önce: [5.1 Genel bakış](01-cok-kiracili-hedef-mimari.md), [5.5 Yetki ve hesap modeli](05-yetki-ve-hesap-modeli.md)
@@ -342,3 +346,10 @@ Ana düğümler (modül, sayfa) alt düğümlerden hesaplanır. Hepsi yeşilse y
 - Yeni yapı **bu deponun kökünde** sıfırdan kurulur; mevcut tüm klasörler `eski/` altına taşınır (D28, [5.8](08-depo-yeniden-yapilanmasi.md)). Veri taşıma yoktur (D29). Bugünkü `eski/mert/eworks` kodu **referans** olarak kalır.
 - Taşınacak Python modülleri (5.1 §8), testleriyle birlikte `services/integration/institutions/...` altına alınır. Testler önce yeni sahte kurum sunucusuyla kırmızıya çevrilir, sonra uyarlanır.
 - İlk iş (Faz 0): iskelet, mimari kurallar, `feature-registry`'nin tam ağacı. Bugünkü portalın tüm ekranları ve işlemleri kayda girer ve **hepsi kırmızı** başlar. Böylece ilerleme ilk günden ölçülür.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **06 Kaynak kod (DDD/TDD)**
+<!-- /gezinti -->

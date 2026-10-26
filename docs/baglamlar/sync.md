@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **sync**
+<!-- /gezinti -->
+
 # sync — Senkron işleri
 
 > Durum: **D aşaması (2026-10-25)**: kurum işi (iş kaydı + transactional outbox), durum makinesi, işçi taşıyıcısı ve sonuç uygulayıcısı, takılı iş temizliği, Python ACL ile uçtan uca GİB sözleşme listesi akışı (sahte GİB'e karşı). Gece planı, hız politikası ekranı, iptal yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil), [02 §5](../hedef-mimari/02-kurum-entegrasyon-robotu.md). Kod: `packages/contexts/sync` — dışarıya yalnız `src/index.ts`.
@@ -60,3 +64,10 @@ sequenceDiagram
 
 - İptal (`beyanname.senkron.cancel`), gece planı, hız politikası ekranı, `Integration` kaydı (resmi web servis / robot seçimi, D19; bugün erişim yolu ACL'nin ortam parametresi, D38), adım bazlı durum.
 - Zaman aşımına uğrayan robot işi şu an yalnız takılı iş temizliğiyle kapanır; entegrasyon tarafında zaman aşımı sonucu yayımlanmalı.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **sync**
+<!-- /gezinti -->

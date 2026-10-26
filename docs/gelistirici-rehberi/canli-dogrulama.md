@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Canlı GİB doğrulaması**
+<!-- /gezinti -->
+
 # Canlı GİB doğrulaması (D33)
 
 Kurumla konuşan işlemler (`live: true`) sahte GİB testleri geçse de **canlı koşu kaydı** girilene kadar kırmızıdır ([test.md](../ai/test.md), K-40). Bu belge canlı koşunun nasıl yapılacağını ve kaydın nasıl girileceğini anlatır. Canlı koşuyu **Hakan kendi GİB hesabıyla** yapar; Claude/Codex oturuma katılabilir ama şifreyi görmez.
@@ -68,3 +72,10 @@ Canlı koşudan sonra yerel veritabanında **gerçek mükellef verisi** ve S3'te
 - İş bitince `GIB_SAHTE_SUNUCU` satırını `.env`'den sil (sahte GİB'e geri dön).
 - Gerçek veriyi sil: `node tools/deploy/yigin.mjs down --sil` (tüm birimler silinir), sonra `node tools/deploy/yigin.mjs up` ile temiz demo.
 - `test-results/`, ekran görüntüsü ve günlük dosyalarını commit etme (kural 9).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Canlı GİB doğrulaması**
+<!-- /gezinti -->

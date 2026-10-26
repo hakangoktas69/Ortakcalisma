@@ -74,6 +74,13 @@ export function summary(tree: FeatureTree, status: Record<string, NodeStatus>): 
 }
 
 const BLOK = /(<!-- ozellik-durumu:baslangic[^>]*-->)[\s\S]*?(<!-- ozellik-durumu:bitis -->)/;
+const GEZINTI = /^(<!-- gezinti[\s\S]*?<!-- \/gezinti -->\n)[\s\S]*?(\n<!-- gezinti[\s\S]*<!-- \/gezinti -->\n)$/;
+
+/** Belgenin üstündeki ve altındaki gezinti blokları (yazan: tools/docs/gezinti.mjs) yeniden üretimde korunur. */
+export function gezintiyiKoru(mevcut: string, yeni: string): string {
+  const m = GEZINTI.exec(mevcut.replace(/\r\n/g, '\n'));
+  return m ? `${m[1]}\n${yeni}${m[2]}` : yeni;
+}
 
 export function generate(root: string, resultsDir: string) {
   const results: TestResult[] = [];
@@ -90,10 +97,12 @@ export function generate(root: string, resultsDir: string) {
   ) + '\n';
   const readmePath = join(root, 'README.md');
   const readme = existsSync(readmePath) ? readFileSync(readmePath, 'utf8') : '';
+  const durumPath = join(root, 'docs/ozellik-durumu.md');
+  const durum = existsSync(durumPath) ? readFileSync(durumPath, 'utf8') : '';
   return {
     files: {
       'packages/feature-registry/feature-status.json': json,
-      'docs/ozellik-durumu.md': renderMarkdown(features, status, unknown),
+      'docs/ozellik-durumu.md': gezintiyiKoru(durum, renderMarkdown(features, status, unknown)),
       ...(BLOK.test(readme) ? { 'README.md': readme.replace(BLOK, `$1\n${summary(features, status)}\n$2`) } : {}),
     } as Record<string, string>,
     unknown,

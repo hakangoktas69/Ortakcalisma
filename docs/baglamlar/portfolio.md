@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **portfolio**
+<!-- /gezinti -->
+
 # portfolio — Mükellef portföyü
 
 > Durum: **C aşaması (2026-10-25)**: firma kartı (ekle, görüntüle, düzenle, arşivle), liste ve CSV, VKN tekilliği, kapsam RLS'i. Personel ataması ve mükellef kullanıcısı ekranları ile devir yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil), [05 §2](../hedef-mimari/05-yetki-ve-hesap-modeli.md). Kod: `packages/contexts/portfolio` — dışarıya yalnız `src/index.ts`.
@@ -33,3 +37,10 @@
 ## Açık işler
 
 - Personel ataması ve mükellef kullanıcısı ekranları, müşavir devri (`firmalar.devir`), `TaxpayerRegistered` olayı, TCKN için kolon şifreleme.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **portfolio**
+<!-- /gezinti -->

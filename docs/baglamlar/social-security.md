@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **social-security**
+<!-- /gezinti -->
+
 # social-security — SGK
 
 > Durum: **F aşaması (2026-10-25)**: MUHSGK beyannamelerinin SGK bildirimleri (işyeri × ay, durum, tekil çalışan sayısı, SGK tahakkuk ve hizmet listesi PDF'leri), e-Bildirge ekranı ve SGK kontrol listesi. Kaynak eski portaldaki gibi GİB e-Beyanname içindeki "SGK Bildirimleri"dir; SGK'nın kendi sistemleri (e-Bildirge V2, işe giriş/çıkış, e-Rapor, iş kazası) henüz bağlanmadı. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil). Kod: `packages/contexts/social-security` — dışarıya yalnız `src/index.ts`.
@@ -36,3 +40,10 @@
 
 - SGK sistemleri: işe giriş/çıkış, e-Rapor (sağlık verisi — ayrı erişim ve maskeleme kuralı gerekir), iş kazası; SGK kurum hesabı (D13).
 - Çok sayfalı SGK bildirim listesi canlıda gözlenmedi; robot bugün tek sayfa dışını reddeder.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **social-security**
+<!-- /gezinti -->

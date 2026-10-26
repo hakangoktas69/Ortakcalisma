@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../README.md) › [Genel bakış](00-genel-bakis.md) › **Özellik durumu**
+<!-- /gezinti -->
+
 # Özellik durumu
 
 > **Üretilen dosya — elle düzenlemeyin.** Kaynak: `packages/feature-registry/src/features.ts` + test sonuçları; üretici `pnpm features` ([06 §8](hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#8-özellik-durumu-ve-ön-yüzde-kırmızıyeşil-işaretleme-d22)).
@@ -188,3 +192,10 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;Satış ekibi | `satis.ekip` | sales | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `satis.ekip.view` | sales | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Davet et | `satis.ekip.invite` | sales | 🔴 | 0 |
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../README.md) › [Genel bakış](00-genel-bakis.md) › **Özellik durumu**
+<!-- /gezinti -->

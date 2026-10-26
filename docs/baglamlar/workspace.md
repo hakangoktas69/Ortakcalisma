@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **workspace**
+<!-- /gezinti -->
+
 # workspace — Çalışma alanı
 
 > Durum: **G aşaması (2026-10-25)**: görevler (eski "Takvim ve Görevler"), firma notları, ana sayfa sayaçları. Takvim görünümü, uyarı/okundu ve raporlar yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil). Kod: `packages/contexts/workspace` — dışarıya yalnız `src/index.ts`.
@@ -35,3 +39,10 @@
 
 - Takvim görünümü (`genel_bakis.takvim`), görev CSV'si, uyarılar (`bildirimler`), son gün kurallarından otomatik görev, firma kartında notlar.
 - Okuma birleşimleri: bazı bağlam sorguları `portfolio.firms` ile birleşir (unvan için). Bağlam sınırına uygun okuma modeline taşınacak (bkz. [durum.md](../ai/durum.md)).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **workspace**
+<!-- /gezinti -->

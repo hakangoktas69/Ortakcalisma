@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Test**
+<!-- /gezinti -->
+
 # Test ve özellik durumu (TDD)
 
 > Ayrıntı: [06 §7–§8](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#7-tdd-süreci-d22). Örnekli uygulama rehberi: [gelistirici-rehberi/tdd.md](../gelistirici-rehberi/tdd.md).
@@ -40,3 +44,10 @@ Kapsam eşikleri: domain + application (+ `packages/kernel`) %90 satır / %80 da
 ## Bir işi tamamlarken
 
 Ajanlar kod değiştiren işte `gelistir` becerisini (`docs/ai/beceriler/gelistir.md`) uygular. `pnpm verify` (tip, mimari, birim testleri + kapsam eşiği, yetki anahtarı denetimi, hafıza, ajan senkronu, bağlantılar) yeşil olmadan iş bitmez; arayüz değiştiyse dört ekran sınıfında kabul testleri. Koşulamayan adım varsa kullanıcıya açıkça söylenir.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Test**
+<!-- /gezinti -->

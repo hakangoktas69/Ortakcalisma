@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **organization**
+<!-- /gezinti -->
+
 # organization — Ofis
 
 > Durum: **B aşaması (2026-10-25)**: ofis ve müşavir kaydı (tablolar, RLS). Davet ve ofis ayarları yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil). Kod: `packages/contexts/organization` — dışarıya yalnız `src/index.ts`.
@@ -25,3 +29,10 @@ _(Kabul testleri `@F:<anahtar>` etiketli; durum: [ozellik-durumu.md](../ozellik-
 ## Açık işler
 
 _(—)_
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **organization**
+<!-- /gezinti -->

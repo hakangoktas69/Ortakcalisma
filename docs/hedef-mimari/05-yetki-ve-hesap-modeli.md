@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **05 Yetki ve hesap**
+<!-- /gezinti -->
+
 # 5.5 Yetki ve hesap modeli
 
 > Önce: [5.1 Genel bakış](01-cok-kiracili-hedef-mimari.md) · İlgili: [5.2 Kurum entegrasyonları](02-kurum-entegrasyon-robotu.md)
@@ -206,3 +210,10 @@ sequenceDiagram
 - müşavir devri.
 
 Müşavir, kendi hesaplarının kimler tarafından ne zaman kullanıldığını görebilir. Mükellef, kendi hesaplarının kullanım geçmişini görebilir.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **05 Yetki ve hesap**
+<!-- /gezinti -->
