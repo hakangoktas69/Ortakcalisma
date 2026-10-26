@@ -4,7 +4,7 @@
 
 # Başlangıç: kur, çalıştır, değiştir, test et
 
-Bu rehber projeye yeni katılan ve yazılım geliştirmede deneyimi az olan ekip üyeleri içindir. Sonunda uygulamayı kendi bilgisayarında çalıştırmış, demo hesabıyla girmiş, kodda bir değişikliği anında görmüş ve testleri koşmuş olursun. Komutlar Windows'ta **Git Bash**'te yazılır (PowerShell'de de çalışır; fark varsa belirtilmiştir).
+Bu rehber projeye yeni katılan ve yazılım geliştirmede deneyimi az olan ekip üyeleri içindir. Sonunda uygulamayı kendi bilgisayarında çalıştırmış, demo hesabıyla girmiş, kodda bir değişikliği anında görmüş ve testleri koşmuş olursun. Komutlar Windows'ta **Git Bash**'te yazılır. PowerShell'de de çalışır; tek fark `pnpm` yerine `pnpm.cmd` yazmaktır (§5).
 
 Kodu genelde Claude Code ya da Codex ile değiştirirsin: [claude-codex.md](claude-codex.md#ajana-iş-verdiğinde-ne-olur-gelistir). Bu rehber, ajan çalışırken neyin olup bittiğini anlaman ve sonucu kendi gözünle doğrulaman içindir. Bilmediğin terimler: [terimler.md](terimler.md).
 
@@ -31,7 +31,7 @@ git config --global core.longpaths true   # eski/ arşivinde 260 karakteri aşan
 git clone https://github.com/hakangoktas69/Ortakcalisma.git
 cd Ortakcalisma
 git switch yeniden-yapilanma        # yeniden yapılanma dev'e birleşene kadar güncel kod burada; sonra dev
-corepack enable                     # PowerShell'de yönetici ister; olmazsa her komutun başına "corepack " yaz: corepack pnpm install
+corepack enable                     # yönetici ister (Program Files'a yazar); olmazsa her komutun başına "corepack " yaz: corepack pnpm install
 pnpm install                        # bağımlılıklar + git kancaları (tools/git-hooks)
 pnpm verify                         # tip denetimi, mimari kurallar, birim testleri, hafıza, belge bağlantıları — hepsi ✔ olmalı
 ```
@@ -64,8 +64,10 @@ Docker'daki web (8080) derlenmiş bir imajdır; kod değişikliğini görmek iç
 
 ```bash
 node tools/deploy/yigin.mjs gelistir        # yığın + altyapı portları yalnız bu bilgisayarda (127.0.0.1) + apps/web/.env.local
-pnpm --filter @eworks/web dev               # → http://127.0.0.1:8765 (aynı demo hesabı)
+pnpm --filter @eworks/web dev               # → http://127.0.0.1:8765 (aynı demo hesabı); PowerShell'de: pnpm.cmd --filter @eworks/web dev
 ```
+
+VS Code'dan aynısı, komut yazmadan: §5.
 
 - `gelistir`, `up`'ın yaptığı her şeyi yapar; ayrıca veritabanı, kimlik, Redis ve S3 portlarını **yalnız 127.0.0.1**'e açar (ağdaki başka bilgisayar erişemez) ve web'in bunlara bağlanacağı `apps/web/.env.local`'i yazar. Bu dosya sır içerir, git'e girmez.
 - 8765, Eworks 2 pilot portalının (Mert) adresidir. Durdurmak için terminalde `Ctrl+C`.
@@ -84,22 +86,40 @@ Kod değiştirmenin kuralları ve adımları (önce test, sonra kod): [gelistir 
 
 ## 5. VS Code ile çalıştırma
 
-1. VS Code'da **File → Open Folder** ile depo kökünü aç (`Ortakcalisma`). Alt klasörü açma; yapılandırma kökte.
-2. Sağ altta "Bu depo için önerilen eklentiler" uyarısı çıkar → **Install All** ([.vscode/extensions.json](../../.vscode/extensions.json)): Docker, Python + Python Debugger (debugpy), Vitest, Playwright, Mermaid önizleme.
-3. Terminal: **Terminal → New Terminal** (Windows'ta açılır listeden *Git Bash* seç). Bu rehberdeki komutların hepsi burada çalışır.
-4. Hazır görevler: **Terminal → Run Task…** ([.vscode/tasks.json](../../.vscode/tasks.json)):
+### İlk açılış (bir kez)
+
+1. **Docker Desktop'ı başlat** (görev çubuğunda balina simgesi "running" olmalı). Yığın komutları Docker olmadan çalışmaz.
+2. VS Code'da **File → Open Folder** ile depo kökünü aç (`Ortakcalisma`). Alt klasörü açma; `.vscode` yapılandırması kökte.
+3. Sağ altta "Bu depo için önerilen eklentiler" bildirimi çıkar → **Install All** ([.vscode/extensions.json](../../.vscode/extensions.json)): Docker, Python + Python Debugger (debugpy), Vitest, Playwright, Mermaid önizleme. Bildirim kaybolduysa: Extensions görünümü (`Ctrl+Shift+X`) → arama kutusuna `@recommended`.
+4. **Terminali seç.** VS Code'un Windows'taki varsayılan terminali **PowerShell**'dir. Önerilen: Git Bash'i varsayılan yap, böylece bu rehberdeki komutlar olduğu gibi çalışır:
+   - `Ctrl+Shift+P` → **Terminal: Select Default Profile** → **Git Bash**. Sonra açık terminali kapat (çöp kutusu simgesi) ve **Terminal → New Terminal** ile yenisini aç.
+   - PowerShell'de kalırsan tek fark: `pnpm` yerine **`pnpm.cmd`** yaz (ör. `pnpm.cmd --filter @eworks/web dev`). Bilgisayarın PowerShell politikası (`AllSigned`) imzasız `pnpm.ps1`'i engeller; `pnpm.cmd` bu engele takılmaz. `node …`, `git …`, `docker …` komutları iki terminalde de aynıdır.
+
+### Uygulamayı VS Code'dan çalıştır
+
+Komut yazmadan, hazır görevlerle: **Terminal → Run Task…** → listeden seç ([.vscode/tasks.json](../../.vscode/tasks.json)). Görevler Windows'ta `pnpm.cmd`'yi kendileri kullanır; terminal seçiminden etkilenmez.
+
+1. **Yığın: gelistir** — yığın Docker'da kurulur, altyapı portları 127.0.0.1'de açılır, `apps/web/.env.local` yazılır. İlk seferde 10–20 dk; terminalde `✔ Web ortamı yazıldı` görünce biter.
+2. **Web: dev (8765)** — web Docker'sız başlar. Terminalde `✓ Ready` görünce tarayıcıda `http://127.0.0.1:8765` aç; demo hesabıyla gir (§3). Kaydettiğin her değişiklik sayfada anında görünür. Durdurmak için o terminalde `Ctrl+C`.
+3. Hata ayıklayıcıyla çalıştırmak istersen 2. adım yerine **F5** (§6).
+
+Tüm görevler:
 
 | Görev | Ne yapar |
 |---|---|
-| Yığın: up | Tüm yığın Docker'da → `http://localhost:8080` |
-| Yığın: gelistir | Altyapı portları 127.0.0.1'de; ardından "Web: dev (8765)" |
+| Yığın: up | Tüm yığın Docker'da → `http://localhost:8080` (kod değişikliği için imaj yeniden derlenir) |
+| Yığın: gelistir | Altyapı portları 127.0.0.1'de + `.env.local`; ardından "Web: dev (8765)" |
 | Yığın: debug | `gelistir` + Docker'daki işçi ve entegrasyona hata ayıklayıcı bağlanabilir (§7) |
 | Yığın: demo kipine dön | Geliştirme/hata ayıklama portlarını kapatır |
 | Web: dev (8765) | Docker'sız web, anında yenilenir |
-| Yığın: test / Yığın: e2e / pnpm test / pnpm verify | §8'deki testler (`Ctrl+Shift+B` değil; **Run Test Task** varsayılanı `pnpm verify`) |
+| pnpm test | Birim testleri |
+| pnpm verify | Commit'ten önceki denetimler. Kısayolu: **Terminal → Run Test Task…** doğrudan bunu çalıştırır |
+| Yığın: test / Yığın: e2e | Docker yığınına karşı testler (§8) |
 | Yığın: down | Durdurur |
 
-5. Docker eklentisinin kenar çubuğunda (balina simgesi) çalışan container'ları, günlüklerini (**View Logs**) ve kabuklarını (**Attach Shell**) görürsün.
+### Container'ları izle
+
+Docker eklentisinin kenar çubuğundaki görünümünde çalışan container'ları görürsün. Bir container'a sağ tıkla: **View Logs** (günlükler), **Attach Shell** (içinde komut satırı), **Restart**. Container adları `eworks-<servis>-1` biçimindedir (ör. `eworks-worker-1`).
 
 ## 6. VS Code ile hata ayıklama (Docker'sız)
 
