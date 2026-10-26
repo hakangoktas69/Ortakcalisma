@@ -18,6 +18,8 @@ class FirmAccountUI(unittest.IsolatedAsyncioTestCase):
                 return await route.fulfill(body=HTML.read_text(encoding='utf-8'),content_type='text/html')
             if path == '/demo-cleanup.js':
                 return await route.fulfill(body=HTML.with_name('demo-cleanup.js').read_text(encoding='utf-8'),content_type='application/javascript')
+            if path == '/institution-review.js':
+                return await route.fulfill(body=HTML.with_name('institution-review.js').read_text(encoding='utf-8'),content_type='application/javascript')
             if path == '/auth/v1/token':
                 value = dict(access_token='synthetic',refresh_token='synthetic',expires_in=3600,user=dict(id=OWNER,email='test@example.invalid'))
             elif path == '/rest/v1/rpc/eworks_security_check':
@@ -41,6 +43,7 @@ class FirmAccountUI(unittest.IsolatedAsyncioTestCase):
                 await page.goto('http://127.0.0.1:8765/eworks-tasarim.html')
                 await page.evaluate("() => window.EworksLogin('test@example.invalid','synthetic')")
                 await page.get_by_role('button',name='Firma Kartı',exact=True).click()
+                await page.get_by_role('button',name='Düzenle',exact=True).last.click()
                 await page.get_by_role('button',name='Firma GİB Hesabı',exact=True).click()
                 dialog = page.get_by_role('dialog',name='Firma GİB Hesabı',exact=True)
                 button = dialog.get_by_role('button',name='Firma Hesabını Vault’a Kaydet')
