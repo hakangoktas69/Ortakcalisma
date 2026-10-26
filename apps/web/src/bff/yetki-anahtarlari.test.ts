@@ -16,7 +16,9 @@ const ACIK: Record<string, string> = {
   'api/oturum/giris/route.ts': 'giriş isteği, oturum öncesi',
   'api/saglik/route.ts': 'sağlık denetimi, iş verisi yok',
   '(panel)/firmalar/kart/page.tsx': 'yalnız listeye yönlendirir',
-  '(panel)/[...yol]/page.tsx': 'kırmızı yer tutucu; anahtar yoldan türetilir ve kayıtta aranır',
+  '(panel)/[...yol]/page.tsx':
+    'kırmızı yer tutucu (anahtar yoldan türetilir ve kayıtta aranır) ya da modül sayfası: yalnız görebildiği alt sayfaların bağlantıları, içerik yok',
+  '(panel)/kategori/[id]/page.tsx': 'gezinme: oturum ister, yalnız görebildiği modüllerin bağlantıları, içerik yok; her hedef kendi anahtarını denetler',
 };
 
 const SAYFA_KORUMASI = /\bsayfaIzni\(\s*'([^']+)'/g;
