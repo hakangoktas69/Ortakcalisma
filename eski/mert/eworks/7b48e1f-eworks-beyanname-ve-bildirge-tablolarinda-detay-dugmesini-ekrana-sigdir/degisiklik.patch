@@ -1,0 +1,101 @@
+From 7b48e1f670ab8cc7acda157082a406b63261eedb
+Author: MERT-hb <m1ert01can@gmail.com>
+Date: 2026-10-23T12:05:16+03:00
+Subject: Eworks beyanname ve bildirge tablolarinda Detay dugmesini ekrana sigdir
+
+
+diff --git a/mert/eworks/docs/gunluk/2026-10-23.md b/mert/eworks/docs/gunluk/2026-10-23.md
+index 432f1a4..19f9a52 100644
+--- a/mert/eworks/docs/gunluk/2026-10-23.md
++++ b/mert/eworks/docs/gunluk/2026-10-23.md
+@@ -11,3 +11,7 @@ Kapsam: `mert/eworks/`. Saat/dönem anlatımı Türkiye zamanına göredir.
+ 7. Sourcetree 3.4.32 kuruldu, mevcut Git tanındı ve ana ekran doğrulandı. Ekip paylaşımı için güncel `dev` tabanlı feature dalı, ayrı ikinci entegrasyon dizini ve bu ortak hafıza hazırlandı. Paylaşım testlerinin nihai sonucu ikinci entegrasyonun `VALIDATION.md` dosyasında tutulur.
+ 
+ Özel müşteri verileri ve sohbetin ham dökümü bu günlüğe eklenmedi. Dokuz eski olayın kesin kaynak sebebi günlük eksikliği nedeniyle geriye dönük kanıtlanamaz; bugünkü canlı tekrarda hiçbiri tekrarlanmadı.
++
++## Tablo görünümü düzeltmesi
++
++e-Beyanname ve e-Bildirge listelerinde Detay düğmesine ulaşmak için gereken yatay kaydırma kaldırıldı. Yalnız bu iki listeye özel sabit kolon dağılımı ve uzun metinlerde satır kırma kullanıldı; 600 piksel ve altında etiketli kart düzeni uygulanır. Tarih, durum, çalışan sayısı ve Detay kontrolü korunur. İki modül 1440, 1024, 768, 600 ve 390 piksel genişliklerde uzun sentetik firma adı/referansıyla incelendi; yatay taşma yok ve üç örnek satırın tüm Detay düğmeleri görünür. Canlı müşteri kaydı değiştirilmedi veya sorgu başlatılmadı.
+diff --git a/mert/eworks/entegrasyon-2-servis/Eworks-Portal/eworks-tasarim.html b/mert/eworks/entegrasyon-2-servis/Eworks-Portal/eworks-tasarim.html
+index 70fe5e7..da630be 100644
+--- a/mert/eworks/entegrasyon-2-servis/Eworks-Portal/eworks-tasarim.html
++++ b/mert/eworks/entegrasyon-2-servis/Eworks-Portal/eworks-tasarim.html
+@@ -361,6 +361,26 @@ footer{left:18px;right:18px;font-size:10px}
+ #portalApp .declaration-date-card button:focus-visible{outline:3px solid #ffcb12;outline-offset:2px}
+ @media(max-width:850px){#portalApp .declaration-fetch-grid{grid-template-columns:minmax(0,1fr)}#portalApp .declaration-card-head{padding:18px}#portalApp .declaration-selection,#portalApp .declaration-fetch-body{padding:18px}}
+ @media(max-width:450px){#portalApp .declaration-years,#portalApp .declaration-months{gap:7px}#portalApp .declaration-section-title span{font-size:10px}#portalApp .declaration-tabs{width:100%}#portalApp .declaration-tabs button{flex:1}#portalApp .declaration-heading h2{font-size:16px}}
++
++/* Keep document details within the available width; wrap long source references. */
++#portalApp .records-fit .table-scroll{overflow:visible}
++#portalApp .records-fit table{width:100%;min-width:0;table-layout:fixed}
++#portalApp .records-fit th,#portalApp .records-fit td{padding:12px 8px;white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
++#portalApp .records-fit .row-title,#portalApp .records-fit .row-sub{white-space:normal;overflow-wrap:anywhere}
++#portalApp .records-fit .badge{white-space:normal;max-width:100%;box-sizing:border-box}
++#portalApp .records-fit .badge:before{flex-shrink:0}
++#portalApp .records-fit .record-detail-cell{text-align:right}
++#portalApp .records-fit .record-detail-cell .table-link{white-space:nowrap;min-height:36px}
++@media(max-width:600px){
++ #portalApp .records-fit table,#portalApp .records-fit tbody{display:block;width:100%}
++ #portalApp .records-fit thead,#portalApp .records-fit colgroup{display:none}
++ #portalApp .records-fit tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;padding:16px;border-bottom:1px solid #edf2f6}
++ #portalApp .records-fit td{display:block;min-width:0;padding:0;border:0}
++ #portalApp .records-fit td:nth-child(-n+2),#portalApp .records-fit .record-empty-cell{grid-column:1/-1}
++ #portalApp .records-fit td[data-label]:before{content:attr(data-label);display:block;font-size:9px;color:#8698ae;font-weight:750;margin-bottom:4px}
++ #portalApp .records-fit .record-detail-cell{align-self:end;justify-self:end}
++}
++
+ </style></head>
+ <body data-default-view="login"><div id="cloudStatus" role="status" style="position:fixed;top:0;left:0;right:0;z-index:99998;padding:8px;background:#e6f5ef;text-align:center;font:12px Segoe UI">Supabase hesabınızla giriş yapın · GİB şifresi kullanmayın</div><section id="cloudFailure" hidden style="position:fixed;inset:20% 8%;z-index:100001;background:white;padding:28px;border:2px solid #c2415b;border-radius:16px;box-shadow:0 0 0 200vmax #0008"><h2>Değişiklikler veritabanına kaydedilemedi</h2><p id="cloudFailureText"></p><button data-cloud-retry>Kaydetmeyi Tekrar Dene</button> <button data-cloud-backup>Kaydedilmemiş JSON Yedeğini İndir</button><p>Kaydetme tamamlanmadan sekmeyi kapatmayın. Listeyi yenilemek bekleyen düzenlemeleri kaybettirebilir.</p></section><div style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#fff2c6;color:#674b00;padding:6px;text-align:center;font:12px Segoe UI">Developer · İkinci entegrasyon · Canlı kayıtlar</div><div id="loginPage">
+ <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+@@ -671,7 +691,16 @@ function firmOptions(any=true){return `${any?'<option value="all">Tüm mükellef
+ function recordRows(page){return data.notes.filter(row=>row.page===page||(page==='declarations-view'&&row.page==='declarations'))}
+ function filtered(rows){const q=UI.search.trim().toLocaleLowerCase('tr-TR');return rows.filter(r=>(UI.company==='all'||r.firmId===UI.company)&&(UI.status==='all'||r.status===UI.status)&&(!q||Object.values(r).some(v=>String(v).toLocaleLowerCase('tr-TR').includes(q))))}
+ function statsStrip(rows){const counts={all:rows.length,done:rows.filter(r=>['Tamamlandı','Ödendi','Onaylandı','Okundu','Arşivlendi','Kontrol Edildi'].includes(r.status)).length,pending:rows.filter(r=>['Bekliyor','Onay Bekliyor','Kontrol Ediliyor','Yüklendi','Devam Ediyor'].includes(r.status)).length,missing:rows.filter(r=>['Eksik','Ödenmedi','Yeni'].includes(r.status)).length};return `<div class="mini-stats"><div class="mini-stat"><span>Toplam kayıt</span><b>${fmt.format(counts.all)}</b></div><div class="mini-stat"><span>Tamamlanan</span><b>${fmt.format(counts.done)}</b></div><div class="mini-stat"><span>İşlem bekleyen</span><b>${fmt.format(counts.pending)}</b></div><div class="mini-stat"><span>Dikkat gerektiren</span><b>${fmt.format(counts.missing)}</b></div></div>`;}
+-function tableRows(rows,page){const payment=page.startsWith('payments'),firmRelated=!page.startsWith('settings')&&!['news','faq','suggest','expert','accounts-office'].includes(page);
++function fittedRecordTable(rows,page){
++ const sgk=page==='sgk-bildirge',list=filtered(rows);
++ const headers=['İşlem / Belge','Mükellef / Şirket','Dönem','Oluşturma',...(sgk?['Çalışan sayısı']:[]),'Durum','İşlem'];
++ const widths=sgk?[20,25,9,12,12,12,10]:[19,29,10,13,17,12];
++ return `<div class="paper table-card records-fit"><div class="table-header"><strong>${safe(INDEX[page].title)} kayıtları</strong><small>${list.length} kayıt listeleniyor · satıra tıklayarak detaylarını inceleyin</small></div><div class="table-scroll"><table><colgroup>${widths.map(w=>`<col style="width:${w}%">`).join('')}</colgroup><thead><tr>${headers.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${list.map(r=>{
++ const cells=[`<span class="row-title">${safe(r.document)}</span><span class="row-sub">${safe(r.reference)}</span>`,`<span class="row-title">${safe(r.firm)}</span><span class="row-sub">${safe(data.firms.find(f=>f.id===r.firmId)?.ref||'')}</span>`,safe(r.period),safe(trDate(r.date)),...(sgk?[`<span class="badge info">${Number.isInteger(r.metadata?.employeeCount)?safe(r.metadata.employeeCount)+' çalışan':'Doğrulanmadı'}</span>`]:[]),badge(r.status),`<button class="table-link" data-detail="${safe(r.id)}" data-source="${page}">Detay →</button>`];
++ return `<tr>${cells.map((cell,i)=>`<td data-label="${headers[i]}"${i===cells.length-1?' class="record-detail-cell"':''}>${cell}</td>`).join('')}</tr>`;
++ }).join('')||`<tr><td class="record-empty-cell" colspan="${headers.length}"><div class="empty-list"><b>Aradığınız kayıt bulunamadı.</b>Filtreleri değiştirmeyi deneyin.</div></td></tr>`}</tbody></table></div></div>`;
++}
++function tableRows(rows,page){if(['declarations-view','sgk-bildirge'].includes(page))return fittedRecordTable(rows,page);const payment=page.startsWith('payments'),firmRelated=!page.startsWith('settings')&&!['news','faq','suggest','expert','accounts-office'].includes(page);
+  return `<div class="paper table-card"><div class="table-header"><strong>${safe(INDEX[page].title)} kayıtları</strong><small>${filtered(rows).length} kayıt listeleniyor · satıra tıklayarak detaylarını inceleyin</small></div><div class="table-scroll"><table><thead><tr><th>İşlem / Belge</th>${firmRelated?'<th>Mükellef / Şirket</th>':''}<th>Dönem</th><th>Oluşturma</th>${payment?'<th>Tutar</th>':''}${page==='sgk-bildirge'?'<th>Çalışan sayısı</th>':''}<th>Durum</th><th>İşlem</th></tr></thead><tbody>${filtered(rows).map(r=>`<tr><td><span class="row-title">${safe(r.document)}</span><span class="row-sub">${safe(r.reference)}</span></td>${firmRelated?`<td><span class="row-title">${safe(r.firm)}</span><span class="row-sub">${safe(data.firms.find(f=>f.id===r.firmId)?.ref||'')}</span></td>`:''}<td>${safe(r.period)}</td><td>${safe(trDate(r.date))}</td>${payment?`<td><b>${money(r.amount)}</b></td>`:''}${page==='sgk-bildirge'?`<td><span class="badge info">${Number.isInteger(r.metadata?.employeeCount)?safe(r.metadata.employeeCount)+' çalışan':'Doğrulanmadı'}</span></td>`:''}<td>${badge(r.status)}</td><td><button class="table-link" data-detail="${safe(r.id)}" data-source="${page}">Detay →</button></td></tr>`).join('')||`<tr><td colspan="7"><div class="empty-list"><b>Aradığınız kayıt bulunamadı.</b>Filtreleri değiştirmeyi deneyin.</div></td></tr>`}</tbody></table></div></div>`}
+ function trDate(d){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(d)))return String(d);const [y,m,day]=d.split('-');return day+'.'+m+'.'+y}
+ function generic(page){const info=INDEX[page],rows=recordRows(page),statuses=[...new Set(rows.map(r=>r.status))];
+diff --git a/mert/eworks/entegrasyon-2-servis/SOURCE-MANIFEST.json b/mert/eworks/entegrasyon-2-servis/SOURCE-MANIFEST.json
+index b376732..a0a71c1 100644
+--- a/mert/eworks/entegrasyon-2-servis/SOURCE-MANIFEST.json
++++ b/mert/eworks/entegrasyon-2-servis/SOURCE-MANIFEST.json
+@@ -9,7 +9,7 @@
+     "Eworks-Portal/declaration-pdf-viewer.mjs": "d3ec6e1b926589f2d921b3a2efb47969cc06150c099452a18f2b062c8a0a5b55",
+     "Eworks-Portal/demo-cleanup.js": "704632427742858eab553d4afd56f0e5e7af31dae7dbf3813ddef0886d154fbe",
+     "Eworks-Portal/document-retry-source.example.json": "3dcf0ad9fc782e564ca23e6496fc623d488593cd5c97a28336fb52c041035dbc",
+-    "Eworks-Portal/eworks-tasarim.html": "862f1d41f6fba380b121339d5e4d2a18f4c57686938a37a1a3512e7555802189",
++    "Eworks-Portal/eworks-tasarim.html": "34175957de9a87ca5476b4073dd1522fe5391b9bfacf25a07430165fad94386a",
+     "Eworks-Portal/institution-review.js": "c919c1f59dba4aa36a4a45668388bf193b5fcbedd56c955ef58487c05f28b4d3",
+     "Eworks-Portal/requirements.txt": "6876df1f5a5212b7005a97dc80cd68178133cb2114dbd642cf2ef5dc124888c4",
+     "Eworks-Portal/robot-config.json": "c469acf9130604524f4780748f2c76ae49b9d8ef431f7e95280e6a00997f9aaf",
+@@ -300,6 +300,6 @@
+     "Eworks-Python-Robot/test_service_transport.py": "65063acfa3024b5e9e48c1374e4455830a869a5812484f7558be718cda27fb0f",
+     "Eworks-Python-Robot/test_sgk_employee_count.py": "f46e365c9631ab2ea1123fe087fc77a017d8e69de77dcf42d2f6470f662c4748",
+     "README.md": "6490fa277c9934742574cc58273260eedf3df682b83c633c2f993e8924d82871",
+-    "VALIDATION.md": "e5fc82cb045a967902af4ff2b074a599774dd6285b83c9d5ae8cd716359e9ada"
++    "VALIDATION.md": "2cfc55011ad34807f0e8855ce46f1964d43739b8549c67c3fc0843323473784e"
+   }
+ }
+diff --git a/mert/eworks/entegrasyon-2-servis/VALIDATION.md b/mert/eworks/entegrasyon-2-servis/VALIDATION.md
+index e47ac46..8f5273a 100644
+--- a/mert/eworks/entegrasyon-2-servis/VALIDATION.md
++++ b/mert/eworks/entegrasyon-2-servis/VALIDATION.md
+@@ -24,6 +24,8 @@ Portalın gömülü JavaScript'i ayrıca `node --check` ile kontrol edilir. Yeni
+ 
+ ## Sınırlar
+ 
++Tablo görünümü ek kontrolü: e-Beyanname ve e-Bildirge tabloları, uzun sentetik ad/referans içeren üçer kayıtla 1440/1024/768/600/390 pikselde görüntülendi. On düzenin tümünde yatay taşma yok, Detay düğmeleri ekran ve tablo sınırları içinde. 1024 piksel SGK görünümü ayrıca görsel olarak incelendi. Bu işlem canlı sorgu veya portal veri yazımı yapmadı.
++
+ Tüm tarihsel testler çalıştırılmadı. Eski pilotta ortam/arayüz varsayımına bağlı başka testler bulunur. OCR bağımlılık ortamı ve canlı Supabase kurulumu bu paylaşım doğrulamasında yeniden kurulmadı. Seçili testlerin geçmesi bütün test keşfinin veya yeni bir makinenin canlı aktarımının sorunsuz olacağını garanti etmez.
+ 
+ Özel pilotta aynı gün ayrıca canlı doğrulama yapıldı: önce 5 satırlık tarayıcı/servis karşılaştırması, sonra yalnız önceki 11 hataya yönelik 10 sorgu ve 13 PDF kaydı başarılıydı. Bu sonuçların özeti [güncel durum](../docs/ai/memory/guncel-durum.md) dosyasında; özel ham kanıtlar ve belgeler Git paketinin dışındadır. Yeni hesap için bu canlı başarı sonucu tekrar üretim kanıtı sayılmaz.

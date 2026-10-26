@@ -1,0 +1,15 @@
+.env*
+!.env.example
+.local-runtime.json
+**/jobs/
+**/incoming/
+**/downloads/
+**/__pycache__/
+**/.ocr-venv/
+**/.venv/
+**/runtime/
+**/gib-sozlesmeler.*
+**/pending-bulk-resume.json
+**/document-retry-source.json
+*.log
+*.pdf
