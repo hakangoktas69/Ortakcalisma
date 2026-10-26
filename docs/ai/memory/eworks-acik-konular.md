@@ -1,6 +1,6 @@
 ---
 name: eworks-acik-konular
-description: Eworks açık konuları (2026-10-26) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, operasyon logu yok ve hatalar sessizce yutuluyor, ekranda VKN maskeleme uygulanmıyor, Mert'in pilot işi ile D28 çelişkisi, dal adı uyumu, küçük UX (TabloKap odak), servis yolunun gözlenmemiş ağ ayrıntıları, üretim yedeği ve yayın hattı yok, satış lisansı girişi engellemiyor, geçici parola portalda zorunlu değişmiyor, satış portalının üretimde yayımı, satış log yardımcısı, satıştan ofis açmada yarım kalma, satış girişinde hız sınırı yok, güvenlik kodunun erişilebilirliği
+description: Eworks açık konuları (2026-10-26) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, operasyon logu yok ve hatalar sessizce yutuluyor, ekranda VKN maskeleme uygulanmıyor, Mert'in pilot işi ile D28 çelişkisi, dal adı uyumu, küçük UX (TabloKap odak), servis yolunun gözlenmemiş ağ ayrıntıları, üretim yedeği ve yayın hattı yok, satış lisansı girişi engellemiyor, geçici parola portalda zorunlu değişmiyor, satış portalının üretimde yayımı, satış log yardımcısı, satıştan ofis açmada yarım kalma, satış girişinde hız sınırı yok, güvenlik kodunun erişilebilirliği; kabul edilen riskler (2FA'sız satışçı, 2FA durumu sızıntısı, bakımsız svg-captcha, ofis adı tekilliği yalnız uygulamada, shard fonksiyonlarının bağlam sapması)
 metadata:
   type: project
 ---
@@ -33,6 +33,14 @@ metadata:
 22. **Satıştan ofis açma tek işlem değil:** GoTrue kullanıcısı açıldıktan sonra kesinti olursa e-posta kalır, yeniden deneme `eposta_kullanimda` verir; telafi GoTrue silme ucu + identity-access değişikliği ister, şimdilik elle kurtarma.. İmajlar sunucuda kaynaktan derleniyor; CI imaj yayını, sürüm etiketi, kesintisiz güncelleme, gözlem/uyarı yok.
 23. **Satış girişinde istek hızı sınırı yok (D41):** e-posta adımı her istekte DB sorgusu + Redis kaydı; IP/istemci başına hız sınırı gerekir (portal girişi için de).
 24. **Resimli güvenlik kodu yalnız görsel (D41):** ekran okuyucu kullanan 2FA'sız satışçı giriş yapamaz; alternatif yöntem kararı gerekir (WCAG 1.1.1).
+
+**Kabul edilen riskler** (karar verildi, kapatılmadı; izlenir — koşul değişirse yeniden açılır):
+
+- **2FA'sız satışçı (D41/K-48, 2026-10-26, Hakan):** 2FA isteğe bağlı; 2FA'sız satışçının parolası ele geçerse ikinci engel yoktur (resimli güvenlik kodu yalnız otomatik parola denemesini zorlaştırır). Satış portalı ofis ve müşavir hesabı açtığı için etki yüksektir. Yeniden değerlendirme: ilk gerçek satış ekibi kullanıma geçmeden ya da bir hesap ihlalinde.
+- **Girişte 2FA durumu sızıyor (K-48):** e-posta adımından sonra güvenlik kodunun çıkıp çıkmaması bir e-postanın kayıtlı ve 2FA'lı olduğunu ele verir (bilinmeyen e-posta da kod ister, ama 2FA'lı hesap istemez). Küçük sızıntı olarak kabul edildi.
+- **svg-captcha bakımsız (K-48):** 1.4.0 (MIT) 2019'dan beri sürüm almadı; gelistir B2 "bakımı süren paket" kuralından bilinen sapma. `pnpm audit` açık verirse ya da Node uyumsuzluğu çıkarsa kendi SVG üretecine geçilir (port: `CaptchaGenerator`).
+- **Ofis adı tekilliği yalnız uygulamada (K-47):** veritabanında ad indeksi yok (yerel verilerde aynı adlı ofisler olabildiği için migration durdurmasın diye); satış Redis kilidiyle ve Türkçe kurallı ad sorgusuyla engeller, `hesap-ac` komutu kilit almaz.
+- **Shard'da sales.* fonksiyonları başka bağlamın tablosuna yazar (K-47):** `organization` ve `identity_access` tablolarına; hesap açma bu tablolara zaten yazıyordu, yazma tek denetimli yola toplandı. Kalıcı çözüm bağlamların kendi hesap açma fonksiyonları + olay.
 
 Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri Hakan tarafından analiz ediliyor (2026-10-24). Sonuç gelince 02 §1a'daki `integrations` tablosu ve 03 §1a hesapları güncellenir.
 
