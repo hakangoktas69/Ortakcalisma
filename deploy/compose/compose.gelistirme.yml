@@ -1,0 +1,22 @@
+# Yerel geliştirme katmanı: web'i Docker'sız (pnpm dev, http://127.0.0.1:8765) çalıştırmak için altyapı portlarını açar.
+# Yalnız `node tools/deploy/yigin.mjs gelistir` kullanır; demo ve üretim yığınında bu dosya YOKTUR.
+# Portlar yalnız 127.0.0.1'e bağlanır (ağdaki başka makine erişemez). Çakışırsa deploy/compose/.env'de GELISTIRME_*_PORT değiştir.
+services:
+  db-control:
+    ports:
+      - '127.0.0.1:${GELISTIRME_DB_CONTROL_PORT:-54320}:5432'
+  db-shard-01:
+    ports:
+      - '127.0.0.1:${GELISTIRME_DB_SHARD_01_PORT:-54321}:5432'
+  db-shard-02:
+    ports:
+      - '127.0.0.1:${GELISTIRME_DB_SHARD_02_PORT:-54322}:5432'
+  auth:
+    ports:
+      - '127.0.0.1:${GELISTIRME_AUTH_PORT:-59999}:9999'
+  redis:
+    ports:
+      - '127.0.0.1:${GELISTIRME_REDIS_PORT:-56379}:6379'
+  s3:
+    ports:
+      - '127.0.0.1:${GELISTIRME_S3_PORT:-58333}:8333'

@@ -13,7 +13,8 @@ Amaç, geliştiricinin projeyi sıfırdan keşfetmesine gerek bırakmamak. Bilgi
    - `docs/ozellik-durumu.md`: hangi özellikler kırmızı/yeşil
    - `docs/ai/memory/MEMORY.md` ve ilgili kayıtlar
    - `git log --oneline -15`
-   - `docs/00-genel-bakis.md`: okuma sırası ve belge haritası
+   - `docs/00-genel-bakis.md`: okuma sırası (junior ve derinleşme) ve belge haritası
+   - `docs/gelistirici-rehberi/baslangic.md`: kurulum, çalıştırma, geliştirme döngüsü, sorun giderme (junior için ilk belge)
 2. **Kısa özet ver** (10–15 satır):
    - sistem ne yapar (çok kiracılı SaaS; ofis → müşavir → mükellef; web servis birincil, robot yedek)
    - ana parçalar (`packages/contexts`, `apps/web`, `apps/sales`, `apps/worker`, `services/integration`, `supabase`)
@@ -22,7 +23,8 @@ Amaç, geliştiricinin projeyi sıfırdan keşfetmesine gerek bırakmamak. Bilgi
 3. **Sor**: rolü (junior / senior / mimar / ürün), hangi bağlamda çalışacağı, Docker ve Node 24'ün kurulu olup olmadığı.
 4. **Ortamı kontrol et:**
    - `node -v`, `docker version --format '{{.Server.Version}}'`, `git config core.hooksPath` (beklenen `tools/git-hooks`)
-   - Node 24 değilse komutları `node:24` container'ında koşmasını söyle
+   - Node 24 değilse komutları `node:24` container'ında koşmasını söyle; Node 20'nin corepack'i pnpm'i indiremez (`Cannot find matching keyid`, baslangic.md §8)
+   - Windows'ta `git config --global core.longpaths` `true` mu
    - `node tools/claude/check-memory.mjs` ve `node tools/ajan/senkron.mjs --denetle`
    - `.claude/settings.local.json` içinde `autoMemoryDirectory` `docs/ai/memory`'yi gösteriyor mu; göstermiyorsa SessionStart kancası çalışmamıştır (kancalar açık mı, `node` PATH'te mi)
    - depo yeniden yapılanmasından önce klonlandıysa `node tools/ajan/eski-yerel-tasi.mjs` (kuru çalıştırma) çıktısına bak
