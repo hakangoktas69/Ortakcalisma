@@ -136,6 +136,17 @@ services:
       APP_DB_PASSWORD: ${APP_DB_PASSWORD:?}
       WORKER_DB_PASSWORD: ${WORKER_DB_PASSWORD:?}
       INTEGRATION_DB_PASSWORD: ${INTEGRATION_DB_PASSWORD:?}
+      SALES_DB_PASSWORD: ${SALES_DB_PASSWORD:?}
+
+  # Satış kullanıcısı açma (profil: gorev): ilk satışçı. `node tools/deploy/yigin.mjs satis-kullanici --eposta … --ad "…"`
+  satis-kullanici:
+    <<: *node
+    profiles: [gorev]
+    restart: 'no'
+    command: [node, apps/worker/src/satis-kullanici.ts]
+    environment:
+      CONTROL_DATABASE_URL: postgres://eworks_sales:${SALES_DB_PASSWORD}@db-control:5432/postgres
+      SALES_TOTP_KEY: ${SALES_TOTP_KEY:?}
 
   # Demo hesabı (profil: gorev): yigin.mjs up demo profilinde çalıştırır; tekrar çalıştırılabilir
   hesap-ac:
@@ -276,6 +287,44 @@ services:
     deploy:
       resources:
         limits: { memory: 512m }
+
+  # Satış portalı (D27, D40): ayrı imaj ve port, turuncu tema. eworks_sales rolüyle bağlanır: kontrol düzleminde sales şeması +
+  # ofis açma, shard'larda yalnız hesap açma fonksiyonları (mükellef iş verisi yok). Oturumlar Redis 2. veritabanında.
+  sales:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/node.Dockerfile
+      target: sales
+    image: eworks/sales:local
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp, /app/apps/sales/.next/cache]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    ports: ['${SATIS_PORT:-8081}:3000']
+    depends_on:
+      auth: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      db-shard-01: { condition: service_healthy }
+      db-shard-02: { condition: service_healthy }
+    environment:
+      EWORKS_ORTAM: ${EWORKS_ORTAM:-demo}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      YIGIN_KIPI: ${YIGIN_KIPI:-demo}
+      CONTROL_DATABASE_URL: postgres://eworks_sales:${SALES_DB_PASSWORD}@db-control:5432/postgres
+      SHARD_DATABASE_URLS: shard-01=postgres://eworks_sales:${SALES_DB_PASSWORD}@db-shard-01:5432/postgres,shard-02=postgres://eworks_sales:${SALES_DB_PASSWORD}@db-shard-02:5432/postgres
+      AUTH_URL: http://auth:9999
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET:?}
+      SALES_TOTP_KEY: ${SALES_TOTP_KEY:?}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/2
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://localhost:3000/api/saglik').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 5s
+      retries: 30
+    deploy:
+      resources:
+        limits: { memory: 384m }
 
 volumes:
   db-control:

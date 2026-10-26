@@ -13,6 +13,7 @@
 //   node tools/deploy/yigin.mjs up --kip demo   kipi değiştirir (demo | gelistirme | debug | uretim); kip .env'de (YIGIN_KIPI) kalır
 //   node tools/deploy/yigin.mjs down        yığını durdurur (veri birimleri korunur; --sil ile silinir)
 //   node tools/deploy/yigin.mjs test        birim + entegrasyon + pgTAP testlerini yığının ağında, test koşucusu imajında çalıştırır
+//   node tools/deploy/yigin.mjs satis-kullanici --eposta a@b.c --ad "Ad Soyad"   ilk satış kullanıcısı (geçici parola bir kez)
 //   node tools/deploy/yigin.mjs e2e         arayüz kabul testlerini (Playwright, 4 ekran) yığına karşı çalıştırır
 //   node tools/deploy/yigin.mjs helm        Helm iskeletini doğrular (helm lint + template, container'da)
 // Ortam: YIGIN_PROJE (vars. eworks), YIGIN_ENV (vars. deploy/compose/.env; aynı makinede ikinci yığın denemesi için),
@@ -35,8 +36,9 @@ const PROJE = process.env.YIGIN_PROJE ?? 'eworks';
 const SIRLAR = [
   'POSTGRES_PASSWORD', 'JWT_SECRET', 'SESSION_SECRET', 'CONTROL_DB_PASSWORD', 'APP_DB_PASSWORD', 'WORKER_DB_PASSWORD',
   'INTEGRATION_DB_PASSWORD', 'REDIS_PASSWORD', 'RABBITMQ_PASSWORD', 'S3_ACCESS_KEY', 'S3_SECRET_KEY', 'TAX_ID_HMAC_KEY', 'DEMO_SIFRE',
+  'SALES_DB_PASSWORD', 'SALES_TOTP_KEY',
 ];
-const VARSAYILAN = { WEB_PORT: '8080', PUBLIC_URL: 'http://localhost:8080' };
+const VARSAYILAN = { WEB_PORT: '8080', PUBLIC_URL: 'http://localhost:8080', SATIS_PORT: '8081' };
 
 export function envOku(yol = ENV) {
   if (!existsSync(yol)) return {};
@@ -240,6 +242,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     yiginiKaldir(geri.filter((a, j) => !a.startsWith('--') && (i < 0 || j !== i + 1)));
     const env = envOku();
     console.log(`\n✔ Yığın ayakta (kip: ${kip(env)}): ${env.PUBLIC_URL ?? 'http://localhost:8080'}`);
+    console.log(`  Satış portalı: http://localhost:${env.SATIS_PORT ?? '8081'} (ilk satışçı: node tools/deploy/yigin.mjs satis-kullanici --eposta … --ad "…")`);
     if (kip(env) !== 'demo' && kip(env) !== 'uretim') console.log("  Altyapı portları 127.0.0.1'de; normale dönmek için: up --kip demo");
   } else if (komut === 'gelistir' || komut === 'debug') {
     sirlariTamamla();
@@ -286,6 +289,13 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     }
     // Parola değeri komut satırına yazılmaz: -e HESAP_SIFRE yalnız adı geçirir, değer bu sürecin ortamından alınır
     docker(compose('run', '--rm', '-e', 'HESAP_SIFRE', 'hesap-ac', 'node', 'apps/worker/src/hesap-ac.ts', ...geri));
+  } else if (komut === 'satis-kullanici') {
+    if (!geri.includes('--eposta') || !geri.includes('--ad')) {
+      console.error('Kullanım: node tools/deploy/yigin.mjs satis-kullanici --eposta ad.soyad@firma.com --ad "Ad Soyad"');
+      process.exit(2);
+    }
+    // Geçici parola bir kez ekrana yazılır; satışçı ilk girişte değiştirir ve iki adımlı doğrulamayı kurar
+    docker(compose('run', '--rm', 'satis-kullanici', 'node', 'apps/worker/src/satis-kullanici.ts', ...geri));
   } else if (komut === 'web-env') {
     sirlariTamamla();
     console.log(`✔ Web ortamı yazıldı: ${webEnvYaz()} (sır içerir, commit edilmez)`);
@@ -316,6 +326,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       TEST_WORKER_DB_PASSWORD: env.WORKER_DB_PASSWORD,
       TEST_INTEGRATION_DB_PASSWORD: env.INTEGRATION_DB_PASSWORD,
       TEST_CONTROL_DB_PASSWORD: env.CONTROL_DB_PASSWORD,
+      TEST_SALES_DB_PASSWORD: env.SALES_DB_PASSWORD,
       TEST_REDIS_URL: `redis://:${env.REDIS_PASSWORD}@redis:6379/15`,
       TEST_RABBITMQ_URL: `amqp://eworks:${env.RABBITMQ_PASSWORD}@rabbitmq:5672`,
       TEST_S3_ENDPOINT: 'http://s3:8333',
@@ -325,6 +336,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       TEST_JWT_SECRET: env.JWT_SECRET,
       TEST_TAX_ID_HMAC_KEY: env.TAX_ID_HMAC_KEY,
       TEST_WEB_URL: 'http://web:3000',
+      TEST_SATIS_URL: 'http://sales:3000',
       TEST_FAKE_GIB_URL: 'http://fake-gib:8090',
     };
     const envArgs = Object.entries(ortam).flatMap(([k, v]) => ['-e', `${k}=${v}`]);
@@ -346,7 +358,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       docker(compose('up', '-d', '--no-deps', '--wait', 'web'));
     }
   } else {
-    console.error('Kullanım: node tools/deploy/yigin.mjs sirlar|up [--kip demo|gelistirme|debug|uretim]|gelistir|debug|uretim|hesap-ac|web-env|down [--sil]|test|e2e|helm');
+    console.error('Kullanım: node tools/deploy/yigin.mjs sirlar|up [--kip demo|gelistirme|debug|uretim]|gelistir|debug|uretim|hesap-ac|satis-kullanici|web-env|down [--sil]|test|e2e|helm');
     process.exit(2);
   }
 }

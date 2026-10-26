@@ -1,0 +1,43 @@
+# Satış portalı (D27, D40): ayrı imaj, yalnız küme içi Service (Ingress yok: dışarı açılmaz; erişim port yönlendirme/VPN ile).
+# Veritabanına eworks_sales rolüyle bağlanır (kontrol düzleminde sales şeması, shard'larda yalnız hesap açma fonksiyonları).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eworks-sales
+  labels: {{- include "eworks.labels" (dict "name" "sales") | nindent 4 }}
+spec:
+  replicas: {{ .Values.sales.replicas }}
+  selector:
+    matchLabels: {{- include "eworks.labels" (dict "name" "sales") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "eworks.labels" (dict "name" "sales") | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: sales
+          image: {{ include "eworks.image" (dict "root" . "name" "eworks/sales") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - secretRef: { name: {{ .Values.secrets.sales }} }
+          resources: {{- toYaml .Values.sales.resources | nindent 12 }}
+          {{- include "eworks.guvenlik" . | nindent 10 }}
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+          ports:
+            - { name: http, containerPort: {{ .Values.sales.port }} }
+          readinessProbe:
+            httpGet: { path: /api/saglik, port: http }
+          livenessProbe:
+            httpGet: { path: /api/saglik, port: http }
+      volumes:
+        - { name: tmp, emptyDir: {} }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eworks-sales
+spec:
+  selector: {{- include "eworks.labels" (dict "name" "sales") | nindent 4 }}
+  ports:
+    - { name: http, port: 80, targetPort: http }

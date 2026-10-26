@@ -38,6 +38,11 @@ export const taxIdSchema = z.object({
   TAX_ID_HMAC_KEY: secret(32),
 });
 
+/** Satış portalı (D27, D40): satış kullanıcılarının TOTP gizli anahtarlarını mühürleyen anahtar; kaybedilirse 2FA yeniden kurulur. */
+export const salesSchema = z.object({
+  SALES_TOTP_KEY: secret(32),
+});
+
 export const messagingSchema = z.object({
   RABBITMQ_URL: z.string().startsWith('amqp'),
 });

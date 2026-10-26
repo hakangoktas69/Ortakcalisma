@@ -28,6 +28,7 @@ jobs:
           node-version-file: .nvmrc
       - run: corepack enable && pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm --filter @eworks/sales-portal typecheck
       - run: pnpm arch
       - run: pnpm test:ci
       - name: Ajan bağlamı senkron mu (AGENTS.md, MEMORY.md, beceriler)

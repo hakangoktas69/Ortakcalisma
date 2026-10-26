@@ -1189,11 +1189,39 @@
     "tests": 0,
     "context": null
   },
-  "satis.ofis.create": {
-    "status": "red",
-    "green": 0,
+  "satis.oturum.login": {
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 15,
+    "context": "sales"
+  },
+  "satis.oturum.mfa": {
+    "status": "green",
+    "green": 1,
+    "total": 1,
+    "tests": 16,
+    "context": "sales"
+  },
+  "satis.oturum": {
+    "status": "green",
+    "green": 2,
+    "total": 2,
+    "tests": 31,
+    "context": "sales"
+  },
+  "satis.ofis.view": {
+    "status": "green",
+    "green": 1,
+    "total": 1,
+    "tests": 7,
+    "context": "sales"
+  },
+  "satis.ofis.create": {
+    "status": "green",
+    "green": 1,
+    "total": 1,
+    "tests": 40,
     "context": "sales"
   },
   "satis.ofis.freeze": {
@@ -1203,11 +1231,18 @@
     "tests": 0,
     "context": "sales"
   },
-  "satis.ofis": {
+  "satis.ofis.extend": {
     "status": "red",
     "green": 0,
-    "total": 2,
+    "total": 1,
     "tests": 0,
+    "context": "sales"
+  },
+  "satis.ofis": {
+    "status": "red",
+    "green": 2,
+    "total": 4,
+    "tests": 47,
     "context": "sales"
   },
   "satis.musavir.create": {
@@ -1268,9 +1303,9 @@
   },
   "satis": {
     "status": "red",
-    "green": 0,
-    "total": 7,
-    "tests": 0,
+    "green": 4,
+    "total": 11,
+    "tests": 78,
     "context": "sales"
   }
 }

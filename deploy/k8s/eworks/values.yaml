@@ -6,11 +6,13 @@ image:
   pullPolicy: IfNotPresent
 
 # Bileşen başına önceden oluşturulmuş Secret: her biri yalnız kendi veritabanı rolünü taşır (D34, en az yetki).
-# web: eworks_app; worker + migrate: eworks_worker/eworks_control; integration: eworks_integration (yalnız iş ve sır fonksiyonları).
+# web: eworks_app; worker + migrate: eworks_worker/eworks_control; integration: eworks_integration (yalnız iş ve sır fonksiyonları);
+# sales: eworks_sales (kontrol: sales şeması + ofis açma; shard: yalnız hesap açma fonksiyonları) + SALES_TOTP_KEY.
 # integration Secret'ında GIB_SAHTE_SUNUCU bulunmaz; EWORKS_ORTAM=uretim. Kurum erişim yolu (D38): GIB_ERISIM_YOLU / SGK_ERISIM_YOLU
 # = servis (yoksa varsayılan) | robot; hizmet bazında ERISIM_GIB_EBEYANNAME, ERISIM_GIB_IVD (02 §1b).
 secrets:
   web: eworks-web-env
+  sales: eworks-sales-env
   worker: eworks-worker-env
   integration: eworks-integration-env
   migrate: eworks-migrate-env
@@ -19,6 +21,11 @@ web:
   replicas: 2
   port: 3000
   resources: { requests: { cpu: 100m, memory: 256Mi }, limits: { memory: 512Mi } }
+
+sales:
+  replicas: 1
+  port: 3000
+  resources: { requests: { cpu: 50m, memory: 192Mi }, limits: { memory: 384Mi } }
 
 worker:
   replicas: 1

@@ -35,6 +35,15 @@ services:
       OZELLIK_DURUMU_GOSTER: 'false'
       YIGIN_KIPI: uretim
 
+  # Satış portalı internete açılmaz: yalnız sunucunun yerel adresinde; satış ekibi SSH tüneliyle bağlanır
+  # (ssh -L 8081:127.0.0.1:8081 sunucu → http://localhost:8081). Ayrı alan adıyla yayımlamak açık konudur (durum.md).
+  sales:
+    ports: !override ['127.0.0.1:${SATIS_PORT:-8081}:3000']
+    environment:
+      EWORKS_ORTAM: uretim
+      COOKIE_SECURE: 'true'
+      YIGIN_KIPI: uretim
+
   integration:
     environment:
       EWORKS_ORTAM: uretim

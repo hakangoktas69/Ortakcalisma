@@ -21,9 +21,11 @@ export const asRole = (adminUrl: string, role: string, password: string) => {
 export const yigin = {
   controlAdminUrl: () => need('TEST_CONTROL_URL'),
   shardAdminUrls: () => parseShardUrls(need('TEST_SHARD_URLS')),
-  controlUrl: () => asRole(need('TEST_CONTROL_URL'), 'eworks_control', need('TEST_CONTROL_DB_PASSWORD')),
-  shardUrls: (role: 'eworks_app' | 'eworks_worker' | 'eworks_integration') => {
-    const pw = need(role === 'eworks_app' ? 'TEST_APP_DB_PASSWORD' : role === 'eworks_worker' ? 'TEST_WORKER_DB_PASSWORD' : 'TEST_INTEGRATION_DB_PASSWORD');
+  controlUrl: (role: 'eworks_control' | 'eworks_sales' = 'eworks_control') =>
+    asRole(need('TEST_CONTROL_URL'), role, need(role === 'eworks_sales' ? 'TEST_SALES_DB_PASSWORD' : 'TEST_CONTROL_DB_PASSWORD')),
+  shardUrls: (role: 'eworks_app' | 'eworks_worker' | 'eworks_integration' | 'eworks_sales') => {
+    const parolalar = { eworks_app: 'TEST_APP_DB_PASSWORD', eworks_worker: 'TEST_WORKER_DB_PASSWORD', eworks_integration: 'TEST_INTEGRATION_DB_PASSWORD', eworks_sales: 'TEST_SALES_DB_PASSWORD' };
+    const pw = need(parolalar[role]);
     return new Map([...parseShardUrls(need('TEST_SHARD_URLS'))].map(([id, url]) => [id, asRole(url, role, pw)]));
   },
   redisUrl: () => need('TEST_REDIS_URL'),
