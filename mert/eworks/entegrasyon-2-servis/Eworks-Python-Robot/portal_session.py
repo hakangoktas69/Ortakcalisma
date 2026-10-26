@@ -75,6 +75,9 @@ async def run(folder, access_token):
                 from notice_probe import NoticeProbe
                 probe = NoticeProbe(folder)
                 context.on('response', probe.observe)
+                from notice_service import NoticeListCollector
+                notice_collector = NoticeListCollector(folder)
+                context.on('response', notice_collector.observe)
             page = await context.new_page()
             context.set_default_timeout(10000)
             await page.goto('https://dijital.gib.gov.tr/portal/login', wait_until='domcontentloaded')
@@ -109,6 +112,7 @@ async def run(folder, access_token):
                             if account['identity'] not in verified_identities:
                                 raise ValueError('Açılan GİB hesabı seçilen mükellefle eşleşmiyor; geçiş durduruldu.')
                             verified = True
+                            observed_identity = account['identity']
                             status('running', 'Mükellef hesabı doğrulandı; seçilen portal açılıyor.')
                 if verified and not opened:
                     opened = True  # Geçiş başarısızsa tekrar tekrar tıklanmaz.
@@ -117,13 +121,26 @@ async def run(folder, access_token):
                             scope['target'], credentials_provider), timeout=100)
                     except Exception:
                         result = 'target_requires_user'
+                    notice_read = None
+                    if scope['target'] == 'notices':
+                        try:
+                            notice_read = await notice_collector.collect(context, owner,
+                                scope['firmId'], scope['identity'], observed_identity, verified_identities)
+                        except ValueError as exc:
+                            notice_read = dict(state='list_validation_failed', complete=False, message=str(exc))
+                        except Exception:
+                            notice_read = dict(state='list_request_failed', complete=False)
                     atomic_json(folder/'portal-session-result.json', {
                         'schema': 'eworks.portal-session.v1', 'ownerId': owner,
                         'requestId': request['requestId'], 'firmId': scope['firmId'],
                         'target': scope['target'], 'accountVerified': True,
                         'navigationState': result.get('state') if isinstance(result,dict) else result,
-                        **({'inspection': result} if isinstance(result,dict) else {}), 'imported': False})
-                    status('running', 'Firma hesabı doğrulandı. Portal penceresi açık; hedef uygulama ek giriş/yetki isterse pencerede tamamlayın. Veri aktarımı yapılmıyor.')
+                        **({'inspection': result} if isinstance(result,dict) else {}),
+                        **({'noticeRead': notice_read} if notice_read is not None else {}), 'imported': False})
+                    if notice_read is not None:
+                        status('running', str(notice_read.get('count'))+' tebligat mevcut liste filtresinde doğrulandı. Belgeler açılmadı; Eworks aktarımı yapılmadı.' if notice_read.get('complete') else 'e-Tebligat listesi tam doğrulanamadı: '+notice_read.get('message',notice_read['state']))
+                    else:
+                        status('running', 'Firma hesabı doğrulandı. Portal penceresi açık; hedef uygulama ek giriş/yetki isterse pencerede tamamlayın. Veri aktarımı yapılmıyor.')
                 await asyncio.sleep(2)
             return {'schema': 'eworks.portal-session.v1', 'ownerId': owner,
                 'requestId': request['requestId'], 'accountVerified': verified,
