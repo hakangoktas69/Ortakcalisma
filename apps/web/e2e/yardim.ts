@@ -53,10 +53,3 @@ export function hataTopla(page: Page) {
   });
   return hatalar;
 }
-
-/** Dar ekranda menü düğmeyle açılır; geniş ekranda zaten açıktır. */
-export async function menuyuAc(page: Page) {
-  const dugme = page.locator('.menu-dugme');
-  if (await dugme.isVisible()) await dugme.click();
-  await expect(page.locator('nav.menu')).toBeVisible();
-}

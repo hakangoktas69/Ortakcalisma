@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ekranDenetle, girisYap, hataTopla, kullanicilar, menuyuAc } from './yardim.ts';
+import { ekranDenetle, girisYap, hataTopla, kullanicilar } from './yardim.ts';
 
 test.describe('oturum', () => {
   test('@F:oturum.giris.login ofis kullanıcısı giriş yapar, panelde ofisini görür, çıkış yapar', async ({ page }) => {
@@ -60,15 +60,57 @@ test.describe('oturum', () => {
 });
 
 test.describe('menü ve yetki', () => {
-  test('personel yalnız yetkili modülleri görür; yetkisiz sayfada 403 görünümü', async ({ page }) => {
+  test('personel ana sayfadan kategoriye, oradan yalnız yetkili modüllere gider; yetkisiz sayfada 403 görünümü', async ({ page }) => {
+    const hatalar = hataTopla(page);
     const k = kullanicilar();
     await girisYap(page, k.personel);
-    await menuyuAc(page);
-    await expect(page.locator('nav [data-modul="firmalar"]')).toBeVisible();
-    await expect(page.locator('nav [data-modul="oturum"]')).toHaveCount(0);
-    await expect(page.locator('nav [data-modul="yonetim"]')).toHaveCount(0);
+    const kategoriler = page.getByRole('navigation', { name: 'Kategoriler' });
+    await expect(kategoriler.getByRole('link', { name: /Günlük Yönetim/ })).toBeVisible();
+    await ekranDenetle(page);
+    await kategoriler.getByRole('link', { name: /Günlük Yönetim/ }).click();
+    await expect(page).toHaveURL(/\/kategori\/gunluk$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Günlük Yönetim' })).toBeVisible();
+    await expect(page.locator('[data-modul="firmalar"]')).toBeVisible();
+    await expect(page.locator('[data-modul="oturum"]')).toHaveCount(0);
+    await ekranDenetle(page);
+    // Modül kartından sayfaya, sayfadan "← Günlük Yönetim" ile kategoriye dönülür
+    // Personelin modülün tamamına değil alt sayfalarına yetkisi var: modül sayfası yine açılır, yalnız yetkili sayfalar listelenir
+    await page.locator('[data-modul="firmalar"]').click();
+    await expect(page.getByRole('heading', { level: 1, name: /Firmalarım/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Firma listesi/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Müşavir devri/ })).toHaveCount(0);
+    await page.getByRole('link', { name: /Günlük Yönetim/ }).first().click();
+    await expect(page).toHaveURL(/\/kategori\/gunluk$/);
+    await page.goto('/kategori/ofis');
+    await expect(page.locator('[data-modul="yonetim"]')).toHaveCount(0);
+    await page.goto('/kategori/olmayan');
+    await expect(page.getByRole('heading', { name: /bulunamadı/i })).toBeVisible();
+    // Portal içindeki 404'te üst çubuk (çıkış dahil) yerinde kalır
+    await expect(page.getByRole('button', { name: 'Çıkış' })).toBeVisible();
+    await ekranDenetle(page);
     await page.goto('/yonetim/kullanicilar');
     await expect(page.getByRole('heading', { name: 'Yetkiniz yok' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Ana sayfaya dön' })).toBeVisible();
+    await ekranDenetle(page);
+    expect(hatalar.filter((h) => !h.includes('404'))).toEqual([]);
+  });
+
+  test('çok sayfalı modül alt sayfa kartlarıyla açılır; kartlar özellik durumunu gösterir', async ({ page }) => {
+    const k = kullanicilar();
+    await girisYap(page, k.yonetici);
+    await page.goto('/kategori/gunluk');
+    await page.locator('[data-modul="beyanname"]').click();
+    await expect(page).toHaveURL(/\/beyanname$/);
+    await expect(page.getByRole('link', { name: /e-Beyanname görüntüleme/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Pilot bölge ayarları/ }).locator('.rozet.kirmizi')).toBeVisible();
+    await ekranDenetle(page);
+    // Alt sayfadan dönüş modül sayfasınadır (kardeş sayfaya bir tıkla geçilir)
+    await page.getByRole('link', { name: /e-Beyanname görüntüleme/ }).click();
+    await expect(page).toHaveURL(/\/beyanname\/liste/);
+    await page.getByRole('link', { name: 'e-Beyanname', exact: true }).click();
+    await expect(page).toHaveURL(/\/beyanname$/);
+    await page.goto('/kategori/odeme');
+    await expect(page.getByRole('link', { name: /Cari kasa/ })).toBeVisible();
     await ekranDenetle(page);
   });
 

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { accountStatuses } from '@eworks/credentials';
-import { isAllowed } from '@eworks/identity-access';
+import { isAllowed, type Session } from '@eworks/identity-access';
 import { isApproved, listFirms } from '@eworks/portfolio';
 import { listFilings } from '@eworks/social-security';
 import { latestJobs, STATUS_LABEL, type JobKind } from '@eworks/sync';
@@ -9,10 +9,13 @@ import { listTasks, taskCounters } from '@eworks/workspace';
 import { bugun } from '@/bff/beyanname.ts';
 import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
-import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
+import { gorunurKategoriler, kategoriYolu } from '@/shared/ui/kategoriler.ts';
+import { gorunur } from '@/shared/ui/ozellik.ts';
+import { Kartlar } from '@/shared/ui/Sayfa.tsx';
 
-// Ana sayfa (genel_bakis.panel): ofisin günlük durumu — her sayaç kullanıcının yetkisi ve firma kapsamıyla (RLS) hesaplanır.
-// Sayaç bir ekrana bağlıdır; yetkisi olmayan sayaç gösterilmez.
+// Ana sayfa: kategori kartları (Mert'in Eworks tasarımı; yalnız görebildiği modülü olan kategori) ve genel_bakis.panel —
+// ofisin günlük durumu; her sayaç kullanıcının yetkisi ve firma kapsamıyla (RLS) hesaplanır. Sayaç bir ekrana bağlıdır;
+// yetkisi olmayan sayaç gösterilmez, ana sayfa yetkisi yoksa yalnız kartlar görünür.
 
 type Sayac = { etiket: string; deger: number | string; href: string; uyari?: boolean };
 
@@ -20,9 +23,34 @@ const IS_ADI: Record<JobKind, string> = { 'gib.sozlesmeler': 'GİB sözleşmeler
 const IS_SAYFASI: Record<JobKind, string> = { 'gib.sozlesmeler': '/firmalar/gib_sozlesmeler', 'gib.beyannameler': '/beyanname/senkron', 'gib.muhsgk': '/sgk/ebildirge' };
 const IS_YETKISI: Record<JobKind, string> = { 'gib.sozlesmeler': 'firmalar.gib_sozlesmeler.view', 'gib.beyannameler': 'beyanname.liste.view', 'gib.muhsgk': 'sgk.ebildirge.view' };
 
+/** Kategori kartları: gezinmedir, içerik göstermez; ana sayfa yetkisi kapatılmış kullanıcı da izinli modüllerine buradan ulaşır. */
+function Merkez({ oturum }: { oturum: Session }) {
+  return (
+    <>
+      <div className="hub-baslik">
+        <p className="hub-ust">Eworks çalışma alanı</p>
+        <h1>İşlerinizi tek merkezden yönetin</h1>
+        <p>Başlamak için bir bölüm seçin.</p>
+      </div>
+      <Kartlar
+        etiket="Kategoriler"
+        buyuk
+        kartlar={gorunurKategoriler((k) => gorunur(oturum, k)).map((c) => ({
+          anahtar: c.id,
+          baslik: c.baslik,
+          aciklama: c.aciklama,
+          simge: c.simge,
+          href: kategoriYolu(c),
+          ...(c.hedef ? { ozellikAnahtari: c.hedef } : {}),
+        }))}
+      />
+    </>
+  );
+}
+
 export default async function AnaSayfa() {
   const { oturum, izinli } = await sayfaIzni('genel_bakis.panel.view');
-  if (!izinli) return <Yasak />;
+  if (!izinli) return <Merkez oturum={oturum} />;
   const ctx = baglam(oturum);
   const k = konteyner();
   const can = (key: string) => isAllowed(oturum.grants, key);
@@ -65,7 +93,9 @@ export default async function AnaSayfa() {
 
   return (
     <>
-      <Baslik k="genel_bakis.panel" alt="Ofisinizin bugünkü durumu; sayaçlar yetkiniz ve firma kapsamınızla hesaplanır." />
+      <Merkez oturum={oturum} />
+      <h2 className="bolum-basligi">Bugünkü durum</h2>
+      <p className="alt">Sayaçlar yetkiniz ve firma kapsamınızla hesaplanır.</p>
       <div className="sayaclar">
         {sayaclar.map((s) => (
           <Link key={s.etiket} className="sayac" href={s.href} data-uyari={s.uyari ? 'true' : undefined}>
