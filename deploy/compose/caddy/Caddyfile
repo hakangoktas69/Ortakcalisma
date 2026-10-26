@@ -1,0 +1,10 @@
+# Ters vekil (compose.uretim.yml): alan adına otomatik HTTPS, HTTP → HTTPS yönlendirme, web'e iletim.
+# Sertifika Let's Encrypt'ten alınır: alan adının DNS kaydı bu sunucuyu göstermeli, 80 ve 443 dışarıdan açık olmalı.
+{$EWORKS_ALAN_ADI} {
+	encode zstd gzip
+	reverse_proxy web:3000
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+}

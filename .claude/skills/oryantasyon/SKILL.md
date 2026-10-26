@@ -23,7 +23,7 @@ Amaç, geliştiricinin projeyi sıfırdan keşfetmesine gerek bırakmamak. Bilgi
 3. **Sor**: rolü (junior / senior / mimar / ürün), hangi bağlamda çalışacağı, Docker ve Node 24'ün kurulu olup olmadığı.
 4. **Ortamı kontrol et:**
    - `node -v`, `docker version --format '{{.Server.Version}}'`, `git config core.hooksPath` (beklenen `tools/git-hooks`)
-   - Node 24 değilse komutları `node:24` container'ında koşmasını söyle; Node 20'nin corepack'i pnpm'i indiremez (`Cannot find matching keyid`, baslangic.md §8)
+   - Node 24 değilse komutları `node:24` container'ında koşmasını söyle; Node 20'nin corepack'i pnpm'i indiremez (`Cannot find matching keyid`, baslangic.md §12)
    - Windows'ta `git config --global core.longpaths` `true` mu
    - `node tools/claude/check-memory.mjs` ve `node tools/ajan/senkron.mjs --denetle`
    - `.claude/settings.local.json` içinde `autoMemoryDirectory` `docs/ai/memory`'yi gösteriyor mu; göstermiyorsa SessionStart kancası çalışmamıştır (kancalar açık mı, `node` PATH'te mi)

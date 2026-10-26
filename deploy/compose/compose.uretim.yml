@@ -1,0 +1,43 @@
+# Üretim katmanı (VPS, tek sunucu): yalnız `node tools/deploy/yigin.mjs uretim` kullanır. Rehber: docs/gelistirici-rehberi/vps-kurulum.md
+# - Dışarıya yalnız ters vekil (Caddy) açılır: 80 → 443 yönlendirme, alan adına otomatik TLS sertifikası (Let's Encrypt).
+# - Web'in kendi portu kapatılır; uygulama container'ları dışarıdan erişilemez.
+# - Sahte GİB yok (profil: uretim), güvenli çerez ve üretim ortamı zorunlu (kod da denetler: üretimde sahte GİB ve güvensiz çerez açılmaz).
+services:
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    depends_on:
+      web: { condition: service_healthy }
+    ports:
+      - '${URETIM_HTTP_PORT:-80}:80'
+      - '${URETIM_HTTPS_PORT:-443}:443'
+      - '${URETIM_HTTPS_PORT:-443}:443/udp'
+    environment:
+      EWORKS_ALAN_ADI: ${EWORKS_ALAN_ADI:?EWORKS_ALAN_ADI tanımlı değil (deploy/compose/.env)}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    deploy:
+      resources:
+        limits: { memory: 128m }
+
+  web:
+    ports: !reset []
+    environment:
+      EWORKS_ORTAM: uretim
+      COOKIE_SECURE: 'true'
+
+  integration:
+    environment:
+      EWORKS_ORTAM: uretim
+      GIB_SAHTE_SUNUCU: ''
+
+volumes:
+  caddy-data:
+  caddy-config:

@@ -182,6 +182,7 @@ services:
     build:
       context: ../..
       dockerfile: deploy/docker/integration.Dockerfile
+      target: uretim
     image: eworks/integration:local
     restart: unless-stopped
     read_only: true

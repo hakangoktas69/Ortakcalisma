@@ -10,7 +10,7 @@ Eworks, mali müşavir ofislerinin kurum (GİB, SGK) verilerini müşavirin ve m
 
 İlk hafta, bu sırayla. Her belge kısa; bilmediğin terim için [terimler.md](gelistirici-rehberi/terimler.md).
 
-1. [Başlangıç rehberi](gelistirici-rehberi/baslangic.md) — kur, çalıştır, değiştir, test et. Uygulamayı çalıştırıp demo hesabıyla gez.
+1. [Başlangıç rehberi](gelistirici-rehberi/baslangic.md) — kur, çalıştır, VS Code ile çalıştır ve hata ayıkla, değiştir, test et. Uygulamayı çalıştırıp demo hesabıyla gez.
 2. [README](../README.md) — bağlam haritası, bir isteğin akışı, dizin haritası.
 3. [ai/vizyon.md](ai/vizyon.md) — ürün kimin için, ne yapar, ne yapmaz.
 4. [ai/kurallar.md](ai/kurallar.md) — pazarlıksız kurallar (neden önemli olduklarıyla).
@@ -35,7 +35,7 @@ Eworks, mali müşavir ofislerinin kurum (GİB, SGK) verilerini müşavirin ve m
 | [baglamlar/](baglamlar/README.md) | Bounded context sayfaları |
 | [ozellik-durumu.md](ozellik-durumu.md) | Modül → sayfa → işlem, kırmızı/yeşil (üretilir) |
 | [ai/](ai/vizyon.md) | Ajan bağlamı; [ai/memory/](ai/memory/MEMORY.md) ekip hafızası; `ai/beceriler/` beceri kaynakları |
-| [gelistirici-rehberi/](gelistirici-rehberi/baslangic.md) | [Başlangıç](gelistirici-rehberi/baslangic.md), [terimler](gelistirici-rehberi/terimler.md); [DDD](gelistirici-rehberi/ddd.md) ve [TDD](gelistirici-rehberi/tdd.md) uygulama rehberleri (koddan örneklerle); Claude Code ve Codex ile çalışma, ekip senkronu; [canlı GİB doğrulaması](gelistirici-rehberi/canli-dogrulama.md) |
+| [gelistirici-rehberi/](gelistirici-rehberi/baslangic.md) | [Başlangıç](gelistirici-rehberi/baslangic.md) (VS Code, hata ayıklama), [VPS kurulumu](gelistirici-rehberi/vps-kurulum.md), [terimler](gelistirici-rehberi/terimler.md); [DDD](gelistirici-rehberi/ddd.md) ve [TDD](gelistirici-rehberi/tdd.md) uygulama rehberleri (koddan örneklerle); Claude Code ve Codex ile çalışma, ekip senkronu; [canlı GİB doğrulaması](gelistirici-rehberi/canli-dogrulama.md) |
 
 ## Arşiv (yalnız referans)
 
