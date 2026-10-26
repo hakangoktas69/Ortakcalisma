@@ -13,6 +13,9 @@ const config: NextConfig = {
   productionBrowserSourceMaps: false,
   transpilePackages: ['@eworks/credentials', '@eworks/documents', '@eworks/feature-registry', '@eworks/identity-access', '@eworks/kernel', '@eworks/platform', '@eworks/portfolio', '@eworks/social-security', '@eworks/sync', '@eworks/tax-filing', '@eworks/workspace'],
   serverExternalPackages: ['pg', 'ioredis'],
+  // `next dev` varsayılan olarak AGENTS.md'ye kendi bloğunu yazar; bizde AGENTS.md tek kaynaktan üretilir (tools/ajan/senkron.mjs)
+  // ve elle eklenen içerik `pnpm verify`'ı kırar. Ajan bağlamı CLAUDE.md'dedir.
+  agentRules: false,
   async headers() {
     return [
       {

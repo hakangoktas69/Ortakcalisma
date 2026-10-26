@@ -2,6 +2,9 @@
 // Compose yığınını yönetir (Node 20+ yeter; asıl iş container'larda koşar).
 //   node tools/deploy/yigin.mjs sirlar      deploy/compose/.env yoksa güçlü rastgele sırlarla üretir (eksik anahtarları tamamlar)
 //   node tools/deploy/yigin.mjs up          sırlar + imajlar + yığın (--wait: sağlık denetimleri yeşil olana kadar)
+//   node tools/deploy/yigin.mjs gelistir    up + altyapı portları yalnız 127.0.0.1'de (compose.gelistirme.yml) + apps/web/.env.local;
+//                                           ardından web Docker'sız: pnpm --filter @eworks/web dev → http://127.0.0.1:8765
+//   node tools/deploy/yigin.mjs web-env     yalnız apps/web/.env.local'i yeniden üretir (sırlar deploy/compose/.env'den)
 //   node tools/deploy/yigin.mjs down        yığını durdurur (veri birimleri korunur; --sil ile silinir)
 //   node tools/deploy/yigin.mjs test        birim + entegrasyon + pgTAP testlerini yığının ağında, test koşucusu imajında çalıştırır
 //   node tools/deploy/yigin.mjs e2e         arayüz kabul testlerini (Playwright, 4 ekran) yığına karşı çalıştırır
@@ -15,6 +18,8 @@ import { fileURLToPath } from 'node:url';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const COMPOSE = join(KOK, 'deploy', 'compose', 'compose.yml');
+const GELISTIRME = join(KOK, 'deploy', 'compose', 'compose.gelistirme.yml');
+const WEB_ENV = join(KOK, 'apps', 'web', '.env.local');
 const ENV = join(KOK, 'deploy', 'compose', '.env');
 const PROJE = process.env.YIGIN_PROJE ?? 'eworks';
 const PROFIL = process.env.YIGIN_PROFIL ?? 'demo';
@@ -49,17 +54,83 @@ export function sirlariTamamla(yol = ENV) {
 
 const ALTYAPI = ['db-control', 'auth', 'db-shard-01', 'db-shard-02', 'redis', 'rabbitmq', 's3'];
 
+// Geliştirme katmanının varsayılan yerel portları (compose.gelistirme.yml ile aynı; .env'de GELISTIRME_*_PORT ile değişir)
+export const GELISTIRME_PORTLARI = { dbControl: 54320, dbShard01: 54321, dbShard02: 54322, auth: 59999, redis: 56379, s3: 58333 };
+const PORT_ADLARI = { dbControl: 'GELISTIRME_DB_CONTROL_PORT', dbShard01: 'GELISTIRME_DB_SHARD_01_PORT', dbShard02: 'GELISTIRME_DB_SHARD_02_PORT',
+  auth: 'GELISTIRME_AUTH_PORT', redis: 'GELISTIRME_REDIS_PORT', s3: 'GELISTIRME_S3_PORT' };
+
+const WEB_SIRLARI = ['CONTROL_DB_PASSWORD', 'APP_DB_PASSWORD', 'JWT_SECRET', 'SESSION_SECRET', 'TAX_ID_HMAC_KEY', 'REDIS_PASSWORD', 'S3_ACCESS_KEY',
+  'S3_SECRET_KEY'];
+
+/** .env'deki port: boşsa varsayılan (compose'daki ${VAR:-varsayılan} gibi), geçersizse hata. */
+function portOku(env, ad, varsayilan) {
+  const ham = (env[ad] ?? '').trim();
+  if (ham === '') return varsayilan;
+  const n = Number(ham);
+  if (!Number.isInteger(n) || n < 1 || n > 65535) throw new Error(`${ad} 1–65535 arasında bir port olmalı`);
+  return n;
+}
+
+/** apps/web/.env.local içeriği: web'in Docker dışından yığına bağlanması. Süper kullanıcı parolası verilmez (web uygulama rolüyle bağlanır). */
+export function webEnv(env, { adres = () => '127.0.0.1', portlar } = {}) {
+  const eksik = WEB_SIRLARI.filter((k) => !env[k]);
+  if (eksik.length > 0) throw new Error(`deploy/compose/.env'de eksik: ${eksik.join(', ')} — node tools/deploy/yigin.mjs sirlar`);
+  const p = portlar ?? Object.fromEntries(Object.entries(GELISTIRME_PORTLARI).map(([k, v]) => [k, portOku(env, PORT_ADLARI[k], v)]));
+  const db = (servis, kullanici, parola, port) => `postgres://${kullanici}:${encodeURIComponent(parola)}@${adres(servis)}:${port}/postgres`;
+  const degerler = {
+    EWORKS_ORTAM: 'gelistirme',
+    COOKIE_SECURE: 'false',
+    CONTROL_DATABASE_URL: db('db-control', 'eworks_control', env.CONTROL_DB_PASSWORD, p.dbControl),
+    SHARD_DATABASE_URLS: `shard-01=${db('db-shard-01', 'eworks_app', env.APP_DB_PASSWORD, p.dbShard01)},shard-02=${db('db-shard-02', 'eworks_app', env.APP_DB_PASSWORD, p.dbShard02)}`,
+    AUTH_URL: `http://${adres('auth')}:${p.auth}`,
+    JWT_SECRET: env.JWT_SECRET,
+    SESSION_SECRET: env.SESSION_SECRET,
+    TAX_ID_HMAC_KEY: env.TAX_ID_HMAC_KEY,
+    REDIS_URL: `redis://:${encodeURIComponent(env.REDIS_PASSWORD)}@${adres('redis')}:${p.redis}/0`,
+    S3_ENDPOINT: `http://${adres('s3')}:${p.s3}`,
+    S3_ACCESS_KEY: env.S3_ACCESS_KEY,
+    S3_SECRET_KEY: env.S3_SECRET_KEY,
+  };
+  return '# Üretildi: node tools/deploy/yigin.mjs web-env — sır içerir, commit etmeyin (.gitignore: .env.*)\n' +
+    Object.entries(degerler).map(([k, v]) => `${k}=${v}`).join('\n') + '\n';
+}
+
+/** Compose dosyaları. Geliştirme kipi (.env: GELISTIRME_KATMANI=1, `gelistir` yazar) sonraki up/test/e2e/down'da da korunur;
+ * yoksa bir `up` port katmanını düşürür ve Docker'sız web bağlantısını kaybeder. */
+export function composeDosyalari(env = envOku()) {
+  return env.GELISTIRME_KATMANI === '1' ? [COMPOSE, GELISTIRME] : [COMPOSE];
+}
+
+function envAyarla(anahtar, deger) {
+  const env = { ...envOku(), [anahtar]: deger };
+  if (deger === null) delete env[anahtar];
+  writeFileSync(ENV, '# Üretildi: node tools/deploy/yigin.mjs sirlar — commit etmeyin\n' + Object.entries(env).map(([k, v]) => `${k}=${v}`).join('\n') + '\n');
+}
+
+const konteyner = (servis) => execFileSync('docker', compose('ps', '-q', servis), { encoding: 'utf8', cwd: KOK }).trim();
+
 /** Altyapı → migration → uygulama servisleri; tek seferlik görevler `--wait`'i bozmasın diye ayrı çalışır. */
 function yiginiKaldir(ek = []) {
   // Görev profilindeki servisler (migrate, hesap-ac) de derlensin; `up` ise onları başlatmasın
-  docker(['compose', '-p', PROJE, '--env-file', ENV, '-f', COMPOSE, '--profile', PROFIL, '--profile', 'gorev', 'build']);
+  docker(compose('--profile', 'gorev', 'build'));
+  const onceki = konteyner('db-control');
   docker(compose('up', '-d', '--wait', '--wait-timeout', '600', ...ALTYAPI));
+  if (onceki && konteyner('db-control') !== onceki) {
+    // Kontrol veritabanı yeniden oluşturuldu: GoTrue eski bağlantıda kalıp 500 verir, yeniden başlatılır
+    docker(compose('restart', 'auth'));
+    docker(compose('up', '-d', '--wait', '--wait-timeout', '120', 'auth'));
+  }
   docker(compose('run', '--rm', 'migrate'));
   if (PROFIL === 'demo') docker(compose('run', '--rm', 'hesap-ac'));
   docker(compose('up', '-d', '--remove-orphans', '--wait', '--wait-timeout', '600', ...ek));
 }
 
-const compose = (...args) => ['compose', '-p', PROJE, '--env-file', ENV, '-f', COMPOSE, '--profile', PROFIL, ...args];
+const compose = (...args) => ['compose', '-p', PROJE, '--env-file', ENV, ...composeDosyalari().flatMap((d) => ['-f', d]), '--profile', PROFIL, ...args];
+
+function webEnvYaz() {
+  writeFileSync(WEB_ENV, webEnv(envOku()));
+  return WEB_ENV;
+}
 const docker = (args, opts = {}) => {
   const r = spawnSync('docker', args, { stdio: 'inherit', cwd: KOK, ...opts });
   if (r.status !== 0) process.exit(r.status ?? 1);
@@ -72,9 +143,25 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     console.log(n ? `✔ ${n} sır üretildi: ${ENV}` : '✔ Sırlar zaten tam');
   } else if (komut === 'up') {
     sirlariTamamla();
-    yiginiKaldir(geri);
+    if (geri.includes('--gelistirme-kapat')) envAyarla('GELISTIRME_KATMANI', null); // altyapı portlarını yeniden kapat
+    yiginiKaldir(geri.filter((a) => !a.startsWith('--')));
     const env = envOku();
     console.log(`\n✔ Yığın ayakta: ${env.PUBLIC_URL ?? 'http://localhost:8080'}`);
+    if (env.GELISTIRME_KATMANI === '1') console.log("  Geliştirme kipi açık: altyapı portları 127.0.0.1'de (kapatmak için: up --gelistirme-kapat)");
+  } else if (komut === 'gelistir') {
+    sirlariTamamla();
+    envAyarla('GELISTIRME_KATMANI', '1');
+    yiginiKaldir(geri);
+    const yol = webEnvYaz();
+    console.log([
+      '',
+      `✔ Yığın ayakta (Docker içindeki web: ${envOku().PUBLIC_URL ?? 'http://localhost:8080'}); altyapı portları yalnız 127.0.0.1'de.`,
+      `✔ Web ortamı yazıldı: ${yol} (sır içerir, commit edilmez)`,
+      "  Docker'sız web (değişiklikte anında yenilenir):  pnpm --filter @eworks/web dev   →  http://127.0.0.1:8765",
+    ].join('\n'));
+  } else if (komut === 'web-env') {
+    sirlariTamamla();
+    console.log(`✔ Web ortamı yazıldı: ${webEnvYaz()} (sır içerir, commit edilmez)`);
   } else if (komut === 'helm') {
     const k8s = join(KOK, 'deploy', 'k8s');
     docker(['run', '--rm', '-v', `${k8s}:/k`, 'alpine/helm:3.19.0', 'lint', '/k/eworks']);
@@ -120,7 +207,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         'python3 -m pytest -q -p no:cacheprovider --junitxml=/out/pytest.xml && lint-imports --no-cache']);
     }
   } else {
-    console.error('Kullanım: node tools/deploy/yigin.mjs sirlar|up|down [--sil]|test|e2e|helm');
+    console.error('Kullanım: node tools/deploy/yigin.mjs sirlar|up|gelistir|web-env|down [--sil]|test|e2e|helm');
     process.exit(2);
   }
 }

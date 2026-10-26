@@ -1,7 +1,9 @@
 # Eworks
 
-Mali müşavir ofisleri için çok kiracılı SaaS: GİB e-Beyanname ve SGK verisini müşavirin ve mükelleflerin kendi kurum hesaplarıyla — **web servis birincil, sunucu robotu yedek** — toplu çeker; beyanname, tahakkuk, SGK belgesi, görev ve uyarıları tek ekranda sunar. Kiracı = ofis; ofis → müşavir → mükellef.
+Mali müşavir ofisleri için çok kiracılı SaaS: GİB e-Beyanname ve SGK verisini müşavirin ve mükelleflerin kendi kurum hesaplarıyla, sunucu tarafında toplu çeker (oturum tarayıcıyla açılır; sonrasında hizmet başına robot ya da doğrulanmış HTTP, D38); beyanname, tahakkuk, SGK belgesi, görev ve uyarıları tek ekranda sunar. Kiracı = ofis; ofis → müşavir → mükellef.
 
+> **Yeni misin?** [Başlangıç rehberi](docs/gelistirici-rehberi/baslangic.md): kur, çalıştır, değiştir, test et. Sonra [okuma sırası](docs/00-genel-bakis.md#okuma-sırası-junior).
+>
 > 24.10.2026'da depo yeniden yapılandı (D28): yeni yapı bu kökte, önceki tüm projeler [eski/](eski/README.md) altında arşivdir. Pull sonrası her makinede bir kez: `node tools/ajan/eski-yerel-tasi.mjs --uygula`.
 
 ## Özellik durumu
@@ -31,7 +33,7 @@ flowchart TB
     NT["notifications<br/>Bildirim"]
     AU["audit<br/>Denetim"]
   end
-  ACL["services/integration (Python ACL)<br/>GİB / SGK servis + robot<br/>→ contracts/"]
+  ACL["services/integration (Python ACL)<br/>GİB: robot + servis yolu (D38)<br/>→ contracts/"]
   IA --> ORG --> PF
   PF --> CR
   SY --> CR
@@ -47,26 +49,28 @@ Bağlam sayfaları: [docs/baglamlar/](docs/baglamlar/README.md).
 
 ## Bir istek nasıl akar
 
+Örnek: kullanıcı "Yeni görev" formunu gönderir.
+
 ```mermaid
 flowchart LR
   subgraph Web["apps/web (Next.js)"]
-    R["app/(panel)/sgk/e-bildirge/page.tsx<br/>rota, ince"]
-    S["features/social-security/screens"]
-    A["features/social-security/actions.ts"]
-    G["bff/guard: oturum + CSRF +<br/>yetki anahtarı + kapsam"]
+    P["app/(panel)/gorevler/page.tsx<br/>sayfa: sayfaIzni('gorevler.view')"]
+    F["features/workspace/Gorevler.tsx<br/>form (tarayıcı)"]
+    U["app/api/gorevler/route.ts<br/>BFF ucu"]
+    G["bff/oturum.ts: apiIzni<br/>oturum + CSRF + yetki anahtarı"]
   end
-  subgraph Pkg["packages/contexts/social-security"]
-    APP["application: use-case"]
-    DOM["domain: kurallar"]
-    INF["infrastructure: Postgres"]
+  subgraph Pkg["packages/contexts/workspace"]
+    APP["application/workspace.ts<br/>createTask (use-case)"]
+    DOM["domain/task.ts<br/>kurallar"]
+    INF["infrastructure/pg-workspace.ts"]
   end
-  SYF["packages/contexts/sync<br/>index.ts facade"]
-  DB[("Postgres shard<br/>social_security.*, sync.*")]
-  R --> S --> A --> G --> APP
-  APP --> DOM
+  DB[("Postgres shard<br/>workspace.tasks, RLS")]
+  P --> F -- "POST /api/gorevler" --> U --> G
+  U --> APP --> DOM
   APP --> INF --> DB
-  APP --> SYF --> DB
 ```
+
+Sayfa ve uç incedir: yetkiyi denetler, iş kuralını use-case ve domain'e bırakır. Ayrıntı: [DDD rehberi §4.4](docs/gelistirici-rehberi/ddd.md#44-bff-ve-ui--ince-kabuk).
 
 ## Dizin haritası
 
@@ -77,27 +81,31 @@ flowchart LR
 | `packages/feature-registry` | Özellik ağacı = yetki ağacı = TDD durum kaynağı |
 | `packages/platform`, `packages/testing` | Teknik altyapı · test yardımcıları (sahte VKN/TCKN) |
 | `apps/web`, `apps/sales`, `apps/worker` | Portal + BFF · satış portalı · arka plan işçisi |
-| `services/integration`, `services/ocr` | Python ACL (kurum servis/robot) · CAPTCHA OCR |
+| `services/integration` | Python ACL: GİB girişi (otomatik CAPTCHA, ddddocr), robot ve servis yolu, sahte GİB (`services/ocr` iskelet, kullanılmıyor) |
 | `contracts/` | Yayımlanmış dil: ACL çıktıları ve olay yükleri (JSON Schema) |
 | `supabase/` | `migrations/control`, `migrations/tenant`, pgTAP testleri, sentetik seed |
-| `deploy/` | Docker Compose ve Kubernetes |
+| `deploy/` | Docker Compose ve Kubernetes — [deploy/README.md](deploy/README.md) |
 | `tools/` | `arch` (katman kuralları), `features` (özellik durumu), `ajan` (Claude ↔ Codex senkronu), `claude` (kancalar), `git-hooks`, `docs` |
 | `docs/` | [Genel bakış ve okuma sırası](docs/00-genel-bakis.md), hedef mimari, karar kaydı, bağlamlar, ajan bağlamı + ekip hafızası |
 | `eski/` | Yeniden yapılanma öncesi depo (arşiv) |
 
 ## Çalıştırma
 
-Node 24 ve pnpm gerekir (`.nvmrc`; yerel Node eskiyse `node:24` container'ında).
+Gerekenler: Git, Docker Desktop (en az 6 GB bellek), Node 24 (`.nvmrc`), pnpm (corepack ile). Adım adım ve sorun giderme: [başlangıç rehberi](docs/gelistirici-rehberi/baslangic.md).
 
 ```bash
-corepack enable
-pnpm install          # git kancalarını da kurar (tools/git-hooks)
-pnpm verify           # tip denetimi, mimari kurallar, testler, ekip hafızası, ajan senkronu, belge bağlantıları
-pnpm features         # özellik durumunu test sonuçlarından üretir
+corepack enable && pnpm install             # bağımlılıklar + git kancaları
+pnpm verify                                 # tip, mimari kurallar, birim testleri, belgeler — commit'ten önce her zaman
+node tools/deploy/yigin.mjs up              # tüm yığın Docker'da → http://localhost:8080 (demo@eworks.test / .env'deki DEMO_SIFRE)
+node tools/deploy/yigin.mjs gelistir        # geliştirme: altyapı portları 127.0.0.1'de, ardından
+pnpm --filter @eworks/web dev               #   web Docker'sız, anında yenilenir → http://127.0.0.1:8765
+node tools/deploy/yigin.mjs test            # entegrasyon + pgTAP + Python testleri
+node tools/deploy/yigin.mjs e2e             # arayüz kabul testleri (dört ekran)
+node tools/deploy/yigin.mjs down            # durdur (--sil: verileri de sil)
 ```
 
-Uygulamalar (`apps/*`) ve yerel yığın (Compose) Faz 0'da eklenecek; durum: [docs/ai/durum.md](docs/ai/durum.md).
+Docker ayrıntısı (servisler, portlar, ayarlar): [deploy/README.md](deploy/README.md). Durum ve açık konular: [docs/ai/durum.md](docs/ai/durum.md).
 
 ## Katkı
 
-TDD: önce `feature-registry` anahtarı, sonra `@F:<anahtar>` etiketli kırmızı kabul testi ([docs/ai/test.md](docs/ai/test.md)). Örnekli rehberler: [DDD](docs/gelistirici-rehberi/ddd.md), [TDD](docs/gelistirici-rehberi/tdd.md). Kurallar: [CLAUDE.md](CLAUDE.md) ve [docs/ai/kurallar.md](docs/ai/kurallar.md). Claude Code ya da Codex ile çalışma: [docs/gelistirici-rehberi/claude-codex.md](docs/gelistirici-rehberi/claude-codex.md). Canlı GİB doğrulaması: [docs/gelistirici-rehberi/canli-dogrulama.md](docs/gelistirici-rehberi/canli-dogrulama.md).
+TDD: önce `feature-registry` anahtarı, sonra `@F:<anahtar>` etiketli kırmızı kabul testi ([docs/ai/test.md](docs/ai/test.md)). Örnekli rehberler: [DDD](docs/gelistirici-rehberi/ddd.md), [TDD](docs/gelistirici-rehberi/tdd.md); terimler: [terimler.md](docs/gelistirici-rehberi/terimler.md). Kurallar: [CLAUDE.md](CLAUDE.md) ve [docs/ai/kurallar.md](docs/ai/kurallar.md). Claude Code ya da Codex ile çalışma: [docs/gelistirici-rehberi/claude-codex.md](docs/gelistirici-rehberi/claude-codex.md). Canlı GİB doğrulaması: [docs/gelistirici-rehberi/canli-dogrulama.md](docs/gelistirici-rehberi/canli-dogrulama.md).

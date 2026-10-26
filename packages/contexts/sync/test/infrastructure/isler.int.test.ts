@@ -45,8 +45,17 @@ describe('kurum işi (sync)', () => {
     // Uygulama rolü outbox'ı okuyamaz
     const appPool = web.pool(await web.shardOf(ctx.org));
     await expect(withSystem(appPool, ctx.org, (c) => c.query('select * from sync.pending_outbox(10)'))).rejects.toThrow();
-    const bekleyen = await withSystem(sistem.pool(await sistem.shardOf(ctx.org)), ctx.org, async (c) => (await c.query<{ org_id: string; payload: { jobId: string } }>('select * from sync.pending_outbox(1000)')).rows);
-    expect(bekleyen.some((m) => m.org_id === ctx.org && m.payload.jobId === r.value.jobId)).toBe(true);
+    // Yığındaki işçi outbox'ı sürekli yayımlar: mesaj bu satıra gelmeden "yayımlandı" olabilir. Önce bekleyenler, sonra satır
+    // okunur: bekleyenlerde yoksa yayımlanmış olmalı (yayımlanmış mesaj geri bekleyene dönmez; sıra yarışa dayanıklı).
+    const { bekleyen, yazilan } = await withSystem(sistem.pool(await sistem.shardOf(ctx.org)), ctx.org, async (c) => {
+      const b = (await c.query<{ org_id: string; payload: { jobId: string } }>('select * from sync.pending_outbox(500)')).rows
+        .some((m) => m.org_id === ctx.org && m.payload.jobId === r.value.jobId);
+      const y = (await c.query<{ payload: { jobId: string }; published_at: Date | null }>(
+        'select payload, published_at from sync.outbox where org_id = $1', [ctx.org])).rows.find((m) => m.payload.jobId === r.value.jobId);
+      return { bekleyen: b, yazilan: y };
+    });
+    expect(yazilan).toBeDefined(); // iş ile aynı işlemde yazıldı
+    if (!bekleyen) expect(yazilan?.published_at).not.toBeNull();
   });
 
   it('iş bir kez sahiplenilir; kurum sırrı yalnız entegrasyon rolüne ve yalnız sahiplenilmiş işe verilir', async () => {
