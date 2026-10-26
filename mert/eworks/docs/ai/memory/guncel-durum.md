@@ -25,3 +25,6 @@ Ana proje artık yalnız ikinci entegrasyon yöntemidir. İlk sürüm ana proje 
 Referans görsel yerleşim örneğidir. Yeni e-Defter ekranı Eworks mavi tonları, beyaz kartları ve mevcut filtre/rozet stiliyle hazırlandı: firma türü, yıl, firma ve kaynak durumu filtreleri, 12 aylık belge matrisi, dönem detayı ve CSV dışa aktarımı. YB/KB/Y kutucukları sadece ilgili sahip/firma/yıl/döneme bağlı doğrulanmış belge kaydı varsa mavi; bilinmeyen aylar gri görünür. Görseldeki sayılar kopyalanmaz; kaynağı doğrulanmayan dönem sıklığı veya yazılım adı üretilmez. Eski yerel dosya takip ekranı ayrı düğmeden korunur; onun notları canlı GİB verisi sayılmaz.
 
 Bu aşama ekran ve proje ayrımıdır. Canlı e-Defter endpoint/alan sözleşmesi ve indirilebilir belge akışı henüz doğrulanmadı; GİB'den belge çek düğmesi bu yüzden pasif. Yeni oturumda canlı kaynak gözlemi, hesap/yetki doğrulaması ve ardından servis adaptörü gerekli. Henüz e-Defter belgesi çekildiği veya entegrasyon tamamlandığı söylenemez.
+
+## 26 Ekim 2026 güncellemesi
+Firma kartı ayrıntıları Düzenle ile açılır. Günlük Yönetim > Portal Kısayolları ekranı ve firmaya özel GİB oturum açılış yolu eklendi. Canlı giriş henüz doğrulanmadı; SGK/e-Arşiv yalnız giriş bağlantısıdır. Ayrıntı: [26 Ekim günlüğü](../../gunluk/2026-10-26.md). Önceki toplu iş duraklatılmıştır.

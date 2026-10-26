@@ -52,6 +52,7 @@ def run_job(job_id,config,access_token=''):
     with LOCK:owner=JOBS[job_id]['ownerId']
     request={'requestId':job_id,'ownerId':owner}
     if config.get('networkProbe') is True:request['networkProbe']=True
+    if config.get('portalSession'):request['portalSession']=config['portalSession']
     if config.get('declarationSync'):
         request['declarationSync']=config['declarationSync']
         request['downloadDocuments']=True
@@ -65,8 +66,8 @@ def run_job(job_id,config,access_token=''):
     (folder/'request.json').write_text(json.dumps(request),encoding='utf-8')
     with LOCK:JOBS[job_id].update(state='running',message='Python robotu Chrome penceresini hazırlıyor.')
     try:
-        worker=ROOT.parent/'Eworks-Python-Robot'/'portal_worker.py'
-        result=subprocess.run([sys.executable,str(worker),str(folder)],cwd=str(worker.parent),input=json.dumps({'accessToken':access_token}).encode('utf-8'),capture_output=True,timeout=7230 if config.get('declarationSync') else 930,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+        worker=ROOT.parent/'Eworks-Python-Robot'/('portal_session.py' if config.get('portalSession') else 'portal_worker.py')
+        result=subprocess.run([sys.executable,str(worker),str(folder)],cwd=str(worker.parent),input=json.dumps({'accessToken':access_token}).encode('utf-8'),capture_output=True,timeout=7230 if config.get('declarationSync') or config.get('portalSession') else 930,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
         access_token=''
         status_file=folder/'status.json'
         if result.returncode!=0:
@@ -74,6 +75,10 @@ def run_job(job_id,config,access_token=''):
             raise RuntimeError(status.get('message','Python GİB robotu tamamlanamadı.'))
         batch=json.loads(result.stdout.decode('utf-8'))
         if batch.get('requestId')!=job_id or batch.get('ownerId')!=owner:raise ValueError('İş kimliği eşleşmiyor')
+        if config.get('portalSession'):
+            if batch.get('schema')!='eworks.portal-session.v1' or batch.get('imported') is not False:raise ValueError('Portal oturumu sonucu doğrulanamadı.')
+            with LOCK:JOBS[job_id].update(state='completed',message='Portal oturumu kapandı; kayıtlar değiştirilmedi.',_result=batch)
+            return
         if config.get('networkProbe') is True:
             if batch.get('schema')!='eworks.gib.network-probe.v1' or batch.get('queryCount')!=1:raise ValueError('Bağlantı testi sonucu doğrulanamadı.')
             (folder/'network-probe-result.json').write_text(json.dumps(batch,ensure_ascii=False),encoding='utf-8')
@@ -111,7 +116,7 @@ def public_job(job_id):
             status=json.loads(p.read_text(encoding='utf-8'))
             job.update({k:status[k] for k in ('state','message') if k in status})
         except (OSError,ValueError):pass
-    return {k:v for k,v in job.items() if not k.startswith('_')}
+    return {k:v for k,v in job.items() if not k.startswith('_') and k!='portalSession'}
 
 def signal_focus(job_id):
     try:
@@ -184,7 +189,7 @@ class Handler(SimpleHTTPRequestHandler):
             temporary.write_text(json.dumps({'expectedCount':count}),encoding='utf-8')
             temporary.replace(folder/'ready.json')
             return self.reply(202,{'message':'Listeyi okuma isteği alındı'})
-        if self.path not in ('/api/gib/update','/api/gib/network-probe','/api/declarations/review','/api/declarations/retry-plan','/api/declarations/sync'):return self.reply(404,{'message':'İşlem bulunamadı'})
+        if self.path not in ('/api/portal/open','/api/gib/update','/api/gib/network-probe','/api/declarations/review','/api/declarations/retry-plan','/api/declarations/sync'):return self.reply(404,{'message':'İşlem bulunamadı'})
         authorization=self.headers.get('Authorization','')
         access_token=authorization[7:] if authorization.startswith('Bearer ') else ''
         if not verify_owner(access_token,owner):return self.reply(401,{'message':'Geçerli Eworks oturumu gerekli; tekrar giriş yapın.'})
@@ -204,7 +209,12 @@ class Handler(SimpleHTTPRequestHandler):
             except (OSError,ValueError,KeyError,TypeError):return self.reply(409,{'message':'Gözlem kaynağı doğrulanamadı; mevcut kayıtlar korundu.'})
         config=robot_config()
         if config is None:return self.reply(503,{'state':'setup_required','message':'Python robotu hazır değil; bağımlılıklarını kontrol edin. Mevcut kayıtlar korunuyor.'})
-        kind='network_probe' if self.path=='/api/gib/network-probe' else 'declarations' if self.path=='/api/declarations/sync' else 'contracts'
+        if self.path=='/api/portal/open':
+            try:
+                from portal_session import validate_scope
+                config={'portalSession':validate_scope(body.get('portalSession'))}
+            except (ValueError,TypeError):return self.reply(400,{'message':'Geçerli firma ve portal seçin.'})
+        kind='portal_session' if self.path=='/api/portal/open' else 'network_probe' if self.path=='/api/gib/network-probe' else 'declarations' if self.path=='/api/declarations/sync' else 'contracts'
         if kind=='network_probe':
             config={**config,'networkProbe':True}
             config.pop('moduleInspection',None)
@@ -227,12 +237,13 @@ class Handler(SimpleHTTPRequestHandler):
             active=next((j for j in JOBS.values() if j['state'] in ('queued','running','awaiting_user')),None)
             if active:
                 if active['ownerId']!=owner:return self.reply(409,{'message':'Başka bir güncelleme çalışıyor.'})
-                if active.get('kind','contracts')!=kind or (kind=='declarations' and active.get('scope')!=scope):return self.reply(409,{'message':'Farklı bir GİB sorgusu çalışıyor. Önce tamamlayın veya iptal edin.'})
+                if active.get('kind','contracts')!=kind or (kind=='declarations' and active.get('scope')!=scope) or (kind=='portal_session' and active.get('portalSession')!=config['portalSession']):return self.reply(409,{'message':'Farklı bir GİB sorgusu çalışıyor. Önce tamamlayın veya iptal edin.'})
                 signal_focus(active['id'])
                 return self.reply(202,{'jobId':active['id'],'state':active['state'],'reused':True,'message':'Mevcut GİB işi devam ediyor; pencere öne getiriliyor.'})
             job_id=uuid.uuid4().hex
             JOBS[job_id]={'id':job_id,'ownerId':owner,'kind':kind,'state':'queued','message':'GİB aktarımı sıraya alındı.'}
             if kind=='declarations':JOBS[job_id]['scope']=scope
+            if kind=='portal_session':JOBS[job_id]['portalSession']={'firmId':config['portalSession']['firmId'],'target':config['portalSession']['target'],'identity':config['portalSession']['identity']}
         threading.Thread(target=run_job,args=(job_id,config,access_token),daemon=True).start()
         return self.reply(202,{'jobId':job_id,'state':'queued'})
     def end_headers(self):
