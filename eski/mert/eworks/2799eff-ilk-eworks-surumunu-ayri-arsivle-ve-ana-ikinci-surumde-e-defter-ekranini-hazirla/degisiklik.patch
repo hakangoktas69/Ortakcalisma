@@ -1,0 +1,275 @@
+From 2799effbb71bfef56f9d40469a7ae57373b09a04
+Author: MERT-hb <m1ert01can@gmail.com>
+Date: 2026-10-23T12:35:53+03:00
+Subject: Ilk Eworks surumunu ayri arsivle ve ana ikinci surumde e-Defter ekranini hazirla
+
+
+diff --git a/mert/eworks-arsiv/.gitignore b/mert/eworks-arsiv/.gitignore
+new file mode 100644
+index 0000000..55f4816
+--- /dev/null
++++ b/mert/eworks-arsiv/.gitignore
+@@ -0,0 +1,41 @@
++# Credentials and local state
++.env
++.env.*
++!.env.example
++*.pem
++*.key
++secrets.xml
++.local/
++# Customer exports and browser sessions
++**/gib-sozlesmeler.*
++**/incoming/
++**/jobs/
++**/downloads/
++**/uploads/
++**/*profile*/
++**/storage-state*.json
++**/storage_state*.json
++*.db
++*.sqlite*
++*.xls
++*.xlsx
++*.csv
++*.png
++*.jpg
++*.jpeg
++*.pdf
++*.log
++# Backups and dependencies
++**/*Yedek*/
++**/*backup*/
++__pycache__/
++*.pyc
++.venv/
++venv/
++node_modules/
++runtime/
++*.zip
++
++# Isolated OCR engine and diagnostic logs
++.ocr-venv/
++*.stderr
+diff --git a/mert/eworks-arsiv/README.md b/mert/eworks-arsiv/README.md
+new file mode 100644
+index 0000000..c029a7f
+--- /dev/null
++++ b/mert/eworks-arsiv/README.md
+@@ -0,0 +1,7 @@
++# Eworks tarihsel arşivi
++
++İlk tarayıcı entegrasyonu ana Eworks projesinden ayrı, `entegrasyon-1-tarayici/` altında korunur. Kaynak dosyaların içerikleri değiştirilmeden taşındı; `SOURCE-MANIFEST.json` ve eski Git dalı korunur.
++
++Aktif ana proje **[ikinci entegrasyondur](../eworks/entegrasyon-2-servis/README.md)**. e-Defter geliştirmesi ve sonraki işler yalnız o yöntemde yürütülür. Arşive yeni özellik eklenmez ve canlı çalışma için bu arşiv başlatılmaz. Yerel özel ortamda da ilk sürüm, ikinci sürümden ayrı kardeş arşiv dizininde durur.
++
++Şifre, gerçek müşteri verisi, PDF veya özel aktarım dosyası arşive eklenmez.
+diff --git a/mert/eworks/CLAUDE.md b/mert/eworks/CLAUDE.md
+index 3197d47..9c0c7dd 100644
+--- a/mert/eworks/CLAUDE.md
++++ b/mert/eworks/CLAUDE.md
+@@ -2,8 +2,8 @@
+ 
+ Bu dosya yalnız `mert/eworks/` içindir. Önce [ekip hafızasını](docs/ai/memory/MEMORY.md) ve [güncel durumu](docs/ai/memory/guncel-durum.md) okuyun.
+ 
+-- `entegrasyon-1-tarayici/` tarihsel ilk sürümdür; yeni geliştirmeleri buraya taşımayın.
+-- `entegrasyon-2-servis/` ikinci entegrasyonun paylaşılabilir kaynak kopyasıdır. Çalışan özel aktarım ortamıyla aynı klasör değildir.
++- İlk sürüm proje dışında `../eworks-arsiv/entegrasyon-1-tarayici/` altında salt tarihsel arşivdir; yeni geliştirmeleri buraya taşımayın.
++- Ana proje `entegrasyon-2-servis/` üzerinden yürür. e-Defter yalnız ikinci entegrasyon yöntemiyle geliştirilecektir. Bu dizin ikinci entegrasyonun paylaşılabilir kaynak kopyasıdır. Çalışan özel aktarım ortamıyla aynı klasör değildir.
+ - İşe güncel `dev` dalından `feature/…` açarak başlayın. Commit ve testlerden sonra güncel `dev` ile birleştirin, ardından ekip düzenine göre `dev` dalını push edin. Git Flow geliştirme dalı `dev`, üretim dalı `main` olmalıdır.
+ - `.env`, parola, token, gerçek VKN/TCKN, mükellef isimleri, PDF'ler, özel iş sonuçları ve yerel yorumlayıcı ayarları Git'e girmez. Bağlantı sabitleri paylaşım kopyasında şablondur.
+ - Eworks bilgileri bu dizinin `docs/ai/memory/` alanında tutulur. Başka ekip üyelerinin klasörlerini veya `mukellef-takip/` uygulamasını bu işle değiştirmeyin.
+diff --git a/mert/eworks/README.md b/mert/eworks/README.md
+index bfe363d..2e87a86 100644
+--- a/mert/eworks/README.md
++++ b/mert/eworks/README.md
+@@ -4,8 +4,8 @@ Ekip arkadaşları için başlangıç: **[Ortak hafıza](docs/ai/memory/MEMORY.m
+ 
+ | Dizin | Amaç |
+ |---|---|
+-| `entegrasyon-1-tarayici/` | 21 Ekim ilk tarayıcı entegrasyonu; tarihsel kaynak korunur |
+-| `entegrasyon-2-servis/` | Aynı oturumda servis taşıma, sorgu karşılaştırması ve sınırlı belge tekrarını içeren ikinci yöntem |
++| `../eworks-arsiv/entegrasyon-1-tarayici/` | Ana proje dışında korunan ilk sürüm arşivi |
++| **`entegrasyon-2-servis/` — ana proje** | Aynı oturumda servis taşıma, sorgu karşılaştırması ve sınırlı belge tekrarını içeren ikinci yöntem |
+ | `docs/ai/memory/` | Ekibin paylaşabileceği mimari, kararlar ve kaldığımız aşama |
+ | `docs/gunluk/` | Tarihli çalışma özetleri |
+ 
+@@ -13,6 +13,8 @@ Ekip arkadaşları için başlangıç: **[Ortak hafıza](docs/ai/memory/MEMORY.m
+ 
+ Yeni işlere güncel `dev` dalından `feature/…` açılarak başlanır. Git Flow ayarları ve devam adımları [ekip rehberinde](docs/ai/memory/devam-rehberi.md). Ajanlar önce [CLAUDE.md](CLAUDE.md) dosyasını okumalıdır.
+ 
+-İlk sürümün kaynak envanteri kendi `SOURCE-MANIFEST.json` dosyasında korunur. [İlk sürümün eski kurulum notları](docs/ilk-entegrasyon-rehberi.md) ve [ilk sürüm test sınırlamaları](VALIDATION.md) ayrıca saklanır. İkinci sürümün test sonuçları [kendi doğrulama belgesindedir](entegrasyon-2-servis/VALIDATION.md).
++e-Defter dahil tüm yeni geliştirmeler yalnız ikinci entegrasyonda yapılır. Görsel örnekler yerleşim içindir; renk ve kutucuklar Eworks tasarımına uyarlanır.
++
++İlk sürümün kaynak envanteri [ayrı arşivde](../eworks-arsiv/README.md) korunur. [İlk sürümün eski kurulum notları](docs/ilk-entegrasyon-rehberi.md) ve [ilk sürüm test sınırlamaları](VALIDATION.md) ayrıca saklanır. İkinci sürümün test sonuçları [kendi doğrulama belgesindedir](entegrasyon-2-servis/VALIDATION.md).
+ 
+ Bu kaynaklar yerel pilot içindir. Üretim yayını ve tamamlanmış e-Defter aktarımı olarak değerlendirilmemelidir.
+diff --git a/mert/eworks/docs/ai/memory/guncel-durum.md b/mert/eworks/docs/ai/memory/guncel-durum.md
+index a7f1ea7..2ead43b 100644
+--- a/mert/eworks/docs/ai/memory/guncel-durum.md
++++ b/mert/eworks/docs/ai/memory/guncel-durum.md
+@@ -17,3 +17,11 @@ Kullanıcının son toplu hedefi 274 mükellef için 22 Temmuz–31 Ağustos 202
+ Kalan toplu aktarım ve izleme otomasyonu beklemededir. Eylül/Ekim için yeni toplu sorgu yapılmaz; önceki kayıtlar silinmez. Geçerli sözleşme bulunmaması, kayıt bulunmaması, kaynağın belgeyi sunmaması ve robot hatası ayrı durumlardır. Bu çalışma tüm mükelleflerin aktarımının bittiği anlamına gelmez.
+ 
+ Canlı iş kimlikleri, hesap kimliği, müşteri listesi ve PDF'ler paylaşım paketinde bulunmaz. Devam için özel ortamın sahibi tarafından kontrollü olarak sağlanmaları gerekir.
++
++## Ana proje ve e-Defter kararı
++
++Ana proje artık yalnız ikinci entegrasyon yöntemidir. İlk sürüm ana proje ağacından `mert/eworks-arsiv/entegrasyon-1-tarayici/` altına içerikleri değişmeden taşındı; tarihsel Git dalı korunur. e-Defter, aynı oturumda doğrulanmış servis yolu yaklaşımıyla bu ana projeye eklenecek; ilk sürüme eklenmeyecek.
++
++Referans görsel yerleşim örneğidir. Yeni e-Defter ekranı Eworks mavi tonları, beyaz kartları ve mevcut filtre/rozet stiliyle hazırlandı: firma türü, yıl, firma ve kaynak durumu filtreleri, 12 aylık belge matrisi, dönem detayı ve CSV dışa aktarımı. YB/KB/Y kutucukları sadece ilgili sahip/firma/yıl/döneme bağlı doğrulanmış belge kaydı varsa mavi; bilinmeyen aylar gri görünür. Görseldeki sayılar kopyalanmaz; kaynağı doğrulanmayan dönem sıklığı veya yazılım adı üretilmez. Eski yerel dosya takip ekranı ayrı düğmeden korunur; onun notları canlı GİB verisi sayılmaz.
++
++Bu aşama ekran ve proje ayrımıdır. Canlı e-Defter endpoint/alan sözleşmesi ve indirilebilir belge akışı henüz doğrulanmadı; GİB'den belge çek düğmesi bu yüzden pasif. Yeni oturumda canlı kaynak gözlemi, hesap/yetki doğrulaması ve ardından servis adaptörü gerekli. Henüz e-Defter belgesi çekildiği veya entegrasyon tamamlandığı söylenemez.
+diff --git a/mert/eworks/docs/gunluk/2026-10-23.md b/mert/eworks/docs/gunluk/2026-10-23.md
+index 19f9a52..1752de3 100644
+--- a/mert/eworks/docs/gunluk/2026-10-23.md
++++ b/mert/eworks/docs/gunluk/2026-10-23.md
+@@ -15,3 +15,7 @@ Kapsam: `mert/eworks/`. Saat/dönem anlatımı Türkiye zamanına göredir.
+ ## Tablo görünümü düzeltmesi
+ 
+ e-Beyanname ve e-Bildirge listelerinde Detay düğmesine ulaşmak için gereken yatay kaydırma kaldırıldı. Yalnız bu iki listeye özel sabit kolon dağılımı ve uzun metinlerde satır kırma kullanıldı; 600 piksel ve altında etiketli kart düzeni uygulanır. Tarih, durum, çalışan sayısı ve Detay kontrolü korunur. İki modül 1440, 1024, 768, 600 ve 390 piksel genişliklerde uzun sentetik firma adı/referansıyla incelendi; yatay taşma yok ve üç örnek satırın tüm Detay düğmeleri görünür. Canlı müşteri kaydı değiştirilmedi veya sorgu başlatılmadı.
++
++## e-Defter ve ana proje yönü
++
++Kullanıcı ana projenin ikinci yöntem olmasını ve ilk sürümün ayrı saklanmasını istedi. İlk sürüm `mert/eworks-arsiv/` altına içerik değiştirmeden taşındı. e-Defter için Eworks tasarım dilinde firma/yıl filtreleri ve 12 aylık belge matrisi hazırlandı. Kaynak verisi gelmeyen alanlarda başarı veya belge yok durumu üretilmez. Canlı e-Defter servis gözlemi ve belge adaptörü bekliyor; bu aşamada yeni GİB sorgusu veya belge aktarımı başlatılmadı.
+diff --git a/mert/eworks/entegrasyon-2-servis/Eworks-Portal/eworks-tasarim.html b/mert/eworks/entegrasyon-2-servis/Eworks-Portal/eworks-tasarim.html
+index da630be..7f03dd0 100644
+--- a/mert/eworks/entegrasyon-2-servis/Eworks-Portal/eworks-tasarim.html
++++ b/mert/eworks/entegrasyon-2-servis/Eworks-Portal/eworks-tasarim.html
+@@ -381,6 +381,25 @@ footer{left:18px;right:18px;font-size:10px}
+  #portalApp .records-fit .record-detail-cell{align-self:end;justify-self:end}
+ }
+ 
++
++#portalApp .edefter-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
++#portalApp .edefter-controls input,#portalApp .edefter-controls select{max-width:100%;min-width:0}
++#portalApp .edefter-controls input{flex:1;min-width:160px}
++#portalApp .edefter-legend{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0;color:#708ba6;font-size:11px}
++#portalApp .edefter-matrix{overflow-x:auto}
++#portalApp .edefter-matrix table{table-layout:fixed;min-width:860px}
++#portalApp .edefter-matrix .edefter-firm-col{width:210px}
++#portalApp .edefter-matrix td,#portalApp .edefter-matrix th{padding:10px 4px;text-align:center}
++#portalApp .edefter-matrix th:first-child,#portalApp .edefter-matrix td:first-child{text-align:left;padding:12px;position:sticky;left:0;background:#fff;z-index:1}
++#portalApp .edefter-matrix th:first-child{background:#f7f9fd;z-index:2}
++#portalApp .edefter-matrix .row-title,#portalApp .edefter-matrix .row-sub{white-space:normal;overflow-wrap:anywhere}
++#portalApp .edefter-month-stack{display:grid;gap:5px;justify-items:center}
++#portalApp .edefter-doc{border:1px solid #e2eaf3;border-radius:8px;background:#f5f8fc;color:#91a3b8;min-width:31px;min-height:29px;font-size:10px;font-weight:800;padding:5px;cursor:pointer}
++#portalApp .edefter-doc.available{background:#e7f2ff;border-color:#b4d4f3;color:#2166a3}
++#portalApp .edefter-doc:hover{border-color:#2166a3}
++#portalApp .edefter-firm-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
++#portalApp .edefter-firm-meta span{font-size:9px;color:#7188a0;background:#f1f5fa;border-radius:5px;padding:3px 5px}
++
+ </style></head>
+ <body data-default-view="login"><div id="cloudStatus" role="status" style="position:fixed;top:0;left:0;right:0;z-index:99998;padding:8px;background:#e6f5ef;text-align:center;font:12px Segoe UI">Supabase hesabınızla giriş yapın · GİB şifresi kullanmayın</div><section id="cloudFailure" hidden style="position:fixed;inset:20% 8%;z-index:100001;background:white;padding:28px;border:2px solid #c2415b;border-radius:16px;box-shadow:0 0 0 200vmax #0008"><h2>Değişiklikler veritabanına kaydedilemedi</h2><p id="cloudFailureText"></p><button data-cloud-retry>Kaydetmeyi Tekrar Dene</button> <button data-cloud-backup>Kaydedilmemiş JSON Yedeğini İndir</button><p>Kaydetme tamamlanmadan sekmeyi kapatmayın. Listeyi yenilemek bekleyen düzenlemeleri kaybettirebilir.</p></section><div style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#fff2c6;color:#674b00;padding:6px;text-align:center;font:12px Segoe UI">Developer · İkinci entegrasyon · Canlı kayıtlar</div><div id="loginPage">
+ <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+@@ -1017,8 +1036,61 @@ showDrawer(drawerHead(action==='review'?'Mükellef Kontrolü':action==='fill'?'E
+ function calendarPage(){const rows=data.tasks.filter(r=>(UI.status==='all'||r.status===UI.status)&&(!UI.search||Object.values(r).join(' ').toLocaleLowerCase('tr-TR').includes(UI.search.toLocaleLowerCase('tr-TR'))));
+ return `${titleBlock('Takvim ve Görevler','Yasal tarihlerinizi, şirket işlerini ve sorumlulukları planlayın.',`<button class="btn" data-export="tasks">${ico('download')} Excel / CSV</button><button class="btn blue" data-newtask>${ico('plus')} Yeni Görev</button>`,'GÜNLÜK YÖNETİM')}
+  <div class="mini-stats"><div class="mini-stat"><span>Görev sayısı</span><b>${data.tasks.length}</b></div><div class="mini-stat"><span>Bekleyen</span><b>${data.tasks.filter(t=>t.status==='Bekliyor').length}</b></div><div class="mini-stat"><span>Öncelikli</span><b>${data.tasks.filter(t=>t.status==='Öncelikli').length}</b></div><div class="mini-stat"><span>Tamamlanan</span><b>${data.tasks.filter(t=>t.status==='Tamamlandı').length}</b></div></div><div class="filterbar"><input class="grow" id="innerSearch" placeholder="Görev veya firma ara..." value="${safe(UI.search)}"/><select id="statusFilter"><option value="all">Tüm durumlar</option>${[...new Set(data.tasks.map(t=>t.status))].map(s=>`<option>${safe(s)}</option>`).join('')}</select><button class="btn" data-resetfilters>${ico('refresh')} Temizle</button></div><div class="paper table-card"><div class="table-header"><strong>Görev ve son tarih listesi</strong><small>${rows.length} görev</small></div><div class="table-scroll"><table><thead><tr><th>Görev</th><th>Firma</th><th>Son tarih</th><th>Sorumlu</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${rows.map(t=>`<tr><td><span class="row-title">${safe(t.title)}</span></td><td>${safe(t.firm)}</td><td>${trDate(t.due)}</td><td>${safe(t.owner)}</td><td>${badge(t.status)}</td><td><button class="table-link" data-taskdetail="${safe(t.id)}">Düzenle →</button></td></tr>`).join('')}</tbody></table></div></div>`}
++const EDEFTER_KINDS=[['yevmiye_berat','YB','Yevmiye beratı'],['kebir_berat','KB','Kebir beratı'],['yevmiye_defteri','Y','Yevmiye defteri']];
++const edefterFilters={type:'all',status:'all',firm:'all',search:''};
++function edefterVerifiedRecords(firm,year){
++ const owner=cloud.session?.user?.id;if(!owner)return [];
++ return data.notes.filter(r=>r.page==='ledger'&&r.sourceType==='gib_live'&&r.authorizationVerified===true&&r.ownerId===owner&&r.firmId===firm.id&&r.identity===(firm.taxNumber||firm.identityNumber)&&new RegExp('^'+year+'-(0[1-9]|1[0-2])$').test(r.period));
++}
++function edefterFiles(firm,year,month,kind){
++ const period=year+'-'+String(month+1).padStart(2,'0');
++ return edefterVerifiedRecords(firm,year).filter(r=>r.period===period).flatMap(r=>(r.attachments||[]).filter(f=>f.ledgerKind===kind&&f.storageVerified===true&&f.ownerId===r.ownerId&&f.identity===r.identity&&f.recordId===r.recordId));
++}
++function edefterVisibleFirms(){
++ return data.firms.filter(f=>{
++  const corporate=/limited|anonim|kurum/i.test(f.type||'');const personal=/şahıs|sahis|esnaf|serbest/i.test(f.type||'');
++  const observed=edefterVerifiedRecords(f,UI.year).length>0;
++  return (edefterFilters.type==='all'||(edefterFilters.type==='corporate'?corporate:personal))&&(edefterFilters.status==='all'||(edefterFilters.status==='observed'?observed:!observed))&&(edefterFilters.firm==='all'||f.id===edefterFilters.firm)&&(!edefterFilters.search||[f.name,f.taxNumber,f.identityNumber].join(' ').toLocaleLowerCase('tr-TR').includes(edefterFilters.search.toLocaleLowerCase('tr-TR')));
++ });
++}
++function edefterExport(){
++ const rows=edefterVisibleFirms().flatMap(f=>Array.from({length:12},(_,m)=>({Mükellef:f.name,Dönem:UI.year+'-'+String(m+1).padStart(2,'0'),...Object.fromEntries(EDEFTER_KINDS.map(([k,code])=>[code,edefterFiles(f,UI.year,m,k).length?'Kayıtlı belge':'Kontrol edilmedi']))})));
++ exportCsv('Eworks_Edefter_'+UI.year,rows);
++}
++function edefterMonthDrawer(id,month){
++ const f=data.firms.find(f=>f.id===id);if(!f||!Number.isInteger(month)||month<0||month>11)return;
++ const rows=edefterVerifiedRecords(f,UI.year).filter(r=>r.period===UI.year+'-'+String(month+1).padStart(2,'0'));
++ showDrawer(drawerHead('e-Defter · '+MONTHS[month]+' '+UI.year,f.name)+detailFields({'Mükellef':f.name,'Dönem':MONTHS[month]+' '+UI.year,'Kaynak durumu':rows.length?'Doğrulanmış kaynak kaydı':'Kontrol edilmedi'})+EDEFTER_KINDS.map(([kind,code,label])=>{const files=edefterFiles(f,UI.year,month,kind);return `<section class="paper panel-padding" style="margin-top:12px"><h3>${label} · ${code}</h3><p>${files.length?files.length+' kayıtlı belge':'Bu döneme ait doğrulanmış belge kaydı henüz yok.'}</p></section>`}).join('')+'<p class="small-note">Belge kaydı bulunmaması, kaynakta belge olmadığı anlamına gelmez. Yerel yüklemeler GİB onayı olarak gösterilmez.</p>');
++}
++function ledgersPage(){
++ const firms=edefterVisibleFirms(),observed=data.firms.filter(f=>edefterVerifiedRecords(f,UI.year).length),records=data.firms.flatMap(f=>edefterVerifiedRecords(f,UI.year));
++ const dates=records.map(r=>r.observedAt).filter(d=>Number.isFinite(Date.parse(d))).sort();const updated=dates.length?new Date(dates.at(-1)).toLocaleString('tr-TR'):'Henüz canlı sorgu yapılmadı';
++ const years=Array.from({length:Math.min(6,Number(TODAY.slice(0,4))-2003)},(_,i)=>Number(TODAY.slice(0,4))-i);
++ return `${titleBlock('e-Defter','Mükelleflerin defter ve berat belgelerini yıl ve ay bazında izleyin.',`<button class="btn" data-edefter-export>${ico('download')} Excel / CSV</button><button class="btn" data-edefter-local>${ico('folder')} Yerel dosya takibi</button>`,'EWORKS / E-DEFTER')}
++ <div class="edefter-controls"><div class="segmented">${[['all','Tümü'],['corporate','Kurum'],['personal','Şahıs']].map(([id,label])=>`<button class="${edefterFilters.type===id?'current':''}" data-edefter-type="${id}">${label}</button>`).join('')}</div><select class="btn" id="edefterYear" aria-label="e-Defter yılı">${years.map(y=>`<option ${UI.year===y?'selected':''}>${y}</option>`).join('')}</select><input class="btn" id="edefterSearch" aria-label="e-Defter firma ara" placeholder="Firma, VKN veya TCKN ara…" value="${safe(edefterFilters.search)}"><span class="small-note">Son güncelleme: ${safe(updated)}</span></div>
++ <div class="mini-stats"><div class="mini-stat"><span>Firma kapsamı</span><b>${data.firms.length}</b></div><div class="mini-stat"><span>Aktif yıl</span><b>${UI.year}</b></div><div class="mini-stat"><span>Kaynak kaydı bulunan firma</span><b>${observed.length}</b></div><div class="mini-stat"><span>Doğrulama bekleyen firma</span><b>${data.firms.length-observed.length}</b></div></div>
++ <div class="edefter-controls"><select class="btn" id="edefterFirm" aria-label="e-Defter mükellef seç"><option value="all">Tüm mükellefler</option>${data.firms.map(f=>`<option value="${safe(f.id)}" ${edefterFilters.firm===f.id?'selected':''}>${safe(f.name)}</option>`).join('')}</select><select class="btn" id="edefterStatus" aria-label="e-Defter kaynak durumu">${[['all','Tüm durumlar'],['observed','Kaynak kaydı bulunan'],['unknown','Kontrol edilmedi']].map(([v,label])=>`<option value="${v}" ${edefterFilters.status===v?'selected':''}>${label}</option>`).join('')}</select><button class="btn blue" disabled title="Canlı kaynak doğrulaması tamamlandıktan sonra kullanılabilir">GİB’den belge çek</button></div>
++ <div class="small-note warn" style="margin-bottom:16px">Canlı e-Defter bağlantısı henüz doğrulanmadı. Kontrol edilmeyen aylar gri gösterilir; belge yok veya onaylı olarak değerlendirilmez.</div>
++ <div class="paper table-card"><div class="table-header"><strong>${UI.year} e-Defter ve berat takibi</strong><small>${firms.length} mükellef · ay kutucuğundan dönem detayını açın</small></div><div class="edefter-matrix"><table><colgroup><col class="edefter-firm-col">${SHORT.map(()=>'<col>').join('')}</colgroup><thead><tr><th scope="col">Mükellef / Firma</th>${SHORT.map(m=>`<th scope="col">${safe(m)}</th>`).join('')}</tr></thead><tbody>${firms.map(f=>`<tr><td><strong class="row-title">${safe(f.name)}</strong><span class="row-sub">${safe(f.taxNumber||f.identityNumber||'Kimlik bilgisi eksik')}</span><div class="edefter-firm-meta"><span>${safe(f.type||'Tür belirtilmedi')}</span><span>Dönem: doğrulanmadı</span></div></td>${Array.from({length:12},(_,m)=>`<td><div class="edefter-month-stack">${EDEFTER_KINDS.map(([kind,code,label])=>{const count=edefterFiles(f,UI.year,m,kind).length;return `<button class="edefter-doc ${count?'available':''}" data-edefter-month="${m}" data-edefter-firm="${safe(f.id)}" aria-label="${safe(f.name)} · ${MONTHS[m]} ${UI.year} · ${label} · ${count?'Kayıtlı belge':'Kontrol edilmedi'}" title="${label}: ${count?'Kayıtlı belge':'Kontrol edilmedi'}">${code}</button>`}).join('')}</div></td>`).join('')}</tr>`).join('')||'<tr><td colspan="13"><div class="empty-list">Seçilen filtrelere uygun firma bulunamadı.</div></td></tr>'}</tbody></table></div></div>
++ <div class="edefter-legend"><span>YB · Yevmiye beratı</span><span>KB · Kebir beratı</span><span>Y · Yevmiye defteri</span><span>Mavi: kayıtlı belge · Gri: kontrol edilmedi</span></div>`;
++}
++document.addEventListener('click',e=>{
++ const b=e.target.closest('[data-edefter-type],[data-edefter-month],[data-edefter-export],[data-edefter-local]');if(!b)return;
++ if(b.hasAttribute('data-edefter-type')){edefterFilters.type=b.dataset.edefterType;render();}
++ else if(b.hasAttribute('data-edefter-month'))edefterMonthDrawer(b.dataset.edefterFirm,Number(b.dataset.edefterMonth));
++ else if(b.hasAttribute('data-edefter-export'))edefterExport();
++ else if(b.hasAttribute('data-edefter-local'))showDrawer(legacyLedgersPage());
++});
++document.addEventListener('change',e=>{
++ const t=e.target;if(t.id==='edefterYear')UI.year=Number(t.value);
++ else if(t.id==='edefterFirm')edefterFilters.firm=t.value;
++ else if(t.id==='edefterStatus')edefterFilters.status=t.value;
++ else if(t.id==='edefterSearch')edefterFilters.search=t.value;
++ else return;render();
++});
++
+ function ledgerStatus(fid,month){return data.ledgers[fid+':'+month]||(data.uploaded.some(file=>file.firmId===fid&&file.month===month)?'Yüklendi':'Kontrol edilmedi')}
+-function ledgersPage(){const firm=data.firms.find(f=>f.id===UI.ledgerCompany)||data.firms[0];const id=firm?.id||'';UI.ledgerCompany=id;const s=UI.period,start=s*3;const completed=Array.from({length:12},(_,m)=>ledgerStatus(id,m)).filter(v=>v==='Onaylandı'||v==='Kontrol Edildi').length;
++function legacyLedgersPage(){const firm=data.firms.find(f=>f.id===UI.ledgerCompany)||data.firms[0];const id=firm?.id||'';UI.ledgerCompany=id;const s=UI.period,start=s*3;const completed=Array.from({length:12},(_,m)=>ledgerStatus(id,m)).filter(v=>v==='Onaylandı'||v==='Kontrol Edildi').length;
+  const periodCard=Array.from({length:4},(_,q)=>{const done=Array.from({length:3},(_,k)=>ledgerStatus(id,q*3+k)).filter(v=>v==='Onaylandı'||v==='Kontrol Edildi').length;return `<button class="period ${UI.period===q?'selected':''}" data-period="${q}"><strong>${q+1}. Dönem</strong><small>${MONTHS[q*3]} – ${MONTHS[q*3+2]}</small><div class="period-bar"><i style="width:${done/3*100}%"></i></div></button>`}).join('');
+  const monthCards=Array.from({length:3},(_,i)=>{let m=start+i,st=ledgerStatus(id,m);const files=data.uploaded.filter(f=>f.firmId===id&&f.month===m);return `<div class="ledger-month"><div class="monthname"><strong>${MONTHS[m]}</strong>${badge(st)}</div><div class="ledger-checks"><div><span>Defter / Berat</span><b>${files.length?files.length+' dosya':st==='Onaylandı'?'Arşiv kaydı':'Dosya bekleniyor'}</b></div><div><span>Kontrol durumu</span><b>${st==='Onaylandı'?'Kayıtlı onay':st==='Kontrol Edildi'?'Kontrol edildi':st==='Yüklendi'?'Yükleme alındı':'Bekliyor'}</b></div><div><span>Dönem</span><b>${MONTHS[m]} ${UI.year}</b></div></div><div class="month-footer"><button class="btn small" data-choosemonth="${m}">${ico('upload')} Dosya Ekle</button><button class="btn small" data-ledger-review="${m}" ${!files.length&&!data.ledgers[id+':'+m]?'disabled':''}>${ico('check')} Kontrol</button></div></div>`}).join('');
+  const tabs=`<div class="segmented"><button class="${UI.ledgerMode==='quarter'?'current':''}" data-ledgermode="quarter">3 Aylık Takip</button><button class="${UI.ledgerMode==='year'?'current':''}" data-ledgermode="year">12 Aylık Matris</button></div>`;
+diff --git a/mert/eworks/entegrasyon-2-servis/README.md b/mert/eworks/entegrasyon-2-servis/README.md
+index 63390a7..5e23f96 100644
+--- a/mert/eworks/entegrasyon-2-servis/README.md
++++ b/mert/eworks/entegrasyon-2-servis/README.md
+@@ -1,6 +1,6 @@
+ # Eworks ikinci entegrasyon — ekip kaynak paketi
+ 
+-İlk sürüm `../entegrasyon-1-tarayici/` içinde korunur. Bu dizin aynı GİB oturumunda servis taşıması, karşılaştırma, devam ve hedefli belge tekrarı eklenen ikinci yöntemin paylaşım kopyasıdır. Canlı hesap ayarları ve özel sonuçlar dahil değildir.
++Bu dizin aktif ana projedir. İlk sürüm proje dışında `../../eworks-arsiv/entegrasyon-1-tarayici/` içinde korunur. e-Defter yalnız ikinci entegrasyon yöntemiyle geliştirilecektir. Bu dizin aynı GİB oturumunda servis taşıması, karşılaştırma, devam ve hedefli belge tekrarı eklenen ikinci yöntemin paylaşım kopyasıdır. Canlı hesap ayarları ve özel sonuçlar dahil değildir.
+ 
+ Önce [ekip hafızasını](../docs/ai/memory/MEMORY.md) okuyun. Son canlı doğrulama ve sınırlar [güncel durum](../docs/ai/memory/guncel-durum.md) dosyasındadır.
+ 
+diff --git a/mert/eworks/entegrasyon-2-servis/SOURCE-MANIFEST.json b/mert/eworks/entegrasyon-2-servis/SOURCE-MANIFEST.json
+index a0a71c1..0af3007 100644
+--- a/mert/eworks/entegrasyon-2-servis/SOURCE-MANIFEST.json
++++ b/mert/eworks/entegrasyon-2-servis/SOURCE-MANIFEST.json
+@@ -9,7 +9,7 @@
+     "Eworks-Portal/declaration-pdf-viewer.mjs": "d3ec6e1b926589f2d921b3a2efb47969cc06150c099452a18f2b062c8a0a5b55",
+     "Eworks-Portal/demo-cleanup.js": "704632427742858eab553d4afd56f0e5e7af31dae7dbf3813ddef0886d154fbe",
+     "Eworks-Portal/document-retry-source.example.json": "3dcf0ad9fc782e564ca23e6496fc623d488593cd5c97a28336fb52c041035dbc",
+-    "Eworks-Portal/eworks-tasarim.html": "34175957de9a87ca5476b4073dd1522fe5391b9bfacf25a07430165fad94386a",
++    "Eworks-Portal/eworks-tasarim.html": "57f73b1ac01fe941fb7eac185b33e144d45eb8e0d1cbe34f5afdd982efa7c9f5",
+     "Eworks-Portal/institution-review.js": "c919c1f59dba4aa36a4a45668388bf193b5fcbedd56c955ef58487c05f28b4d3",
+     "Eworks-Portal/requirements.txt": "6876df1f5a5212b7005a97dc80cd68178133cb2114dbd642cf2ef5dc124888c4",
+     "Eworks-Portal/robot-config.json": "c469acf9130604524f4780748f2c76ae49b9d8ef431f7e95280e6a00997f9aaf",
+@@ -299,7 +299,7 @@
+     "Eworks-Python-Robot/test_robot.py": "2c7c627a54cd47c795b7eb9cab92c2ddd8bbcc261c74af01599e3720443b18ed",
+     "Eworks-Python-Robot/test_service_transport.py": "65063acfa3024b5e9e48c1374e4455830a869a5812484f7558be718cda27fb0f",
+     "Eworks-Python-Robot/test_sgk_employee_count.py": "f46e365c9631ab2ea1123fe087fc77a017d8e69de77dcf42d2f6470f662c4748",
+-    "README.md": "6490fa277c9934742574cc58273260eedf3df682b83c633c2f993e8924d82871",
+-    "VALIDATION.md": "2cfc55011ad34807f0e8855ce46f1964d43739b8549c67c3fc0843323473784e"
++    "README.md": "5a1b83592072d40c7101ff6eda5dbaced2a658dce2c555e3e9745a2de63f2b3c",
++    "VALIDATION.md": "2f84135f55934d266f02960a97989d7d68338d21c2be78776c1c795c08f2029e"
+   }
+ }
+diff --git a/mert/eworks/entegrasyon-2-servis/VALIDATION.md b/mert/eworks/entegrasyon-2-servis/VALIDATION.md
+index 8f5273a..63303a3 100644
+--- a/mert/eworks/entegrasyon-2-servis/VALIDATION.md
++++ b/mert/eworks/entegrasyon-2-servis/VALIDATION.md
+@@ -24,6 +24,8 @@ Portalın gömülü JavaScript'i ayrıca `node --check` ile kontrol edilir. Yeni
+ 
+ ## Sınırlar
+ 
++e-Defter ekranı: sentetik firmalarla tür filtresi, yıl değişiminde eski yılın belgelerinin gösterilmemesi, farklı hesap belgelerinin dışlanması ve belgesi doğrulanmamış ayların onaylı sayılmaması kontrol edildi. 1360 piksel görünüm görsel olarak incelendi; 390 pikselde sayfa taşması yok, 12 aylık matris kendi alanında kayar. Canlı e-Defter sorgusu veya indirme bu kontrole dahil değildir; bağlantı doğrulanmadığı için belge çekme düğmesi pasiftir.
++
+ Tablo görünümü ek kontrolü: e-Beyanname ve e-Bildirge tabloları, uzun sentetik ad/referans içeren üçer kayıtla 1440/1024/768/600/390 pikselde görüntülendi. On düzenin tümünde yatay taşma yok, Detay düğmeleri ekran ve tablo sınırları içinde. 1024 piksel SGK görünümü ayrıca görsel olarak incelendi. Bu işlem canlı sorgu veya portal veri yazımı yapmadı.
+ 
+ Tüm tarihsel testler çalıştırılmadı. Eski pilotta ortam/arayüz varsayımına bağlı başka testler bulunur. OCR bağımlılık ortamı ve canlı Supabase kurulumu bu paylaşım doğrulamasında yeniden kurulmadı. Seçili testlerin geçmesi bütün test keşfinin veya yeni bir makinenin canlı aktarımının sorunsuz olacağını garanti etmez.
