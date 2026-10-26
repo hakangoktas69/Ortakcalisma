@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Karar kayıtları](README.md) › **ADR 0001**
+<!-- /gezinti -->
+
 # 0001 — Depo yeniden yapılanması
 
 - **Durum:** Kabul, uygulandı (2026-10-24, `yeniden-yapilanma` dalı)
@@ -28,3 +32,10 @@ Ortakcalisma deposunda birden çok proje (Mükellef Takip, Eworks pilotu, analiz
 - Taşımadan önce açılmış dallar eski yollardadır; git yeniden adlandırmayı çoğunlukla tanır, çakışmada dal sahibi `eski/` yoluna taşır.
 - `eski/hakan/mukellef-takip` ayrı proje olarak açılırsa kendi `.claude` kancaları çalışır; kök kancaları yalnız yeni yapıyı yönetir.
 - Arşivdeki `CLAUDE.md`/`AGENTS.md` dosyaları `docs/arsiv` altında `*.eski.md` adını alır (ajan bağlamı olarak yüklenmesin diye).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Karar kayıtları](README.md) › **ADR 0001**
+<!-- /gezinti -->

@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **audit**
+<!-- /gezinti -->
+
 # audit — Denetim
 
 > Durum: **C aşaması (2026-10-25)**: değiştirilemez denetim kaydı (`audit.entries`, ofis başına hash zinciri, yalnız `audit.record()`); kurum hesabı kaydı ve CSV dışa aktarma yazıyor. Görüntüleme ekranı yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil). Kod: `packages/contexts/audit` — dışarıya yalnız `src/index.ts`.
@@ -25,3 +29,10 @@ _(Kabul testleri `@F:<anahtar>` etiketli; durum: [ozellik-durumu.md](../ozellik-
 ## Açık işler
 
 _(—)_
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **audit**
+<!-- /gezinti -->

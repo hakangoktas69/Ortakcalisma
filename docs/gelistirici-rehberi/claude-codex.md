@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Claude Code ve Codex**
+<!-- /gezinti -->
+
 # Claude Code, Codex ve ekip hafızası
 
 > İlgili: [hedef-mimari/09 — ajan bağlamı ve senkron tasarımı](../hedef-mimari/09-yapay-zeka-ajan-baglami.md) · [Ekip hafızası](../ai/memory/MEMORY.md) · [Kurallar](../ai/kurallar.md)
@@ -117,3 +121,10 @@ Sonra Claude Code / Codex'te yeni oturum açın.
 | `pre-push` "senkron değil" diyor | `node tools/ajan/senkron.mjs --yaz`, değişiklikleri commitleyin; `AGENTS.md`'ye elle kural yazdıysanız kaynağa taşıyın |
 | Kancalar çalışmıyor | `git config core.hooksPath` → `tools/git-hooks` olmalı: `node tools/ajan/senkron.mjs --kanca-kur` |
 | `eski/hakan/mukellef-takip` üzerinde çalışmak gerekiyor | Arşivdir (D32). Gerekirse o klasörü ayrı proje olarak açın; kendi `.claude` kancaları çalışır |
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Claude Code ve Codex**
+<!-- /gezinti -->

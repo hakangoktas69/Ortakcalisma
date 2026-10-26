@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **TDD rehberi**
+<!-- /gezinti -->
+
 # TDD uygulama rehberi
 
 > TDD'ye yeniyseniz önce: [TDD nedir, ne işe yarar?](tdd-nedir.md) — red–green–refactor döngüsü, avantajları, ne zaman kullanılır.
@@ -255,3 +259,10 @@ describe('[F:firmalar.kart.create] firma kartı', …)           // Vitest descr
 | `pnpm verify` | Tip, mimari, birim + kapsam eşiği, yetki anahtarı denetimi, hafıza, ajan senkronu, belge bağlantıları; iş bitmeden yeşil olmalı |
 
 Yerel Node 24 değilse aynı komutlar `node:24` container'ında koşar (`sh tools/deploy/dogrula.sh`).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **TDD rehberi**
+<!-- /gezinti -->

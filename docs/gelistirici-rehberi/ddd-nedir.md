@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **DDD nedir**
+<!-- /gezinti -->
+
 # Domain-Driven Design (DDD) nedir ve ne işe yarar?
 
 > Kavramsal giriş. Bu kavramların Eworks kodundaki karşılıkları: [DDD uygulama rehberi](ddd.md). Proje kararları: [hedef-mimari/06](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md).
@@ -58,3 +62,10 @@ DDD her proje için uygun bir ilaç değildir. "Gereksiz karmaşıklık yaratmam
 | Entity, value object, aggregate, repository | `src/domain`, `src/application` (repository portu), `src/infrastructure` (repository uygulaması); ayrıntı [DDD uygulama rehberi §3](ddd.md#3-taktiksel-tasarım) |
 
 Ortak dil notu: Yukarıdaki genel anlatım, iş uzmanının terimini kodda olduğu gibi kullanmayı önerir. Bu projede tanımlayıcılar İngilizce yazılır (CLAUDE.md, "Dil ve üslup"). Ortak dil ilkesi Türkçe terim ile İngilizce tanımlayıcı arasındaki **bire bir ve sabit eşlemeyle** korunur. Yeni bir terim önce sözlüğe girer, sonra koda.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **DDD nedir**
+<!-- /gezinti -->

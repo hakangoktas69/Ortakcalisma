@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **DDD rehberi**
+<!-- /gezinti -->
+
 # DDD uygulama rehberi
 
 > DDD'ye yeniyseniz önce: [DDD nedir, ne işe yarar?](ddd-nedir.md) — domain, ortak dil, bounded context, entity, value object, aggregate, repository kavramları.
@@ -237,3 +241,10 @@ Sıra, stratejikten taktiksele iner:
 **Bilinen sapma (açık konu 7, [durum.md](../ai/durum.md)):** tax-filing, social-security ve workspace sorguları firma unvanı için `portfolio.firms` ile birleşir; bu, bounded context sınırının (§2.5) ihlalidir. Yeni kodda bu kalıp çoğaltılmaz; okuma modeline ya da portfolio public API'sine taşınması bekleniyor.
 
 **Hedef ile bugün arasındaki farklar:** 06'daki bazı yerleşimler henüz farklıdır — kabul testleri `apps/web/e2e/` altındadır (06'da `features/<ctx>/test`), aggregate'ler sınıf değil tip + saf fonksiyon olarak yazılmıştır (§3), BFF ucu ve UI bileşen testi henüz yoktur. Yeni kod bugünkü kalıbı izler; değiştirmek isteyen önce karar önerir.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **DDD rehberi**
+<!-- /gezinti -->

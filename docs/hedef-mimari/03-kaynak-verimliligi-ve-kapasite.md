@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **03 Kapasite**
+<!-- /gezinti -->
+
 # 5.3 Kaynak verimliliği ve kapasite
 
 > Önce: [5.2 Kurum entegrasyon robotu](02-kurum-entegrasyon-robotu.md) · Sonra: [5.4 Dağıtım](04-dagitim-compose-kubernetes.md)
@@ -126,3 +130,10 @@ Kabul ölçütleri:
 
 ### Büyük veri işlemleri (genel kural)
 - Toplu geçmiş tarama, yeniden ayrıştırma, shard'lar arası ofis taşıma, arşivleme ve dışa aktarım **parçalı iş** olarak yürür. Parça = ofis × hesap × ay. Her parça checkpoint'lidir. Eşzamanlı parça sayısı parametreyle sınırlanır. Parçalar gündüz kullanıcı trafiğiyle yarışmayacak önceliktedir.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **03 Kapasite**
+<!-- /gezinti -->

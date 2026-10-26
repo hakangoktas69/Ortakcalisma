@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **tax-filing**
+<!-- /gezinti -->
+
 # tax-filing — Beyanname
 
 > Durum: **E aşaması (2026-10-25)**: e-Beyanname sözleşme listesi (D), beyanname listesi + PDF'ler, kurum incelemesi kuralı, görüntüleme / CSV / kontrol / belge ekranları. Son gün kuralları ve pilot bölge ayarları yok. Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil). Kod: `packages/contexts/tax-filing` — dışarıya yalnız `src/index.ts`.
@@ -44,3 +48,10 @@
 
 - Canlı e-Beyanname ekranının yeniden doğrulanması (eski robot canlıda doğrulanmıştı; bu taşımada sahte sunucuya karşı sınandı).
 - Son gün kuralları, pilot bölge ayarları, senkron iptali (`beyanname.senkron.cancel`), tahakkuk tutarlarının ayrıştırılması.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [Bağlamlar](README.md) › **tax-filing**
+<!-- /gezinti -->

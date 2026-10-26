@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **01 Hedef mimari**
+<!-- /gezinti -->
+
 # 5.1 Hedef mimari — çok kiracılı SaaS Eworks (genel bakış)
 
 > Önce: [Sistem mimarisi (bugün)](../arsiv/mevcut-durum/02-mimari/01-sistem-mimarisi.md) · Sonra: [5.2 Kurum entegrasyon robotu](02-kurum-entegrasyon-robotu.md), [5.3 Kaynak verimliliği ve kapasite](03-kaynak-verimliligi-ve-kapasite.md), [5.4 Dağıtım: Compose / Kubernetes](04-dagitim-compose-kubernetes.md)
@@ -355,3 +359,10 @@ Bunun yerine kapasite şu yollarla artırılır:
 4. ölçülmüş eşiğe kadar kademeli hız artışı (D11).
 
 Bu yolların kapasiteye etkisi: [5.3 §1](03-kaynak-verimliligi-ve-kapasite.md#1-kapasite-hesabı--robot).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **01 Hedef mimari**
+<!-- /gezinti -->

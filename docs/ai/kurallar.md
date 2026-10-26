@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Kurallar**
+<!-- /gezinti -->
+
 # Kurallar
 
 > Kod ve belge değişikliğinde uyulacak kurallar. Gerekçeler hedef mimari belgelerinde ve [karar kaydında](../adr/karar-kaydi.md).
@@ -36,10 +40,17 @@ Her yeni karar **aynı değişiklikte** dört yere işlenir:
 
 İlgili ayrıntı belgesi ve bağlam sayfası da güncellenir. Açık konular ekip hafızasında (`eworks-acik-konular`) ve `durum.md`'de durur; kapanan madde silinir ve kararı işlenir. Yanıtın kapsamı belirsizse varsayım yapılmaz, açık konuya yazılır ve sorulur.
 
-Belge değişikliğinden sonra: göreli bağlantılar (`node tools/docs/baglanti-denetle.mjs`), mermaid çizimi, hafıza değiştiyse `node tools/claude/check-memory.mjs`. Klasör taşıma, başkasının alanına yazma gibi geri alınması zor işlerde önce kapsam sorulur.
+Belge değişikliğinden sonra: göreli bağlantılar (`node tools/docs/baglanti-denetle.mjs`), gezinti yolu (yeni belge `tools/docs/gezinti.mjs` `TABLO`'suna ebeveyniyle eklenir, sonra `pnpm docs:gezinti`), mermaid çizimi, hafıza değiştiyse `node tools/claude/check-memory.mjs`. Klasör taşıma, başkasının alanına yazma gibi geri alınması zor işlerde önce kapsam sorulur.
 
 ## Dal, commit, birleştirme
 
 İş başında `dev`'den kişisel dal açılır (`<ad>/<kısa-iş>`), iş bitiminde orada commitlenir. Ortak dallara (`main`, `master`, `dev`, `yeniden-yapilanma`) doğrudan commit yok; pre-commit kancası reddeder (D37). `dev`'e birleştirme: önce `dev`'in güncellemeleri kişisel dala çekilir (merge, rebase değil), çatışma kişisel dalda iki tarafın hedeflediği işlev kodda analiz edilerek çözülür (iş kuralı çelişkisi, belirsiz amaç ya da hassas alan → kullanıcıya sorulur), doğrulamalar yeniden koşulur, sonra `--no-ff` birleştirilir (`tools/ajan/birlestir.mjs`). `dev` push'u her seferinde kullanıcı onayıyla. `dev` → `main` birleşimini kod sahibi yapar (PR, `.github/pull_request_template.md`). Hassas alan (`tools/ajan/ortak.mjs` `HASSAS_ALANLAR` → `.github/CODEOWNERS`, `@hkazaz`) değişikliğini kod sahibi onaylar. Yeni bağımlılık sabit sürümle, lisans ve güvenlik açığı denetimiyle eklenir.
 
 Commit: Türkçe, kısa başlık (ne yapıldığı). Üretilen dosyalar (`AGENTS.md`, `MEMORY.md` dizini, `.claude/skills`, `docs/ozellik-durumu.md`) kaynakla aynı commit'e girer (pre-commit kancası sahneler).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Kurallar**
+<!-- /gezinti -->

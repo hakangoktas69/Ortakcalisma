@@ -1,8 +1,14 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Başlangıç rehberi**
+<!-- /gezinti -->
+
 # Başlangıç: kur, çalıştır, değiştir, test et
 
 Bu rehber projeye yeni katılan ve yazılım geliştirmede deneyimi az olan ekip üyeleri içindir. Sonunda uygulamayı kendi bilgisayarında çalıştırmış, demo hesabıyla girmiş, kodda bir değişikliği anında görmüş ve testleri koşmuş olursun. Komutlar Windows'ta **Git Bash**'te yazılır (PowerShell'de de çalışır; fark varsa belirtilmiştir).
 
 Kodu genelde Claude Code ya da Codex ile değiştirirsin: [claude-codex.md](claude-codex.md#ajana-iş-verdiğinde-ne-olur-gelistir). Bu rehber, ajan çalışırken neyin olup bittiğini anlaman ve sonucu kendi gözünle doğrulaman içindir. Bilmediğin terimler: [terimler.md](terimler.md).
+
+Belgelerin en üstünde ve en altında `README › Genel bakış › …` biçiminde bir yol satırı bulunur. Bir bağlantıyla başka belgeye geçtikten sonra bu satırdaki üst belgelere tıklayarak geri dönebilirsin (VS Code önizlemesinde "geri" düğmesi yoktur).
 
 ## 1. Gerekenler
 
@@ -119,3 +125,10 @@ Docker yer kaplıyorsa: Docker Desktop → Troubleshoot → Clean / Purge data, 
 ## 9. Sonra ne okumalı
 
 [Genel bakış ve okuma sırası](../00-genel-bakis.md#okuma-sırası-junior) — mimari, bağlamlar ve kuralları hangi sırayla okuyacağın.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › **Başlangıç rehberi**
+<!-- /gezinti -->

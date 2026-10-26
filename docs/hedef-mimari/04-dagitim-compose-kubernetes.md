@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **04 Dağıtım**
+<!-- /gezinti -->
+
 # 5.4 Dağıtım — Docker Compose veya Kubernetes (seçimli)
 
 > Önce: [5.3 Kaynak verimliliği ve kapasite](03-kaynak-verimliligi-ve-kapasite.md)
@@ -101,3 +105,10 @@ Geçiş yolu: Küçük → Orta değişikliği yalnız Compose dosyasının maki
   - `NEXT_PUBLIC_` kapısı.
 - Etiketli sürümde imajlar kayda gönderilir. Compose için `profiles/*.env` + sürüm etiketi, K8s için chart sürümü yayımlanır.
 - Migration ayrı bir iş olarak çalışır: Compose'da `migrate` tek seferlik servisi, K8s'te Helm `pre-upgrade` hook Job.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **04 Dağıtım**
+<!-- /gezinti -->

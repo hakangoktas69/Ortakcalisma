@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../README.md) › **Docker ve Kubernetes**
+<!-- /gezinti -->
+
 # deploy — Docker ve Kubernetes
 
 Uygulama aynı imajlarla iki biçimde kurulur: **Docker Compose** (`compose/`, geliştirme, demo, küçük kurulum) ya da **Kubernetes** (`k8s/`, Helm; kurulumda seçimli, D10). Gerekçe ve boyutlandırma: [hedef-mimari/04](../docs/hedef-mimari/04-dagitim-compose-kubernetes.md). İlk kez çalıştıracaksan önce [başlangıç rehberi](../docs/gelistirici-rehberi/baslangic.md).
@@ -56,3 +60,10 @@ Her servisin bellek sınırı vardır; uygulama container'ları salt okunur dosy
 ## Kubernetes
 
 `k8s/eworks` Helm şablonudur (iskelet; `helm lint` yeşil, kümede henüz koşulmadı). Sırlar Secret'lardan gelir, `GIB_SAHTE_SUNUCU` üretimde yoktur, `EWORKS_ORTAM=uretim`. Ayrıntı: [k8s/eworks/values.yaml](k8s/eworks/values.yaml).
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../README.md) › **Docker ve Kubernetes**
+<!-- /gezinti -->

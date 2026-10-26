@@ -1,3 +1,7 @@
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **07 Veri ve sharding**
+<!-- /gezinti -->
+
 # 5.7 Veri saklama (10 yıl) ve sharding
 
 > Önce: [5.3 Kapasite](03-kaynak-verimliligi-ve-kapasite.md), [5.6 Kaynak kod yapısı](06-kaynak-kod-yapisi-ddd-tdd.md)
@@ -113,3 +117,10 @@ Uygulama düzeyinde kiracı sharding'i Compose ve Kubernetes'te aynı biçimde �
   - **kontrol düzlemi:** `identity-access` (kullanıcı/MFA), `organization` (dizin), `sales`, `sync`'in entegrasyon kaydı ve hız politikası kısmı;
   - **kiracı shard'ı:** diğerleri.
 - `supabase/migrations/control/` ve `supabase/migrations/tenant/` olarak iki migration dizini tutulur.
+
+<!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
+
+---
+
+[README](../../README.md) › [Genel bakış](../00-genel-bakis.md) › [01 Hedef mimari](01-cok-kiracili-hedef-mimari.md) › **07 Veri ve sharding**
+<!-- /gezinti -->
