@@ -19,6 +19,7 @@ import os
 import random
 import secrets
 import threading
+from collections import Counter
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
@@ -43,6 +44,12 @@ _ivd_oturum: dict[str, str] = {}       # intvrg oturum → kullanıcı kodu
 _ebyn_belirtec: dict[str, str] = {}    # tek kullanımlık e-Beyanname geçiş belirteci → kullanıcı kodu
 _ebyn_oturum: dict[str, str] = {}      # e-Beyanname oturumu → kullanıcı kodu
 _ebyn_kayit: dict[tuple[str, str], dict] = {}  # (oturum, oid) → listelenen beyanname (belge/SGK detayı için)
+_ebyn_token: dict[str, str] = {}       # e-Beyanname oturumu → sayfaya gömülü TOKEN (sorgu gövdesinde döner)
+_ebyn_son: dict[str, dict] = {}        # e-Beyanname oturumu → son sorgu (sayfalama için)
+
+# Yalnız testler için: kurum davranışını zorla (ör. ZORLA['ebeyanname_sorgu'] = 429) ve istekleri say. Demo yığını kullanmaz.
+ZORLA: dict[str, int] = {}
+SAYAC: Counter = Counter()
 
 
 def _vkn(rnd: random.Random) -> str:
@@ -253,19 +260,24 @@ class Isleyici(BaseHTTPRequestHandler):
                 if kullanici is None and self._cerez('EBYN') not in _ebyn_oturum:
                     return self._yanit(403, _sayfa('Yetkisiz', '<p>Oturum bulunamadı.</p>'))
                 cerez = None
+                oturum = self._cerez('EBYN') or ''
                 if kullanici is not None:
                     oturum = secrets.token_hex(16)
                     _ebyn_oturum[oturum] = kullanici
+                    _ebyn_token[oturum] = secrets.token_urlsafe(18)
                     cerez = f'EBYN={oturum}'
-            return self._yanit(200, _sayfa('e-Beyanname', ebyn.uygulama_sayfasi()), cerez=cerez)
+                belirtec = _ebyn_token.get(oturum, '')
+            return self._yanit(200, _sayfa('e-Beyanname', ebyn.uygulama_sayfasi(belirtec)), cerez=cerez)
         if u.path == '/ebeyanname/eyeksite/sgk':
             oturum = self._cerez('EBYN') or ''
             k = _ebyn_kayit.get((oturum, q.get('oid', [''])[0]))
             if k is None or not k['sgk']:
                 return self._json({'hata': 'Hata: SGK bildirimi bulunamadı.'})
             return self._json({'donem': k['donem'], 'vergiDurum': k['vergiDurum'], 'satirlar': k['sgk']})
-        if u.path == '/ebeyanname/eyeksite/belge':
+        if u.path == '/ebeyanname/dispatch' and q.get('cmd', [''])[0] == 'IMAJ':
             oturum = self._cerez('EBYN') or ''
+            if oturum not in _ebyn_oturum or q.get('TOKEN', [''])[0] != _ebyn_token.get(oturum):
+                return self._yanit(401, _sayfa('Yetkisiz', '<p>Oturum geçersiz.</p>'))
             k = _ebyn_kayit.get((oturum, q.get('oid', [''])[0]))
             tur = q.get('tur', [''])[0]
             if k is None:
@@ -314,21 +326,8 @@ class Isleyici(BaseHTTPRequestHandler):
             with _kilit:
                 _ebyn_belirtec[belirtec] = kullanici
             return self._json({'belirtec': belirtec})
-        if u.path == '/ebeyanname/eyeksite/ara':
-            oturum = self._cerez('EBYN') or ''
-            kullanici = _ebyn_oturum.get(oturum)
-            if kullanici is None:
-                return self._json({'hata': 'Hata: Oturum süreniz dolmuştur.'})
-            try:
-                istek = json.loads(govde or b'{}')
-            except ValueError:
-                return self._json({'hata': 'Hata: İstek geçersiz.'})
-            yanit = ebyn.ara(lambda kimlik: _beyannameler(kullanici, kimlik), istek)
-            if 'satirlar' in yanit:
-                with _kilit:
-                    for k in _beyannameler(kullanici, str(istek.get('kimlik'))) or []:
-                        _ebyn_kayit[(oturum, k['oid'])] = k
-            return self._json(yanit)
+        if u.path == '/ebeyanname/dispatch':
+            return _ebyn_sorgu_isle(self, govde)
         if u.path == '/dijital/portal/api/ivd':
             kullanici = _dvd_oturum.get(self._cerez('DVD') or '')
             if kullanici is None:
@@ -338,6 +337,40 @@ class Isleyici(BaseHTTPRequestHandler):
                 _ivd_belirtec[belirtec] = kullanici
             return self._json({'belirtec': belirtec})
         return self._yanit(404, b'')
+
+
+def _tarih_parcasi(deger: str) -> list[str]:
+    return [deger[:4], deger[4:6], deger[6:8]] if len(deger) == 8 and deger.isdigit() else []
+
+
+def _ebyn_sorgu_isle(isleyici: 'Isleyici', govde: bytes):
+    """POST /dispatch: ilk sayfa (tarihli sorgu) ya da sonraki sayfa; yanıt HTML (hata kutusu ya da liste)."""
+    oturum = isleyici._cerez('EBYN') or ''
+    kullanici = _ebyn_oturum.get(oturum)
+    alanlar = {k: v[0] for k, v in parse_qs(govde.decode('utf-8', 'replace'), keep_blank_values=True).items()}
+    if kullanici is None or alanlar.get('TOKEN') != _ebyn_token.get(oturum):
+        return isleyici._yanit(401, _sayfa('Yetkisiz', '<p>Oturum geçersiz.</p>'))
+    cmd = alanlar.get('cmd')
+    if cmd == 'BEYANNAMELISTESI':
+        SAYAC['ebeyanname_sorgu'] += 1
+        if ZORLA.get('ebeyanname_sorgu'):
+            return isleyici._yanit(ZORLA['ebeyanname_sorgu'], _sayfa('Hata', '<p>İşlem reddedildi.</p>'))
+        tc = alanlar.get('sorguTipiT') == '1'
+        istek = {'tip': 'T' if tc else 'N', 'kimlik': alanlar.get('tcKimlikNo' if tc else 'vergiNo', ''),
+                 'bas': _tarih_parcasi(alanlar.get('baslangicTarihi', '')), 'bit': _tarih_parcasi(alanlar.get('bitisTarihi', '')), 'sayfa': 1}
+        with _kilit:
+            _ebyn_son[oturum] = istek
+    elif cmd == 'BEYANNAMELISTESI_SAYFA' and oturum in _ebyn_son:
+        istek = {**_ebyn_son[oturum], 'sayfa': int(alanlar.get('sayfa') or 1)}
+    else:
+        return isleyici._yanit(400, _sayfa('Hata', '<p>İstek geçersiz.</p>'))
+    yanit = ebyn.ara(lambda kimlik: _beyannameler(kullanici, kimlik), istek)
+    if 'satirlar' in yanit:
+        with _kilit:
+            for k in _beyannameler(kullanici, str(istek.get('kimlik'))) or []:
+                _ebyn_kayit[(oturum, k['oid'])] = k
+    return isleyici._yanit(200, ebyn.liste_html(yanit).encode('utf-8'))
+
 
 
 def baslat(port: int = 0) -> ThreadingHTTPServer:

@@ -5,6 +5,7 @@ Kurumla konuşan tek katman: web servis birincil, robot yedek (D19). Çıktısı
 | Yer | İçerik |
 |---|---|
 | `src/eworks_integration/core/` | ayarlar (üretimde sahte kurum yasak), `calisan` (kuyruk tüketicisi), `hiz` (Redis GCRA, kurum başına ortak bütçe), `captcha` (ddddocr) |
+| `src/eworks_integration/transports/service/` | `http_tasima.py` (D38 `servis` yolu, Eworks 2): kurum politikasının (`institutions/gib/ebeyanname_servis.py`) sorgu/belge saydığı istekleri kapsamla doğrular, hız sınırından geçirip aynı oturumla bir kez gönderir, yanıtı sınıflar (`core/hatalar.py`). Seçim: `GIB_ERISIM_YOLU` = `servis` (vars.) \| `robot` |
 | `src/eworks_integration/transports/robot/` | başsız Chromium bağlamı; kuruma giden istekleri hız sınırından geçirir, demo/testte `*.gib.gov.tr`'yi sahte sunucuya yönlendirir ve kurum dışına çıkışı keser |
 | `src/eworks_integration/institutions/gib/` | giriş (otomatik güvenlik kodu, şifre/kod hatası ayrımı), İVD geçişi, e-Beyanname sözleşme listesi (eski `Eworks-Python-Robot`'tan taşındı) |
 | `tests/sahte_kurumlar/gib.py` | sahte GİB: gerçek ekran akışının taklidi, sentetik veri (canlı doğrulama sayılmaz, D33) |

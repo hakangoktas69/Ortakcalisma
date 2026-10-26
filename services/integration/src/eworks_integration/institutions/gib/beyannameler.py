@@ -21,7 +21,9 @@ from datetime import date, datetime, timedelta
 from urllib.parse import unquote, urlsplit
 from zoneinfo import ZoneInfo
 
+from ...core.hatalar import KaynakEngelledi
 from ...transports.robot.tarayici import gib_alani
+from .ebeyanname_servis import Kapsam
 from .gezinme import confirm_transition, visible_target
 from .muhsgk import sgk_bildirimleri
 
@@ -48,6 +50,20 @@ class BelgeIstegi:
     kaydet: object
     beyanname: bool = True
     sgk: bool = True
+
+
+def _engel_varsa(tasima) -> None:
+    """Servis yolunda kurum oturumu reddettiyse ya da hız sınırı bildirdiyse iş durur (D38): kalan kapsam sorgulanmaz."""
+    if tasima is not None and tasima.engel is not None:
+        raise tasima.engel
+
+
+def _tasima_hatasi(tasima) -> None:
+    """Servis taşıması bu isteği doğrulayamadıysa o kapsam düşer (fail-closed); engel ise iş durur."""
+    _engel_varsa(tasima)
+    h = tasima.hata_al() if tasima is not None else None
+    if h is not None:
+        raise BeyannameHatasi(str(h))
 
 
 def belge_istegi(deger) -> BelgeIstegi | None:
@@ -197,7 +213,9 @@ async def pdf_yakala(context, kontrol, sure_sn: float = 40) -> bytes:
 
     async def yanit_govdesi(yanit):
         try:
-            if yanit.status == 200 and 'pdf' in (yanit.headers.get('content-type') or '').lower():
+            if yanit.status >= 400:
+                koy(BeyannameHatasi('GİB belge yanıtı alınamadı; dosya kaydedilmedi.'))  # beklemeden düş
+            elif yanit.status == 200 and 'pdf' in (yanit.headers.get('content-type') or '').lower():
                 koy(await yanit.body())
             elif yanit.status == 200 and 'text/html' in (yanit.headers.get('content-type') or '').lower() and yanit.request.resource_type == 'document':
                 metin = sade(re.sub(r'<[^>]+>', ' ', await yanit.text()))
@@ -369,8 +387,10 @@ async def _liste_sayfasi(cerceve):
     return satirlar, tuple(map(int, sayac.groups())), durum['disabled'], kontroller[0]
 
 
-async def sorgula(context, sayfa, cerceve, kimlik: str, esler: list[str], bas: date, bit: date, belge_kaydet=None) -> list[dict]:
-    """Tek mükellef + tek ay. Boş sonuç yalnız GİB'in açık 'bulunamamıştır' yanıtıyla kabul edilir."""
+async def sorgula(context, sayfa, cerceve, kimlik: str, esler: list[str], bas: date, bit: date, belge_kaydet=None,
+                  tasima=None) -> list[dict]:
+    """Tek mükellef + tek ay. Boş sonuç yalnız GİB'in açık 'bulunamamıştır' yanıtıyla kabul edilir.
+    tasima (D38 servis yolu): kapsam açıkken sorgu ve belge istekleri aynı oturumun doğrulanmış HTTP taşımasından geçer."""
     await _onceki_sonucu_kapat(cerceve)
     await _formu_doldur(cerceve, kimlik, bas, bit)
     uyarilar: list[str] = []
@@ -379,6 +399,8 @@ async def sorgula(context, sayfa, cerceve, kimlik: str, esler: list[str], bas: d
         uyarilar.append(' '.join(sade(d.message).split()))
         await d.dismiss()
     sayfa.on('dialog', diyalog)
+    if tasima is not None:
+        tasima.kapsam_ac(Kapsam(kimlik, tuple(esler or [kimlik]), bas, bit))
     try:
         for deneme in (1, 2):
             uyarilar.clear()
@@ -386,13 +408,14 @@ async def sorgula(context, sayfa, cerceve, kimlik: str, esler: list[str], bas: d
             await cerceve.locator('input[name="sorgulaButon"]').click(timeout=10000)
             for _ in range(120):
                 await asyncio.sleep(0.25)
-                if uyarilar:
+                if uyarilar or (tasima is not None and tasima.hata is not None):
                     break
                 try:
                     if await _liste_sayfasi(cerceve) is not None:
                         break
                 except BeyannameHatasi:
                     pass  # yanıt gelene kadar ekran yarım olabilir; doğrulanmayan ekran hiçbir zaman sonuç sayılmaz
+            _tasima_hatasi(tasima)
             if uyarilar and uyarilar[0] == HIZ_UYARISI and deneme == 1:
                 await asyncio.sleep(1.6)
                 continue
@@ -401,12 +424,14 @@ async def sorgula(context, sayfa, cerceve, kimlik: str, esler: list[str], bas: d
             if uyarilar[0] in BOS_SONUC:
                 return []
             raise BeyannameHatasi('GİB sorguyu tamamlayamadı; boş sonuç sayılmadı.')
-        return await _sayfalari_oku(context, cerceve, kimlik, esler, bas, bit, belge_kaydet)
+        return await _sayfalari_oku(context, cerceve, kimlik, esler, bas, bit, belge_kaydet, tasima)
     finally:
         sayfa.remove_listener('dialog', diyalog)
+        if tasima is not None:
+            tasima.kapsam_kapat()
 
 
-async def _sayfalari_oku(context, cerceve, kimlik, esler, bas, bit, belge_kaydet):
+async def _sayfalari_oku(context, cerceve, kimlik, esler, bas, bit, belge_kaydet, tasima=None):
     """Yalnız gözlenen 'Sonraki Sayfa' kontrolüyle tam listeyi okur; sayfalar arası toplam değişirse durur."""
     kayitlar, gorulen, toplam = [], set(), None
     while True:
@@ -425,13 +450,17 @@ async def _sayfalari_oku(context, cerceve, kimlik, esler, bas, bit, belge_kaydet
             gorulen.add(kayit['recordId'])
             istek = belge_istegi(belge_kaydet)
             kayit['documents'], kayit['documentWarnings'] = (
-                (await belgeleri_indir(context, cerceve, kayit, istek.kaydet)) if istek and istek.beyanname else ([], []))
+                (await belgeleri_indir(context, cerceve, kayit, istek.kaydet, tasima)) if istek and istek.beyanname else ([], []))
             if istek and istek.sgk and kayit['type'] == 'MUHSGK':
                 try:
                     kayit['sgk'] = await sgk_bildirimleri(context, cerceve, kayit, istek.kaydet, pdf_yakala, pdf_dogrula, kaynak_kimligi)
                 except ValueError as e:
                     # SGK detayı okunamazsa beyanname satırı yine yazılır; SGK kısmı uyarıyla boş kalır
                     kayit['documentWarnings'].append(f'SGK bildirimleri: {str(e)[:200]}')
+                _engel_varsa(tasima)
+                neden = tasima.hata_al() if tasima is not None else None
+                if neden is not None:
+                    kayit['documentWarnings'].append(f'SGK belgesi: {neden}')  # servis yanıtı doğrulanamadı; görünür kalsın
             kayit.pop('_ham')
             kayitlar.append(kayit)
         if son == toplam:
@@ -451,7 +480,7 @@ async def _sayfalari_oku(context, cerceve, kimlik, esler, bas, bit, belge_kaydet
             raise BeyannameHatasi('Sonraki sayfa yüklenmedi.')
 
 
-async def belgeleri_indir(context, cerceve, kayit: dict, belge_kaydet) -> tuple[list[dict], list[str]]:
+async def belgeleri_indir(context, cerceve, kayit: dict, belge_kaydet, tasima=None) -> tuple[list[dict], list[str]]:
     """Satırdaki beyanname ve tahakkuk PDF'leri. Kontrolün onclick'i satır kimliğiyle eşleşmezse tıklanmaz."""
     ham = kayit['_ham']
     satir = cerceve.locator(f'[id="row{ham}"]')
@@ -474,13 +503,16 @@ async def belgeleri_indir(context, cerceve, kayit: dict, belge_kaydet) -> tuple[
             anahtar = await belge_kaydet(ozet, ham_pdf)
             belgeler.append({'kind': tur, 'key': anahtar, 'sha256': ozet, 'size': len(ham_pdf)})
         except BeyannameHatasi as e:
-            uyarilar.append(f'{"Beyanname" if tur == "declaration" else "Tahakkuk"} PDF: {e}')
+            _engel_varsa(tasima)
+            neden = (tasima.hata_al() if tasima is not None else None) or e
+            uyarilar.append(f'{"Beyanname" if tur == "declaration" else "Tahakkuk"} PDF: {neden}')
     return belgeler, uyarilar
 
 
 async def beyanname_tara(context, ana_adres: str, sozlesmeler: list[dict], kapsam: dict, belge_kaydet, ilerleme=None,
-                         sure_sn: float = 6600) -> list[dict]:
-    """Kapsamdaki her mükellef × ay için sorgu sonucu: {identity, startDate, endDate, outcome, message?, records, access?}."""
+                         sure_sn: float = 6600, tasima=None) -> list[dict]:
+    """Kapsamdaki her mükellef × ay için sorgu sonucu: {identity, startDate, endDate, outcome, message?, records, access?}.
+    tasima verilirse (D38 servis yolu) kurum engelinde tarama durur: biten kapsamlar korunur, kalanlar failed; engel tasima.engel'de."""
     kanit = erisim_kaniti(sozlesmeler)
     bas, bit = date.fromisoformat(kapsam['startDate']), date.fromisoformat(kapsam['endDate'])
     istenen = kapsam.get('identities') or sorted(kanit)
@@ -506,9 +538,16 @@ async def beyanname_tara(context, ana_adres: str, sozlesmeler: list[dict], kapsa
             if ilerleme:
                 await ilerleme(f'Mükellef {i}/{len(uygun)} · {a_bas.isoformat()} – {a_bit.isoformat()} · {tamam}/{toplam} sorgu tamamlandı.')
             try:
-                kayitlar = await sorgula(context, sayfa, cerceve, kimlik, kanit[kimlik]['aliases'], a_bas, a_bit, belge_kaydet)
+                kayitlar = await sorgula(context, sayfa, cerceve, kimlik, kanit[kimlik]['aliases'], a_bas, a_bit, belge_kaydet, tasima)
                 sonuclar.append({**temel, 'outcome': 'ok' if kayitlar else 'empty', 'records': kayitlar})
                 ardisik_hata = 0
+            except KaynakEngelledi as e:
+                # Kurum engeli (D38): biten kapsamlar korunur, bu ve kalan kapsamlar sorgulanmadan düşer; engel tasima.engel'de
+                sonuclar.append({**temel, 'outcome': 'failed', 'message': str(e)[:300], 'records': []})
+                sonuclar.extend({'identity': k2, 'startDate': b.isoformat(), 'endDate': s.isoformat(), 'outcome': 'failed',
+                                 'message': 'Kurum erişimi durdu; sorgulanmadı.', 'records': []}
+                                for k2, b, s in _kalan(uygun, aylar, kimlik, a_bas))
+                return sonuclar
             except BeyannameHatasi as e:
                 sonuclar.append({**temel, 'outcome': 'failed', 'message': str(e)[:300], 'records': []})
                 ardisik_hata += 1

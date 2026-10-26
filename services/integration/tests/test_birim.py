@@ -63,6 +63,32 @@ def test_uretimde_sahte_gib_yasak():
         yukle({**temel, 'GIB_SAHTE_SUNUCU': 'http://fake'})
 
 
+def test_kurum_erisim_yolu_parametresi():
+    """D38: robot → yalnız tarayıcı; servis (vars.) → aynı GİB oturumunda HTTP taşıma. Bilinmeyen değerle açılmaz."""
+    temel = {'RABBITMQ_URL': 'amqp://x', 'REDIS_URL': 'redis://x', 'S3_ENDPOINT': 'http://s3', 'S3_ACCESS_KEY': 'a', 'S3_SECRET_KEY': 'b',
+             'SHARD_DATABASE_URLS': 'shard-01=postgres://x'}
+    a = yukle(temel)
+    assert (a.gib_erisim, a.sgk_erisim) == ('servis', 'servis')
+    assert yukle({**temel, 'GIB_ERISIM_YOLU': 'robot'}).gib_erisim == 'robot'
+    assert yukle({**temel, 'GIB_ERISIM_YOLU': ' Robot '}).gib_erisim == 'robot'
+    for ad in ('GIB_ERISIM_YOLU', 'SGK_ERISIM_YOLU', 'ERISIM_GIB_EBEYANNAME'):
+        with pytest.raises(ValueError, match=f'{ad} robot ya da servis'):
+            yukle({**temel, ad: 'webservis'})
+
+
+def test_oturum_sonrasi_hizmet_bazinda_erisim_yolu():
+    """D38: giriş her zaman tarayıcıda; oturum sonrası her hizmet robot | servis. Kurum varsayılanı servis ise HTTP politikası
+    olmayan hizmet robotla çalışır; hizmete açıkça servis istenip politika yoksa açılışta reddedilir (uç uydurulmaz)."""
+    temel = {'RABBITMQ_URL': 'amqp://x', 'REDIS_URL': 'redis://x', 'S3_ENDPOINT': 'http://s3', 'S3_ACCESS_KEY': 'a', 'S3_SECRET_KEY': 'b',
+             'SHARD_DATABASE_URLS': 'shard-01=postgres://x'}
+    assert yukle(temel).erisim == {'gib.ivd': 'robot', 'gib.ebeyanname': 'servis'}
+    assert yukle({**temel, 'GIB_ERISIM_YOLU': 'robot'}).erisim == {'gib.ivd': 'robot', 'gib.ebeyanname': 'robot'}
+    assert yukle({**temel, 'GIB_ERISIM_YOLU': 'robot', 'ERISIM_GIB_EBEYANNAME': 'servis'}).erisim['gib.ebeyanname'] == 'servis'
+    assert yukle({**temel, 'ERISIM_GIB_EBEYANNAME': 'robot'}).erisim['gib.ebeyanname'] == 'robot'
+    with pytest.raises(ValueError, match='ERISIM_GIB_IVD=servis desteklenmiyor'):
+        yukle({**temel, 'ERISIM_GIB_IVD': 'servis'})
+
+
 def test_kod_hatasi_sifre_hatasi_sanilmaz():
     from eworks_integration.institutions.gib.giris import KOD_HATASI, SIFRE_HATASI
     ekran = 'Kullanıcı Kodu / T.C. Kimlik No Şifre Güvenlik Kodu Giriş Yap Güvenlik kodu hatalı. Lütfen tekrar deneyiniz.'

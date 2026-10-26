@@ -20,9 +20,10 @@ Diğer canlı işlemler (`tebligat.liste.sync`, `sgk.ise_giris_cikis.sync`, `sgk
    ```
    GIB_SAHTE_SUNUCU=
    GIB_ISTEK_DK=30
+   GIB_ERISIM_YOLU=servis
    ```
 
-   Boş `GIB_SAHTE_SUNUCU` robotu gerçek GİB'e yönlendirir. 30 istek/dk, pilot hızının yarısıdır (D25); ilk koşuda temkinli kalır. Ardından yeniden `node tools/deploy/yigin.mjs up` (servisler yeni ayarla yeniden kurulur).
+   Boş `GIB_SAHTE_SUNUCU` robotu gerçek GİB'e yönlendirir. `GIB_ERISIM_YOLU` hangi erişim yolunun doğrulandığını belirler (D38; `servis` varsayılandır, `robot` ayrıca koşulabilir); kayıttaki `sonuc` alanına yolu yaz. 30 istek/dk, pilot hızının yarısıdır (D25); ilk koşuda temkinli kalır. Ardından yeniden `node tools/deploy/yigin.mjs up` (servisler yeni ayarla yeniden kurulur).
 3. Çıkış IP'si: robot bu makinenin IP'siyle çıkar (D14). Kurumun alışılmadık bulabileceği bir ağdan (yurt dışı VPN gibi) koşma.
 4. Portala gir: `http://localhost:8080`, demo hesabı `DEMO_EPOSTA` / `DEMO_SIFRE` (değerler `.env`'de).
 5. Firmalarım → Kurum hesapları → **Müşavir GİB hesabı**: kendi GİB kullanıcı kodun ve şifren. Şifre yalnız Vault'a gider.

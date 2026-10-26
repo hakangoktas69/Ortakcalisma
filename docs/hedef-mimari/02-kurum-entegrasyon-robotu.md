@@ -36,6 +36,34 @@ Kurallar:
 - Servis kimlik bilgileri robotla aynı Vault kaydından okunur (ör. SGK işyeri kullanıcı adı, işyeri kodu, sistem ve işyeri şifresi). Kuruma göre ek servis yetkisi gerekiyorsa hesap kaydına alan eklenir.
 - **Envanter:** Her kurum ekranı için resmî servis var mı, hangi yetki/başvuruyla erişilir, ne döndürür? Bu tablo Faz 0'da çıkarılır ve `integrations` tablosuna işlenir. Servisi olmayanlar robotla başlar. Servis açıldığında yalnız `primary_transport` değişir.
 
+## 1b. Erişim yolu parametresi (D38)
+
+Bugün resmî kurum web servisi bağlı değil. **Oturum açılışı (CAPTCHA dahil) her zaman tarayıcıdadır**; oturum sonrası her kurum hizmeti için iki yol vardır ve seçim entegrasyon işçisinin ortam parametresidir:
+
+- `robot`: hizmetin ekranları tarayıcı tıklamasıyla (Eworks 1).
+- `servis`: hizmetin sorgu ve belge istekleri tarayıcıdan önce yakalanır, kurum politikasıyla doğrulanır, hız sınırlayıcıdan geçer ve aynı oturumla **bir kez** gönderilir (genel taşıma `transports/service/http_tasima.py`; Eworks 2).
+
+Parametreler: kurum varsayılanı `GIB_ERISIM_YOLU` / `SGK_ERISIM_YOLU` (ayarlanmazsa `servis`); hizmet bazında `ERISIM_<KURUM>_<HİZMET>` kurum varsayılanını ezer.
+
+| Hizmet (anahtar) | Parametre | Servis politikası | Varsayılan sonuç |
+|---|---|---|---|
+| GİB e-Beyanname (`gib.ebeyanname`): beyanname listesi + PDF'ler, MUHSGK SGK bildirimleri | `ERISIM_GIB_EBEYANNAME` | Var: `institutions/gib/ebeyanname_servis.py` (`POST /dispatch`, `GET /dispatch?cmd=IMAJ`) | `servis` |
+| GİB İVD (`gib.ivd`): e-Beyanname sözleşme listesi | `ERISIM_GIB_IVD` | Yok (gözlenmiş HTTP ucu arşivde yok) | `robot`; açıkça `servis` istenirse açılış reddedilir |
+| SGK sistemleri (işe giriş/çıkış, e-Rapor, iş kazası) | `SGK_ERISIM_YOLU` | Yok; bağlantı henüz yazılmadı | — |
+
+Yeni hizmete servis yolu, gözlenmiş istek biçimi bir **kurum politikası** (izinli alanlar, kapsam doğrulaması, yanıt sınıflaması) olarak yazılıp testlerle eklendiğinde açılır; `core/ayarlar.py` `HIZMETLER` listesinde işaretlenir.
+
+Servis yolunun kuralları:
+
+- **Kapsam:** sorgu gövdesi izinli alan listesi dışında alan, eksik oturum belirteci, kapsam dışı tarih, hedef dışı VKN/TCKN, birden çok kimlik süzgeci ya da ek süzgeç (tür, vergi dairesi, durum, dönem) içerirse istek **kuruma gönderilmez**; o kapsam sonuç yazmaz.
+- **Yanıt sınıflaması** (`core/hatalar.py`): 401/403 → `SOURCE_AUTH`, 429 → `SOURCE_RATE_LIMIT`: iş durur, kalan kapsam sorgulanmaz, kurum hızı yarıya iner (§4.3). Diğer durum, köken, tür, boyut, zaman aşımı → o kapsam düşer (fail-closed), iş sürer.
+- Kurum engeli kalıcıdır: aynı bağlamda kuruma başka istek gönderilmez (sayfalama dahil; robot yolundaki yanıtlarda da gözlenir). Biten kapsamların sonucu korunur, kalanlar "sorgulanmadı" olarak yazılır. Yerel istek bütçesi dolarsa (`LOCAL_BUDGET`) iş aynı biçimde durur ama kurum hızı düşürülmez.
+- Yanıt tarayıcıya gövde çözülmüş hâliyle döner (kodlama/uzunluk başlıkları ayıklanır); tablo, sayfalama, satır kimliği ve PDF denetimleri robot katmanında yine zorunludur. Sayfalama istekleri tarihsizdir ve robot yolundan gider.
+- Belirteç, gövde, çerez, yanıt içeriği loga ve hataya girmez; işçi yalnız `erisim` değerini ve hata kodunu günlüğe yazar.
+- Çıktı şeması iki yolda aynıdır (`eworks.gib.declarations.v1`); ekranlar yoldan habersizdir.
+- **Adlandırma:** `servis` §1a'daki resmî web servis (`transport = service`) değildir, §2.2'deki hibrit yoldur. Resmî servis bağlanınca parametreye ayrı değer eklenir ve `integrations` kaydı (kurum × veri türü, ofis bazlı seçim, `fallback_policy`) kurulur. Otomatik yedek yol yoktur.
+- Akış ve uçlar Eworks 2'den gelir (`eski/mert/eworks/d8326fb-…`): Mert'in Eworks 2 koduyla 23.10.2026'da canlıda çalıştı ve sınandı (VALIDATION.md: tarayıcı/servis 5 satır aynı sonuç, 13 PDF, 79 test). Eworks 2'de de giriş (CAPTCHA) ve sözleşme listesi tarayıcıdadır; HTTP taşıma oturum açıldıktan sonraki liste ve PDF isteklerindedir. Bu uyarlamanın canlı kaydı ayrıca girilir. Sahte e-Beyanname bu ağ biçimini taklit eder; `live` işlemler canlı kayıt bekler (D33).
+
 ## 2. Bileşenler
 
 > Aşağıdaki şema robot yolunu gösterir. Servis işçisi aynı iş döngüsü, istek kapısı ve kuyruk yapısını kullanır, ama tarayıcı ve OCR içermez.

@@ -58,5 +58,5 @@ sequenceDiagram
 
 ## Açık işler
 
-- İptal (`beyanname.senkron.cancel`), gece planı, hız politikası ekranı, `Integration` kaydı (web servis / robot seçimi, D19), adım bazlı durum.
+- İptal (`beyanname.senkron.cancel`), gece planı, hız politikası ekranı, `Integration` kaydı (resmi web servis / robot seçimi, D19; bugün erişim yolu ACL'nin ortam parametresi, D38), adım bazlı durum.
 - Zaman aşımına uğrayan robot işi şu an yalnız takılı iş temizliğiyle kapanır; entegrasyon tarafında zaman aşımı sonucu yayımlanmalı.
