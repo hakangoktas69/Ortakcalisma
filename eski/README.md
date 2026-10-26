@@ -10,6 +10,7 @@ Bu klasörde yeni geliştirme yapılmaz. Dosyalar git geçmişiyle birlikte (`gi
 | `mert/eworks/` | Eworks yerel pilotu (`entegrasyon-1-tarayici`: tek dosya portal, Python/Playwright robotu, Supabase). Yeniden yapılandırılan uygulamanın kaynağı (D29: veri taşıma yok) | `apps/web`, `services/integration`, `supabase/` |
 | `hkazaz/` | Analiz belgeleri (`*-analiz.md`), Docker denemeleri (`docker/`). Eworks dokümantasyonu buradan taşındı | `docs/hedef-mimari/`, `docs/arsiv/mevcut-durum/` |
 | `hakan/`, `yunus/` | Kişisel çalışma klasörleri (`hakan/` Mükellef Takip'i de barındırır) | — |
+| `karsilastirma-fonksiyonel.md`, `karsilastirma-gorsel.md` | Mükellef Takip, Eworks 1 (ilk entegrasyon) ve Eworks 2 (`dev` dalındaki ikinci entegrasyon) için işlev ve görsel karşılaştırma (26.10.2026) | — |
 | `CLAUDE.md`, `AGENTS.md`, `README-eski-kok.md` | Eski kök bağlam ve klasör tablosu (eski kök `README.md`, bu dosyayla çakışmasın diye yeniden adlandırıldı) | Kök `CLAUDE.md`, `AGENTS.md`, `README.md` |
 
 ## Pull sonrası her makinede bir kez
