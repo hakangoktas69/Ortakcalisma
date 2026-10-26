@@ -690,11 +690,11 @@ const NAV=[
  {id:'notices',title:'e-Tebligat',icon:'mail'},
  {id:'sgk',title:'SGK',icon:'shield',children:[['sgk-check','SGK Kontrol Listesi'],['sgk-report','SGK e-Rapor'],['sgk-bildirge','e-Bildirge'],['sgk-entry','İşe Giriş Çıkış'],['sgk-accident','İş Kazası']]},
  {id:'ledger',title:'e-Defter',icon:'book'},
+ {id:'reports',title:'Raporlar',icon:'chart',children:[['reports-pos','POS + TÖDEB'],['reports-cars','Kayıtlı Araçlar'],['reports-trade','Ticaret Sicil Gazetesi'],['reports-audit','Karşıt İnceleme']]},
  {id:'petitions',title:'Dilekçeler',icon:'clipboard',children:[['petitions-all','Tüm Dilekçeler'],['petitions-debt','Borç Durum Yazısı']]},
  {id:'invoices',title:'Faturalar',icon:'invoice',children:[['invoices-e','e-Faturalar'],['invoices-archive','e-Arşiv Faturalar'],['invoices-receipts','Fiş Takip'],['invoices-withhold','Tevkifat Kontrol']]}
  ]],
- ['OFİS VE RAPORLAMA',[
- {id:'reports',title:'Raporlar',icon:'chart',children:[['reports-pos','POS + TÖDEB'],['reports-cars','Kayıtlı Araçlar'],['reports-trade','Ticaret Sicil Gazetesi'],['reports-audit','Karşıt İnceleme']]},
+ ['OFİS',[
  {id:'payments',title:'Ödeme',icon:'wallet',children:[['payments-month','Aylık Ödeme Listesi'],['payments-cash','Cari Kasa'],['payments-debt','Vergi & SGK Borçları'],['payments-online','Online Ödeme'],['payments-fees','Ücret Yönetimi'],['payments-stats','İstatistikler'],['payments-settings','Ödeme Ayarları']]},
  {id:'accounts',title:'Kullanıcılar',icon:'users',children:[['accounts-office','Ofis Kullanıcıları'],['accounts-clients','Mükellef Kullanıcıları']]},
  {id:'settings',title:'Ayarlar',icon:'settings',children:[['settings-profile','Bilgilerim'],['settings-comms','SMS / WhatsApp / Mail'],['settings-groups','Mükellef Grupları'],['settings-install','Portal Kullanımı']]}
@@ -979,7 +979,7 @@ document.addEventListener('click',async e=>{
 
 const CATEGORIES=[
  {id:'daily',title:'Günlük Yönetim',icon:'home',description:'Mükellefler, beyannameler ve günlük işler',items:NAV[0][1].filter(n=>n.id!=='overview')},
- {id:'office',title:'Ofis ve Raporlama',icon:'chart',description:'Raporlar, kullanıcılar ve ofis ayarları',items:NAV[1][1].filter(n=>n.id!=='payments')},
+ {id:'office',title:'Ofis',icon:'chart',description:'Kullanıcılar ve ofis ayarları',items:NAV[1][1].filter(n=>n.id!=='payments')},
  {id:'payment',title:'Ödeme',icon:'wallet',description:'Ödemeler, borçlar ve ücret takibi',items:NAV[1][1].find(n=>n.id==='payments').children.map(([id,title])=>({id,title,icon:'wallet'}))},
  {id:'support',title:'Destek',icon:'help',description:'Uzman desteği, yardım ve yenilikler',items:NAV[2][1]}
 ];
