@@ -99,6 +99,7 @@ async def run(folder, access_token):
             status('running', 'Seçilen firmanın GİB giriş ekranı hazırlanıyor.')
             verified = False
             opened = False
+            last_inspection_command = None
             deadline = asyncio.get_running_loop().time() + 7200
             while context.pages and asyncio.get_running_loop().time() < deadline:
                 if (folder/'cancel').exists():
@@ -159,6 +160,23 @@ async def run(folder, access_token):
                         status('running', 'Müşavir hesabı gözlendi; vergi levhası erişim yolu incelendi. Mükellef yetkisi ve belge aktarımı henüz doğrulanmadı.')
                     else:
                         status('running', 'Firma hesabı doğrulandı. Portal penceresi açık; hedef uygulama ek giriş/yetki isterse pencerede tamamlayın. Veri aktarımı yapılmıyor.')
+                if advisor and verified and opened:
+                    command_path = folder/'taxplate-inspection-request.json'
+                    if command_path.is_file():
+                        command=json.loads(command_path.read_text(encoding='utf-8'))
+                        nonce=command.get('nonce')
+                        if (command.get('requestId')==request['requestId'] and command.get('action')=='inspect_taxplates'
+                                and isinstance(nonce,str) and len(nonce)==32 and nonce!=last_inspection_command):
+                            last_inspection_command=nonce
+                            import importlib, tax_plate_discovery
+                            module=importlib.reload(tax_plate_discovery)
+                            status('running','Aynı müşavir oturumunda vergi levhası erişimi yeniden inceleniyor.')
+                            try:
+                                inspection=await asyncio.wait_for(module.inspect_tax_plate_screen(context),timeout=90)
+                            except Exception as exc:
+                                inspection=dict(state='inspection_failed',errorType=type(exc).__name__,clientAuthorizationVerified=False,downloaded=False,imported=False)
+                            atomic_json(folder/'taxplate-reinspection-result.json',dict(requestId=request['requestId'],nonce=nonce,inspection=inspection,imported=False))
+                            status('running','Vergi levhası erişimi yeniden incelendi; belgeler henüz aktarılmadı.')
                 await asyncio.sleep(2)
             return {'schema': 'eworks.portal-session.v1', 'ownerId': owner,
                 'requestId': request['requestId'], 'accountVerified': verified,

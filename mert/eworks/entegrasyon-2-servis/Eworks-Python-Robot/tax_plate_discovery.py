@@ -53,13 +53,14 @@ async def screen_structure(context):
    if controls or tables:result.append(dict(sourceOrigin=safe_origin(frame.url),controls=sorted(set(controls))[:40],tables=tables[:10]))
  return result
 
-async def inspect_tax_plate_screen(context):
+async def _inspect_tax_plate_screen(context,diagnostics):
  visited=set();actions=[]
  for attempt in range(12):
   clicked=False
   for label in PLATE_LABELS:
+   diagnostics['stage']=label
    if label in visited:continue
-   target=await visible_target(context,label)
+   target=await visible_target(context,label,diagnostics)
    if target is not None:
     await target.click(timeout=5000);visited.add(label);actions.append(label);clicked=True
     await asyncio.sleep(1)
@@ -70,11 +71,24 @@ async def inspect_tax_plate_screen(context):
     return dict(module='taxplates',state='tax_plate_form_observed',actions=actions,structure=observed,clientAuthorizationVerified=False,downloaded=False,imported=False)
    continue
   for label in ('İnternet Vergi Dairesi','Hepsini gör','Bilgilerim','Sorgulamalar','Bilgi Girişi'):
+   diagnostics['stage']=label
    if label in visited:continue
-   target=await visible_target(context,label)
+   target=await visible_target(context,label,diagnostics)
    if target is not None:
     await target.click(timeout=5000);visited.add(label);actions.append(label)
     await confirm_ivd_transition(context);clicked=True;break
   if not clicked:break
   await asyncio.sleep(1)
  return dict(module='taxplates',state='tax_plate_navigation_observed' if any(x in PLATE_LABELS for x in actions) else 'tax_plate_entry_unavailable',actions=actions,structure=await screen_structure(context),clientAuthorizationVerified=False,downloaded=False,imported=False)
+
+
+async def inspect_tax_plate_screen(context):
+ diagnostics={}
+ try:
+  result=await _inspect_tax_plate_screen(context,diagnostics)
+ except Exception as exc:
+  result=dict(module='taxplates',state='tax_plate_navigation_error',errorType=type(exc).__name__,stage=diagnostics.get('stage'),clientAuthorizationVerified=False,downloaded=False,imported=False)
+  try:result['structure']=await screen_structure(context)
+  except Exception:result['structure']=[]
+ result['navigationDiagnostics']=diagnostics
+ return result
