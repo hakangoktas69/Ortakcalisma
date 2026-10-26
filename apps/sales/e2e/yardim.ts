@@ -1,12 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page } from '@playwright/test';
+import { Redis } from 'ioredis';
 import { createPool } from '@eworks/platform';
 import { createSalesUser, NodeSalesCrypto, PgSalesUsers, totpCodeAt } from '@eworks/sales';
 import { yigin } from '@eworks/testing';
 
-// Satış portalı kabul testi yardımcıları. Her test kendi satış kullanıcısını gerçek use-case'le açar (komutun yaptığı gibi);
-// doğrulayıcı uygulamanın yerine kod, kurulum ekranındaki anahtardan hesaplanır.
+// Satış portalı kabul testi yardımcıları. Her test kendi satış kullanıcısını gerçek use-case'le açar (komutun yaptığı gibi).
+// Doğrulayıcı uygulamanın yerine kod, kurulum ekranındaki anahtardan hesaplanır; resimli güvenlik kodunun yanıtı (D41)
+// satış uygulamasının Redis'inden okunur (kullanıcı resimden okur; test resmi çözmez).
 
 export type Satisci = { eposta: string; parola: string; kurtarma: string[] };
 
@@ -28,41 +30,78 @@ export async function satisciAc(): Promise<{ eposta: string; geciciParola: strin
 
 export const adim = () => Math.floor(Date.now() / 30_000);
 
-export async function parolaGir(page: Page, eposta: string, parola: string) {
-  await page.goto('/giris');
-  await page.getByLabel('E-posta').fill(eposta);
-  await page.getByLabel('Parola').fill(parola);
-  await page.getByRole('button', { name: 'Devam et' }).click();
+/** Ekrandaki güvenlik kodunun yanıtı: başlangıç çerezindeki kimlikle satış Redis'inden. */
+export async function guvenlikKodu(page: Page): Promise<string> {
+  const cerez = (await page.context().cookies()).find((c) => c.name.endsWith('ew_satis_baslangic'));
+  const url = process.env['TEST_SATIS_REDIS_URL'];
+  if (!cerez || !url) throw new Error('başlangıç çerezi ya da TEST_SATIS_REDIS_URL yok');
+  const redis = new Redis(url);
+  try {
+    return (await redis.get(`ew:satis:oturum:${cerez.value}:kod`)) ?? '';
+  } finally {
+    await redis.quit();
+  }
 }
 
-/** İlk giriş: parola → 2FA kurulumu (anahtar ekrandan) → kurtarma kodları → zorunlu parola değişikliği → ofis listesi. */
-export async function satisciHazirla(page: Page, denetle = false): Promise<Satisci> {
-  const { eposta, geciciParola } = await satisciAc();
-  await parolaGir(page, eposta, geciciParola);
-  await expect(page).toHaveURL(/\/giris\/kurulum$/);
+/** E-posta adımı. */
+export async function epostaGir(page: Page, eposta: string) {
+  await page.goto('/giris?yeni=1');
+  await page.getByLabel('E-posta').fill(eposta);
+  await page.getByRole('button', { name: 'Devam et' }).click();
+  await expect(page.getByLabel('Parola')).toBeVisible();
+}
+
+/** E-posta + parola (+ ekranda varsa güvenlik kodu, doğru yanıtla) → Giriş yap. */
+export async function parolaGir(page: Page, eposta: string, parola: string) {
+  await epostaGir(page, eposta);
+  await page.getByLabel('Parola').fill(parola);
+  if (await page.getByLabel('Güvenlik kodu').isVisible()) await page.getByLabel('Güvenlik kodu').fill(await guvenlikKodu(page));
+  await page.getByRole('button', { name: 'Giriş yap' }).click();
+}
+
+/** Oturumdaki satışçıya 2FA açar (Parola ve güvenlik → QR/anahtar → parola + kod → kurtarma kodları). */
+export async function ikiAdimAc(page: Page, parola: string, denetle = false): Promise<string[]> {
+  await page.goto('/sifre');
+  await page.getByRole('link', { name: 'İki adımlı doğrulamayı aç' }).click();
   await expect(page.getByRole('img', { name: 'Doğrulayıcı uygulama için QR kod' })).toBeVisible();
   if (denetle) await ekranDenetle(page);
   await page.getByText('QR okutamıyorum: anahtarı elle gir').click();
   const anahtar = (await page.getByLabel('Kurulum anahtarı').textContent())?.trim() ?? '';
   expect(anahtar).toMatch(/^[A-Z2-7]{32}$/);
+  await page.locator('#ac-parola').fill(parola);
   await page.getByLabel('Doğrulama kodu').fill(totpCodeAt(anahtar, adim()));
-  await page.getByRole('button', { name: 'Kurulumu tamamla' }).click();
+  await page.getByRole('button', { name: 'İki adımlı doğrulamayı aç' }).click();
   const kodlar = page.getByRole('list', { name: 'Kurtarma kodları' }).getByRole('listitem');
   await expect(kodlar).toHaveCount(10);
   const kurtarma = (await kodlar.allTextContents()).map((k) => k.trim());
   if (denetle) await ekranDenetle(page);
   await page.getByRole('link', { name: 'Kodları kaydettim, devam et' }).click();
+  await expect(page.getByRole('heading', { level: 2, name: 'İki adımlı doğrulama: açık' })).toBeVisible();
+  return kurtarma;
+}
+
+/** İlk giriş: e-posta → parola + güvenlik kodu → zorunlu parola değişikliği → (istenirse) 2FA açma → ofis listesi. */
+export async function satisciHazirla(page: Page, s: { ikiAdim?: boolean; denetle?: boolean } = {}): Promise<Satisci> {
+  const { eposta, geciciParola } = await satisciAc();
+  await epostaGir(page, eposta);
+  // 2FA'sız hesap: güvenlik kodu resmi ve alanı görünür
+  await expect(page.getByRole('img', { name: 'Güvenlik kodu resmi' })).toBeVisible();
+  if (s.denetle) await ekranDenetle(page);
+  await page.getByLabel('Parola').fill(geciciParola);
+  await page.getByLabel('Güvenlik kodu').fill(await guvenlikKodu(page));
+  await page.getByRole('button', { name: 'Giriş yap' }).click();
   // Geçici parolayla giren önce parolasını değiştirir
   await expect(page).toHaveURL(/\/sifre$/);
   await expect(page.getByText('Geçici parolayla giriş yaptınız.')).toBeVisible();
-  if (denetle) await ekranDenetle(page);
+  if (s.denetle) await ekranDenetle(page);
   const parola = `Satis-${randomUUID().slice(0, 8)}-2026`;
   await page.getByLabel('Mevcut parola').fill(geciciParola);
   await page.getByLabel('Yeni parola', { exact: true }).fill(parola);
   await page.getByLabel('Yeni parola (tekrar)').fill(parola);
   await page.getByRole('button', { name: 'Parolayı değiştir' }).click();
   await expect(page.getByRole('status')).toContainText('Parolanız değişti.');
-  await page.getByRole('link', { name: 'Ofis listesine git' }).click();
+  const kurtarma = s.ikiAdim ? await ikiAdimAc(page, parola, s.denetle) : [];
+  await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: 'Ofisler' })).toBeVisible();
   return { eposta, parola, kurtarma };
 }

@@ -180,10 +180,10 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `destek.sss.view` | — (atanmadı) | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Yenilikler | `destek.yenilikler` | — (atanmadı) | 🔴 0/1 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `destek.yenilikler.view` | — (atanmadı) | 🔴 | 0 |
-| **Satış portalı** | `satis` | sales | 🔴 4/11 | 78 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Satış girişi | `satis.oturum` | sales | 🟢 2/2 | 31 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Giriş yap | `satis.oturum.login` | sales | 🟢 | 15 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;İki adımlı doğrulama | `satis.oturum.mfa` | sales | 🟢 | 16 |
+| **Satış portalı** | `satis` | sales | 🔴 4/11 | 83 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Satış girişi | `satis.oturum` | sales | 🟢 2/2 | 36 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Giriş yap | `satis.oturum.login` | sales | 🟢 | 18 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;İki adımlı doğrulama | `satis.oturum.mfa` | sales | 🟢 | 18 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Ofis hesabı | `satis.ofis` | sales | 🔴 2/4 | 47 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `satis.ofis.view` | sales | 🟢 | 7 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ofis aç | `satis.ofis.create` | sales | 🟢 | 40 |

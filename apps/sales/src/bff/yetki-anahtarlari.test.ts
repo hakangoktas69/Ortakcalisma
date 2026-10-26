@@ -13,10 +13,9 @@ const APP = join(SRC, 'app');
 const ACIK: Record<string, string> = {
   'giris/page.tsx': 'giriş ekranı, oturum öncesi',
   'giris/dogrula/page.tsx': 'ikinci adım: yalnız parolası doğrulanmış ara adım çereziyle açılır, iş verisi yok',
-  'giris/kurulum/page.tsx': 'ilk giriş 2FA kurulumu: yalnız ara adım çereziyle, iş verisi yok',
-  'api/oturum/giris/route.ts': 'giriş isteği, oturum öncesi (aynı köken denetimi var)',
+  'api/oturum/giris/route.ts': 'parola (+ güvenlik kodu) adımı, oturum öncesi (aynı köken denetimi var)',
   'api/oturum/dogrula/route.ts': 'ikinci adım isteği, ara adım çereziyle (aynı köken denetimi var)',
-  'api/oturum/kurulum/route.ts': '2FA kurulum onayı, ara adım çereziyle (aynı köken denetimi var)',
+  'api/oturum/baslat/route.ts': 'e-posta adımı, oturum öncesi (aynı köken denetimi var); yalnız güvenlik kodu gereğine karar verir',
   'api/saglik/route.ts': 'sağlık denetimi, iş verisi yok',
 };
 

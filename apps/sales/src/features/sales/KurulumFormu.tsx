@@ -1,17 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { aciklama, Alan } from '@/shared/ui/Alan.tsx';
+import { istek } from '@/shared/ui/istek.ts';
 
-// 2FA kurulum onayı: kod doğruysa oturum açılır ve kurtarma kodları YALNIZ bu ekranda bir kez gösterilir.
-// Ara adım çerezi HttpOnly'dir; istek aynı kökenden JSON ile gider (CSRF: aynı köken + SameSite=Strict, oturum henüz yok).
-
-type Sonuc = { kurtarmaKodlari: string[]; sonraki: string };
-
-export function KurulumFormu() {
+// 2FA açma onayı (oturumdan): parola + kod doğruysa açılır ve kurtarma kodları YALNIZ bu ekranda bir kez gösterilir.
+export function KurulumFormu({ csrf }: { csrf: string }) {
   const [hata, setHata] = useState<string | null>(null);
   const [bekliyor, setBekliyor] = useState(false);
-  const [sonuc, setSonuc] = useState<Sonuc | null>(null);
-  if (sonuc) {
+  const [kodlar, setKodlar] = useState<string[] | null>(null);
+  if (kodlar) {
     return (
       <section className="sonuc" aria-labelledby="kodlar-baslik">
         <p className="basari" role="status">
@@ -20,11 +18,11 @@ export function KurulumFormu() {
         <h2 id="kodlar-baslik">Kurtarma kodlarınız</h2>
         <p className="uyari">Bu kodlar bir daha gösterilmez. Telefonunuza erişemezseniz giriş için kullanılır; her kod bir kez geçer. Güvenli bir yere kaydedin.</p>
         <ul className="kodlar" aria-label="Kurtarma kodları">
-          {sonuc.kurtarmaKodlari.map((k) => (
+          {kodlar.map((k) => (
             <li key={k}>{k}</li>
           ))}
         </ul>
-        <a className="dugme birincil" href={sonuc.sonraki}>
+        <a className="dugme birincil" href="/sifre">
           Kodları kaydettim, devam et
         </a>
       </section>
@@ -37,22 +35,12 @@ export function KurulumFormu() {
         e.preventDefault();
         setBekliyor(true);
         setHata(null);
-        try {
-          const r = await fetch('/api/oturum/kurulum', {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ kod: new FormData(e.currentTarget).get('kod') }),
-            credentials: 'same-origin',
-          });
-          const veri = (await r.json().catch(() => ({}))) as Partial<Sonuc> & { mesaj?: string };
-          if (r.ok && Array.isArray(veri.kurtarmaKodlari) && typeof veri.sonraki === 'string') setSonuc({ kurtarmaKodlari: veri.kurtarmaKodlari, sonraki: veri.sonraki });
-          else if (r.status === 401) window.location.assign('/giris?hata=sure');
-          else setHata(veri.mesaj ?? 'Kod doğrulanamadı.');
-        } catch {
-          setHata('Sunucuya ulaşılamadı.');
-        } finally {
-          setBekliyor(false);
-        }
+        const v = new FormData(e.currentTarget);
+        const r = await istek<{ kurtarmaKodlari?: unknown }>('/api/guvenlik/2fa', 'POST', csrf, { parola: v.get('parola'), kod: v.get('kod') });
+        setBekliyor(false);
+        const gelen = r.ok ? r.veri.kurtarmaKodlari : null;
+        if (Array.isArray(gelen) && gelen.every((k) => typeof k === 'string')) setKodlar(gelen);
+        else setHata(r.ok ? 'Kod doğrulanamadı.' : r.mesaj);
       }}
     >
       {hata ? (
@@ -60,12 +48,16 @@ export function KurulumFormu() {
           {hata}
         </p>
       ) : null}
-      <label>
-        Doğrulama kodu
-        <input name="kod" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required />
-      </label>
+      <div className="form-satir">
+        <Alan id="ac-parola" etiket="Parola" ipucu="Hesabın sizin olduğunu doğrulamak için.">
+          <input {...aciklama('ac-parola', true)} name="parola" type="password" autoComplete="current-password" required maxLength={128} />
+        </Alan>
+        <Alan id="ac-kod" etiket="Doğrulama kodu" ipucu="Uygulamanın gösterdiği 6 haneli kod.">
+          <input {...aciklama('ac-kod', true)} name="kod" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required />
+        </Alan>
+      </div>
       <button type="submit" className="dugme birincil" disabled={bekliyor}>
-        {bekliyor ? 'Doğrulanıyor…' : 'Kurulumu tamamla'}
+        {bekliyor ? 'Doğrulanıyor…' : 'İki adımlı doğrulamayı aç'}
       </button>
     </form>
   );

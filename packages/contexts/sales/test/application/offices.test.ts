@@ -6,7 +6,7 @@ import { listOffices, openOfficeForSale, type OfficeSaleDeps, type SalesAccountR
 
 const simdi = new Date('2026-10-26T09:00:00Z');
 const gun = (n: number) => new Date(simdi.getTime() + n * 86_400_000);
-const satisci = { userId: 's-1', email: 'satis@eworks.test', fullName: 'Selin Satış', csrf: 'c', mustChangePassword: false };
+const satisci = { userId: 's-1', email: 'satis@eworks.test', fullName: 'Selin Satış', csrf: 'c', mustChangePassword: false, twoFactor: true };
 
 function kur() {
   const kimlikler = new Map<string, { id: string; password: string }>();

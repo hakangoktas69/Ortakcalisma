@@ -42,7 +42,7 @@ Ortakcalisma/                        ← depo kökü = Eworks SaaS monoreposu
 | Konu | Yeni yapı |
 |---|---|
 | Uygulama | `apps/sales` (Next.js, ayrı imaj, turuncu tema) + `packages/contexts/sales` |
-| Kullanıcılar | `SalesUser` müşavir/mükellef kullanıcılarından ayrı tablodadır, iki adımlı doğrulama zorunludur |
+| Kullanıcılar | `SalesUser` müşavir/mükellef kullanıcılarından ayrı tablodadır; iki adımlı doğrulama isteğe bağlı, 2FA'sız girişte resimli güvenlik kodu zorunlu (D41) |
 | Ne açar | **Ofis, müşavir ve mükellef hesapları** satış portalından açılır. Kendi kendine kayıt kapalıdır (`DISABLE_SIGNUP=true`). Ofis açılırken kiracı shard'ı atanır (5.7) |
 | Mükellef onayı (D18) | Satış sözleşmesiyle alınır. Satış portalı mükellef için `credential_consents` kaydını **sözleşme referansıyla** (`given_by = sales_contract`, belge kimliği) oluşturur. Kurum bazında kapsam sözleşmeden işlenir |
 | Veri sınırı | Satış yalnız kontrol düzlemindeki hesap tablolarına ve shard'larda hesap açma use-case'ine erişir. **Mükellef iş verisini (beyanname, SGK, belge) göremez.** Veritabanı rolüyle zorlanır (`eworks_sales`: shard'da yalnız hesap açma fonksiyonları, D40) |

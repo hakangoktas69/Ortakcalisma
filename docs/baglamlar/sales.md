@@ -4,7 +4,7 @@
 
 # sales — Satış portalı
 
-> Durum: **çekirdek aşama (2026-10-26, D40)**: satışçı girişi (zorunlu TOTP), ofis listesi, yeni ofis (+ yönetici müşavir + deneme lisansı). Dondurma, lisans uzatma, satış ekibi ve mükellef sözleşmesi sonraki aşamada (o `satis.*` anahtarları kırmızı). Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil), [08 §2](../hedef-mimari/08-depo-yeniden-yapilanmasi.md#2-satış-portalı-d27), [karar kaydı K-47](../adr/karar-kaydi.md). Kod: `packages/contexts/sales` — dışarıya yalnız `src/index.ts`; uygulama `apps/sales`.
+> Durum: **çekirdek aşama (2026-10-26, D40)**: satışçı girişi (2FA isteğe bağlı, 2FA'sızda resimli güvenlik kodu — D41), ofis listesi, yeni ofis (+ yönetici müşavir + deneme lisansı). Dondurma, lisans uzatma, satış ekibi ve mükellef sözleşmesi sonraki aşamada (o `satis.*` anahtarları kırmızı). Kaynak: [06 §2](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md#2-bounded-context-haritası-ve-ortak-dil), [08 §2](../hedef-mimari/08-depo-yeniden-yapilanmasi.md#2-satış-portalı-d27), [karar kaydı K-47](../adr/karar-kaydi.md). Kod: `packages/contexts/sales` — dışarıya yalnız `src/index.ts`; uygulama `apps/sales`.
 
 | | |
 |---|---|
@@ -16,8 +16,9 @@
 
 ## Kurallar
 
-- Satış kullanıcıları portal kimliğinden (GoTrue) ayrıdır: satışçı portala, müşavir satış portalına giremez. Giriş: e-posta + parola → **zorunlu TOTP** (ilk girişte QR ile kurulum; 10 tek kullanımlık kurtarma kodu bir kez gösterilir). Aynı kod iki kez geçmez (son adım saklanır). 5 hatalı parola ya da kod 15 dk kilitler; ara adımda 5 yanlış kod adımı düşürür. Geçici parola ilk girişte değiştirilir; parola değişince diğer oturumlar düşer.
-- TOTP gizli anahtarı veritabanında AES-256-GCM ile mühürlüdür (`SALES_TOTP_KEY`); parola scrypt özetidir. Yalnız `node:crypto` (QR çizimi için `qrcode`).
+- Satış kullanıcıları portal kimliğinden (GoTrue) ayrıdır: satışçı portala, müşavir satış portalına giremez. Giriş (D41): önce e-posta; hesap 2FA'sızsa (ya da e-posta kayıtlı değilse) parola ekranında **resimli güvenlik kodu** da istenir, kod çözülmeden parola denenmez (kod 5 dk, tek kullanımlık; yanlış kod sayaç işletmez). 2FA'lı hesap parola sonrası TOTP ya da kurtarma kodu girer. Aynı kod iki kez geçmez (son adım saklanır). 5 hatalı parola ya da kod 15 dk kilitler; ara adımda 5 yanlış kod adımı düşürür. Geçici parola ilk girişte değiştirilir.
+- **2FA isteğe bağlıdır** (D41): "Parola ve güvenlik" sayfasından açılır (QR, 10 tek kullanımlık kurtarma kodu bir kez gösterilir); kapatmak parola + güncel kod (ya da kurtarma kodu) ister, yanlış deneme sayacı işletir. Parola ya da 2FA değişince diğer oturumlar düşer. Bilinen risk: 2FA'sız satışçının parolası ele geçerse ikinci engel yoktur; bir e-postanın 2FA'lı olduğu giriş ekranından anlaşılabilir.
+- TOTP gizli anahtarı veritabanında AES-256-GCM ile mühürlüdür (`SALES_TOTP_KEY`); parola scrypt özetidir; `node:crypto`. QR çizimi `qrcode`, güvenlik kodu resmi `svg-captcha` (bakımı durmuş paket, K-48).
 - Ofis, en az ofisi olan ve yeni ofis kabul eden shard'a açılır (07 §2.3). Sıra: kimlik (GoTrue) → kontrol düzlemi dizini → shard; e-posta başka parolayla kayıtlıysa ofis hiç açılmaz. Satış aynı adla ikinci ofis açmaz (Türkçe harf kurallarıyla büyük/küçük harf duyarsız: "Ofisi" = "OFİSİ"); aynı ad için eşzamanlı iki istek Redis kilidiyle engellenir. Veritabanında tekil indeks yoktur: hesap açma komutu ve eski testler aynı adlı ofisleri yerel veritabanlarında bırakmış olabilir (indeks migration'ı onları durdururdu).
 - Ofis yöneticisi aynı zamanda müşavir kaydı alır (portföy sahibi olabilsin). Kendi kendine kayıt kapalıdır (GoTrue `DISABLE_SIGNUP`).
 - Paket (Başlangıç / Pro / Kurumsal) ve deneme süresi (varsayılan 14, en çok 90 gün) satış hesabında kayıttır; **portala girişi engellemez** (D40; dondurma engeller). Satış hesabı olmayan ofis (komutla açılmış) listede "süresiz"dir.
@@ -29,10 +30,12 @@
 
 | Ekran / uç | Anahtar | Not |
 |---|---|---|
-| `/giris`, `POST /api/oturum/giris` | açık | Parola adımı; ara adım çerezi (≤ 15 dk) |
-| `/giris/kurulum`, `POST /api/oturum/kurulum` | açık (ara adım) | QR + anahtar; kurtarma kodları yanıtta bir kez |
+| `/giris`, `POST /api/oturum/baslat` | açık | E-posta adımı; başlangıç çerezi (≤ 10 dk), güvenlik kodu kararı sunucuda |
+| `/giris`, `POST /api/oturum/giris` | açık (başlangıç) | Parola (+ güvenlik kodu); 2FA'lıya ara adım çerezi (≤ 5 dk), 2FA'sıza oturum |
 | `/giris/dogrula`, `POST /api/oturum/dogrula` | açık (ara adım) | Kod ya da kurtarma kodu |
-| `/sifre`, `POST /api/oturum/sifre` | `satis.oturum`, `satis.oturum.login` | Geçici parola önce burada değişir |
+| `/sifre`, `POST /api/oturum/sifre` | `satis.oturum`, `satis.oturum.login` | Parola ve güvenlik; geçici parola önce burada değişir |
+| `/guvenlik/2fa`, `POST /api/guvenlik/2fa` | `satis.oturum.mfa` | 2FA açma: QR + anahtar; kurtarma kodları yanıtta bir kez |
+| `POST /api/guvenlik/2fa/kapat` | `satis.oturum.mfa` | 2FA kapatma: parola + kod / kurtarma kodu |
 | `/` | `satis.ofis` | Ofis listesi, arama, durum süzgeci |
 | `/yeni`, `POST /api/ofisler` | `satis.ofis.create` | Geçici parola yanıtta bir kez |
 | `POST /api/oturum/cikis` | `satis.oturum` | CSRF belirteçli form |
@@ -41,13 +44,13 @@
 
 ## Testler
 
-- Birim: `test/domain/sales.test.ts`, `test/application/{sales-auth,offices,provisioning}.test.ts`, `test/infrastructure/kripto.test.ts` (RFC 4226/6238 vektörleri). Yetki anahtarı taraması: `apps/sales/src/bff/yetki-anahtarlari.test.ts`.
+- Birim: `test/domain/sales.test.ts`, `test/application/{sales-auth,offices,provisioning}.test.ts`, `test/domain/captcha.test.ts`, `test/infrastructure/kripto.test.ts` (RFC 4226/6238 vektörleri), `test/infrastructure/captcha.test.ts`. Yetki anahtarı taraması: `apps/sales/src/bff/yetki-anahtarlari.test.ts`.
 - pgTAP: `supabase/tests/control/sales.sql`, `supabase/tests/tenant/sales/hesap_acma.sql`. Entegrasyon (gerçek roller): `apps/sales/test/satis.int.test.ts`. Kabul (4 ekran): `apps/sales/e2e/satis.e2e.ts`; müşavirin geçici parolayla portala girişi dahil.
 
 ## Açık işler
 
 - Ofis dondurma (`satis.ofis.freeze`), lisans uzatma (`satis.ofis.extend`), satış ekibi ekranı (`satis.ekip.*`), müşavir/mükellef ekleme ve sözleşme + mükellef onayı (`satis.musavir.*`, `satis.mukellef.*`).
-- Açık konular 18–22 ([durum](../ai/durum.md#açık-konular)): lisansın girişi engellemesi, portalda geçici parolanın zorunlu değişimi, üretimde yayın, ortak log yardımcısı, ofis açmada yarım kalma (telafi yok).
+- Açık konular 18–24 ([durum](../ai/durum.md#açık-konular)): lisansın girişi engellemesi, portalda geçici parolanın zorunlu değişimi, üretimde yayın, ortak log yardımcısı, ofis açmada yarım kalma (telafi yok), girişte istek hızı sınırı, güvenlik kodunun erişilebilirliği.
 - **Bilinen sapma:** shard'daki `sales.*` fonksiyonları `organization` ve `identity_access` tablolarına yazar/okur (supabase kuralı: başka bağlamın tablosuna yazan fonksiyon yazılmaz). Hesap açma bu tablolara zaten yazıyordu (önceden işçi rolüyle doğrudan); fonksiyonlar yazmayı tek, denetimli ve dar bir yola topladı. Kalıcı çözüm: `organization` / `identity-access` bağlamlarının kendi hesap açma fonksiyonları ve satıştan olayla tetiklenmesi.
 
 <!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->

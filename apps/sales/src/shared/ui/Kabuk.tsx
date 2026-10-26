@@ -15,7 +15,7 @@ export function Kabuk({ ad, csrf, etkin, children }: { ad: string; csrf: string;
           <nav aria-label="Satış menüsü">
             {bag('/', 'Ofisler', 'ofisler')}
             {bag('/yeni', 'Yeni ofis', 'yeni')}
-            {bag('/sifre', 'Parola', 'sifre')}
+            {bag('/sifre', 'Parola ve güvenlik', 'sifre')}
           </nav>
           <div className="kullanici">
             <span>{ad}</span>

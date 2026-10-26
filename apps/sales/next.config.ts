@@ -12,7 +12,8 @@ const config: NextConfig = {
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
   transpilePackages: ['@eworks/identity-access', '@eworks/kernel', '@eworks/platform', '@eworks/sales'],
-  serverExternalPackages: ['pg', 'ioredis', 'qrcode'],
+  // svg-captcha yazı tipi dosyasını çalışma anında diskten okur: paket olarak kalır (izlenip standalone'a kopyalanır)
+  serverExternalPackages: ['pg', 'ioredis', 'qrcode', 'svg-captcha'],
   // AGENTS.md tek kaynaktan üretilir (tools/ajan/senkron.mjs); `next dev` yazmasın
   agentRules: false,
   async headers() {

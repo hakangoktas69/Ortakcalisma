@@ -1193,21 +1193,21 @@
     "status": "green",
     "green": 1,
     "total": 1,
-    "tests": 15,
+    "tests": 18,
     "context": "sales"
   },
   "satis.oturum.mfa": {
     "status": "green",
     "green": 1,
     "total": 1,
-    "tests": 16,
+    "tests": 18,
     "context": "sales"
   },
   "satis.oturum": {
     "status": "green",
     "green": 2,
     "total": 2,
-    "tests": 31,
+    "tests": 36,
     "context": "sales"
   },
   "satis.ofis.view": {
@@ -1305,7 +1305,7 @@
     "status": "red",
     "green": 4,
     "total": 11,
-    "tests": 78,
+    "tests": 83,
     "context": "sales"
   }
 }
