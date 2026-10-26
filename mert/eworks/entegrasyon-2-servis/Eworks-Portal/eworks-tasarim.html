@@ -1624,33 +1624,36 @@ function initialize(){renderNav();render();announceNotifications();$('year').tex
    const dialog=document.createElement('dialog');
    dialog.style.cssText='max-width:480px;width:calc(100% - 40px);padding:24px;border:1px solid #dbe3eb;border-radius:16px';
    dialog.setAttribute('aria-label','Firma GİB Hesabı');
-   dialog.innerHTML=`<form autocomplete="off"><h2>Firma GİB Hesabı</h2><p>${safe(firm.name)}</p><p>Yalnızca bu firmanın GİB hesabını girin. Bilgiler Supabase Vault’a gönderilir; yerel dosyaya veya firma verilerine yazılmaz.</p><p role="status">Firma bağlantısı kontrol ediliyor…</p><label class="form-field">Firma GİB kullanıcı adı<input name="username" maxlength="256" autocomplete="off" required></label><label class="form-field">Firma GİB şifresi<input name="password" type="password" maxlength="1024" autocomplete="off" required></label><div class="actions"><button class="btn blue" type="submit" disabled>Firma Hesabını Vault’a Kaydet</button><button class="btn" type="button">Kapat</button></div></form>`;
+   dialog.innerHTML=`<form autocomplete="off"><h2>Firma GİB Hesabı</h2><p>${safe(firm.name)}</p><p>Yalnızca bu firmanın GİB hesabını girin. Bilgiler Supabase Vault’a gönderilir; yerel dosyaya veya firma verilerine yazılmaz.</p><p role="status">Firma bağlantısı kontrol ediliyor…</p><button class="btn" type="button" data-edit-gib disabled>GİB Bilgilerini Düzenle</button><fieldset data-gib-fields hidden disabled style="border:0;padding:0;margin:16px 0"><label class="form-field">Firma GİB kullanıcı adı<input name="firmGibCode" maxlength="256" autocomplete="off" data-lpignore="true" data-1p-ignore required></label><label class="form-field">Firma GİB şifresi<input name="firmGibSecret" type="password" maxlength="1024" autocomplete="new-password" data-lpignore="true" data-1p-ignore required></label></fieldset><div class="actions"><button class="btn blue" type="submit" disabled>Firma Hesabını Vault’a Kaydet</button><button class="btn" type="button" data-close-gib>Kapat</button></div></form>`;
    document.body.append(dialog);
    const form=dialog.querySelector('form'),status=dialog.querySelector('[role=status]'),submit=form.querySelector('[type=submit]');
-   let verified=false;
+   let verified=false,editing=false;
+   const fields=form.querySelector('[data-gib-fields]'),edit=form.querySelector('[data-edit-gib]');
+   const lock=()=>{editing=false;form.reset();fields.disabled=true;fields.hidden=true;submit.disabled=true;edit.disabled=!verified;};
+   edit.onclick=()=>{if(!verified)return;form.reset();editing=true;fields.hidden=false;fields.disabled=false;submit.disabled=false;form.elements.firmGibCode.focus();};
    const verify=result=>{
      if(cloud.session?.user?.id!==owner||!cloud.ready||!data.firms.some(f=>f.id===firmId))throw Error('Eworks oturumu veya firma değişti.');
      if(result?.scope!=='firm'||result.firmId!==firmId||typeof result.configured!=='boolean')throw Error('Firmaya özel Vault bağlantısı dağıtılmamış veya kapsam yanıtı geçersiz.');
      return result;
    };
-   form.querySelector('[type=button]').onclick=()=>dialog.close();
+   form.querySelector('[data-close-gib]').onclick=()=>dialog.close();
    dialog.addEventListener('close',()=>{verified=false;form.reset();dialog.remove()});
    form.onsubmit=async event=>{
-     event.preventDefault();if(!verified||!form.reportValidity())return;submit.disabled=true;
+     event.preventDefault();if(!verified||!editing||!form.reportValidity())return;submit.disabled=true;
      try{
        verify(await gibAccountRequest('status',{firmId}));
-       const result=verify(await gibAccountRequest('save',{firmId,username:form.elements.username.value,password:form.elements.password.value}));
+       const result=verify(await gibAccountRequest('save',{firmId,username:form.elements.firmGibCode.value,password:form.elements.firmGibSecret.value}));
        if(!result.configured)throw Error('Kayıt doğrulanamadı.');
        status.textContent='Bu firmanın GİB hesabı Vault’a kaydedildi. Canlı modül bağlantıları ayrıca doğrulanacak.';
      }catch(error){verified=false;status.textContent='Kaydedilemedi: '+error.message;}
-     finally{form.reset();submit.disabled=!verified;}
+     finally{lock();}
    };
    dialog.showModal();
    try{
      const result=verify(await gibAccountRequest('status',{firmId}));
      if(!dialog.open)return;
-     verified=true;submit.disabled=false;
-     status.textContent=result.configured?'Bu firma için ayrı GİB hesabı kayıtlı.':'Bu firma için GİB hesabı henüz kaydedilmemiş.';
+     verified=true;edit.disabled=false;
+     status.textContent=result.configured?'Bu firma için ayrı GİB hesabı kayıtlı. Giriş bilgileri bu ekrana otomatik doldurulmaz.':'Bu firma için GİB hesabı henüz kaydedilmemiş.';
    }catch(error){status.textContent='Kurulum gerekli: '+error.message;}
  }
  document.addEventListener('click',event=>{const button=event.target.closest('[data-firm-gib-account]');if(button)openFirmGibAccount(button.dataset.firmGibAccount)});

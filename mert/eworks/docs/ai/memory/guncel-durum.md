@@ -37,3 +37,4 @@ Kullanıcı bundan sonraki işlerin dev dalına aktarılmasını yasakladı. Yal
 
 ## Kurum bilgi kartları
 Firmalarım > Düzenle formuna GİB, SGK, UETS, e-Devlet, Portal, Durum, E-Belge ve Sistem kartları eklendi. GİB girişleri mevcut firma kapsamlı Vault diyaloğunda kalır. Diğer kurumlar için şifre saklama bağlantısı kurulmadığı açıkça gösterilir; parola alanı veya sahte doğrulama rozeti eklenmedi. SGK kullanıcı adı/işyeri kodu, UETS adresi ve portal kullanıcı adı normal firma alanları olarak Kaydet ile saklanır. Kaynak sözleşme/e-Belge ve sistem alanları salt okunurdur. Sentetik test, bulut kayıt isteğini, kaynak verilerinin korunmasını ve dar ekranda yatay taşma olmadığını doğruladı. Gerçek hesapta kayıt veya GİB sorgusu başlatılmadı.
+

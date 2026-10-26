@@ -51,6 +51,9 @@ class FirmAccountUI(unittest.IsolatedAsyncioTestCase):
                     await expect(button).to_be_disabled()
                     self.assertEqual(saves,[])
                 else:
+                    await expect(button).to_be_disabled()
+                    await expect(dialog.get_by_label('Firma GİB şifresi')).to_be_hidden()
+                    await dialog.get_by_role('button',name='GİB Bilgilerini Düzenle',exact=True).click()
                     await expect(button).to_be_enabled()
                     await dialog.get_by_label('Firma GİB kullanıcı adı').fill('synthetic-user')
                     await dialog.get_by_label('Firma GİB şifresi').fill('synthetic-password')
@@ -58,6 +61,8 @@ class FirmAccountUI(unittest.IsolatedAsyncioTestCase):
                     await expect(dialog.get_by_role('status')).to_contain_text('Vault’a kaydedildi')
                     self.assertEqual(len(saves),1)
                     await expect(dialog.get_by_label('Firma GİB şifresi')).to_have_value('')
+                    await expect(dialog.get_by_label('Firma GİB şifresi')).to_be_hidden()
+                    await expect(button).to_be_disabled()
                     self.assertEqual(await page.evaluate('() => localStorage.length'),0)
             finally:
                 await browser.close()
