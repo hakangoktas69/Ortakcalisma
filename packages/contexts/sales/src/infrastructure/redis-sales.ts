@@ -5,15 +5,16 @@ import type { SalesSessionData, SalesSessionStore } from '../application/sales-a
 
 // Satış oturumları ve ara adımlar Redis'te (portal oturumlarından ayrı önek). Tarayıcıya yalnız 256 bit opak kimlik gider.
 // Oturum her erişimde süresini uzatmaz: ara adım kısa ömürlüdür, satış oturumu 8 saatte biter (kayan süre yok).
-// Sayaç ve kilit atomiktir (INCR, SET NX, Lua karşılaştır-sil): paralel istekler sınırları aşamaz, başkasının kilidini silemez.
+// Sayaç, güvenlik kodu ve kilit atomiktir (INCR, GETDEL, SET NX, Lua karşılaştır-sil): paralel istekler sınırları aşamaz, başkasının kilidini silemez.
 
 const KEY = (id: string) => `ew:satis:oturum:${id}`;
 const DENEME = (id: string) => `ew:satis:oturum:${id}:deneme`;
+const KOD = (id: string) => `ew:satis:oturum:${id}:kod`;
 const KILIT = (k: string) => `ew:satis:kilit:${k}`;
-/** Ara adımın en uzun ömrü (kurulum 15 dk); deneme sayacı adımdan önce düşmesin. */
-const DENEME_SURESI = 15 * 60;
+/** Ara adımın ömrü (5 dk); deneme sayacı adımdan önce düşmesin. */
+const DENEME_SURESI = 5 * 60;
 
-const OTURUM_TURLERI = new Set(['adim', 'oturum']);
+const OTURUM_TURLERI = new Set(['baslangic', 'adim', 'oturum']);
 
 export class RedisSalesSessionStore implements SalesSessionStore {
   private readonly redis: Redis;
@@ -41,7 +42,14 @@ export class RedisSalesSessionStore implements SalesSessionStore {
     await this.redis.set(KEY(id), JSON.stringify(data), 'KEEPTTL');
   }
   async destroy(id: string) {
-    await this.redis.del(KEY(id), DENEME(id));
+    await this.redis.del(KEY(id), DENEME(id), KOD(id));
+  }
+  async setCaptcha(id: string, text: string, ttlSeconds: number) {
+    await this.redis.set(KOD(id), text, 'EX', ttlSeconds);
+  }
+  /** GETDEL: yanıt okununca silinir (tek kullanımlık; paralel iki istekte yalnız biri alır). */
+  takeCaptcha(id: string) {
+    return this.redis.getdel(KOD(id));
   }
   async incrementAttempts(id: string) {
     const sonuc = await this.redis.multi().incr(DENEME(id)).expire(DENEME(id), DENEME_SURESI).exec();

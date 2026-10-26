@@ -337,6 +337,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       TEST_TAX_ID_HMAC_KEY: env.TAX_ID_HMAC_KEY,
       TEST_WEB_URL: 'http://web:3000',
       TEST_SATIS_URL: 'http://sales:3000',
+      // Satış portalının Redis'i (kabul testi resimli güvenlik kodunun yanıtını buradan okur, D41)
+      TEST_SATIS_REDIS_URL: `redis://:${env.REDIS_PASSWORD}@redis:6379/2`,
       TEST_FAKE_GIB_URL: 'http://fake-gib:8090',
     };
     const envArgs = Object.entries(ortam).flatMap(([k, v]) => ['-e', `${k}=${v}`]);

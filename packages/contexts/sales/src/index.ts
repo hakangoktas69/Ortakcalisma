@@ -3,6 +3,7 @@
 export const CONTEXT = 'sales' as const;
 
 export { afterFailure, isLocked, LOCK_MINUTES, MAX_FAILED, passwordProblem, validEmail } from './domain/sales-user.ts';
+export { CAPTCHA_CHARS, CAPTCHA_LENGTH, CAPTCHA_TTL_SECONDS, captchaMatches, loginNeedsCaptcha, normalizeCaptcha } from './domain/captcha.ts';
 export {
   ACCOUNT_STATUSES,
   accountStatus,
@@ -23,22 +24,29 @@ export {
 export { addMember, openOffice, type Directory, type Identity, type MemberRole, type NewUser, type ProvisionDeps, type ProvisionError, type TenantProvisioner } from './application/provisioning.ts';
 export {
   authorizeSales,
-  beginTotpSetup,
+  beginLogin,
+  beginTotpEnrollment,
   changeOwnPassword,
+  confirmTotpEnrollment,
   createSalesUser,
   currentSalesSession,
-  enableTotp,
+  disableTotp,
+  loginCaptcha,
+  loginStart,
   salesLogin,
   salesLogout,
   SESSION_TTL,
+  START_TTL,
   STEP_TTL,
   verifySecondFactor,
+  type CaptchaGenerator,
   type SalesAuditEntry,
   type SalesAuditPort,
   type SalesAuthDeps,
   type SalesAuthzError,
   type SalesCrypto,
   type SalesLoginError,
+  type SalesLoginStage,
   type SalesPrincipal,
   type SalesSessionData,
   type SalesSessionStore,
@@ -60,3 +68,4 @@ export { PgDirectory, PgTenantProvisioner } from './infrastructure/pg-provisioni
 export { PgSalesAccounts, PgSalesAudit, PgSalesUsers } from './infrastructure/pg-sales.ts';
 export { RedisLocks, RedisSalesSessionStore } from './infrastructure/redis-sales.ts';
 export { NodeSalesCrypto, totpCodeAt } from './infrastructure/node-crypto.ts';
+export { SvgCaptchaGenerator } from './infrastructure/svg-captcha.ts';

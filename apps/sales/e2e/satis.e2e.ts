@@ -1,17 +1,23 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
-import { ekranDenetle, hataTopla, parolaGir, satisciAc, satisciHazirla, uyari } from './yardim.ts';
+import { ekranDenetle, epostaGir, hataTopla, parolaGir, satisciAc, satisciHazirla, uyari } from './yardim.ts';
 
-// Satış portalı kabul testleri (D27, D40): satışçı girişi zorunlu 2FA ile, ofis listesi, yeni ofis (+ müşavirin portala girişi).
+// Satış portalı kabul testleri (D27, D40, D41): satışçı girişi (2FA isteğe bağlı; 2FA'sız girişte resimli güvenlik kodu),
+// 2FA açma/kapatma, ofis listesi, yeni ofis (+ müşavirin portala girişi).
+
+const MESAJ_GIRIS = 'E-posta ya da parola hatalı. Art arda 5 hatalı denemede hesap 15 dakika kilitlenir.';
 
 test.describe('satış girişi', () => {
-  test('@F:satis.oturum.login @F:satis.oturum.mfa ilk giriş: 2FA kurulur, kurtarma kodları bir kez görünür, geçici parola değiştirilir; çerez HttpOnly', async ({ page }) => {
+  test('@F:satis.oturum.login ilk giriş güvenlik koduyla; geçici parola değiştirilir; 2FA\'sız oturum açılır; çerez HttpOnly', async ({ page }) => {
     const hatalar = hataTopla(page);
     await page.goto('/');
     await expect(page).toHaveURL(/\/giris$/);
     await ekranDenetle(page);
-    const s = await satisciHazirla(page, true);
-    expect(s.kurtarma).toHaveLength(10);
+    await satisciHazirla(page, { denetle: true });
+    await expect(page.getByRole('heading', { level: 1, name: 'Ofisler' })).toBeVisible();
+    await ekranDenetle(page);
+    await page.goto('/sifre');
+    await expect(page.getByRole('heading', { level: 2, name: 'İki adımlı doğrulama: kapalı' })).toBeVisible();
     await ekranDenetle(page);
     const cerez = (await page.context().cookies()).find((c) => c.name.endsWith('ew_satis_sid'));
     expect(cerez?.httpOnly).toBe(true);
@@ -24,10 +30,14 @@ test.describe('satış girişi', () => {
     expect(hatalar).toEqual([]);
   });
 
-  test('@F:satis.oturum.mfa ikinci giriş kod ister; yanlış kod reddedilir; kurtarma kodu bir kez geçer', async ({ page, context }) => {
-    const s = await satisciHazirla(page);
+  test('@F:satis.oturum.mfa 2FA açılınca güvenlik kodu istenmez, kod adımı gelir; yanlış kod reddedilir; kurtarma kodu bir kez geçer', async ({ page, context }) => {
+    const s = await satisciHazirla(page, { ikiAdim: true, denetle: true });
+    expect(s.kurtarma).toHaveLength(10);
     await context.clearCookies();
-    await parolaGir(page, s.eposta, s.parola);
+    await epostaGir(page, s.eposta);
+    await expect(page.getByLabel('Güvenlik kodu')).toHaveCount(0);
+    await page.getByLabel('Parola').fill(s.parola);
+    await page.getByRole('button', { name: 'Giriş yap' }).click();
     await expect(page).toHaveURL(/\/giris\/dogrula$/);
     await ekranDenetle(page);
     await page.getByLabel('Doğrulama kodu').fill('000000');
@@ -46,21 +56,44 @@ test.describe('satış girişi', () => {
     await expect(uyari(page)).toContainText('Kod hatalı');
   });
 
-  test('@F:satis.oturum.login yanlış parola ve olmayan e-posta aynı mesajı alır; ara adım çerezi olmadan kod ekranı açılmaz', async ({ page }) => {
-    const { eposta } = await satisciAc();
+  test('@F:satis.oturum.mfa 2FA kapatılır (parola + kurtarma kodu); sonraki girişte güvenlik kodu yeniden istenir', async ({ page, context }) => {
+    const s = await satisciHazirla(page, { ikiAdim: true });
+    await page.goto('/sifre');
+    await expect(page.getByRole('heading', { level: 2, name: 'İki adımlı doğrulama: açık' })).toBeVisible();
+    await ekranDenetle(page);
+    await page.locator('#kapat-parola').fill(s.parola);
+    await page.getByText('Telefonuma erişemiyorum').click();
+    await page.getByLabel('Kurtarma kodu').fill(s.kurtarma[1] ?? '');
+    await page.getByRole('button', { name: 'İki adımlı doğrulamayı kapat' }).click();
+    await expect(page.getByRole('status')).toHaveText('İki adımlı doğrulama kapatıldı.');
+    await expect(page.getByRole('heading', { level: 2, name: 'İki adımlı doğrulama: kapalı' })).toBeVisible();
+    await context.clearCookies();
+    await epostaGir(page, s.eposta);
+    await expect(page.getByRole('img', { name: 'Güvenlik kodu resmi' })).toBeVisible();
+  });
+
+  test('@F:satis.oturum.login yanlış güvenlik kodunda parola denenmez; yanlış parola ve olmayan e-posta aynı mesajı alır; ara adım çerezi olmadan kod ekranı açılmaz', async ({ page }) => {
+    const { eposta, geciciParola } = await satisciAc();
+    await epostaGir(page, eposta);
+    await page.getByLabel('Parola').fill(geciciParola);
+    await page.getByLabel('Güvenlik kodu').fill('YANLS');
+    await page.getByRole('button', { name: 'Giriş yap' }).click();
+    await expect(uyari(page)).toHaveText('Güvenlik kodu hatalı; resimdeki yeni kodu yazın.');
+    // Aynı e-postayla devam: yeni kod gösterilir, e-posta yeniden sorulmaz
+    await expect(page.getByText(eposta)).toBeVisible();
+    await ekranDenetle(page);
     for (const e of [eposta, 'olmayan-satisci@eworks.test']) {
       await parolaGir(page, e, 'yanlis-parola-12345');
-      await expect(uyari(page)).toHaveText('E-posta ya da parola hatalı. Art arda 5 hatalı denemede hesap 15 dakika kilitlenir.');
+      await expect(uyari(page)).toHaveText(MESAJ_GIRIS);
     }
     await page.goto('/giris/dogrula');
     await expect(page).toHaveURL(/\/giris$/);
-    await page.goto('/giris/kurulum');
+    await page.goto('/guvenlik/2fa');
     await expect(page).toHaveURL(/\/giris$/);
   });
 
   test('başka kökenden gelen giriş isteği reddedilir; güvenlik başlıkları var', async ({ request }) => {
-    const { eposta, geciciParola } = await satisciAc();
-    const r = await request.post('/api/oturum/giris', { form: { eposta, parola: geciciParola }, headers: { origin: 'https://saldirgan.example.com' }, maxRedirects: 0 });
+    const r = await request.post('/api/oturum/baslat', { form: { eposta: 'a@b.test' }, headers: { origin: 'https://saldirgan.example.com' }, maxRedirects: 0 });
     expect(r.status()).toBe(303);
     expect(r.headers()['location']).toBe('/giris?hata=kaynak');
     expect(r.headers()['set-cookie'] ?? '').not.toContain('ew_satis');
@@ -73,6 +106,7 @@ test.describe('satış girişi', () => {
   test('oturumsuz BFF ucu 401, CSRF belirteçsiz değişiklik 403 döner', async ({ page, request }) => {
     const koken = new URL(process.env['TEST_SATIS_URL'] ?? 'http://localhost:8081').origin;
     expect((await request.post('/api/ofisler', { data: {}, headers: { origin: koken } })).status()).toBe(401);
+    expect((await request.post('/api/guvenlik/2fa/kapat', { data: {}, headers: { origin: koken } })).status()).toBe(401);
     await satisciHazirla(page);
     const r = await page.request.post('/api/ofisler', { data: { officeName: 'X' }, headers: { origin: new URL(page.url()).origin } });
     expect(r.status()).toBe(403);

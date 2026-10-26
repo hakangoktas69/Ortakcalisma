@@ -1,5 +1,5 @@
-// Gerçek yığın: satış rolleri (eworks_sales, kontrol + shard), GoTrue, Redis. Satıştan ofis açılır, müşavir geçici parolayla
-// portala girer; satış rolü iş verisini veritabanı düzeyinde göremez; ofisi etkileyen işlem iki denetim kaydında.
+// Gerçek yığın: satış rolleri (eworks_sales, kontrol + shard), GoTrue, Redis. Satış girişi (2FA isteğe bağlı, 2FA'sızda
+// resimli güvenlik kodu; D41), satıştan ofis açma ve müşavirin portala girişi, satış rolünün veri sınırı, yarışlar.
 import { randomUUID } from 'node:crypto';
 import { Redis } from 'ioredis';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -7,11 +7,15 @@ import { GoTrueAuthProvider, login, PgMembershipReader, RedisSessionStore } from
 import { createPool, ShardRouter } from '@eworks/platform';
 import { yigin } from '@eworks/testing';
 import {
-  beginTotpSetup,
+  beginLogin,
+  beginTotpEnrollment,
+  changeOwnPassword,
+  confirmTotpEnrollment,
   createSalesUser,
   currentSalesSession,
-  enableTotp,
+  disableTotp,
   listOffices,
+  loginCaptcha,
   NodeSalesCrypto,
   openOfficeForSale,
   PgDirectory,
@@ -22,6 +26,7 @@ import {
   RedisLocks,
   RedisSalesSessionStore,
   salesLogin,
+  SvgCaptchaGenerator,
   totpCodeAt,
   verifySecondFactor,
 } from '@eworks/sales';
@@ -37,6 +42,7 @@ const authDeps = {
   users: new PgSalesUsers(satis.control),
   sessions: new RedisSalesSessionStore(redis),
   crypto,
+  captcha: new SvgCaptchaGenerator(),
   audit: new PgSalesAudit(satis.control),
   clock,
   newId: randomUUID,
@@ -60,39 +66,101 @@ afterAll(async () => {
 
 const adim = () => Math.floor(Date.now() / 30_000);
 const kod = totpCodeAt;
+/** Güvenlik kodunun yanıtı (test Redis'ten okur; kullanıcı resimden okur). */
+const kodYaniti = async (startId: string) => (await redis.get(`ew:satis:oturum:${startId}:kod`)) ?? '';
 
-/** Gerçek akışla satış kullanıcısı: aç → giriş → 2FA kur → oturum. */
-async function satisci() {
+/** E-posta adımı + gerekiyorsa güvenlik kodu (doğru yanıtla) + parola. */
+async function girisYap(email: string, password: string) {
+  const b = await beginLogin(email, authDeps);
+  if (!b.ok) throw new Error(b.error);
+  if (!b.value.captcha) return salesLogin({ startId: b.value.startId, password }, authDeps);
+  await loginCaptcha(b.value.startId, authDeps);
+  return salesLogin({ startId: b.value.startId, password, captcha: await kodYaniti(b.value.startId) }, authDeps);
+}
+
+/** Gerçek akışla satışçı: aç → güvenlik koduyla ilk giriş → parola değiştir → 2FA aç. */
+async function satisci(ikiAdim = true) {
   const email = `satis-${randomUUID().slice(0, 8)}@eworks.test`;
   const c = await createSalesUser({ email, fullName: 'Selin Satış' }, authDeps);
   if (!c.ok) throw new Error(c.error);
-  const g = await salesLogin({ email, password: c.value.tempPassword }, authDeps);
-  if (!g.ok) throw new Error(g.error);
-  const k = await beginTotpSetup(g.value.stepId, authDeps);
-  if (!k.ok) throw new Error(k.error);
-  const step = adim();
-  const e = await enableTotp(g.value.stepId, kod(k.value.secret, step), authDeps);
-  if (!e.ok) throw new Error(e.error);
-  const p = await currentSalesSession(e.value.sessionId, authDeps);
+  const g = await girisYap(email, c.value.tempPassword);
+  if (!g.ok || g.value.stage !== 'oturum') throw new Error('ilk giriş');
+  const sessionId = g.value.sessionId;
+  const p0 = await currentSalesSession(sessionId, authDeps);
+  if (!p0) throw new Error('oturum yok');
+  const password = `Satis-${randomUUID().slice(0, 8)}-2026`;
+  const r = await changeOwnPassword(sessionId, p0, { current: c.value.tempPassword, next: password }, authDeps);
+  if (!r.ok) throw new Error(r.error);
+  let secret = '';
+  let step = 0;
+  let kurtarma: string[] = [];
+  if (ikiAdim) {
+    const p1 = await currentSalesSession(sessionId, authDeps);
+    if (!p1) throw new Error('oturum yok');
+    const b = await beginTotpEnrollment(p1, authDeps);
+    if (!b.ok) throw new Error(b.error);
+    secret = b.value.secret;
+    step = adim();
+    const e = await confirmTotpEnrollment(sessionId, p1, { password, code: kod(secret, step) }, authDeps);
+    if (!e.ok) throw new Error(e.error);
+    kurtarma = e.value.recoveryCodes;
+  }
+  const p = await currentSalesSession(sessionId, authDeps);
   if (!p) throw new Error('oturum yok');
-  return { ...p, password: c.value.tempPassword, secret: k.value.secret, sessionId: e.value.sessionId, step };
+  return { ...p, password, secret, step, sessionId, kurtarma };
 }
 
-describe('satış girişi (gerçek scrypt + TOTP + Redis)', () => {
-  it('[F:satis.oturum.login] [F:satis.oturum.mfa] kurulumdan sonra ikinci girişte kod istenir; gizli anahtar veritabanında mühürlü', async () => {
+/** 2FA'lı satışçının ara adımı. */
+async function adimAl(email: string, password: string) {
+  const g = await girisYap(email, password);
+  if (!g.ok || g.value.stage !== 'mfa') throw new Error('ara adım bekleniyordu');
+  return g.value.stepId;
+}
+
+describe('satış girişi (gerçek scrypt + TOTP + güvenlik kodu + Redis)', () => {
+  it('[F:satis.oturum.login] [F:satis.oturum.mfa] 2FA açılınca girişte güvenlik kodu istenmez, kod adımı gelir; gizli anahtar mühürlü', async () => {
     const s = await satisci();
     const { rows } = await yonetici.query<{ totp_secret_enc: string; password_hash: string }>('select totp_secret_enc, password_hash from sales.users where id = $1', [s.userId]);
     expect(rows[0]?.totp_secret_enc).not.toContain(s.secret);
     expect(rows[0]?.password_hash).toMatch(/^scrypt\$/);
-    const g = await salesLogin({ email: s.email, password: s.password }, authDeps);
-    expect(g).toMatchObject({ ok: true, value: { stage: 'mfa' } });
-    if (!g.ok) return;
-    expect(await redis.ttl(`ew:satis:oturum:${g.value.stepId}`)).toBeLessThanOrEqual(300);
+    expect(await beginLogin(s.email, authDeps)).toMatchObject({ ok: true, value: { captcha: false } });
+    const stepId = await adimAl(s.email, s.password);
+    expect(await redis.ttl(`ew:satis:oturum:${stepId}`)).toBeLessThanOrEqual(300);
     // Kurulumda kullanılan adım (ve öncesi) tekrar kullanılamaz; bir sonraki adımın kodu geçer
-    expect(await verifySecondFactor(g.value.stepId, { code: kod(s.secret, s.step) }, authDeps)).toEqual({ ok: false, error: 'kod_hatali' });
-    expect(await verifySecondFactor(g.value.stepId, { code: kod(s.secret, s.step + 1) }, authDeps)).toMatchObject({ ok: true });
+    expect(await verifySecondFactor(stepId, { code: kod(s.secret, s.step) }, authDeps)).toEqual({ ok: false, error: 'kod_hatali' });
+    expect(await verifySecondFactor(stepId, { code: kod(s.secret, s.step + 1) }, authDeps)).toMatchObject({ ok: true });
     const { rows: denetim } = await yonetici.query<{ action: string }>('select action from sales.audit_entries where subject = $1 order by id', [s.userId]);
-    expect(denetim.map((r) => r.action)).toEqual(['satis.kullanici.acildi', 'satis.oturum.2fa_acildi', 'satis.oturum.giris', 'satis.oturum.giris']);
+    expect(denetim.map((r) => r.action)).toEqual(['satis.kullanici.acildi', 'satis.oturum.giris', 'satis.oturum.parola_degisti', 'satis.oturum.2fa_acildi', 'satis.oturum.giris']);
+  });
+
+  it('[F:satis.oturum.login] 2FA\'sız hesap güvenlik kodu ister: yanlış kodda parola denenmez (sayaç işlemez), kod tek kullanımlıktır', async () => {
+    const s = await satisci(false);
+    const b = await beginLogin(s.email, authDeps);
+    if (!b.ok || !b.value.captcha) throw new Error('kod bekleniyordu');
+    const svg = await loginCaptcha(b.value.startId, authDeps);
+    expect(svg).toMatch(/^<svg/);
+    const dogru = await kodYaniti(b.value.startId);
+    expect(svg).not.toContain(dogru);
+    expect(await salesLogin({ startId: b.value.startId, password: 'yanlis-parola-1', captcha: 'YANLS' }, authDeps)).toEqual({ ok: false, error: 'kod_hatali' });
+    const { rows } = await yonetici.query<{ failed_logins: number }>('select failed_logins from sales.users where id = $1', [s.userId]);
+    expect(rows[0]?.failed_logins).toBe(0);
+    // Yanlış deneme kodu tüketti: doğru yanıt da artık geçmez
+    expect(await salesLogin({ startId: b.value.startId, password: s.password, captcha: dogru }, authDeps)).toEqual({ ok: false, error: 'kod_hatali' });
+    await loginCaptcha(b.value.startId, authDeps);
+    expect(await salesLogin({ startId: b.value.startId, password: s.password, captcha: (await kodYaniti(b.value.startId)).toLowerCase() }, authDeps)).toMatchObject({ ok: true, value: { stage: 'oturum' } });
+  });
+
+  it('[F:satis.oturum.mfa] 2FA kapatılınca diğer oturumlar düşer, sonraki girişte güvenlik kodu istenir', async () => {
+    const s = await satisci();
+    const diger = await verifySecondFactor(await adimAl(s.email, s.password), { code: kod(s.secret, s.step + 1) }, authDeps);
+    if (!diger.ok) throw new Error(diger.error);
+    expect(await disableTotp(s.sessionId, s, { password: s.password, recoveryCode: s.kurtarma[0] ?? '' }, authDeps)).toMatchObject({ ok: true });
+    const { rows } = await yonetici.query<{ totp_enabled_at: Date | null; totp_secret_enc: string | null; n: number }>(
+      'select totp_enabled_at, totp_secret_enc, cardinality(recovery_code_hashes)::int as n from sales.users where id = $1', [s.userId]);
+    expect(rows[0]).toEqual({ totp_enabled_at: null, totp_secret_enc: null, n: 0 });
+    expect(await currentSalesSession(s.sessionId, authDeps)).toMatchObject({ twoFactor: false });
+    expect(await currentSalesSession(diger.value.sessionId, authDeps)).toBeNull();
+    expect(await beginLogin(s.email, authDeps)).toMatchObject({ ok: true, value: { captcha: true } });
   });
 });
 
@@ -148,39 +216,33 @@ describe('satış rolünün veri sınırı', () => {
 describe('yarışa dayanıklılık (paralel istekler sınırları aşamaz)', () => {
   it('[F:satis.oturum.mfa] aynı ara adımla 10 paralel yanlış kod: hesap kilitlenir, adım düşer', async () => {
     const s = await satisci();
-    const g = await salesLogin({ email: s.email, password: s.password }, authDeps);
-    if (!g.ok) throw new Error(g.error);
-    const sonuc = await Promise.all(Array.from({ length: 10 }, () => verifySecondFactor(g.value.stepId, { code: '000000' }, authDeps)));
+    const stepId = await adimAl(s.email, s.password);
+    const sonuc = await Promise.all(Array.from({ length: 10 }, () => verifySecondFactor(stepId, { code: '000000' }, authDeps)));
     expect(sonuc.every((r) => !r.ok)).toBe(true);
     const { rows } = await yonetici.query<{ locked_until: Date | null }>('select locked_until from sales.users where id = $1', [s.userId]);
     expect(rows[0]?.locked_until?.getTime() ?? 0).toBeGreaterThan(Date.now());
-    expect(await redis.exists(`ew:satis:oturum:${g.value.stepId}`)).toBe(0);
-    expect(await salesLogin({ email: s.email, password: s.password }, authDeps)).toEqual({ ok: false, error: 'kilitli' });
+    expect(await redis.exists(`ew:satis:oturum:${stepId}`)).toBe(0);
+    expect(await girisYap(s.email, s.password)).toEqual({ ok: false, error: 'kilitli' });
   });
 
   it('[F:satis.oturum.mfa] aynı geçerli kod iki paralel girişte yalnız bir kez geçer; kurtarma kodu da öyle', async () => {
     const s = await satisci();
-    const iki = async () => {
-      const a = await salesLogin({ email: s.email, password: s.password }, authDeps);
-      const b = await salesLogin({ email: s.email, password: s.password }, authDeps);
-      if (!a.ok || !b.ok) throw new Error('giriş');
-      return [a.value.stepId, b.value.stepId] as const;
-    };
-    const [a, b] = await iki();
+    const [a, b] = [await adimAl(s.email, s.password), await adimAl(s.email, s.password)];
     const kodla = await Promise.all([a, b].map((id) => verifySecondFactor(id, { code: kod(s.secret, s.step + 1) }, authDeps)));
     expect(kodla.filter((r) => r.ok)).toHaveLength(1);
-    const { rows } = await yonetici.query<{ n: number }>('select cardinality(recovery_code_hashes)::int as n from sales.users where id = $1', [s.userId]);
-    expect(rows[0]?.n).toBe(10);
-    // Kurtarma kodu: kurulumda dönen kodlardan biri iki paralel adımda denenir
-    const t = await satisciKodlariyla();
-    const [c, dd] = await (async () => {
-      const x = await salesLogin({ email: t.email, password: t.password }, authDeps);
-      const y = await salesLogin({ email: t.email, password: t.password }, authDeps);
-      if (!x.ok || !y.ok) throw new Error('giriş');
-      return [x.value.stepId, y.value.stepId] as const;
-    })();
-    const kurtarma = await Promise.all([c, dd].map((id) => verifySecondFactor(id, { recoveryCode: t.kurtarma }, authDeps)));
+    const [c, d] = [await adimAl(s.email, s.password), await adimAl(s.email, s.password)];
+    const kurtarma = await Promise.all([c, d].map((id) => verifySecondFactor(id, { recoveryCode: s.kurtarma[0] ?? '' }, authDeps)));
     expect(kurtarma.filter((r) => r.ok)).toHaveLength(1);
+  });
+
+  it('[F:satis.oturum.login] aynı güvenlik kodu yanıtı iki paralel istekte yalnız bir kez geçer (GETDEL)', async () => {
+    const s = await satisci(false);
+    const b = await beginLogin(s.email, authDeps);
+    if (!b.ok) throw new Error(b.error);
+    await loginCaptcha(b.value.startId, authDeps);
+    const yanit = await kodYaniti(b.value.startId);
+    const sonuc = await Promise.all([1, 2].map(() => salesLogin({ startId: b.value.startId, password: s.password, captcha: yanit }, authDeps)));
+    expect(sonuc.filter((r) => r.ok)).toHaveLength(1);
   });
 
   it('[F:satis.ofis.create] kilidi yalnız alan bırakır: başka jetonla bırakma kilidi silmez', async () => {
@@ -202,17 +264,3 @@ describe('yarışa dayanıklılık (paralel istekler sınırları aşamaz)', () 
     await expect(officeDeps.tenant.addMember(r.value.orgId, { userId: randomUUID(), role: 'ofis_admin', displayName: 'Sızma' }, s.userId)).rejects.toThrow(/yeni açılan ofise/);
   });
 });
-
-/** Kurulumdaki kurtarma kodlarından birini de döndüren satışçı (paralel kurtarma kodu testi için). */
-async function satisciKodlariyla() {
-  const email = `satis-${randomUUID().slice(0, 8)}@eworks.test`;
-  const c = await createSalesUser({ email, fullName: 'Selin Satış' }, authDeps);
-  if (!c.ok) throw new Error(c.error);
-  const g = await salesLogin({ email, password: c.value.tempPassword }, authDeps);
-  if (!g.ok) throw new Error(g.error);
-  const k = await beginTotpSetup(g.value.stepId, authDeps);
-  if (!k.ok) throw new Error(k.error);
-  const e = await enableTotp(g.value.stepId, kod(k.value.secret, adim()), authDeps);
-  if (!e.ok) throw new Error(e.error);
-  return { email, password: c.value.tempPassword, kurtarma: e.value.recoveryCodes[0] ?? '' };
-}

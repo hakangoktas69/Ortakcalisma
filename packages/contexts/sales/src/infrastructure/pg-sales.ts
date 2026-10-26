@@ -47,7 +47,6 @@ const PATCH_COLS: Record<string, string> = {
   passwordHash: 'password_hash',
   failedLogins: 'failed_logins',
   lockedUntil: 'locked_until',
-  totpSecretEnc: 'totp_secret_enc',
   sessionVersion: 'session_version',
   mustChangePassword: 'must_change_password',
 };
@@ -110,12 +109,29 @@ export class PgSalesUsers implements SalesUserRepository {
       return { lockedUntil: r?.kilitlendi ? r.locked_until : null };
     });
   }
-  enableTotp(id: string, p: { enabledAt: Date; step: number; recoveryCodeHashes: string[] }, audit: SalesAuditEntry) {
+  /** Koşullu: 2FA açıkken anahtar yazılmaz (iki sekme yarışında açık 2FA'nın anahtarı ezilmez). */
+  async setPendingTotpSecret(id: string, sealed: string) {
+    const r = await this.db.query('update sales.users set totp_secret_enc = $2 where id = $1 and totp_enabled_at is null', [id, sealed]);
+    return r.rowCount === 1;
+  }
+  enableTotp(id: string, p: { enabledAt: Date; step: number; recoveryCodeHashes: string[]; sessionVersion: number }, audit: SalesAuditEntry) {
     return withTx(this.db, async (c) => {
       const r = await c.query(
-        `update sales.users set totp_enabled_at = $2, totp_last_step = $3, recovery_code_hashes = $4
+        `update sales.users set totp_enabled_at = $2, totp_last_step = $3, recovery_code_hashes = $4, session_version = $5
           where id = $1 and totp_enabled_at is null and totp_secret_enc is not null`,
-        [id, p.enabledAt, p.step, p.recoveryCodeHashes],
+        [id, p.enabledAt, p.step, p.recoveryCodeHashes, p.sessionVersion],
+      );
+      if (r.rowCount !== 1) return false;
+      await denetim(c, audit);
+      return true;
+    });
+  }
+  disableTotp(id: string, sessionVersion: number, audit: SalesAuditEntry) {
+    return withTx(this.db, async (c) => {
+      const r = await c.query(
+        `update sales.users set totp_enabled_at = null, totp_secret_enc = null, totp_last_step = null, recovery_code_hashes = '{}', session_version = $2
+          where id = $1 and totp_enabled_at is not null`,
+        [id, sessionVersion],
       );
       if (r.rowCount !== 1) return false;
       await denetim(c, audit);

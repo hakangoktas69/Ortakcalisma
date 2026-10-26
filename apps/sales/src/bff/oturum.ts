@@ -6,14 +6,18 @@ import { konteyner } from './konteyner.ts';
 
 // Satış oturumu ve yetki koruyucusu. Portal ile aynı kalıp (HttpOnly + SameSite=Strict çerez, değişiklikte CSRF + aynı köken),
 // ama ayrı çerez adları ve ayrı kimlik: satış çerezi portalda, portal çerezi burada geçmez.
-// İki çerez: ara adım (parola doğru, kod bekleniyor; ≤ 15 dk) ve oturum (8 saat).
+// Üç çerez: başlangıç (e-posta adımı; ≤ 10 dk), ara adım (parola doğru, 2FA kodu bekleniyor; ≤ 5 dk) ve oturum (8 saat).
 
 const guvenli = () => konteyner().config.COOKIE_SECURE;
 /** `__Host-` öneki yalnız Secure çerezde geçerlidir; http üzerindeki demo/geliştirme yığınında sade ad. */
 export const oturumCerezi = () => (guvenli() ? '__Host-ew_satis_sid' : 'ew_satis_sid');
 export const adimCerezi = () => (guvenli() ? '__Host-ew_satis_adim' : 'ew_satis_adim');
+export const baslangicCerezi = () => (guvenli() ? '__Host-ew_satis_baslangic' : 'ew_satis_baslangic');
 
 export const cerezAyari = (saniye: number) => ({ httpOnly: true, secure: guvenli(), sameSite: 'strict' as const, path: '/', maxAge: saniye });
+
+/** Çerezi siler: `__Host-` önekli çerez yalnız Secure + Path=/ ile silinebilir, bu yüzden aynı ayarla süresi 0 yazılır. */
+export const cerezSil = (c: { set(ad: string, deger: string, ayar: ReturnType<typeof cerezAyari>): unknown }, ad: string) => c.set(ad, '', cerezAyari(0));
 
 export async function satisOturumu(): Promise<SalesPrincipal | null> {
   return currentSalesSession((await cookies()).get(oturumCerezi())?.value, konteyner().giris);

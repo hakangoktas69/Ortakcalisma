@@ -8,7 +8,8 @@
   "dependencies": {
     "@eworks/kernel": "workspace:*",
     "@eworks/platform": "workspace:*",
-    "ioredis": "^5.8.2"
+    "ioredis": "^5.8.2",
+    "svg-captcha": "1.4.0"
   },
   "devDependencies": {
     "@eworks/testing": "workspace:*"

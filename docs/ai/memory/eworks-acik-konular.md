@@ -1,6 +1,6 @@
 ---
 name: eworks-acik-konular
-description: Eworks açık konuları (2026-10-26) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, operasyon logu yok ve hatalar sessizce yutuluyor, ekranda VKN maskeleme uygulanmıyor, Mert'in pilot işi ile D28 çelişkisi, dal adı uyumu, küçük UX (TabloKap odak), servis yolunun gözlenmemiş ağ ayrıntıları, üretim yedeği ve yayın hattı yok, satış lisansı girişi engellemiyor, geçici parola portalda zorunlu değişmiyor, satış portalının üretimde yayımı, satış log yardımcısı, satıştan ofis açmada yarım kalma
+description: Eworks açık konuları (2026-10-26) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, operasyon logu yok ve hatalar sessizce yutuluyor, ekranda VKN maskeleme uygulanmıyor, Mert'in pilot işi ile D28 çelişkisi, dal adı uyumu, küçük UX (TabloKap odak), servis yolunun gözlenmemiş ağ ayrıntıları, üretim yedeği ve yayın hattı yok, satış lisansı girişi engellemiyor, geçici parola portalda zorunlu değişmiyor, satış portalının üretimde yayımı, satış log yardımcısı, satıştan ofis açmada yarım kalma, satış girişinde hız sınırı yok, güvenlik kodunun erişilebilirliği
 metadata:
   type: project
 ---
@@ -31,6 +31,8 @@ metadata:
 20. **Satış portalı üretimde yalnız 127.0.0.1 (SSH tüneli):** uzaktan çalışma için alan adı + TLS + IP kısıtı/VPN kararı.
 21. **Satış portalının log yardımcısı yerel** (`apps/sales/src/bff/gunluk.ts`); ortak yardımcı (açık konu 11) gelince taşınır.
 22. **Satıştan ofis açma tek işlem değil:** GoTrue kullanıcısı açıldıktan sonra kesinti olursa e-posta kalır, yeniden deneme `eposta_kullanimda` verir; telafi GoTrue silme ucu + identity-access değişikliği ister, şimdilik elle kurtarma.. İmajlar sunucuda kaynaktan derleniyor; CI imaj yayını, sürüm etiketi, kesintisiz güncelleme, gözlem/uyarı yok.
+23. **Satış girişinde istek hızı sınırı yok (D41):** e-posta adımı her istekte DB sorgusu + Redis kaydı; IP/istemci başına hız sınırı gerekir (portal girişi için de).
+24. **Resimli güvenlik kodu yalnız görsel (D41):** ekran okuyucu kullanan 2FA'sız satışçı giriş yapamaz; alternatif yöntem kararı gerekir (WCAG 1.1.1).
 
 Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri Hakan tarafından analiz ediliyor (2026-10-24). Sonuç gelince 02 §1a'daki `integrations` tablosu ve 03 §1a hesapları güncellenir.
 

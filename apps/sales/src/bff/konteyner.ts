@@ -12,6 +12,7 @@ import {
   PgTenantProvisioner,
   RedisLocks,
   RedisSalesSessionStore,
+  SvgCaptchaGenerator,
 } from '@eworks/sales';
 
 // Satış portalı bağımlılıkları (süreç başına tek örnek; bileşim kökü). Veritabanına `eworks_sales` rolüyle bağlanır: kontrol
@@ -35,6 +36,7 @@ function kur() {
       users: new PgSalesUsers(router.control),
       sessions: new RedisSalesSessionStore(redis),
       crypto,
+      captcha: new SvgCaptchaGenerator(),
       audit,
       clock,
       newId: randomUUID,
