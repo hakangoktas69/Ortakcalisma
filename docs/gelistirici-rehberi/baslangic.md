@@ -51,7 +51,9 @@ node tools/deploy/yigin.mjs up
 3. Veritabanı şemasını kurar (migration), demo ofisini ve kullanıcısını açar.
 4. Uygulamayı başlatır: web, işçi, kurum entegrasyonu ve **sahte GİB** (gerçek GİB'e hiçbir istek gitmez).
 
-Bitince `✔ Yığın ayakta: http://localhost:8080` yazar. Tarayıcıda aç ve demo hesabıyla gir.
+Bitince `✔ Yığın ayakta (kip: demo): http://localhost:8080` yazar. Tarayıcıda aç ve demo hesabıyla gir.
+
+> Yığının dört kipi vardır: `demo` (bu bölüm), `gelistirme` (§4), `debug` (§7), `uretim` (§11). Her kip için `.env` ayarları, terminal ve VS Code adımları, kipler arası geçiş: **[Yığın kipleri](kipler.md)**.
 
 ### Demo hesabı ve test şifreleri
 
@@ -87,7 +89,7 @@ VS Code'dan aynısı, komut yazmadan: §5.
 - `gelistir`, `up`'ın yaptığı her şeyi yapar; ayrıca veritabanı, kimlik, Redis ve S3 portlarını **yalnız 127.0.0.1**'e açar (ağdaki başka bilgisayar erişemez) ve web'in bunlara bağlanacağı `apps/web/.env.local`'i yazar. Bu dosya sır içerir, git'e girmez.
 - 8765, Eworks 2 pilot portalının (Mert) adresidir. Durdurmak için terminalde `Ctrl+C`.
 - Docker'daki 8080 aynı veritabanını kullanır ama eski kodla çalışır; geliştirirken 8765'i kullan.
-- Kip hatırlanır (`.env`: `YIGIN_KIPI`): sonraki `up`, `test`, `e2e` portları açık tutar. Normale dönmek için `node tools/deploy/yigin.mjs up --kip demo`.
+- Kip hatırlanır (`.env`: `YIGIN_KIPI`): sonraki `up`, `test`, `e2e` portları açık tutar. Normale dönmek için `node tools/deploy/yigin.mjs up --kip demo`. Port çakışması, rozetlerin görünmemesi gibi durumlar: [Yığın kipleri §3](kipler.md#3-gelistirme).
 
 Başka bir yerde değişiklik yaptıysan:
 
@@ -171,7 +173,7 @@ Sonra Run and Debug'da:
 - Hata ayıklama portları yalnız 127.0.0.1'dedir. `debug` kipi **yalnız kendi bilgisayarında** kullanılır: hata ayıklayıcıya bağlanan, container'da kod çalıştırabilir. Üretimde (VPS) bu katman hiç yoktur.
 - Kod değiştirdiysen container'lar eski kodla çalışır: `node tools/deploy/yigin.mjs debug` (imajlar yeniden derlenir), sonra yeniden bağlan.
 - **Docker'daki web'e bağlanma yapılandırması yok**, bilerek: oradaki web derlenmiş (sıkıştırılmış) çıktıdır, kesme noktaları kaynağa oturmaz. Web'i §6'daki gibi 8765'te hata ayıkla.
-- Bitince: `node tools/deploy/yigin.mjs up --kip demo`.
+- Bitince: `node tools/deploy/yigin.mjs up --kip demo`. Port değiştirme ve geçişler: [Yığın kipleri §4](kipler.md#4-debug).
 
 Depodaki [.vscode/launch.json](../../.vscode/launch.json) hazırdır, ayrıca bir şey eklemen gerekmez. İçeriği (yeni bir makinede ya da başka bir klasörde açarsan aynısını `.vscode/launch.json`'a koy; depodaki dosya esastır):
 
@@ -277,7 +279,7 @@ Docker yer kaplıyorsa: Docker Desktop → Troubleshoot → Clean / Purge data, 
 
 ## 11. Sunucuya (VPS) kurulum
 
-Canlı ortam: [VPS kurulum rehberi](vps-kurulum.md) — sunucu hazırlığı, alan adı ve otomatik HTTPS, üretim kurulumu (`node tools/deploy/yigin.mjs uretim`), ilk ofis yöneticisi, güncelleme, yedek.
+Canlı ortam: [VPS kurulum rehberi](vps-kurulum.md) (`uretim` kipini kendi bilgisayarında denemek: [Yığın kipleri §5](kipler.md#5-uretim)) — sunucu hazırlığı, alan adı ve otomatik HTTPS, üretim kurulumu (`node tools/deploy/yigin.mjs uretim`), ilk ofis yöneticisi, güncelleme, yedek.
 
 ## 12. Sorun giderme
 

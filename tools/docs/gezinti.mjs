@@ -23,6 +23,7 @@ export const TABLO = {
   'docs/gelistirici-rehberi/baslangic.md': { ebeveyn: GENEL, etiket: 'Başlangıç rehberi' },
   'docs/gelistirici-rehberi/terimler.md': { ebeveyn: GENEL, etiket: 'Terimler' },
   'docs/gelistirici-rehberi/vps-kurulum.md': { ebeveyn: 'docs/gelistirici-rehberi/baslangic.md', etiket: 'VPS kurulumu' },
+  'docs/gelistirici-rehberi/kipler.md': { ebeveyn: 'docs/gelistirici-rehberi/baslangic.md', etiket: 'Yığın kipleri' },
   'docs/gelistirici-rehberi/ddd-nedir.md': { ebeveyn: GENEL, etiket: 'DDD nedir' },
   'docs/gelistirici-rehberi/ddd.md': { ebeveyn: GENEL, etiket: 'DDD rehberi' },
   'docs/gelistirici-rehberi/tdd-nedir.md': { ebeveyn: GENEL, etiket: 'TDD nedir' },

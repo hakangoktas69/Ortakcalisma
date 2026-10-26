@@ -27,7 +27,7 @@ Yığını doğrudan `docker compose` ile değil, sırları ve sırayı yöneten
 
 ### Kipler
 
-Kip `deploy/compose/.env`'de (`YIGIN_KIPI`) hatırlanır; sonraki `up`, `test`, `e2e`, `down` aynı katmanlarla çalışır. TDD özellik durumu (kırmızı/yeşil rozetler) yalnız `gelistirme` ve `debug` kipinde görünür; `demo` ve `uretim`'de portal normal görünümdedir. `e2e` rozetleri doğruladığı için koşu süresince açar, sonraki `up` kipin görünümüne döner (D39, `OZELLIK_DURUMU_GOSTER`). Üretim dışındaki kipte kip adı logo yanında yazar.
+Her kipin `.env` ayarları, terminal ve VS Code adımları: [Yığın kipleri rehberi](../docs/gelistirici-rehberi/kipler.md). Kip `deploy/compose/.env`'de (`YIGIN_KIPI`) hatırlanır; sonraki `up`, `test`, `e2e`, `down` aynı katmanlarla çalışır. TDD özellik durumu (kırmızı/yeşil rozetler) yalnız `gelistirme` ve `debug` kipinde görünür; `demo` ve `uretim`'de portal normal görünümdedir. `e2e` rozetleri doğruladığı için koşu süresince açar, sonraki `up` kipin görünümüne döner (D39, `OZELLIK_DURUMU_GOSTER`). Üretim dışındaki kipte kip adı logo yanında yazar.
 
 | Kip | Katmanlar | Ne zaman |
 |---|---|---|

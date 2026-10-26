@@ -55,7 +55,7 @@ eski/                         yeniden yapılanma öncesi depo — arşiv, yeni g
 
 ## Çalıştırma
 
-Adım adım: [başlangıç rehberi](docs/gelistirici-rehberi/baslangic.md) (VS Code, hata ayıklama), [VPS](docs/gelistirici-rehberi/vps-kurulum.md). Node 24 ve pnpm (corepack) gerekir; yerel Node eskiyse komutları `node:24` container'ında koş (`sh tools/deploy/dogrula.sh` = `pnpm verify` container'da).
+Adım adım: [başlangıç rehberi](docs/gelistirici-rehberi/baslangic.md) (VS Code, hata ayıklama), [yığın kipleri](docs/gelistirici-rehberi/kipler.md), [VPS](docs/gelistirici-rehberi/vps-kurulum.md). Node 24 ve pnpm (corepack) gerekir; yerel Node eskiyse komutları `node:24` container'ında koş (`sh tools/deploy/dogrula.sh` = `pnpm verify` container'da).
 
 ```bash
 node tools/deploy/yigin.mjs up     # Compose yığını: sırlar (deploy/compose/.env), imajlar, altyapı → migrate → uygulama
