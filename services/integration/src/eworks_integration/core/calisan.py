@@ -17,11 +17,14 @@ from playwright.async_api import async_playwright
 from redis import asyncio as aioredis
 
 from ..institutions.gib.beyannameler import BelgeIstegi, BeyannameHatasi, beyanname_tara, to_declarations
+from ..institutions.gib.ebeyanname_servis import EBEYANNAME
 from ..institutions.gib.giris import GirisBasarisiz, YanlisSifre, giris_yap
 from ..institutions.gib.sozlesmeler import ListeHatasi, sozlesme_listesi_oku, to_contract
 from ..transports.robot.tarayici import Tarayici
+from ..transports.service.http_tasima import ServisTasima
 from .ayarlar import Ayarlar, yukle
 from .captcha import CaptchaCozucu
+from .hatalar import KaynakEngelledi
 from .hiz import HizSinirlayici
 
 EXCHANGE, DLX = 'eworks', 'eworks.dlx'
@@ -95,6 +98,13 @@ class Calisan:
         try:
             async with async_playwright() as p, Tarayici(p, self.hiz, self.a.sahte_gib) as t:
                 ctx = await t.baglam()
+                # Kurum erişim yolu (D38): giriş her zaman tarayıcıda; oturum sonrası hizmet başına robot | servis. e-Beyanname
+                # servis ise sorgu ve belgeler aynı oturumun doğrulanmış HTTP taşımasıyla. İVD (sözleşme listesi) için gözlenmiş HTTP
+                # politikası yok; robotla.
+                tasima = ServisTasima(ctx, EBEYANNAME, self.hiz, self.a.sahte_gib) if self.a.erisim['gib.ebeyanname'] == 'servis' else None
+                if tasima is not None:
+                    await tasima.bagla()
+                gunluk('is_basladi', tur=kind, erisim=self.a.erisim)
                 try:
                     await ilerleme('GİB girişi yapılıyor (güvenlik kodu otomatik).')
                     ana = await giris_yap(await ctx.new_page(), kimlik, self.cozucu, ilerleme)
@@ -110,7 +120,11 @@ class Calisan:
                             return anahtar_pdf
                         # MUHSGK işi (SGK e-Bildirge toplu güncelleme) yalnız SGK tahakkuk + hizmet listesini indirir
                         istek = BelgeIstegi(belge_kaydet, beyanname=kind == 'gib.beyannameler', sgk=True)
-                        sorgular = await beyanname_tara(ctx, ana, kayitlar, params, istek, ilerleme)
+                        await ilerleme('Erişim yolu: ' + ('servis (aynı oturumda doğrulanmış HTTP)' if tasima else 'robot (tarayıcı)') + '.')
+                        sorgular = await beyanname_tara(ctx, ana, kayitlar, params, istek, ilerleme, tasima=tasima)
+                        if tasima is not None and tasima.engel is not None:
+                            await self._kurum_engeli(tasima.engel)
+                            await ilerleme(f'{tasima.engel} Tamamlanan kapsamlar kaydedildi.')
                 finally:
                     await ctx.close()
             anahtar = f'org/{org}/sonuc/{job}.json'
@@ -120,6 +134,9 @@ class Calisan:
             await asyncio.to_thread(self.s3.put_object, Bucket=self.a.s3_bucket, Key=anahtar, Body=govde, ContentType='application/json')
             await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'ok', 'resultKey': anahtar})
             gunluk('is_tamam', adet=len(kayitlar))
+        except KaynakEngelledi as e:
+            await self._kurum_engeli(e)
+            await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': str(e)[:500]})
         except YanlisSifre:
             await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'wrong_password'})
             gunluk('hatali_sifre')
@@ -132,6 +149,13 @@ class Calisan:
             gunluk('is_hatasi', tur=type(e).__name__)
         finally:
             kimlik.clear()
+
+    async def _kurum_engeli(self, e: KaynakEngelledi):
+        """Kurum oturumu reddetti ya da hız sınırı bildirdi: istek tekrarlanmadı, kurum hızı yarıya iner (kural 5). Yerel bütçe
+        dolduysa (LOCAL_BUDGET) kurum suçlu değildir, hız düşürülmez."""
+        if e.kod != 'LOCAL_BUDGET':
+            await self.hiz.baglanti_hatasi()
+        gunluk('kaynak_engelledi', kod=e.kod, durum=e.durum)
 
     async def calis(self):
         await asyncio.to_thread(self._kova_hazirla)
@@ -147,7 +171,8 @@ class Calisan:
             for ad in (ROBOT_GIB, SONUC):
                 kuyruklar[ad] = await self.kanal.declare_queue(ad, durable=True, arguments=ARGUMANLAR)
                 await kuyruklar[ad].bind(ex, ad)
-            gunluk('entegrasyon_basladi', sahte_gib=bool(self.a.sahte_gib), hiz=self.a.gib_istek_dk)
+            gunluk('entegrasyon_basladi', sahte_gib=bool(self.a.sahte_gib), hiz=self.a.gib_istek_dk, erisim=self.a.erisim,
+               sgk_erisim=self.a.sgk_erisim)  # SGK sistemlerine bağlantı yok; değer yalnız doğrulanır
             async with kuyruklar[ROBOT_GIB].iterator() as it:
                 async for msg in it:
                     async with msg.process(requeue=False):

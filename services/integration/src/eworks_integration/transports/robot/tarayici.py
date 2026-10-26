@@ -32,7 +32,7 @@ def sahte_adres(sahte_kok: str, url: str) -> str:
     return f"{sahte_kok.rstrip('/')}/{alt}{p.path}{'?' + p.query if p.query else ''}"
 
 
-def _sahte_istek(adres: str, yontem: str, basliklar: dict[str, str], govde: bytes | None):
+def sahte_istek(adres: str, yontem: str, basliklar: dict[str, str], govde: bytes | None):
     istek = urllib.request.Request(adres, data=govde, method=yontem, headers={k: v for k, v in basliklar.items() if k.lower() not in ATLANAN_BASLIKLAR})
     try:
         with urllib.request.urlopen(istek, timeout=20) as y:  # noqa: S310 — adres yapılandırmadan, yalnız demo/test
@@ -70,7 +70,7 @@ class Tarayici:
             if not self.sahte_gib:
                 return await route.continue_()
             basliklar = await istek.all_headers()
-            durum, yanit_basliklari, govde = await asyncio.to_thread(_sahte_istek, sahte_adres(self.sahte_gib, istek.url), istek.method, basliklar, istek.post_data_buffer)
+            durum, yanit_basliklari, govde = await asyncio.to_thread(sahte_istek, sahte_adres(self.sahte_gib, istek.url), istek.method, basliklar, istek.post_data_buffer)
             # Set-Cookie birden çok olabilir; Playwright başlık listesini olduğu gibi aktarır
             return await route.fulfill(status=durum, headers=dict(yanit_basliklari), body=govde)
         if self.sahte_gib:

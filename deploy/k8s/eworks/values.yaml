@@ -7,7 +7,8 @@ image:
 
 # Bileşen başına önceden oluşturulmuş Secret: her biri yalnız kendi veritabanı rolünü taşır (D34, en az yetki).
 # web: eworks_app; worker + migrate: eworks_worker/eworks_control; integration: eworks_integration (yalnız iş ve sır fonksiyonları).
-# integration Secret'ında GIB_SAHTE_SUNUCU bulunmaz; EWORKS_ORTAM=uretim.
+# integration Secret'ında GIB_SAHTE_SUNUCU bulunmaz; EWORKS_ORTAM=uretim. Kurum erişim yolu (D38): GIB_ERISIM_YOLU / SGK_ERISIM_YOLU
+# = servis (yoksa varsayılan) | robot; hizmet bazında ERISIM_GIB_EBEYANNAME, ERISIM_GIB_IVD (02 §1b).
 secrets:
   web: eworks-web-env
   worker: eworks-worker-env

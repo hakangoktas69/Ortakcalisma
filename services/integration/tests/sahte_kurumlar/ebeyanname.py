@@ -1,5 +1,7 @@
 """Sahte e-Beyanname (ebeyanname.gib.gov.tr) — demo ve test için, canlı GİB değildir (D33).
 
+Ağ katmanı (D38 servis yolu için): sorgu POST /dispatch form gövdesiyle, belgeler GET /dispatch?cmd=IMAJ (Eworks 2 gözlemi).
+
 Ekran yapısı eski robotun canlıda gözlediği alanları izler: "Beyanname Ara" formu (vergiNo / tcKimlikNo, sorguTipi*
 kutuları, gönderim tarihi Gün/Ay/Yıl, Sorgula), "Beyanname Listesi" penceresi (10 sütun, satır kimliği row<oid>, title'da XML
 adı), "1 - 2 / 5" sayfalama ve "Sonraki Sayfa" düğmesi, satır içi PDF simgeleri (beyannameGoruntule / tahakkukGoruntule),
@@ -12,6 +14,8 @@ Sayfa boyu küçüktür (SAHTE_GIB_BEYANNAME_SAYFA, vars. 2) ki sayfalama her so
 from __future__ import annotations
 
 import hashlib
+import html
+import json
 import os
 import random
 from datetime import date, datetime, timedelta
@@ -145,7 +149,10 @@ def hizmet_pdf(k: dict, s: dict) -> bytes:
     return pdf(satirlar)
 
 
-def uygulama_sayfasi() -> str:
+def uygulama_sayfasi(belirtec: str) -> str:
+    """Beyanname Ara formu. Ağ biçimi Eworks 2'nin canlıda çalışan akışını izler (Mert, 23.10.2026): sorgu
+    POST /dispatch (form gövdesi: TOKEN, cmd, sorguTipiZ, baslangicTarihi, bitisTarihi, sorguTipiN|T + vergiNo|tcKimlikNo),
+    yanıt HTML; belgeler GET /dispatch?cmd=IMAJ. Tarih biçimi gözlenmedi (Eworks 2 altı biçimi kabul eder); burada yyyymmdd."""
     return '''
 <h1>e-Beyanname</h1>
 <nav><a href="#" onclick="document.getElementById('araForm').hidden=false;return false">Beyanname Ara</a></nav>
@@ -166,37 +173,41 @@ def uygulama_sayfasi() -> str:
 <div id="sonuc"></div>
 <div id="detay"></div>
 <script>
-let son = 0, sorgu = null;
+const TOKEN = ''' + json.dumps(belirtec) + ''';
+let son = 0;
 const e = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const v = n => document.querySelector('[name="'+n+'"]').value.trim();
 const c = n => document.querySelector('[name="'+n+'"]').checked;
+const tarih = o => v(o + 'TarihiYil') + v(o + 'TarihiAy').padStart(2, '0') + v(o + 'TarihiGun').padStart(2, '0');
 async function ara(sayfa) {
+  let govde;
   if (sayfa === 1) {
     if (Date.now() - son < 1000) { alert('Hata: İki istek arası en az 1 sn olabilir.'); return; }
     son = Date.now();
-    sorgu = {tip: c('sorguTipiT') ? 'T' : 'N', kimlik: c('sorguTipiT') ? v('tcKimlikNo') : v('vergiNo'),
-      bas: [v('baslangicTarihiYil'), v('baslangicTarihiAy'), v('baslangicTarihiGun')], bit: [v('bitisTarihiYil'), v('bitisTarihiAy'), v('bitisTarihiGun')],
-      donem: c('sorguTipiP') || c('sorguTipiB') || c('sorguTipiV') || c('sorguTipiD')};
+    const tc = c('sorguTipiT');
+    govde = new URLSearchParams({TOKEN, cmd: 'BEYANNAMELISTESI', sorguTipiZ: '1', baslangicTarihi: tarih('baslangic'), bitisTarihi: tarih('bitis')});
+    govde.set(tc ? 'sorguTipiT' : 'sorguTipiN', '1');
+    govde.set(tc ? 'tcKimlikNo' : 'vergiNo', tc ? v('tcKimlikNo') : v('vergiNo'));
+    for (const ek of ['B', 'P', 'V', 'D']) if (c('sorguTipi' + ek)) govde.set('sorguTipi' + ek, '1');
+  } else {
+    govde = new URLSearchParams({TOKEN, cmd: 'BEYANNAMELISTESI_SAYFA', sayfa: String(sayfa)});
   }
-  const r = await fetch('/eyeksite/ara', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({...sorgu, sayfa})});
-  const j = await r.json();
-  if (j.hata) { document.getElementById('sonuc').innerHTML = ''; alert(j.hata); return; }
-  const satir = k => '<tr id="row' + e(k.oid) + '" title="' + e(k.xml) + ' dosyası"><td>' +
-    '<img src="data:," width="12" height="12" title="''' + BYN_BASLIK + '''" onclick="beyannameGoruntule(\\'' + k.oid + '\\',false,false)">' +
-    '<img src="data:," width="12" height="12" title="''' + THK_BASLIK + '''" onclick="tahakkukGoruntule(\\'' + k.oid + '\\',\\'' + k.tahakkukOid + '\\',false,false)">' +
-    (k.sgk ? '<img src="data:," width="12" height="12" title="SGK Bildirimleri" onclick="beyannameSGKBildirimleriGoster(\\'' + k.oid + '\\',false)">' : '') +
-    '</td>' + [k.tur, k.kimlik, k.unvan, k.vd, k.donem, k.sube, k.yuklendi, k.vergiDurum, k.sgkDurum].map(x => '<td>' + e(x) + '</td>').join('') + '</tr>';
-  document.getElementById('sonuc').innerHTML = '<div id="bynList1" class="dialog"><div>Beyanname Listesi</div>' +
-    '<span id="bynList1_close" class="alphacube_close" onclick=\\'Windows.close("bynList1", event)\\'>x</span>' +
-    '<table id="bynTable"><tr>''' + ''.join(f'<td>{h}</td>' for h in HEADERS) + '''</tr>' + j.satirlar.map(satir).join('') + '</table>' +
-    '<table><tr><td>' + j.ilk + ' - ' + j.son + ' / ' + j.toplam + ' <input type="button" value="&gt;" title="Sonraki Sayfa"' +
-    (j.son >= j.toplam ? ' disabled' : ' onclick="ara(' + (sayfa + 1) + ')"') + '></td></tr></table></div>';
+  const r = await fetch('/dispatch', {method: 'POST', headers: {'content-type': 'application/x-www-form-urlencoded'}, body: govde.toString()});
+  const html = await r.text();
+  const hedef = document.getElementById('sonuc');
+  if (r.status !== 200) { hedef.innerHTML = ''; alert('Hata: İşleminiz gerçekleştirilemedi.'); return; }
+  const kap = document.createElement('div');
+  kap.innerHTML = html;
+  const hata = kap.querySelector('.hata');
+  if (hata) { hedef.innerHTML = ''; alert(hata.textContent); return; }
+  hedef.innerHTML = html;
 }
 const Windows = {close: (id) => { const el = document.getElementById(id); if (el) el.remove(); }};
-function beyannameGoruntule(oid) { window.open('/eyeksite/belge?tur=beyanname&oid=' + encodeURIComponent(oid)); }
-function tahakkukGoruntule(oid, toid) { window.open('/eyeksite/belge?tur=tahakkuk&oid=' + encodeURIComponent(oid) + '&toid=' + encodeURIComponent(toid)); }
-function sgkTahakkukGoruntule(oid, soid) { window.open('/eyeksite/belge?tur=sgk_tahakkuk&oid=' + encodeURIComponent(oid) + '&soid=' + encodeURIComponent(soid)); }
-function sgkHizmetGoruntule(oid, soid) { window.open('/eyeksite/belge?tur=sgk_hizmet&oid=' + encodeURIComponent(oid) + '&soid=' + encodeURIComponent(soid)); }
+const belge = q => window.open('/dispatch?cmd=IMAJ&TOKEN=' + encodeURIComponent(TOKEN) + '&' + q);
+function beyannameGoruntule(oid) { belge('tur=beyanname&oid=' + encodeURIComponent(oid)); }
+function tahakkukGoruntule(oid, toid) { belge('tur=tahakkuk&oid=' + encodeURIComponent(oid) + '&toid=' + encodeURIComponent(toid)); }
+function sgkTahakkukGoruntule(oid, soid) { belge('tur=sgk_tahakkuk&oid=' + encodeURIComponent(oid) + '&soid=' + encodeURIComponent(soid)); }
+function sgkHizmetGoruntule(oid, soid) { belge('tur=sgk_hizmet&oid=' + encodeURIComponent(oid) + '&soid=' + encodeURIComponent(soid)); }
 async function beyannameSGKBildirimleriGoster(oid) {
   const j = await (await fetch('/eyeksite/sgk?oid=' + encodeURIComponent(oid))).json();
   if (j.hata) { alert(j.hata); return; }
@@ -211,6 +222,30 @@ async function beyannameSGKBildirimleriGoster(oid) {
 }
 function mesajButtonClick() {}
 </script>'''
+
+
+def liste_html(yanit: dict) -> str:
+    """Sorgu yanıtı (HTML): hata kutusu ya da "Beyanname Listesi" penceresi + sayfa sayacı (eski robotun canlı gözlemi)."""
+    e = html.escape
+    if 'hata' in yanit:
+        return f'<div class="hata">{e(yanit["hata"])}</div>'
+
+    def satir(k: dict) -> str:
+        sgk = (f'<img src="data:," width="12" height="12" title="SGK Bildirimleri" onclick="beyannameSGKBildirimleriGoster(\'{e(k["oid"])}\',false)">'
+               if k['sgk'] else '')
+        hucreler = ''.join(f'<td>{e(str(x))}</td>' for x in (k['tur'], k['kimlik'], k['unvan'], k['vd'], k['donem'], k['sube'], k['yuklendi'],
+                                                           k['vergiDurum'], k['sgkDurum']))
+        return (f'<tr id="row{e(k["oid"])}" title="{e(k["xml"])} dosyası"><td>'
+                f'<img src="data:," width="12" height="12" title="{BYN_BASLIK}" onclick="beyannameGoruntule(\'{e(k["oid"])}\',false,false)">'
+                f'<img src="data:," width="12" height="12" title="{THK_BASLIK}" '
+                f'onclick="tahakkukGoruntule(\'{e(k["oid"])}\',\'{e(k["tahakkukOid"])}\',false,false)">{sgk}</td>{hucreler}</tr>')
+
+    sonraki = ' disabled' if yanit['son'] >= yanit['toplam'] else f' onclick="ara({yanit["sayfa"] + 1})"'
+    return ('<div id="bynList1" class="dialog"><div>Beyanname Listesi</div>'
+            '<span id="bynList1_close" class="alphacube_close" onclick="Windows.close(&quot;bynList1&quot;, event)">x</span>'
+            '<table id="bynTable"><tr>' + ''.join(f'<td>{h}</td>' for h in HEADERS) + '</tr>' + ''.join(satir(k) for k in yanit['satirlar'])
+            + '</table>' + f'<table><tr><td>{yanit["ilk"]} - {yanit["son"]} / {yanit["toplam"]} '
+            f'<input type="button" value="&gt;" title="Sonraki Sayfa"{sonraki}></td></tr></table></div>')
 
 
 def gorunum(k: dict) -> dict:
@@ -241,4 +276,4 @@ def ara(kayitlar_kimlige_gore, istek: dict) -> dict:
     sayfa = max(1, int(istek.get('sayfa') or 1))
     ilk = (sayfa - 1) * SAYFA
     parca = bulunan[ilk:ilk + SAYFA]
-    return {'satirlar': [gorunum(k) for k in parca], 'ilk': ilk + 1, 'son': ilk + len(parca), 'toplam': len(bulunan)}
+    return {'satirlar': [gorunum(k) for k in parca], 'ilk': ilk + 1, 'son': ilk + len(parca), 'toplam': len(bulunan), 'sayfa': sayfa}

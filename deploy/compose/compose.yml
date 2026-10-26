@@ -198,6 +198,13 @@ services:
       EWORKS_ORTAM: ${EWORKS_ORTAM:-demo}
       GIB_SAHTE_SUNUCU: ${GIB_SAHTE_SUNUCU-http://fake-gib:8090}
       GIB_ISTEK_DK: ${GIB_ISTEK_DK:-60}
+      # Kurum erişim yolu (D38): servis (vars.) = aynı oturumda doğrulanmış HTTP, robot = yalnız tarayıcı.
+      # SGK_ERISIM_YOLU bugün etkisiz (SGK sistemlerine bağlantı yok); MUHSGK SGK bildirimleri GİB yolunu izler.
+      GIB_ERISIM_YOLU: ${GIB_ERISIM_YOLU:-servis}
+      SGK_ERISIM_YOLU: ${SGK_ERISIM_YOLU:-servis}
+      # Oturum sonrası hizmet bazında (boşsa kurum varsayılanı): ERISIM_GIB_EBEYANNAME, ERISIM_GIB_IVD = robot | servis
+      ERISIM_GIB_EBEYANNAME: ${ERISIM_GIB_EBEYANNAME:-}
+      ERISIM_GIB_IVD: ${ERISIM_GIB_IVD:-}
       SHARD_DATABASE_URLS: shard-01=postgres://eworks_integration:${INTEGRATION_DB_PASSWORD}@db-shard-01:5432/postgres,shard-02=postgres://eworks_integration:${INTEGRATION_DB_PASSWORD}@db-shard-02:5432/postgres
       RABBITMQ_URL: amqp://eworks:${RABBITMQ_PASSWORD}@rabbitmq:5672
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/1
