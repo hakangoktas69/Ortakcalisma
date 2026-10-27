@@ -8,13 +8,13 @@ Her bounded context için: sorumluluk, ortak dil, aggregate ve kurallar, olaylar
 
 | Çekirdek | Destekleyici | Genel |
 |---|---|---|
-| [tax-filing](tax-filing.md) · [social-security](social-security.md) · [portfolio](portfolio.md) | [credentials](credentials.md) · [sync](sync.md) · [documents](documents.md) · [workspace](workspace.md) | [identity-access](identity-access.md) · [organization](organization.md) · [notifications](notifications.md) · [audit](audit.md) · [sales](sales.md) |
+| [tax-filing](tax-filing.md) · [social-security](social-security.md) · [portfolio](portfolio.md) | [credentials](credentials.md) · [sync](sync.md) · [documents](documents.md) · [workspace](workspace.md) · [notices](notices.md) | [identity-access](identity-access.md) · [organization](organization.md) · [notifications](notifications.md) · [audit](audit.md) · [sales](sales.md) |
 
 Python ACL (`services/integration`) bir bağlam değildir; alan modeli yoktur ([06 §1](../hedef-mimari/06-kaynak-kod-yapisi-ddd-tdd.md) ilke 3).
 
 ## Henüz bağlama atanmamış modüller (açık konu)
 
-Bugünkü portalda olup 06'daki bağlam haritasında karşılığı olmayan modüller `feature-registry`'de `context: null` ile kayıtlıdır: **e-Tebligat, e-Defter, Faturalar, Dilekçeler, Ödeme, Raporlar** (POS, araç, ticaret sicil, karşıt inceleme) ve **Destek**. Her biri için yeni bağlam mı, mevcut bağlama mı (ör. e-Tebligat → `documents`, e-Defter → `tax-filing`) kararı verildiğinde `D-NN`/`K-NN` olarak işlenir ve kayıttaki `context` doldurulur.
+Bugünkü portalda olup 06'daki bağlam haritasında karşılığı olmayan modüller `feature-registry`'de `context: null` ile kayıtlıdır: **e-Defter, Faturalar, Dilekçeler, Ödeme, Raporlar** (POS, araç, ticaret sicil, karşıt inceleme) ve **Destek**. Her biri için yeni bağlam mı, mevcut bağlama mı (ör. e-Tebligat → `documents`, e-Defter → `tax-filing`) kararı verildiğinde `D-NN`/`K-NN` olarak işlenir ve kayıttaki `context` doldurulur.
 
 <!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
 

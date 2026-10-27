@@ -2,12 +2,12 @@
 // kurum sırrı yalnız entegrasyon rolü), iş yalnız bir kez sahiplenilir, sonuç kesindir.
 import { randomUUID } from 'node:crypto';
 import { afterAll, describe, expect, it } from 'vitest';
-import { PgCredentialRepository, saveAccount, accountStatuses } from '@eworks/credentials';
+import { PgConsentRepository, PgCredentialRepository, recordConsent, revokeConsent, saveAccount, accountStatuses } from '@eworks/credentials';
 import { GoTrueAuthProvider } from '@eworks/identity-access';
 import { createPool, ShardRouter, withSystem } from '@eworks/platform';
-import { myAdvisorId, PgFirmRepository } from '@eworks/portfolio';
+import { createFirm, myAdvisorId, PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portfolio';
 import { openOffice, PgDirectory, PgTenantProvisioner } from '@eworks/sales';
-import { yigin } from '@eworks/testing';
+import { fakeVkn, yigin } from '@eworks/testing';
 import { finishJob, getJob, PgJobRepository, requestCalendarJob, requestJob } from '../../src/index.ts';
 
 const sistem = ShardRouter.fromUrls(yigin.controlUrl(), yigin.shardUrls('eworks_worker'));
@@ -109,5 +109,43 @@ describe('takvim kaynakları işi (hesapsız)', () => {
     expect(await requestCalendarJob({ org: ctx.org }, 2027, isci, new Date())).toEqual({ ok: false, error: 'yakin_zamanda' });
     const yeni = await requestCalendarJob({ org: ctx.org }, 2028, isci, new Date());
     expect(yeni.ok && yeni.value.existing).toBe(false);
+  });
+});
+
+describe('firma hesabıyla iş ve mükellef onayı (D18, D46)', () => {
+  it('[F:firmalar.kurum_hesaplari.consent] onay yokken firma hesabının sırrı işe verilmez (EW001); onayla verilir; geri alınınca yine verilmez', async () => {
+    const o = await openOffice({ officeName: `Onay ${randomUUID().slice(0, 8)}`, admin: { email: `y-${randomUUID()}@eworks.test`, password: `Parola-${randomUUID()}`, name: 'Yönetici' } }, prov);
+    if (!o.ok) throw new Error(o.error);
+    const ctx = { sub: o.value.userId, org: o.value.orgId };
+    const firmalar = { repo: new PgFirmRepository(web), registry: new PgTaxpayerRegistry(web), hashTaxId: taxIdHasher(yigin.taxIdKey()), newId: randomUUID };
+    const vkn = fakeVkn();
+    const f = await createFirm(ctx, { title: 'Onaylı Ltd', kind: 'Limited', taxId: vkn }, firmalar);
+    if (!f.ok) throw new Error(f.error);
+    expect((await saveAccount(ctx, { ownerKind: 'firm', ownerId: f.value.id, institution: 'GIB', fields: { username: vkn, password: 'firma-sifresi' } }, creds)).ok).toBe(true);
+    const hesap = (await accountStatuses(ctx, creds, { kind: 'firm', id: f.value.id }))[0]!;
+    const onaylar = new PgConsentRepository(web);
+    const hepsi = () => true;
+    const ent = createPool(await entegrasyonUrl(ctx.org), 1);
+    const isAc = async () => {
+      const r = await requestJob(ctx, { kind: 'gib.etebligat', account: hesap, params: { firmId: f.value.id, taxId: vkn } }, webIsler);
+      if (!r.ok) throw new Error(r.error);
+      expect((await ent.query('select sync.claim_job($1, $2) as j', [ctx.org, r.value.jobId])).rows[0].j).not.toBeNull();
+      return r.value.jobId;
+    };
+    try {
+      const is1 = await isAc();
+      await expect(ent.query('select credentials.secret_for_job($1, $2)', [ctx.org, is1])).rejects.toMatchObject({ code: 'EW001' });
+      await finishJob({ org: ctx.org }, is1, 'failed', 'onay yok', isciIsler);
+      expect(await recordConsent(ctx, { firmId: f.value.id, method: 'sozlesme', consentedOn: '2026-10-20', attested: true }, hepsi, onaylar, '2026-10-27')).toEqual({ ok: true, value: undefined });
+      const is2 = await isAc();
+      expect((await ent.query('select credentials.secret_for_job($1, $2) as s', [ctx.org, is2])).rows[0].s).toEqual({ username: vkn, password: 'firma-sifresi' });
+      await finishJob({ org: ctx.org }, is2, 'succeeded', 'tamam', isciIsler);
+      expect((await revokeConsent(ctx, f.value.id, hepsi, onaylar)).ok).toBe(true);
+      const is3 = await isAc();
+      await expect(ent.query('select credentials.secret_for_job($1, $2)', [ctx.org, is3])).rejects.toMatchObject({ code: 'EW001' });
+      expect(await onaylar.status(ctx, f.value.id)).toMatchObject({ active: false, method: 'sozlesme', consentedOn: '2026-10-20' });
+    } finally {
+      await ent.end();
+    }
   });
 });

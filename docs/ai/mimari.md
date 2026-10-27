@@ -31,13 +31,14 @@
 | `tax-filing` | e-Beyanname sözleşmeleri, beyannameler, tahakkuklar, son gün kuralları |
 | `social-security` | SGK işyeri, e-Bildirge, işe giriş/çıkış, e-Rapor (sağlık verisi), iş kazası, kontrol listesi |
 | `documents` | PDF metaverisi, saklama (vars. 7 gün, D15), toplu temizlik |
-| `workspace` | Görev, not, uyarı, kontrol listeleri (okuma modeli) |
+| `workspace` | Görev, not, uyarı, kontrol listeleri (okuma modeli), mali müşavir takvimi, kişisel hatırlatma, portal kısayolları |
+| `notices` | e-Tebligat (GİB; ileride UETS): yalnız liste bilgisi, belge açılmaz (D45) |
 | `notifications` | Portal ve e-posta bildirimleri |
 | `audit` | Değiştirilemez denetim kaydı |
 | `sales` | Satış portalı: hesap açma, sözleşme ve mükellef onayı, dondurma, shard ataması; iş verisini görmez |
 | `integration` (Python) | ACL; alan modeli yok, yayımlanmış dil üretir |
 
-Bağlam sayfaları: [docs/baglamlar/](../baglamlar/README.md). Bugünkü portalın e-Tebligat, e-Defter, fatura, dilekçe, ödeme ve rapor ekranları henüz bir bağlama atanmadı (açık konu).
+Bağlam sayfaları: [docs/baglamlar/](../baglamlar/README.md). Bugünkü portalın e-Defter, fatura, dilekçe, ödeme ve rapor ekranları henüz bir bağlama atanmadı (açık konu).
 
 ## Katmanlar ve bağımlılık yönü
 

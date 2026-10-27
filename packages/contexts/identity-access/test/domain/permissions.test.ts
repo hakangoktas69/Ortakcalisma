@@ -53,6 +53,15 @@ describe('hiyerarşik yetki', () => {
     for (const r of ['personel', 'mukellef'] as const) expect(isAllowed(effectiveGrants(r), 'genel_bakis.takvim.sync'), r).toBe(false);
   });
 
+  it('[F:tebligat.liste.view] e-Tebligat listesini herkes görür (mükellef kendi firmasını); güncellemeyi yalnız yönetici ve müşavir başlatır', () => {
+    for (const r of ['ofis_admin', 'musavir', 'personel', 'mukellef'] as const) expect(isAllowed(effectiveGrants(r), 'tebligat.liste.view'), r).toBe(true);
+    for (const r of ['ofis_admin', 'musavir'] as const) expect(isAllowed(effectiveGrants(r), 'tebligat.liste.sync'), r).toBe(true);
+    for (const r of ['personel', 'mukellef'] as const) expect(isAllowed(effectiveGrants(r), 'tebligat.liste.sync'), r).toBe(false);
+    // Mükellef onayını müşavir/yönetici beyanla kaydeder; mükellef kendisi de verebilir; personel veremez (D46)
+    for (const r of ['ofis_admin', 'musavir', 'mukellef'] as const) expect(isAllowed(effectiveGrants(r), 'firmalar.kurum_hesaplari.consent'), r).toBe(true);
+    expect(isAllowed(effectiveGrants('personel'), 'firmalar.kurum_hesaplari.consent')).toBe(false);
+  });
+
   it('[F:kisayollar.view] portal kısayolları ofis kullanıcılarına açık, mükellefe kapalı', () => {
     for (const r of ['ofis_admin', 'musavir', 'personel'] as const) expect(isAllowed(effectiveGrants(r), 'kisayollar.view'), r).toBe(true);
     expect(isAllowed(effectiveGrants('mukellef'), 'kisayollar.view')).toBe(false);

@@ -6,6 +6,7 @@ import addFormats from 'ajv-formats';
 import { recordLoginResult, type CredentialRepository } from '@eworks/credentials';
 import { registerDocuments, type DocumentRepository } from '@eworks/documents';
 import { createFirmFromSource, firmsByTaxIds, refreshFirmFromSource, type FirmDeps } from '@eworks/portfolio';
+import { importNotices, type NoticeList, type NoticeRepository } from '@eworks/notices';
 import { importFilings, type FilingRepository, type SgkFilingRecord } from '@eworks/social-security';
 import { finishJob, recordProgress, type JobRepository } from '@eworks/sync';
 import {
@@ -33,6 +34,7 @@ const sonucMesajiGecerli = ajv.compile(sema('events/integration.sonuc.v1.schema.
 const sozlesmeListesiGecerli = ajv.compile(sema('integration/eworks.gib.contracts.v1.schema.json'));
 const beyannameSonucuGecerli = ajv.compile(sema('integration/eworks.gib.declarations.v1.schema.json'));
 const takvimSonucuGecerli = ajv.compile(sema('integration/eworks.calendar.sources.v1.schema.json'));
+const tebligatSonucuGecerli = ajv.compile(sema('integration/eworks.gib.notices.v1.schema.json'));
 
 export type SonucMesaji = { orgId: string; jobId: string; outcome: 'ok' | 'wrong_password' | 'failed' | 'progress'; resultKey?: string; message?: string };
 type Kaynak = 'gib_live' | 'sahte_gib';
@@ -59,6 +61,7 @@ export type UygulayiciDeps = {
   /** Uygulanan ham sonuç silinir (02 §9: ham sonuç saklanmaz); silinemezse iş yine tamamlanır. */
   sonucSil: (anahtar: string) => Promise<void>;
   takvim: { repo: Pick<CalendarRepository, 'replaceYear'> };
+  tebligat: NoticeRepository;
   /** Doğrulanmış kamuya açık takvim sonucu: diğer ofislerin kopyası kuruma gitmeden buradan doldurulur (işçi döngüsü). */
   takvimOrtak: { kaydet: (o: { year: number; observedAt: string; gib: GibCalendarSnapshot | null; religious: TakvimSonucu['religious'] }) => Promise<void> };
 };
@@ -117,6 +120,7 @@ export async function sonucuIsle(ham: unknown, d: UygulayiciDeps): Promise<strin
   if (!m.resultKey || !m.resultKey.startsWith(`org/${m.orgId}/`)) throw new Error('Sonuç anahtarı ofisle eşleşmiyor');
   const sonuc = await d.sonucOku(m.resultKey);
   try {
+    if (is.kind === 'gib.etebligat') return await tebligatUygula(ctx, m, sonuc, sahip, d, is.startedAt);
     return is.kind === 'gib.beyannameler' || is.kind === 'gib.muhsgk' ? await beyannameUygula(ctx, m, sonuc, sahip, d, is.startedAt) : await sozlesmeUygula(ctx, m, sonuc, sahip, d, is.startedAt);
   } finally {
     await d.sonucSil(m.resultKey).catch(() => {});
@@ -124,6 +128,31 @@ export async function sonucuIsle(ham: unknown, d: UygulayiciDeps): Promise<strin
 }
 
 type Sahip = { accountId: string; ownerKind: 'advisor' | 'firm'; ownerId: string };
+
+const TEBLIGAT_HATASI: Record<string, string> = {
+  sayi_uyusmuyor: 'Tebligat sayısı uyuşmadı; liste uygulanmadı.',
+  tekrarlanan_kayit: 'Listede tekrarlanan tebligat var; liste uygulanmadı.',
+  gecersiz_kayit: 'Listede geçersiz kayıt var; liste uygulanmadı.',
+};
+
+/** e-Tebligat (D45): firmanın kendi hesabıyla okunan liste yalnız o firmaya yazılır; belge açılmamıştır. */
+async function tebligatUygula(ctx: { org: string }, m: SonucMesaji, sonuc: unknown, sahip: Sahip, d: UygulayiciDeps, basladi: string | null) {
+  if (!tebligatSonucuGecerli(sonuc) || (sonuc as { jobId: string }).jobId !== m.jobId) {
+    await finishJob(ctx, m.jobId, 'failed', 'Kurum sonucu beklenen biçimde değil; veri yazılmadı.', d);
+    return 'gecersiz_sonuc';
+  }
+  const s = sonuc as NoticeList & { firmId: string; sourceType: Kaynak; observedAt: string };
+  if (sahip.ownerKind !== 'firm' || s.firmId !== sahip.ownerId) throw new Error('e-Tebligat sonucu işin firmasıyla eşleşmiyor');
+  await recordLoginResult(ctx, sahip.accountId, 'ok', d.creds, basladi);
+  const r = await importNotices(ctx, { jobId: m.jobId, firmId: s.firmId, list: s }, d.tebligat);
+  if (!r.ok) {
+    await finishJob(ctx, m.jobId, 'failed', TEBLIGAT_HATASI[r.error] ?? 'Tebligat listesi uygulanmadı.', d);
+    return 'liste_hatasi';
+  }
+  const metin = `${r.value.toplam} tebligat · ${r.value.yeni} yeni · belge açılmadı${s.sourceType === 'sahte_gib' ? ' · kaynak: sahte GİB (demo)' : ''}`;
+  await finishJob(ctx, m.jobId, 'succeeded', metin, d, { ...r.value, kaynak: s.sourceType, gozlem: s.observedAt });
+  return 'uygulandi';
+}
 
 type TakvimSonucu = {
   schema: 'eworks.calendar.sources.v1';

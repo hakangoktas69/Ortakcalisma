@@ -12,7 +12,7 @@ const ORG = '11111111-1111-4111-8111-111111111111';
 const JOB = '22222222-2222-4222-8222-222222222222';
 const rnd = seededRandom(5);
 
-function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status']; kind?: Job['kind'] } = {}) {
+function kur(opts: { ownerKind?: 'advisor' | 'firm'; ownerId?: string; status?: Job['status']; kind?: Job['kind'] } = {}) {
   const is: Job = { id: JOB, kind: opts.kind ?? 'gib.sozlesmeler', accountId: 'h-1', status: opts.status ?? 'running', statusMessage: null, resultSummary: null, createdAt: '', startedAt: '2026-10-27T09:00:00.000Z', finishedAt: null };
   const girisler: string[] = [];
   const girisZamani: (string | null | undefined)[] = [];
@@ -24,6 +24,7 @@ function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status']; kin
   const silinen: string[] = [];
   const takvimYazilan: { year: number; entries: readonly CalendarEntry[]; sources: readonly CalendarSource[] }[] = [];
   const ortak: unknown[] = [];
+  const tebligatYazilan: { firmId: string; adet: number }[] = [];
   const jobs: JobRepository = {
     activeFor: async () => null,
     insertWithOutbox: async () => {},
@@ -35,7 +36,7 @@ function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status']; kin
       return true;
     },
     setMessage: async (_c, _id, m) => void (is.statusMessage = m),
-    accountOwner: async () => (is.kind === 'takvim.kaynaklar' ? null : { accountId: 'h-1', ownerKind: opts.ownerKind ?? 'advisor', ownerId: 'm-1' }),
+    accountOwner: async () => (is.kind === 'takvim.kaynaklar' ? null : { accountId: 'h-1', ownerKind: opts.ownerKind ?? 'advisor', ownerId: opts.ownerId ?? 'm-1' }),
     staleRunning: async () => [],
     countSince: async () => 0,
   };
@@ -70,6 +71,13 @@ function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status']; kin
     sgk: { upsert: async () => ({ id: 's' }), list: async () => [], get: async () => null },
     sonucSil: async (k) => void silinen.push(k),
     takvimOrtak: { kaydet: async (o) => void ortak.push(o) },
+    tebligat: {
+      upsert: async (_c, firmId, rows) => {
+        tebligatYazilan.push({ firmId, adet: rows.length });
+        return { yeni: rows.length, guncellenen: 0 };
+      },
+      list: async () => [],
+    },
     takvim: {
       repo: {
         replaceYear: async (_c, year, entries, sources) => {
@@ -79,7 +87,7 @@ function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status']; kin
       },
     },
   };
-  return { d, is, girisler, girisZamani, firmalar, yazilan, nesneler, beyannameler, belgeler, silinen, takvimYazilan, ortak };
+  return { d, is, girisler, girisZamani, firmalar, yazilan, nesneler, beyannameler, belgeler, silinen, takvimYazilan, ortak, tebligatYazilan };
 }
 
 const liste = (adet: number) => ({
@@ -263,5 +271,43 @@ describe('takvim kaynakları sonucu', () => {
     expect([...k.takvimYazilan, ...t.takvimYazilan]).toEqual([]);
     expect([...k.ortak, ...t.ortak]).toEqual([]);
     expect(t.is.status).toBe('failed');
+  });
+});
+
+describe('e-Tebligat sonucu (D45)', () => {
+  const FIRMA = '33333333-3333-4333-8333-333333333333';
+  const tebligatSonucu = (o: Record<string, unknown> = {}) => ({
+    schema: 'eworks.gib.notices.v1',
+    jobId: JOB,
+    firmId: FIRMA,
+    sourceType: 'sahte_gib',
+    observedAt: '2026-10-27T10:00:00+03:00',
+    accountVerified: true,
+    documentsOpened: false,
+    scope: 'observed_list_filter',
+    count: 2,
+    records: [0, 1].map((i) => ({ noticeKey: String(i).repeat(64), reference: `B-${i}`, documentType: 'Ödeme Emri', sender: 'VDB', department: '', sentOn: '2026-10-20', deliveredOn: null, readOn: null })),
+    ...o,
+  });
+
+  it('[F:tebligat.liste.sync] firmanın hesabıyla okunan liste o firmaya yazılır; giriş başarılı sayılır; iş özetle biter', async () => {
+    const k = kur({ kind: 'gib.etebligat', ownerKind: 'firm', ownerId: FIRMA });
+    k.nesneler.set(anahtar, tebligatSonucu());
+    expect(await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'ok', resultKey: anahtar }, k.d)).toBe('uygulandi');
+    expect(k.tebligatYazilan).toEqual([{ firmId: FIRMA, adet: 2 }]);
+    expect(k.girisler).toEqual(['ok']);
+    expect(k.is.status).toBe('succeeded');
+    expect(k.is.statusMessage).toContain('2 tebligat');
+    expect(k.is.statusMessage).toContain('belge açılmadı');
+  });
+
+  it('başka firmanın sonucu, müşavir hesabıyla yapılmış iş ya da şemaya uymayan sonuç yazılmaz', async () => {
+    const baska = kur({ kind: 'gib.etebligat', ownerKind: 'firm', ownerId: FIRMA });
+    baska.nesneler.set(anahtar, tebligatSonucu({ firmId: '44444444-4444-4444-8444-444444444444' }));
+    await expect(sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'ok', resultKey: anahtar }, baska.d)).rejects.toThrow();
+    const sema = kur({ kind: 'gib.etebligat', ownerKind: 'firm', ownerId: FIRMA });
+    sema.nesneler.set(anahtar, tebligatSonucu({ documentsOpened: true }));
+    expect(await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'ok', resultKey: anahtar }, sema.d)).toBe('gecersiz_sonuc');
+    expect([...baska.tebligatYazilan, ...sema.tebligatYazilan]).toEqual([]);
   });
 });

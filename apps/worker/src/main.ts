@@ -22,6 +22,7 @@ import { PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portf
 import { failStaleJobs, PgJobRepository, requestCalendarJob } from '@eworks/sync';
 import { PgFilingRepository } from '@eworks/social-security';
 import { PgContractRepository, PgDeclarationRepository } from '@eworks/tax-filing';
+import { PgNoticeRepository } from '@eworks/notices';
 import { applyCalendarSources, BundledCalendarSources, ensureCalendarYear, PgCalendarRepository } from '@eworks/workspace';
 import { eksikleriTamamla, ortakAnahtar, takvimHazirla, takvimYillari, type OrtakTakvim } from './takvim.ts';
 import { sonucuIsle, type UygulayiciDeps } from './uygulayici.ts';
@@ -67,6 +68,7 @@ export async function main(env = process.env) {
     sonucSil: (k) => depo.sil(k),
     takvim: { repo: new PgCalendarRepository(router) },
     takvimOrtak: { kaydet: (o) => depo.koy(ortakAnahtar(o.year), JSON.stringify(o), 'application/json') },
+    tebligat: new PgNoticeRepository(router),
   };
   let calisiyor = true;
   const dur = () => {

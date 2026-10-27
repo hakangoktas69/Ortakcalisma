@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation';
-import { accountStatuses, INSTITUTION_FORMS, liveStatus, liveStatusLabel, statusLabel, type AccountStatus, type Institution } from '@eworks/credentials';
+import { accountStatuses, CONSENT_METHODS, consentStatus, INSTITUTION_FORMS, liveStatus, liveStatusLabel, statusLabel, type AccountStatus, type Institution } from '@eworks/credentials';
 import { isAllowed } from '@eworks/identity-access';
 import { getFirm } from '@eworks/portfolio';
 import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { KurumHesabiFormu } from '@/features/credentials/KurumHesabiFormu.tsx';
+import { MukellefOnayi } from '@/features/credentials/MukellefOnayi.tsx';
+import { bugun } from '@/bff/beyanname.ts';
 import { ArsivDugmesi } from '@/features/portfolio/ArsivDugmesi.tsx';
 import { FirmaFormu } from '@/features/portfolio/FirmaFormu.tsx';
 import { FeatureBadge, FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
@@ -46,6 +48,7 @@ export default async function FirmaKarti({ params, searchParams }: { params: Pro
   const gib = hesaplar.find((h) => h.institution === 'GIB');
   const uets = hesaplar.find((h) => h.institution === 'UETS');
   const sgk = hesaplar.filter((h) => h.institution === 'SGK');
+  const onay = await consentStatus(ctx, id, k.onaylar);
   const duzenler = isAllowed(oturum.grants, 'firmalar.kurum_hesaplari.edit_credentials');
   const izin = (key: string) => isAllowed(oturum.grants, key);
   return (
@@ -123,6 +126,21 @@ export default async function FirmaKarti({ params, searchParams }: { params: Pro
                   form={formu('GIB')}
                 />
               </FeatureGate>
+            ) : null}
+            {izin('firmalar.kurum_hesaplari.consent') ? (
+              <FeatureGate k="firmalar.kurum_hesaplari.consent">
+                <MukellefOnayi
+                  csrf={oturum.csrf}
+                  firmId={f.id}
+                  durum={onay ? { active: onay.active, consentedOn: onay.consentedOn, methodTitle: CONSENT_METHODS.find((m) => m.id === onay.method)?.title ?? onay.method } : null}
+                  yontemler={CONSENT_METHODS}
+                  bugun={bugun()}
+                />
+              </FeatureGate>
+            ) : onay?.active ? (
+              <p>
+                Mükellef onayı: <span className="etiket iyi">Var</span>
+              </p>
             ) : null}
           </li>
           <li className="kart kurum-karti">

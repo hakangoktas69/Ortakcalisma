@@ -19,9 +19,9 @@ import { Kartlar } from '@/shared/ui/Sayfa.tsx';
 
 type Sayac = { etiket: string; deger: number | string; href: string; uyari?: boolean };
 
-const IS_ADI: Record<JobKind, string> = { 'gib.sozlesmeler': 'GİB sözleşmeleri', 'gib.beyannameler': 'e-Beyanname', 'gib.muhsgk': 'SGK bildirimleri', 'takvim.kaynaklar': 'Takvim kaynakları' };
-const IS_SAYFASI: Record<JobKind, string> = { 'gib.sozlesmeler': '/firmalar/gib_sozlesmeler', 'gib.beyannameler': '/beyanname/senkron', 'gib.muhsgk': '/sgk/ebildirge', 'takvim.kaynaklar': '/genel_bakis/takvim' };
-const IS_YETKISI: Record<JobKind, string> = { 'gib.sozlesmeler': 'firmalar.gib_sozlesmeler.view', 'gib.beyannameler': 'beyanname.liste.view', 'gib.muhsgk': 'sgk.ebildirge.view', 'takvim.kaynaklar': 'genel_bakis.takvim.sync' };
+const IS_ADI: Record<JobKind, string> = { 'gib.sozlesmeler': 'GİB sözleşmeleri', 'gib.beyannameler': 'e-Beyanname', 'gib.muhsgk': 'SGK bildirimleri', 'takvim.kaynaklar': 'Takvim kaynakları', 'gib.etebligat': 'e-Tebligat' };
+const IS_SAYFASI: Record<JobKind, string> = { 'gib.sozlesmeler': '/firmalar/gib_sozlesmeler', 'gib.beyannameler': '/beyanname/senkron', 'gib.muhsgk': '/sgk/ebildirge', 'takvim.kaynaklar': '/genel_bakis/takvim', 'gib.etebligat': '/tebligat/liste' };
+const IS_YETKISI: Record<JobKind, string> = { 'gib.sozlesmeler': 'firmalar.gib_sozlesmeler.view', 'gib.beyannameler': 'beyanname.liste.view', 'gib.muhsgk': 'sgk.ebildirge.view', 'takvim.kaynaklar': 'genel_bakis.takvim.sync', 'gib.etebligat': 'tebligat.liste.view' };
 
 /** Kategori kartları: gezinmedir, içerik göstermez; ana sayfa yetkisi kapatılmış kullanıcı da izinli modüllerine buradan ulaşır. */
 function Merkez({ oturum }: { oturum: Session }) {

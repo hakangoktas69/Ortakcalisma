@@ -1,7 +1,8 @@
 import 'server-only';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { Redis } from 'ioredis';
-import { PgCredentialRepository } from '@eworks/credentials';
+import { PgConsentRepository, PgCredentialRepository } from '@eworks/credentials';
+import { PgNoticeRepository } from '@eworks/notices';
 import { GoTrueAuthProvider, PgMembershipReader, RedisSessionStore } from '@eworks/identity-access';
 import { PgDocumentRepository, S3FileStore } from '@eworks/documents';
 import { databaseSchema, Depo, loadConfig, sessionSchema, ShardRouter, storageSchema, taxIdSchema } from '@eworks/platform';
@@ -32,6 +33,8 @@ function kur() {
     clock: { now: () => new Date() },
     firmalar: { repo: new PgFirmRepository(router), registry: new PgTaxpayerRegistry(router), hashTaxId: taxIdHasher(c.TAX_ID_HMAC_KEY), newId: randomUUID },
     kurumHesaplari: new PgCredentialRepository(router),
+    onaylar: new PgConsentRepository(router),
+    tebligat: new PgNoticeRepository(router),
     isler: { jobs: new PgJobRepository(router), newId: randomUUID },
     sozlesmeler: { contracts: new PgContractRepository(router) },
     beyannameler: { declarations: new PgDeclarationRepository(router) },

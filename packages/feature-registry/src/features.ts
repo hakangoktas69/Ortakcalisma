@@ -65,7 +65,7 @@ const tree: Tree = {
     page('beyanname.senkron', 'Beyanname senkronu', { start: 'Senkron başlat', cancel: 'İptal et' }, 'portal', 'sync'),
     page('beyanname.pilot_bolge', 'Pilot bölge ayarları', { ...V, edit: 'Düzenle' }, 'portal'),
   ),
-  ...mod('tebligat', 'e-Tebligat', null, 'portal',
+  ...mod('tebligat', 'e-Tebligat', 'notices', 'portal',
     page('tebligat.liste', 'e-Tebligat listesi', { ...V, sync: 'Güncelle' }, 'portal'),
   ),
   ...mod('sgk', 'SGK', 'social-security', 'portal',

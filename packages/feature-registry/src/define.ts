@@ -14,6 +14,7 @@ export type ContextName =
   | 'workspace'
   | 'notifications'
   | 'audit'
+  | 'notices'
   | 'sales';
 
 export type FeatureDef = {

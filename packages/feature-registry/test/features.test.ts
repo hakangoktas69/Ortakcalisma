@@ -38,7 +38,8 @@ describe('özellik ağacı', () => {
   it('bağlam miras alınır, sayfa ezebilir', () => {
     expect(contextOf(features, 'sgk.erapor.approve')).toBe('social-security');
     expect(contextOf(features, 'firmalar.kurum_hesaplari.consent')).toBe('credentials');
-    expect(contextOf(features, 'tebligat.liste.view')).toBeNull();
+    expect(contextOf(features, 'tebligat.liste.view')).toBe('notices'); // D45
+    expect(contextOf(features, 'edefter.liste.view')).toBeNull();
   });
 
   it('test sonucu yokken her düğüm kırmızı başlar', () => {

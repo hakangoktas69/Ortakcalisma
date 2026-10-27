@@ -25,7 +25,8 @@
         "gib.sozlesmeler",
         "gib.beyannameler",
         "gib.muhsgk",
-        "takvim.kaynaklar"
+        "takvim.kaynaklar",
+        "gib.etebligat"
       ]
     },
     "shard": {

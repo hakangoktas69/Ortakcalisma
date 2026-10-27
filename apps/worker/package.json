@@ -18,6 +18,7 @@
     "@eworks/sync": "workspace:*",
     "@eworks/tax-filing": "workspace:*",
     "@eworks/workspace": "workspace:*",
+    "@eworks/notices": "workspace:*",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1"
   },

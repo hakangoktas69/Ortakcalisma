@@ -111,6 +111,9 @@ importers:
       '@eworks/kernel':
         specifier: workspace:*
         version: link:../../packages/kernel
+      '@eworks/notices':
+        specifier: workspace:*
+        version: link:../../packages/contexts/notices
       '@eworks/platform':
         specifier: workspace:*
         version: link:../../packages/platform
@@ -184,6 +187,9 @@ importers:
       '@eworks/kernel':
         specifier: workspace:*
         version: link:../../packages/kernel
+      '@eworks/notices':
+        specifier: workspace:*
+        version: link:../../packages/contexts/notices
       '@eworks/platform':
         specifier: workspace:*
         version: link:../../packages/platform
@@ -278,6 +284,31 @@ importers:
       '@eworks/feature-registry':
         specifier: workspace:*
         version: link:../../feature-registry
+      '@eworks/sales':
+        specifier: workspace:*
+        version: link:../sales
+      '@eworks/testing':
+        specifier: workspace:*
+        version: link:../../testing
+
+  packages/contexts/notices:
+    dependencies:
+      '@eworks/kernel':
+        specifier: workspace:*
+        version: link:../../kernel
+      '@eworks/platform':
+        specifier: workspace:*
+        version: link:../../platform
+    devDependencies:
+      '@eworks/credentials':
+        specifier: workspace:*
+        version: link:../credentials
+      '@eworks/identity-access':
+        specifier: workspace:*
+        version: link:../identity-access
+      '@eworks/portfolio':
+        specifier: workspace:*
+        version: link:../portfolio
       '@eworks/sales':
         specifier: workspace:*
         version: link:../sales

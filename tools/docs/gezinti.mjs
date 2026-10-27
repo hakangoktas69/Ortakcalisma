@@ -50,7 +50,7 @@ export const TABLO = {
   'docs/adr/0001-depo-yeniden-yapilanmasi.md': { ebeveyn: ADR, etiket: 'ADR 0001' },
   [BAGLAM]: { ebeveyn: GENEL, etiket: 'Bağlamlar' },
   ...Object.fromEntries(
-    ['identity-access', 'organization', 'portfolio', 'credentials', 'sync', 'tax-filing', 'social-security', 'documents', 'workspace', 'notifications', 'audit', 'sales']
+    ['identity-access', 'organization', 'portfolio', 'credentials', 'sync', 'tax-filing', 'social-security', 'documents', 'workspace', 'notices', 'notifications', 'audit', 'sales']
       .map((ad) => [`docs/baglamlar/${ad}.md`, { ebeveyn: BAGLAM, etiket: ad }]),
   ),
   'deploy/README.md': { ebeveyn: KOK, etiket: 'Docker ve Kubernetes' },

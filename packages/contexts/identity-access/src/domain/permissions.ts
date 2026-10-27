@@ -20,13 +20,13 @@ export const ROLE_TEMPLATES: Readonly<Record<Role, Grants>> = {
   // Görüntüleme + görev/not. Senkron başlatma ve kurum bilgisi girme kapalı (müşavir izin verebilir)
   personel: {
     allow: ['oturum', 'genel_bakis', 'firmalar.liste', 'firmalar.kart.view', 'firmalar.kurum_hesaplari.view_status', 'firmalar.gib_sozlesmeler.view',
-      'beyanname.liste', 'beyanname.kontrol', 'beyanname.belge', 'sgk.kontrol', 'sgk.ebildirge.view', 'sgk.ebildirge.download', 'gorevler', 'notlar', 'kisayollar', 'bildirimler', 'ayarlar.profil'],
+      'beyanname.liste', 'beyanname.kontrol', 'beyanname.belge', 'sgk.kontrol', 'sgk.ebildirge.view', 'sgk.ebildirge.download', 'tebligat.liste.view', 'gorevler', 'notlar', 'kisayollar', 'bildirimler', 'ayarlar.profil'],
     deny: ['genel_bakis.takvim.edit', 'genel_bakis.takvim.sync'],
   },
   // Kendi firmasında görüntüleme, belge indirme, kendi hesap bilgisini girme ve onay
   mukellef: {
     allow: ['oturum', 'genel_bakis.panel', 'firmalar.kart.view', 'firmalar.kurum_hesaplari.view_status', 'firmalar.kurum_hesaplari.edit_credentials',
-      'firmalar.kurum_hesaplari.consent', 'beyanname.liste.view', 'beyanname.belge', 'sgk.ebildirge.view', 'sgk.ebildirge.download', 'ayarlar.profil'],
+      'firmalar.kurum_hesaplari.consent', 'beyanname.liste.view', 'beyanname.belge', 'sgk.ebildirge.view', 'sgk.ebildirge.download', 'tebligat.liste.view', 'ayarlar.profil'],
     deny: [],
   },
 };

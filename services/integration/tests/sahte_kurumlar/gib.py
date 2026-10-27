@@ -139,8 +139,11 @@ document.getElementById('giris').addEventListener('click', async () => {
 </script>''')
 
 
-def _anasayfa() -> bytes:
-    return _sayfa('GİB Dijital Vergi Dairesi', '''
+def _anasayfa(kullanici: str = '') -> bytes:
+    # Profil düğmesi ve E-Tebligat menüsü Mert'in canlı gözleminden (26.10.2026): "Ad Soyad <kimlik>", menü "E-Tebligat"
+    return _sayfa('GİB Dijital Vergi Dairesi', f'''
+<header><div aria-haspopup="true">SAHTE MÜKELLEF {html.escape(kullanici)}</div>
+<nav><a href="/portal/e-tebligat">E-Tebligat</a></nav></header>''' + '''
 <h1>Dijital Vergi Dairesi</h1>
 <section><h2>Geçiş Yapılabilecek Uygulamalar</h2>
 <div class="kart" onclick="document.getElementById('onay').hidden=false"><p>İnternet Vergi Dairesi</p></div>
@@ -235,7 +238,11 @@ class Isleyici(BaseHTTPRequestHandler):
         if u.path == '/dijital/portal/anasayfa':
             if self._cerez('DVD') not in _dvd_oturum:
                 return self._yanit(302, b'', yer='/portal/login')
-            return self._yanit(200, _anasayfa())
+            return self._yanit(200, _anasayfa(_dvd_oturum[self._cerez('DVD')]))
+        if u.path == '/dijital/portal/e-tebligat':
+            if self._cerez('DVD') not in _dvd_oturum:
+                return self._yanit(302, b'', yer='/portal/login')
+            return self._yanit(200, _etebligat_sayfasi())
         if u.path == '/intvrg/intvrg_side/main.jsp':
             belirtec = q.get('token', [''])[0]
             with _kilit:
@@ -333,6 +340,15 @@ class Isleyici(BaseHTTPRequestHandler):
             return self._json({'belirtec': belirtec})
         if u.path == '/ebeyanname/dispatch':
             return _ebyn_sorgu_isle(self, govde)
+        if u.path == '/dijital/apigateway/etebligat/etebligat/tebligat-listele':
+            kullanici = _dvd_oturum.get(self._cerez('DVD') or '')
+            if kullanici is None:
+                return self._yanit(401, b'{}', 'application/json')
+            try:
+                sayfa = int(json.loads(govde or b'{}').get('pageNo', 1))
+            except (ValueError, TypeError, AttributeError):
+                return self._yanit(400, b'{}', 'application/json')
+            return self._json(_tebligat_sayfasi(kullanici, sayfa))
         if u.path == '/gib/api/gibportal/vergiTakvimi/specification/listAll':
             return self._json(_vergi_takvimi(govde))
         if u.path == '/dijital/portal/api/ivd':
@@ -344,6 +360,44 @@ class Isleyici(BaseHTTPRequestHandler):
                 _ivd_belirtec[belirtec] = kullanici
             return self._json({'belirtec': belirtec})
         return self._yanit(404, b'')
+
+
+TEBLIGAT_SAYFA = 10
+
+
+def tebligatlar(kullanici: str) -> list[dict]:
+    """Sentetik e-Tebligat listesi (kullanıcı koduna göre tohumlanır). Alan adları ve tarih biçimi Mert'in canlı gözleminden."""
+    rnd = random.Random('tebligat:' + kullanici)
+    turler = ['Ödeme Emri', 'Vergi/Ceza İhbarnamesi', 'Yoklama Fişi', 'İzaha Davet Yazısı', 'Bilgi İsteme Yazısı']
+    out = []
+    for i in range(23):
+        gun, ay = rnd.randint(1, 28), rnd.randint(1, 9)
+        okundu = i % 3 == 0
+        out.append({'tebligId': f'{kullanici}-T{i:03d}', 'belgeNo': f'SAHTE-{2026}{ay:02d}-{i:04d}', 'belgeTuruAciklama': turler[i % len(turler)],
+                    'kurumAciklama': 'Sahte Vergi Dairesi Başkanlığı', 'altKurum': 'Sahte Vergi Dairesi',
+                    'gonderimZamani': f'{gun:02d}.{ay:02d}.2026 10:15:00', 'tebligZamani': f'{gun:02d}.{ay:02d}.2026 23:59:59' if okundu else None,
+                    'mukellefOkumaZamani': f'{gun:02d}.{ay:02d}.2026 11:00:00' if okundu else None})
+    return out
+
+
+def _tebligat_sayfasi(kullanici: str, sayfa: int) -> dict:
+    hepsi = tebligatlar(kullanici)
+    bas = (sayfa - 1) * TEBLIGAT_SAYFA
+    return {'data': {'tebligatDtoList': hepsi[bas:bas + TEBLIGAT_SAYFA], 'count': len(hepsi)},
+            'pageDetail': {'pageNo': sayfa, 'pageSize': TEBLIGAT_SAYFA, 'total': len(hepsi), 'totalPage': -(-len(hepsi) // TEBLIGAT_SAYFA)}}
+
+
+def _etebligat_sayfasi() -> bytes:
+    # Liste sayfası kendi isteğini atar (robot bu isteği gözler ve sayfa alanını ilerleterek tekrarlar); belge açma düğmesi yok
+    return _sayfa('e-Tebligat', '''
+<h1>e-Tebligat</h1><table id="liste"><thead><tr><th>Belge No</th><th>Belge Türü</th><th>Gönderim</th></tr></thead><tbody></tbody></table>
+<script>
+fetch('/apigateway/etebligat/etebligat/tebligat-listele', {method: 'POST', headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({pageNo: 1, pageSize: 10, filtre: {durum: 'TUMU'}})})
+  .then(r => r.json()).then(j => { for (const t of j.data.tebligatDtoList) { const tr = document.createElement('tr');
+    for (const v of [t.belgeNo, t.belgeTuruAciklama, t.gonderimZamani]) { const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); }
+    document.querySelector('#liste tbody').appendChild(tr); } });
+</script>''')
 
 
 AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']

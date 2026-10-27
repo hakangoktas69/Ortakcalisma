@@ -21,6 +21,7 @@
     "@eworks/sync": "workspace:*",
     "@eworks/tax-filing": "workspace:*",
     "@eworks/workspace": "workspace:*",
+    "@eworks/notices": "workspace:*",
     "ioredis": "^5.8.2",
     "next": "16.4.1",
     "react": "19.3.0",

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eworks.local/contracts/integration/eworks.gib.notices.v1.schema.json",
+  "title": "GİB e-Tebligat listesi — ACL'den işçiye (gib.etebligat işi)",
+  "description": "Firmanın kendi GİB hesabıyla, hesap kimliği firma VKN/TCKN ile eşleştikten sonra okunan e-Tebligat liste bilgisi (D45). Belge açılmaz; kurum kayıt kimliği yalnız SHA-256 özetiyle taşınır. Şahıs firmasında kişisel veri sayılabilir: loglara girmez.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "jobId", "firmId", "sourceType", "observedAt", "accountVerified", "documentsOpened", "scope", "count", "records"],
+  "properties": {
+    "schema": { "const": "eworks.gib.notices.v1" },
+    "jobId": { "type": "string", "format": "uuid" },
+    "firmId": { "type": "string", "format": "uuid" },
+    "sourceType": { "enum": ["gib_live", "sahte_gib"] },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "accountVerified": { "const": true },
+    "documentsOpened": { "const": false },
+    "scope": { "const": "observed_list_filter" },
+    "count": { "type": "integer", "minimum": 0, "maximum": 10000 },
+    "records": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["noticeKey", "reference", "documentType", "sender", "department", "sentOn", "deliveredOn", "readOn"],
+        "properties": {
+          "noticeKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "reference": { "type": "string", "minLength": 1, "maxLength": 2000 },
+          "documentType": { "type": "string", "minLength": 1, "maxLength": 2000 },
+          "sender": { "type": "string", "minLength": 1, "maxLength": 2000 },
+          "department": { "type": "string", "maxLength": 2000 },
+          "sentOn": { "type": "string", "format": "date" },
+          "deliveredOn": { "oneOf": [{ "type": "null" }, { "type": "string", "format": "date" }] },
+          "readOn": { "oneOf": [{ "type": "null" }, { "type": "string", "format": "date" }] }
+        }
+      }
+    }
+  }
+}

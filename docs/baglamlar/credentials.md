@@ -16,6 +16,8 @@
 
 > **2026-10-27 (D42):** kurum türleri GİB, SGK (işyeri başına, `label` = işyeri adı), UETS; alanların hepsi Vault'ta (`credentials.save_account_secret`, kuruma göre tam alan listesi). e-Devlet şifresi saklanmaz. `liveStatus`: kurumda bilgi değişikliğinden sonra başarılı giriş → aktif; hatalı şifre/kilit/devre dışı → aktif değil; diğer → doğrulanmadı. Form alanları kapalı başlar (otomatik doldurma kilidi).
 
+> **2026-10-27 (D46):** mükellef onayı (`CredentialConsent`, `credentials.consents`): müşavir/ofis yöneticisi yazılı onayı tarih ve yöntemle beyan eder, mükellef kullanıcısı kendi firması için verebilir; firma başına tek etkin onay, geri alınabilir, denetimli (`mukellef_onayi.kaydedildi` / `geri_alindi`). Firma hesabının sırrı onay yoksa işe verilmez (`secret_for_job` → `EW001`). İş sonucu, iş başladıktan sonra bilgisi değişen hesaba yazılmaz (`recordLogin(..., jobStartedAt)`).
+
 ## Kurallar
 
 - Kimlik bilgisi (kullanıcı kodu + şifre) **yalnız Vault'tadır**. Tabloda sır kimliği ve durum durur; sır kimliği sütunu ve `vault` şeması web rolüne kapalıdır. Şifre yanıtta, günlükte, hata mesajında, denetim kaydında yer almaz; form gönderildikten sonra temizlenir.

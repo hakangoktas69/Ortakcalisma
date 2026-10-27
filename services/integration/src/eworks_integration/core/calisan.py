@@ -19,6 +19,7 @@ from redis import asyncio as aioredis
 from ..institutions.acik_kaynak.nager import BayramHatasi, resmi_tatilleri_oku
 from ..institutions.gib.beyannameler import BelgeIstegi, BeyannameHatasi, beyanname_tara, to_declarations
 from ..institutions.gib.ebeyanname_servis import EBEYANNAME
+from ..institutions.gib.etebligat import EtebligatHatasi, etebligat_listesi_oku, hesap_kimligi_oku, to_notices
 from ..institutions.gib.giris import GirisBasarisiz, YanlisSifre, giris_yap
 from ..institutions.gib.sozlesmeler import ListeHatasi, sozlesme_listesi_oku, to_contract
 from ..institutions.gib.vergi_takvimi import TakvimHatasi, to_snapshot, vergi_takvimi_oku
@@ -32,7 +33,7 @@ from .hiz import HizSinirlayici
 EXCHANGE, DLX = 'eworks', 'eworks.dlx'
 ROBOT_GIB, SONUC, DLQ = 'robot.gib', 'entegrasyon.sonuc', 'eworks.dlq'
 ARGUMANLAR = {'x-queue-type': 'quorum', 'x-dead-letter-exchange': DLX, 'x-delivery-limit': 5}
-TURLER = ('gib.sozlesmeler', 'gib.beyannameler', 'gib.muhsgk', 'takvim.kaynaklar')
+TURLER = ('gib.sozlesmeler', 'gib.beyannameler', 'gib.muhsgk', 'takvim.kaynaklar', 'gib.etebligat')
 UUID = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 
 log = logging.getLogger('eworks.entegrasyon')
@@ -46,6 +47,10 @@ class HesapKullanilamaz(Exception):
     pass
 
 
+class OnayYok(Exception):
+    """Firma hesabı için etkin mükellef onayı yok (D18/D46; veritabanı EW001)."""
+
+
 def isi_sahiplen(url: str, org: str, job: str):
     with psycopg.connect(url, autocommit=True) as c:
         return c.execute('select sync.claim_job(%s, %s)', (org, job)).fetchone()[0]
@@ -56,6 +61,8 @@ def is_sirri(url: str, org: str, job: str) -> dict:
         with psycopg.connect(url, autocommit=True) as c:
             return c.execute('select credentials.secret_for_job(%s, %s)', (org, job)).fetchone()[0]
     except psycopg.Error as e:
+        if getattr(e, 'sqlstate', None) == 'EW001':
+            raise OnayYok() from None
         if getattr(e, 'sqlstate', None) in ('55000', 'P0002'):
             raise HesapKullanilamaz() from None
         raise
@@ -101,6 +108,10 @@ class Calisan:
             kimlik = await asyncio.to_thread(is_sirri, url, org, job)
         except HesapKullanilamaz:
             return await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': 'Kurum hesabı kullanılamaz durumda (hatalı şifre ya da kilit).'})
+        except OnayYok:
+            return await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': 'Mükellef onayı yok ya da geri alındı; firmanın kurum hesabı kullanılmadı.'})
+        if kind == 'gib.etebligat':
+            return await self._etebligat(org, job, params, kimlik, ilerleme)
         try:
             async with async_playwright() as p, Tarayici(p, self.hiz, self.a.sahte_gib) as t:
                 ctx = await t.baglam()
@@ -152,6 +163,47 @@ class Calisan:
         except Exception as e:  # noqa: BLE001 — kurum yanıtı/şifre metni dışarı sızmasın diye sabit metin
             await self.hiz.baglanti_hatasi()
             await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': f'Kurum işi tamamlanamadı ({type(e).__name__}).'})
+            gunluk('is_hatasi', tur=type(e).__name__)
+        finally:
+            kimlik.clear()
+
+    async def _etebligat(self, org: str, job: str, params: dict, kimlik: dict, ilerleme):
+        """e-Tebligat listesi (D45): firmanın kendi hesabıyla giriş; görünen hesap kimliği firma VKN/TCKN ile eşleşmezse durur.
+        Yalnız liste okunur, belge açılmaz."""
+        firma, beklenen = params.get('firmId'), params.get('taxId')
+        if not isinstance(firma, str) or not UUID.match(firma) or not isinstance(beklenen, str) or not beklenen.isdigit() or len(beklenen) not in (10, 11):
+            kimlik.clear()
+            return await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': 'e-Tebligat işinin firma bilgisi geçersiz.'})
+        gunluk('is_basladi', tur='gib.etebligat')
+        try:
+            async with async_playwright() as p, Tarayici(p, self.hiz, self.a.sahte_gib) as t:
+                ctx = await t.baglam()
+                try:
+                    sayfa = await ctx.new_page()
+                    await ilerleme('Firmanın GİB hesabıyla giriş yapılıyor (güvenlik kodu otomatik).')
+                    await giris_yap(sayfa, kimlik, self.cozucu, ilerleme)
+                    gorunen = await hesap_kimligi_oku(sayfa)
+                    if gorunen != beklenen:
+                        gunluk('is_basarisiz', tur='gib.etebligat', neden='hesap_kimligi')
+                        return await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': 'Açılan GİB hesabının kimliği firmanın VKN/TCKN numarasıyla doğrulanamadı; liste okunmadı.'})
+                    await ilerleme('Hesap kimliği firmayla eşleşti.')
+                    kayitlar = await etebligat_listesi_oku(ctx, sayfa, ilerleme)
+                finally:
+                    await ctx.close()
+            anahtar = f'org/{org}/sonuc/{job}.json'
+            govde = json.dumps(to_notices(job, firma, kayitlar, bool(self.a.sahte_gib)), ensure_ascii=False).encode('utf-8')
+            await asyncio.to_thread(self.s3.put_object, Bucket=self.a.s3_bucket, Key=anahtar, Body=govde, ContentType='application/json')
+            await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'ok', 'resultKey': anahtar})
+            gunluk('is_tamam', tur='gib.etebligat', adet=len(kayitlar))
+        except YanlisSifre:
+            await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'wrong_password'})
+            gunluk('hatali_sifre')
+        except (GirisBasarisiz, EtebligatHatasi) as e:
+            await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': str(e)[:500]})
+            gunluk('is_basarisiz', tur=type(e).__name__)
+        except Exception as e:  # noqa: BLE001 — kurum yanıtı/şifre metni dışarı sızmasın diye sabit metin
+            await self.hiz.baglanti_hatasi()
+            await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': f'e-Tebligat işi tamamlanamadı ({type(e).__name__}).'})
             gunluk('is_hatasi', tur=type(e).__name__)
         finally:
             kimlik.clear()
