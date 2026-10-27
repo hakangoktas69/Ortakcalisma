@@ -73,6 +73,8 @@ Yetki ağacı = özellik ağacı (`packages/feature-registry`): modül → sayfa
 | Dönem | `Period` | İşyeri (SGK) | `Workplace` |
 | Kurum | `Institution` | e-Bildirge / işe giriş-çıkış / e-Rapor / iş kazası | `EBildirgeDocument` / `EmploymentEvent` / `SickLeaveReport` / `WorkAccident` |
 | Yetki anahtarı | `PermissionKey` | Özellik durumu | `FeatureStatus` (`red`/`green`) |
+| Takvim kaydı | `CalendarEntry` | Kişisel hatırlatma | `Reminder` |
+| SGK işyeri hesabı | `InstitutionAccount` (`institution: SGK`, `label`) | Kurum hesabının canlı durumu | `LiveStatus` |
 
 <!-- gezinti — node tools/docs/gezinti.mjs --yaz üretir, elle düzenlemeyin -->
 

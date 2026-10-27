@@ -9,6 +9,7 @@ export {
   getJob,
   latestJobs,
   recordProgress,
+  requestCalendarJob,
   requestJob,
   type AccountRef,
   type Ctx,

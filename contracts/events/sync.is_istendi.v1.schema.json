@@ -23,7 +23,9 @@
     "kind": {
       "enum": [
         "gib.sozlesmeler",
-        "gib.beyannameler"
+        "gib.beyannameler",
+        "gib.muhsgk",
+        "takvim.kaynaklar"
       ]
     },
     "shard": {

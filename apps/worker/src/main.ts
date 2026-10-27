@@ -19,9 +19,11 @@ import {
   type Kanal,
 } from '@eworks/platform';
 import { PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portfolio';
-import { failStaleJobs, PgJobRepository } from '@eworks/sync';
+import { failStaleJobs, PgJobRepository, requestCalendarJob } from '@eworks/sync';
 import { PgFilingRepository } from '@eworks/social-security';
 import { PgContractRepository, PgDeclarationRepository } from '@eworks/tax-filing';
+import { applyCalendarSources, BundledCalendarSources, ensureCalendarYear, PgCalendarRepository } from '@eworks/workspace';
+import { eksikleriTamamla, ortakAnahtar, takvimHazirla, takvimYillari, type OrtakTakvim } from './takvim.ts';
 import { sonucuIsle, type UygulayiciDeps } from './uygulayici.ts';
 
 const SIFIR = '00000000-0000-0000-0000-000000000000';
@@ -63,6 +65,8 @@ export async function main(env = process.env) {
     sgk: new PgFilingRepository(router),
     sonucOku: (k) => depo.json(k),
     sonucSil: (k) => depo.sil(k),
+    takvim: { repo: new PgCalendarRepository(router) },
+    takvimOrtak: { kaydet: (o) => depo.koy(ortakAnahtar(o.year), JSON.stringify(o), 'application/json') },
   };
   let calisiyor = true;
   const dur = () => {
@@ -87,6 +91,9 @@ export async function main(env = process.env) {
 
   let sonTemizlik = 0;
   let sonBelgeTemizligi = 0;
+  let sonTakvim = 0;
+  const takvim = { repo: new PgCalendarRepository(router), sources: new BundledCalendarSources() };
+  const takvimBellegi = new Map<number, Set<string>>();
   const saklamaGunu = retentionDays(env.DOCUMENT_RETENTION_DAYS);
   const dosyalar = new S3FileStore(depo);
   while (calisiyor) {
@@ -109,6 +116,24 @@ export async function main(env = process.env) {
           const n3 = await purgeExpired({ org: o.id }, { repo: deps.belgeler, files: dosyalar }, saklamaGunu);
           if (n3) gunluk('belge_temizligi', { adet: n3, gun: saklamaGunu });
         }
+      }
+      // Takvim: her ofisin yılı hazır kaynaktan doldurulur (başlangıçta ve 10 dakikada bir; idempotent, dolu yıl yazılmaz)
+      if (Date.now() - sonTakvim > 600_000) {
+        sonTakvim = Date.now();
+        const { rows } = await router.control.query<{ id: string }>(`select id from directory.organizations where status = 'active'`);
+        const t = await takvimHazirla(rows.map((o) => o.id), takvimYillari(new Date()), (org, yil) => ensureCalendarYear({ org }, yil, takvim));
+        if (t.yazilan || t.hata || t.gibEksik.length) gunluk('takvim', { yazilan: t.yazilan, gib_eksik: t.gibEksik.length, hata: t.hata });
+        // GİB vergi takvimi eksik yıl: kamuya açık veri yıl başına bir kez çekilir (ortak sonuç), ofislerin kopyası ondan doldurulur
+        const e = await eksikleriTamamla(t.gibEksik, new Date(), {
+          ortakOku: (yil) => depo.json<OrtakTakvim>(ortakAnahtar(yil), 2 * 1024 * 1024).catch(() => null),
+          uygula: async (org, yil, kaynak) => {
+            const r = await applyCalendarSources({ org }, yil, kaynak, takvim);
+            if (!r.ok) throw new Error(r.error);
+          },
+          iste: async (org, yil) => void (await requestCalendarJob({ org }, yil, { jobs: deps.jobs, newId: randomUUID }, new Date())),
+          bellek: takvimBellegi,
+        });
+        if (e.uygulanan || e.istenen) gunluk('takvim_ortak', e);
       }
     } catch (e) {
       gunluk('dongu_hatasi', { hata: (e as Error).name });

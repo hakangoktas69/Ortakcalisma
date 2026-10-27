@@ -20,6 +20,7 @@ import {
   type FirmPort,
   type ImportSummary,
 } from '@eworks/tax-filing';
+import { applyCalendarSources, type CalendarRepository, type GibCalendarSnapshot } from '@eworks/workspace';
 
 // Entegrasyon sonucunu uygulayan işçi mantığı (06 §4: alan kuralları burada, Python ACL tablolara yazmaz).
 // Bağlamlar yalnız public API'leriyle birleştirilir (bileşim kökü).
@@ -31,6 +32,7 @@ addFormats.default(ajv);
 const sonucMesajiGecerli = ajv.compile(sema('events/integration.sonuc.v1.schema.json'));
 const sozlesmeListesiGecerli = ajv.compile(sema('integration/eworks.gib.contracts.v1.schema.json'));
 const beyannameSonucuGecerli = ajv.compile(sema('integration/eworks.gib.declarations.v1.schema.json'));
+const takvimSonucuGecerli = ajv.compile(sema('integration/eworks.calendar.sources.v1.schema.json'));
 
 export type SonucMesaji = { orgId: string; jobId: string; outcome: 'ok' | 'wrong_password' | 'failed' | 'progress'; resultKey?: string; message?: string };
 type Kaynak = 'gib_live' | 'sahte_gib';
@@ -56,6 +58,9 @@ export type UygulayiciDeps = {
   sonucOku: (anahtar: string) => Promise<unknown>;
   /** Uygulanan ham sonuç silinir (02 §9: ham sonuç saklanmaz); silinemezse iş yine tamamlanır. */
   sonucSil: (anahtar: string) => Promise<void>;
+  takvim: { repo: Pick<CalendarRepository, 'replaceYear'> };
+  /** Doğrulanmış kamuya açık takvim sonucu: diğer ofislerin kopyası kuruma gitmeden buradan doldurulur (işçi döngüsü). */
+  takvimOrtak: { kaydet: (o: { year: number; observedAt: string; gib: GibCalendarSnapshot | null; religious: TakvimSonucu['religious'] }) => Promise<void> };
 };
 
 /** portfolio use-case'lerini tax-filing'in FirmPort'una bağlar. */
@@ -96,9 +101,12 @@ export async function sonucuIsle(ham: unknown, d: UygulayiciDeps): Promise<strin
     return 'ilerleme';
   }
   const [sahip, is] = await Promise.all([d.jobs.accountOwner(ctx, m.jobId), d.jobs.get(ctx, m.jobId)]);
-  if (!sahip || !is) throw new Error('İş bulunamadı');
+  if (!is) throw new Error('İş bulunamadı');
+  // Takvim kaynakları işi kurum hesabı kullanmaz (kamuya açık kaynak): hesap sahibi yoktur
+  if (is.kind === 'takvim.kaynaklar') return takvimSonucu(ctx, m, d);
+  if (!sahip) throw new Error('İş bulunamadı');
   if (m.outcome === 'wrong_password') {
-    await recordLoginResult(ctx, sahip.accountId, 'wrong_password', d.creds);
+    await recordLoginResult(ctx, sahip.accountId, 'wrong_password', d.creds, is.startedAt);
     await finishJob(ctx, m.jobId, 'wrong_password', 'Kurum kullanıcı kodu veya şifresi hatalı. Hesap, yeni bilgi girilene dek kullanılmayacak.', d);
     return 'hatali_sifre';
   }
@@ -109,7 +117,7 @@ export async function sonucuIsle(ham: unknown, d: UygulayiciDeps): Promise<strin
   if (!m.resultKey || !m.resultKey.startsWith(`org/${m.orgId}/`)) throw new Error('Sonuç anahtarı ofisle eşleşmiyor');
   const sonuc = await d.sonucOku(m.resultKey);
   try {
-    return is.kind === 'gib.beyannameler' || is.kind === 'gib.muhsgk' ? await beyannameUygula(ctx, m, sonuc, sahip, d) : await sozlesmeUygula(ctx, m, sonuc, sahip, d);
+    return is.kind === 'gib.beyannameler' || is.kind === 'gib.muhsgk' ? await beyannameUygula(ctx, m, sonuc, sahip, d, is.startedAt) : await sozlesmeUygula(ctx, m, sonuc, sahip, d, is.startedAt);
   } finally {
     await d.sonucSil(m.resultKey).catch(() => {});
   }
@@ -117,13 +125,65 @@ export async function sonucuIsle(ham: unknown, d: UygulayiciDeps): Promise<strin
 
 type Sahip = { accountId: string; ownerKind: 'advisor' | 'firm'; ownerId: string };
 
-async function sozlesmeUygula(ctx: { org: string }, m: SonucMesaji, sonuc: unknown, sahip: Sahip, d: UygulayiciDeps) {
+type TakvimSonucu = {
+  schema: 'eworks.calendar.sources.v1';
+  jobId: string;
+  year: number;
+  observedAt: string;
+  sourceType: Kaynak;
+  gib: GibCalendarSnapshot | null;
+  gibError: string | null;
+  religious: { ramazan: string; kurban: string; certain: boolean; sourceUrl: string; checkedAt: string } | null;
+  religiousError: string | null;
+};
+
+/** Takvim kaynakları (workspace takvimi): doğrulanan kaynak yılın takvimine uygulanır; doğrulanamayanın mevcut kayıtlarına dokunulmaz. */
+async function takvimSonucu(ctx: { org: string }, m: SonucMesaji, d: UygulayiciDeps) {
+  if (m.outcome !== 'ok') {
+    await finishJob(ctx, m.jobId, 'failed', m.message ?? 'Takvim kaynakları okunamadı; takvim değiştirilmedi.', d);
+    return 'basarisiz';
+  }
+  if (!m.resultKey || !m.resultKey.startsWith(`org/${m.orgId}/`)) throw new Error('Sonuç anahtarı ofisle eşleşmiyor');
+  const sonuc = await d.sonucOku(m.resultKey);
+  try {
+    if (!takvimSonucuGecerli(sonuc) || (sonuc as TakvimSonucu).jobId !== m.jobId) {
+      await finishJob(ctx, m.jobId, 'failed', 'Takvim kaynağı beklenen biçimde değil; takvim değiştirilmedi.', d);
+      return 'gecersiz_sonuc';
+    }
+    const s = sonuc as TakvimSonucu;
+    const r = await applyCalendarSources(
+      ctx,
+      s.year,
+      {
+        ...(s.gib ? { gib: s.gib } : {}),
+        ...(s.religious ? { religious: { dates: { ramazan: s.religious.ramazan, kurban: s.religious.kurban }, certain: s.religious.certain, sourceUrl: s.religious.sourceUrl, checkedAt: s.religious.checkedAt } } : {}),
+      },
+      d.takvim,
+    );
+    if (!r.ok) {
+      await finishJob(ctx, m.jobId, 'failed', 'Takvim kaynağı doğrulanamadı (sayı, tekillik ya da yıl tutmadı); takvim değiştirilmedi.', d);
+      return 'kaynak_hatasi';
+    }
+    const parcalar = [
+      s.gib ? `${s.year}: ${s.gib.count} GİB kaydı` : `${s.year}: GİB vergi takvimi doğrulanamadı, mevcut kayıtlar korundu`,
+      s.religious ? `dinî bayramlar ${s.religious.certain ? 'kesin' : 'kesinleşmedi işaretli'}` : 'dinî bayramlar alınamadı',
+      ...(s.sourceType === 'sahte_gib' ? ['kaynak: sahte GİB (demo)'] : []),
+    ];
+    await d.takvimOrtak.kaydet({ year: s.year, observedAt: s.observedAt, gib: s.gib, religious: s.religious });
+    await finishJob(ctx, m.jobId, 'succeeded', parcalar.join(' · '), d, { yil: s.year, yazilan: r.value.written, gib: s.gib?.count ?? 0, gibHata: s.gibError, bayramHata: s.religiousError, kaynak: s.sourceType });
+    return 'uygulandi';
+  } finally {
+    await d.sonucSil(m.resultKey).catch(() => {});
+  }
+}
+
+async function sozlesmeUygula(ctx: { org: string }, m: SonucMesaji, sonuc: unknown, sahip: Sahip, d: UygulayiciDeps, basladi: string | null) {
   if (!sozlesmeListesiGecerli(sonuc) || (sonuc as SozlesmeSonucu).jobId !== m.jobId) {
     await finishJob(ctx, m.jobId, 'failed', 'Kurum sonucu beklenen biçimde değil; veri yazılmadı.', d);
     return 'gecersiz_sonuc';
   }
   if (sahip.ownerKind !== 'advisor') throw new Error('Sözleşme listesi müşavir hesabıyla okunur');
-  await recordLoginResult(ctx, sahip.accountId, 'ok', d.creds);
+  await recordLoginResult(ctx, sahip.accountId, 'ok', d.creds, basladi);
   const s = sonuc as SozlesmeSonucu;
   const r = await importFilingContracts(ctx, { jobId: m.jobId, advisorId: sahip.ownerId, source: s.sourceType, list: s }, { firms: firmaPortu(d.firmalar), contracts: d.sozlesmeler });
   if (!r.ok) {
@@ -135,13 +195,13 @@ async function sozlesmeUygula(ctx: { org: string }, m: SonucMesaji, sonuc: unkno
 }
 
 /** Beyanname sonucu: önce aynı oturumun sözleşme listesi (firmalar + erişim kanıtı), sonra sorgu sonuçları ve belgeler. */
-async function beyannameUygula(ctx: { org: string }, m: SonucMesaji, sonuc: unknown, sahip: Sahip, d: UygulayiciDeps) {
+async function beyannameUygula(ctx: { org: string }, m: SonucMesaji, sonuc: unknown, sahip: Sahip, d: UygulayiciDeps, basladi: string | null) {
   if (!beyannameSonucuGecerli(sonuc) || (sonuc as BeyannameSonucu).jobId !== m.jobId) {
     await finishJob(ctx, m.jobId, 'failed', 'Kurum sonucu beklenen biçimde değil; veri yazılmadı.', d);
     return 'gecersiz_sonuc';
   }
   if (sahip.ownerKind !== 'advisor') throw new Error('Beyanname listesi müşavir hesabıyla okunur');
-  await recordLoginResult(ctx, sahip.accountId, 'ok', d.creds);
+  await recordLoginResult(ctx, sahip.accountId, 'ok', d.creds, basladi);
   const s = sonuc as BeyannameSonucu;
   const k = await importFilingContracts(ctx, { jobId: m.jobId, advisorId: sahip.ownerId, source: s.sourceType, list: s.contracts }, { firms: firmaPortu(d.firmalar), contracts: d.sozlesmeler });
   if (!k.ok) {

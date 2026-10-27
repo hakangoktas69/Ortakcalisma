@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eworks.local/contracts/integration/eworks.calendar.sources.v1.schema.json",
+  "title": "Takvim kaynakları — ACL'den işçiye (takvim.kaynaklar işi)",
+  "description": "Bir yılın GİB vergi takvimi (kamuya açık listAll, 2026-10-27'de gözlendi) ve dinî bayram ilk günleri (Nager.Date). Kaynaklardan biri doğrulanamazsa o alan null, hata kodu dolu; diğeri yine uygulanır. Kişisel veri yok.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "jobId", "year", "observedAt", "sourceType", "gib", "gibError", "religious", "religiousError"],
+  "properties": {
+    "schema": { "const": "eworks.calendar.sources.v1" },
+    "jobId": { "type": "string", "format": "uuid" },
+    "year": { "type": "integer", "minimum": 2000, "maximum": 2100 },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "sourceType": { "enum": ["gib_live", "sahte_gib"] },
+    "gib": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schema", "year", "checkedAt", "sourceUrl", "count", "records"],
+          "properties": {
+            "schema": { "const": "eworks.gib.tax-calendar.v1" },
+            "year": { "type": "integer" },
+            "checkedAt": { "type": "string", "format": "date" },
+            "sourceUrl": { "const": "https://gib.gov.tr/vergi-takvimi" },
+            "count": { "type": "integer", "minimum": 1, "maximum": 3000 },
+            "records": {
+              "type": "array",
+              "maxItems": 3000,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "title", "description", "stopdate", "periodDescription", "subject"],
+                "properties": {
+                  "id": { "type": "integer" },
+                  "title": { "type": "string", "minLength": 1, "maxLength": 4000 },
+                  "description": { "type": "string", "minLength": 1, "maxLength": 4000 },
+                  "stopdate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}" },
+                  "periodDescription": { "type": "string", "maxLength": 4000 },
+                  "subject": { "type": "string", "minLength": 1, "maxLength": 4000 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "gibError": { "oneOf": [{ "type": "null" }, { "type": "string", "pattern": "^[a-z_]{1,40}$" }] },
+    "religious": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ramazan", "kurban", "certain", "sourceUrl", "checkedAt"],
+          "properties": {
+            "ramazan": { "type": "string", "format": "date" },
+            "kurban": { "type": "string", "format": "date" },
+            "certain": { "type": "boolean" },
+            "sourceUrl": { "const": "https://date.nager.at" },
+            "checkedAt": { "type": "string", "format": "date" }
+          }
+        }
+      ]
+    },
+    "religiousError": { "oneOf": [{ "type": "null" }, { "type": "string", "pattern": "^[a-z_]{1,40}$" }] }
+  }
+}

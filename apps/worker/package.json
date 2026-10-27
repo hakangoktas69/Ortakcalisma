@@ -17,6 +17,7 @@
     "@eworks/social-security": "workspace:*",
     "@eworks/sync": "workspace:*",
     "@eworks/tax-filing": "workspace:*",
+    "@eworks/workspace": "workspace:*",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1"
   },

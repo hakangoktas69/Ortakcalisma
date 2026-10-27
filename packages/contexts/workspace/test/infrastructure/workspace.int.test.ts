@@ -7,7 +7,24 @@ import { createPool, ShardRouter } from '@eworks/platform';
 import { createFirm, PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portfolio';
 import { addMember, openOffice, PgDirectory, PgTenantProvisioner } from '@eworks/sales';
 import { fakeVkn, yigin } from '@eworks/testing';
-import { addNote, assignTask, changeStatus, createTask, listNotes, listTasks, PgNoteRepository, PgTaskRepository } from '../../src/index.ts';
+import {
+  addNote,
+  assignTask,
+  BundledCalendarSources,
+  changeStatus,
+  correctEntry,
+  createTask,
+  ensureCalendarYear,
+  listCalendar,
+  listNotes,
+  listTasks,
+  PgCalendarRepository,
+  PgNoteRepository,
+  PgReminderRepository,
+  createReminder,
+  upcomingReminders,
+  PgTaskRepository,
+} from '../../src/index.ts';
 
 const sistem = ShardRouter.fromUrls(yigin.controlUrl(), yigin.shardUrls('eworks_worker'));
 const web = ShardRouter.fromUrls(yigin.controlUrl(), yigin.shardUrls('eworks_app'));
@@ -67,5 +84,67 @@ describe('görev ve not kapsamı (workspace)', () => {
     expect(rows.map((r) => r.action)).toEqual(['gorev.atandi', 'gorev.kapatildi']);
     await pool.end();
     if (havuz !== pool) await havuz.end();
+  });
+});
+
+describe('takvim (workspace.calendar_entries)', () => {
+  it('[F:genel_bakis.takvim.view] işçi yılı hazır kaynaktan doldurur, personel okur, başka ofis görmez; yönetici düzeltir, düzeltme yeniden doldurmada kalır', async () => {
+    const o = await openOffice({ officeName: `Takvim ${randomUUID().slice(0, 8)}`, admin: kisi('yonetici') }, prov);
+    if (!o.ok) throw new Error(o.error);
+    const admin = { sub: o.value.userId, org: o.value.orgId };
+    const p = await addMember({ orgId: admin.org, role: 'personel', user: kisi('personel') }, prov);
+    if (!p.ok) throw new Error(p.error);
+    const isci = { repo: new PgCalendarRepository(sistem), sources: new BundledCalendarSources() };
+    const webD = { repo: new PgCalendarRepository(web) };
+    const ilk = await ensureCalendarYear({ org: admin.org }, 2026, isci);
+    expect(ilk.ok && ilk.value.written).toBeGreaterThan(466);
+    expect(ilk.ok && ilk.value.needsGib).toBe(false);
+    expect(await ensureCalendarYear({ org: admin.org }, 2026, isci)).toEqual({ ok: true, value: { written: 0, needsGib: false } });
+    const ekim = await listCalendar({ sub: p.value.userId, org: admin.org }, '2026-10-01', '2026-10-31', webD);
+    expect(ekim.ok && ekim.value.some((e) => e.source === 'gib')).toBe(true);
+    expect(ekim.ok && ekim.value.find((e) => e.key === 'tatil:2026-10-29')?.title).toBe('Cumhuriyet Bayramı');
+    // Web rolü (yönetici dahil) takvime doğrudan yazamaz
+    if (!ekim.ok) throw new Error('takvim okunamadı');
+    const sahte = { ...ekim.value[0]!, key: 'kural:sahte', date: '2026-10-01' };
+    await expect(new PgCalendarRepository(web).replaceYear(admin, 2026, [sahte], ['kural'])).rejects.toThrow(/row-level security/);
+    const anahtar = 'kural:sgk-prim:2026-09';
+    await expect(new PgCalendarRepository(web).correct({ sub: p.value.userId, org: admin.org }, anahtar, '2026-11-03')).rejects.toThrow(/yetkisi/);
+    expect(await correctEntry(admin, anahtar, '2026-11-03', hepsi, webD)).toEqual({ ok: true, value: { id: anahtar } });
+    await new PgCalendarRepository(sistem).replaceYear({ org: admin.org }, 2026, [], ['gib']);
+    const kasim = await listCalendar(admin, '2026-11-01', '2026-11-30', webD);
+    expect(kasim.ok && kasim.value.find((e) => e.key === anahtar)).toMatchObject({ date: '2026-11-03', corrected: true });
+    expect(kasim.ok && kasim.value.some((e) => e.source === 'gib')).toBe(false);
+    const b = await openOffice({ officeName: `Takvim B ${randomUUID().slice(0, 8)}`, admin: kisi('yonetici') }, prov);
+    if (!b.ok) throw new Error(b.error);
+    const baska = await listCalendar({ sub: b.value.userId, org: admin.org }, '2026-10-01', '2026-10-31', webD);
+    expect(baska.ok && baska.value).toEqual([]);
+  });
+});
+
+describe('kişisel hatırlatma (workspace.reminders)', () => {
+  it('[F:genel_bakis.takvim.remind] sahibi ekler ve görür; aynı ofisteki başka kullanıcı görmez; kapsam dışı firmaya bağlanamaz', async () => {
+    const o = await openOffice({ officeName: `Hatırlatma ${randomUUID().slice(0, 8)}`, admin: kisi('yonetici') }, prov);
+    if (!o.ok) throw new Error(o.error);
+    const admin = { sub: o.value.userId, org: o.value.orgId };
+    const p = await addMember({ orgId: admin.org, role: 'personel', user: kisi('personel') }, prov);
+    if (!p.ok) throw new Error(p.error);
+    const personel = { sub: p.value.userId, org: admin.org };
+    const f = await createFirm(admin, { title: 'Hatırlatma Ltd', kind: 'Limited', taxId: fakeVkn() }, firmalar);
+    if (!f.ok) throw new Error(f.error);
+    const h = { reminders: new PgReminderRepository(web) };
+    const r = await createReminder(admin, { title: 'KDV kontrolü', remindOn: '2026-10-30', category: 'beyanname', remindDays: 3, firmId: f.value.id }, hepsi, h);
+    expect(r.ok).toBe(true);
+    expect((await upcomingReminders(admin, '2026-10-27', h)).map((x) => [x.title, x.firmTitle])).toEqual([['KDV kontrolü', 'Hatırlatma Ltd']]);
+    expect(await upcomingReminders(personel, '2026-10-27', h)).toEqual([]);
+    // Personel atanmadığı firmaya hatırlatma bağlayamaz (RLS kapsamı) → alan hatası, altyapı hatası değil
+    expect(await createReminder(personel, { title: 'Kapsam dışı', remindOn: '2026-10-30', category: 'not', remindDays: 0, firmId: f.value.id }, hepsi, h)).toEqual({
+      ok: false,
+      error: 'gecersiz',
+      errors: [{ field: 'firmId', message: 'Mükellef geçersiz.' }],
+    });
+    if (!r.ok) return;
+    expect(await h.reminders.setDone(personel, r.value.id, true)).toBe(false);
+    expect(await h.reminders.remove(personel, r.value.id)).toBe(false);
+    expect(await h.reminders.setDone(admin, r.value.id, true)).toBe(true);
   });
 });

@@ -42,6 +42,17 @@ describe('hiyerarşik yetki', () => {
     expect(isAllowed(g, 'kisayollar.view')).toBe(false);
   });
 
+  it('[F:genel_bakis.takvim.edit] takvim tarihini yalnız ofis yöneticisi düzeltir; herkes görür', () => {
+    expect(isAllowed(effectiveGrants('ofis_admin'), 'genel_bakis.takvim.edit')).toBe(true);
+    for (const r of ['musavir', 'personel', 'mukellef'] as const) expect(isAllowed(effectiveGrants(r), 'genel_bakis.takvim.edit'), r).toBe(false);
+    for (const r of ['ofis_admin', 'musavir', 'personel'] as const) expect(isAllowed(effectiveGrants(r), 'genel_bakis.takvim.view'), r).toBe(true);
+  });
+
+  it('[F:genel_bakis.takvim.sync] takvimi kaynaklardan güncellemek yönetici ve müşavirde; personel ve mükellef başlatamaz', () => {
+    for (const r of ['ofis_admin', 'musavir'] as const) expect(isAllowed(effectiveGrants(r), 'genel_bakis.takvim.sync'), r).toBe(true);
+    for (const r of ['personel', 'mukellef'] as const) expect(isAllowed(effectiveGrants(r), 'genel_bakis.takvim.sync'), r).toBe(false);
+  });
+
   it('[F:kisayollar.view] portal kısayolları ofis kullanıcılarına açık, mükellefe kapalı', () => {
     for (const r of ['ofis_admin', 'musavir', 'personel'] as const) expect(isAllowed(effectiveGrants(r), 'kisayollar.view'), r).toBe(true);
     expect(isAllowed(effectiveGrants('mukellef'), 'kisayollar.view')).toBe(false);

@@ -1,6 +1,6 @@
 ---
 name: eworks-acik-konular
-description: Eworks açık konuları (2026-10-26) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, operasyon logu yok ve hatalar sessizce yutuluyor, ekranda VKN maskeleme uygulanmıyor, Mert'in pilot işi ile D28 çelişkisi, dal adı uyumu, küçük UX (TabloKap odak), servis yolunun gözlenmemiş ağ ayrıntıları, üretim yedeği ve yayın hattı yok, satış lisansı girişi engellemiyor, geçici parola portalda zorunlu değişmiyor, satış portalının üretimde yayımı, satış log yardımcısı, satıştan ofis açmada yarım kalma, satış girişinde hız sınırı yok, güvenlik kodunun erişilebilirliği; kabul edilen riskler (2FA'sız satışçı, 2FA durumu sızıntısı, bakımsız svg-captcha, ofis adı tekilliği yalnız uygulamada, shard fonksiyonlarının bağlam sapması)
+description: Eworks açık konuları (2026-10-26) — 60/dk hız ile 500 ofis ölçeği, shard donanımı, bağlama atanmamış modüller, GitHub dal koruması, Codex beceri desteği, canlı GİB doğrulaması, bağlamlar arası okuma birleşimleri, yönetim ekranları, ACL kapsam eşiği zorlanmıyor, TDD rehberindeki keşif kodu ifadesi onay bekliyor, operasyon logu yok ve hatalar sessizce yutuluyor, ekranda VKN maskeleme uygulanmıyor, Mert'in pilot işi ile D28 çelişkisi, dal adı uyumu, küçük UX (TabloKap odak), servis yolunun gözlenmemiş ağ ayrıntıları, üretim yedeği ve yayın hattı yok, satış lisansı girişi engellemiyor, geçici parola portalda zorunlu değişmiyor, satış portalının üretimde yayımı, satış log yardımcısı, satıştan ofis açmada yarım kalma, satış girişinde hız sınırı yok, güvenlik kodunun erişilebilirliği, gelecek yılın GİB takvimi ve tekrarlanan istekler, kapsanmayan personel tarihleri, dinî bayram doğrulaması, yeni ofisin takvim gecikmesi, kullanılmayan SGK/UETS sırları; kabul edilen riskler (2FA'sız satışçı, 2FA durumu sızıntısı, bakımsız svg-captcha, ofis adı tekilliği yalnız uygulamada, shard fonksiyonlarının bağlam sapması)
 metadata:
   type: project
 ---
@@ -11,7 +11,7 @@ metadata:
    - "60 istek/dk ile başla" ve "hesap başına 60 istek/dk" ifadelerinin kapsamı (toplam mı, kurum mu, servis mi robot mu, hesap mı?);
    - web servis analizinden çıkacak kurum limitleri.
 2. **Shard başlangıç donanımı:** Öneri: kontrol düzlemi + 2 fiziksel shard sunucusu, 16 mantıksal shard (`docs/hedef-mimari/07-veri-saklama-ve-sharding.md` §2.3).
-3. **Bağlama atanmamış portal modülleri:** e-Tebligat, e-Defter, Faturalar, Dilekçeler, Ödeme, Raporlar, Destek `feature-registry`'de `context: null` (`docs/baglamlar/README.md`). Yeni bağlam mı, mevcut bağlam mı kararı bekliyor.
+3. **Bağlama atanmamış portal modülleri:** e-Defter, Faturalar, Dilekçeler, Ödeme, Raporlar, Destek `feature-registry`'de `context: null` (`docs/baglamlar/README.md`). Yeni bağlam mı, mevcut bağlam mı kararı bekliyor.
 4. **GitHub dal koruması yok (2026-10-26):** kod sahibi `@hkazaz` (CODEOWNERS `HASSAS_ALANLAR`'dan üretilir, D37) ama `main`'de PR + CI + kod sahibi onayı zorunluluğu GitHub'da açılmadı; `dev`'de doğrudan push engeli yok; yerel pre-commit kancası `--no-verify` ile aşılabilir.
 5. **Codex proje içi beceri desteği** doğrulanmadı; yedek yol `AGENTS.md` "Beceriler" bloğu (09 §7.5).
 6. **Canlı GİB doğrulaması (2026-10-25):** eski portalın portu bitti; `firmalar.gib_sozlesmeler.sync`, `beyanname.senkron.start`, `sgk.ebildirge.sync` yalnız sahte GİB'e karşı sınandı. Canlı koşu Hakan'ın hesabıyla (`docs/gelistirici-rehberi/canli-dogrulama.md`); canlı güvenlik kodunda OCR başarısı bilinmiyor.
@@ -41,6 +41,14 @@ metadata:
 - **svg-captcha bakımsız (K-48):** 1.4.0 (MIT) 2019'dan beri sürüm almadı; gelistir B2 "bakımı süren paket" kuralından bilinen sapma. `pnpm audit` açık verirse ya da Node uyumsuzluğu çıkarsa kendi SVG üretecine geçilir (port: `CaptchaGenerator`).
 - **Ofis adı tekilliği yalnız uygulamada (K-47):** veritabanında ad indeksi yok (yerel verilerde aynı adlı ofisler olabildiği için migration durdurmasın diye); satış Redis kilidiyle ve Türkçe kurallı ad sorgusuyla engeller, `hesap-ac` komutu kilit almaz.
 - **Shard'da sales.* fonksiyonları başka bağlamın tablosuna yazar (K-47):** `organization` ve `identity_access` tablolarına; hesap açma bu tablolara zaten yazıyordu, yazma tek denetimli yola toplandı. Kalıcı çözüm bağlamların kendi hesap açma fonksiyonları + olay.
+
+25. **Gelecek yılın GİB vergi takvimi (D43):** GİB yayımlayana dek boş; işçi yıl başına haftada bir çeker, ortak sonuçtan tüm ofislerin kopyası dolar (ilk sürümdeki ofis başına iş kurum kuyruğunu tıkadı, düzeltildi).
+26. **Takvimde kapsanmayan personel tarihleri:** yalnız SGK prim son günü ve MUHSGK; asgari ücret, izin, ücret ödeme günü kaynağı belirlenmedi.
+27. **Dinî bayram doğrulaması:** yalnız 2026 Diyanet ile kesin; diğer yıllar Nager tahmini, ilan otomatik izlenmiyor.
+28. **Yeni ofisin takvimi 10 dk gecikmeli dolar:** ofis açılışında doldurma ayrı iş.
+29. **SGK/UETS sırları kullanılmıyor (D42):** entegrasyon yok; amaçla sınırlılık (KVKK) SGK entegrasyonuyla birlikte değerlendirilmeli.
+
+30. **Mükellef onayı beyanının hukuki dayanağı (D46):** KVKK dayanağı (sözleşme mi açık rıza mı) ve onay belgesinin saklanması hukukçuyla netleşmeli.
 
 Süren iş: GİB/SGK web servis envanteri ve kurum erişim bilgileri Hakan tarafından analiz ediliyor (2026-10-24). Sonuç gelince 02 §1a'daki `integrations` tablosu ve 03 §1a hesapları güncellenir.
 

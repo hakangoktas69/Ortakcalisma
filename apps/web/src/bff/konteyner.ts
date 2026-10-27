@@ -8,7 +8,7 @@ import { databaseSchema, Depo, loadConfig, sessionSchema, ShardRouter, storageSc
 import { PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '@eworks/portfolio';
 import { PgJobRepository } from '@eworks/sync';
 import { PgFilingRepository } from '@eworks/social-security';
-import { PgNoteRepository, PgTaskRepository } from '@eworks/workspace';
+import { PgCalendarRepository, PgNoteRepository, PgReminderRepository, PgTaskRepository } from '@eworks/workspace';
 import { PgContractRepository, PgDeclarationRepository } from '@eworks/tax-filing';
 
 // BFF bağımlılıkları (süreç başına tek örnek). Yapılandırma açılışta doğrulanır; tarayıcıya hiçbir değer gitmez (D5).
@@ -42,6 +42,8 @@ function kur() {
       members: { isStaff: async (ctx: { sub: string; org: string }, id: string) => (await members.staff(ctx.org, ctx.sub)).some((m) => m.userId === id) },
     },
     notlar: { notes: new PgNoteRepository(router) },
+    takvim: { repo: new PgCalendarRepository(router) },
+    hatirlatmalar: { reminders: new PgReminderRepository(router) },
     belgeler: {
       repo: new PgDocumentRepository(router),
       files: new S3FileStore(new Depo({ endpoint: c.S3_ENDPOINT, bucket: c.S3_BUCKET, accessKey: c.S3_ACCESS_KEY, secretKey: c.S3_SECRET_KEY, region: c.S3_REGION })),

@@ -16,10 +16,12 @@ import psycopg
 from playwright.async_api import async_playwright
 from redis import asyncio as aioredis
 
+from ..institutions.acik_kaynak.nager import BayramHatasi, resmi_tatilleri_oku
 from ..institutions.gib.beyannameler import BelgeIstegi, BeyannameHatasi, beyanname_tara, to_declarations
 from ..institutions.gib.ebeyanname_servis import EBEYANNAME
 from ..institutions.gib.giris import GirisBasarisiz, YanlisSifre, giris_yap
 from ..institutions.gib.sozlesmeler import ListeHatasi, sozlesme_listesi_oku, to_contract
+from ..institutions.gib.vergi_takvimi import TakvimHatasi, to_snapshot, vergi_takvimi_oku
 from ..transports.robot.tarayici import Tarayici
 from ..transports.service.http_tasima import ServisTasima
 from .ayarlar import Ayarlar, yukle
@@ -30,7 +32,7 @@ from .hiz import HizSinirlayici
 EXCHANGE, DLX = 'eworks', 'eworks.dlx'
 ROBOT_GIB, SONUC, DLQ = 'robot.gib', 'entegrasyon.sonuc', 'eworks.dlq'
 ARGUMANLAR = {'x-queue-type': 'quorum', 'x-dead-letter-exchange': DLX, 'x-delivery-limit': 5}
-TURLER = ('gib.sozlesmeler', 'gib.beyannameler', 'gib.muhsgk')
+TURLER = ('gib.sozlesmeler', 'gib.beyannameler', 'gib.muhsgk', 'takvim.kaynaklar')
 UUID = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 
 log = logging.getLogger('eworks.entegrasyon')
@@ -64,6 +66,8 @@ class Calisan:
         self.a = a
         self.redis = aioredis.from_url(a.redis_url)
         self.hiz = HizSinirlayici(self.redis, 'GIB', a.gib_istek_dk)
+        # Açık kaynak tatil takvimi (kurum değil) ayrı ve düşük bütçeyle: yılda bir, ofis başına tek istek
+        self.hiz_nager = HizSinirlayici(self.redis, 'NAGER', 30)
         self.cozucu = CaptchaCozucu()
         self.s3 = boto3.client('s3', endpoint_url=a.s3_endpoint, aws_access_key_id=a.s3_erisim, aws_secret_access_key=a.s3_gizli, region_name=a.s3_bolge)
         self.kanal = None
@@ -91,6 +95,8 @@ class Calisan:
         async def ilerleme(metin: str):
             await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'progress', 'message': metin})
 
+        if kind == 'takvim.kaynaklar':
+            return await self._takvim(org, job, params, ilerleme)
         try:
             kimlik = await asyncio.to_thread(is_sirri, url, org, job)
         except HesapKullanilamaz:
@@ -149,6 +155,40 @@ class Calisan:
             gunluk('is_hatasi', tur=type(e).__name__)
         finally:
             kimlik.clear()
+
+    async def _takvim(self, org: str, job: str, params: dict, ilerleme):
+        """Takvim kaynakları (kamuya açık; kurum hesabı ve sır kullanılmaz): GİB vergi takvimi + Nager.Date dinî bayramları.
+        Kaynaklar birbirinden bağımsız doğrulanır; doğrulanamayan kaynak null + hata koduyla gider, diğeri uygulanır."""
+        yil = params.get('year')
+        if type(yil) is not int or not 2000 <= yil <= 2100:
+            return await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': 'Takvim yılı geçersiz.'})
+        simdi = datetime.now(timezone.utc)
+        gib = gib_hata = bayram = bayram_hata = None
+        gunluk('is_basladi', tur='takvim.kaynaklar')
+        try:
+            await ilerleme(f'{yil} GİB vergi takvimi okunuyor.')
+            gib = to_snapshot(await vergi_takvimi_oku(yil, self.hiz, self.a.sahte_gib), yil, simdi.date().isoformat())
+        except TakvimHatasi as e:
+            gib_hata = str(e)
+        except (OSError, TimeoutError):
+            await self.hiz.baglanti_hatasi()
+            gib_hata = 'baglanti'
+        try:
+            await ilerleme(f'{yil} resmî tatilleri okunuyor.')
+            bayram = {**await resmi_tatilleri_oku(yil, self.hiz_nager, self.a.sahte_gib), 'sourceUrl': 'https://date.nager.at', 'checkedAt': simdi.date().isoformat()}
+        except BayramHatasi as e:
+            bayram_hata = str(e)
+        except (OSError, TimeoutError):
+            bayram_hata = 'baglanti'
+        if gib is None and bayram is None:
+            gunluk('is_basarisiz', tur='takvim.kaynaklar', gib=gib_hata, bayram=bayram_hata)
+            return await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'failed', 'message': 'Takvim kaynaklarına ulaşılamadı ya da yanıt doğrulanamadı; takvim değiştirilmedi.'})
+        sonuc = {'schema': 'eworks.calendar.sources.v1', 'jobId': job, 'year': yil, 'observedAt': simdi.isoformat().replace('+00:00', 'Z'),
+                 'sourceType': 'sahte_gib' if self.a.sahte_gib else 'gib_live', 'gib': gib, 'gibError': gib_hata, 'religious': bayram, 'religiousError': bayram_hata}
+        anahtar = f'org/{org}/sonuc/{job}.json'
+        await asyncio.to_thread(self.s3.put_object, Bucket=self.a.s3_bucket, Key=anahtar, Body=json.dumps(sonuc, ensure_ascii=False).encode('utf-8'), ContentType='application/json')
+        await self.yayimla({'orgId': org, 'jobId': job, 'outcome': 'ok', 'resultKey': anahtar})
+        gunluk('is_tamam', tur='takvim.kaynaklar', gib=gib['count'] if gib else 0, gib_hata=gib_hata, bayram_hata=bayram_hata)
 
     async def _kurum_engeli(self, e: KaynakEngelledi):
         """Kurum oturumu reddetti ya da hız sınırı bildirdi: istek tekrarlanmadı, kurum hızı yarıya iner (kural 5). Yerel bütçe

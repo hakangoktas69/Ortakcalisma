@@ -14,6 +14,8 @@
 | Özellik anahtarları | `firmalar.gib_sozlesmeler.sync`, `beyanname.senkron.*`, `yonetim.zamanlama.*`, `yonetim.hiz_politikasi.*` |
 | Veritabanı şeması | `sync` (shard) |
 
+> **2026-10-27 (D43):** `takvim.kaynaklar` iş türü kurum hesabı kullanmaz (kamuya açık GİB vergi takvimi + Nager.Date); `account_id` boş, `requestCalendarJob` (kullanıcı ya da işçi; işçi aynı yıl için 24 saatte bir). Kuyruk `robot.gib`; sonuç `eworks.calendar.sources.v1`, uygulayıcı workspace `applyCalendarSources`.
+
 ## Akış
 
 ```mermaid

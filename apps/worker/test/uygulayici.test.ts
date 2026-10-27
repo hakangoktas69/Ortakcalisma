@@ -4,6 +4,7 @@ import type { Firm, FirmRepository } from '@eworks/portfolio';
 import type { Job, JobRepository } from '@eworks/sync';
 import type { DocumentRepository } from '@eworks/documents';
 import type { ContractRepository, DeclarationRepository } from '@eworks/tax-filing';
+import type { CalendarEntry, CalendarRepository, CalendarSource } from '@eworks/workspace';
 import { fakeVkn, seededRandom } from '@eworks/testing';
 import { sonucuIsle, type UygulayiciDeps } from '../src/uygulayici.ts';
 
@@ -12,14 +13,17 @@ const JOB = '22222222-2222-4222-8222-222222222222';
 const rnd = seededRandom(5);
 
 function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status']; kind?: Job['kind'] } = {}) {
-  const is: Job = { id: JOB, kind: opts.kind ?? 'gib.sozlesmeler', accountId: 'h-1', status: opts.status ?? 'running', statusMessage: null, resultSummary: null, createdAt: '', startedAt: null, finishedAt: null };
+  const is: Job = { id: JOB, kind: opts.kind ?? 'gib.sozlesmeler', accountId: 'h-1', status: opts.status ?? 'running', statusMessage: null, resultSummary: null, createdAt: '', startedAt: '2026-10-27T09:00:00.000Z', finishedAt: null };
   const girisler: string[] = [];
+  const girisZamani: (string | null | undefined)[] = [];
   const firmalar = new Map<string, Firm>();
   const yazilan: number[] = [];
   const nesneler = new Map<string, unknown>();
   const beyannameler: string[] = [];
   const belgeler: string[] = [];
   const silinen: string[] = [];
+  const takvimYazilan: { year: number; entries: readonly CalendarEntry[]; sources: readonly CalendarSource[] }[] = [];
+  const ortak: unknown[] = [];
   const jobs: JobRepository = {
     activeFor: async () => null,
     insertWithOutbox: async () => {},
@@ -31,10 +35,15 @@ function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status']; kin
       return true;
     },
     setMessage: async (_c, _id, m) => void (is.statusMessage = m),
-    accountOwner: async () => ({ accountId: 'h-1', ownerKind: opts.ownerKind ?? 'advisor', ownerId: 'm-1' }),
+    accountOwner: async () => (is.kind === 'takvim.kaynaklar' ? null : { accountId: 'h-1', ownerKind: opts.ownerKind ?? 'advisor', ownerId: 'm-1' }),
     staleRunning: async () => [],
+    countSince: async () => 0,
   };
-  const creds: CredentialRepository = { save: async () => ({ ok: true, value: { accountId: 'h-1' } }), statuses: async () => [], recordLogin: async (_c, _id, o) => void girisler.push(o) };
+  const creds: CredentialRepository = { save: async () => ({ ok: true, value: { accountId: 'h-1' } }), statuses: async () => [], recordLogin: async (_c, _id, o, bas) => {
+      girisler.push(o);
+      girisZamani.push(bas);
+    },
+  };
   const repo = {
     byTaxIds: async (_c: unknown, ids: readonly string[]) => [...firmalar.values()].filter((f) => ids.includes(f.taxId)),
     insert: async (_c: unknown, id: string, advisorId: string, f: Omit<Firm, 'id'>) => void firmalar.set(id, { ...f, id, advisorId, source: 'gib_contract', archivedAt: null, version: 1 } as Firm),
@@ -60,8 +69,17 @@ function kur(opts: { ownerKind?: 'advisor' | 'firm'; status?: Job['status']; kin
     sonucOku: async (k) => nesneler.get(k),
     sgk: { upsert: async () => ({ id: 's' }), list: async () => [], get: async () => null },
     sonucSil: async (k) => void silinen.push(k),
+    takvimOrtak: { kaydet: async (o) => void ortak.push(o) },
+    takvim: {
+      repo: {
+        replaceYear: async (_c, year, entries, sources) => {
+          takvimYazilan.push({ year, entries, sources });
+          return entries.length;
+        },
+      },
+    },
   };
-  return { d, is, girisler, firmalar, yazilan, nesneler, beyannameler, belgeler, silinen };
+  return { d, is, girisler, girisZamani, firmalar, yazilan, nesneler, beyannameler, belgeler, silinen, takvimYazilan, ortak };
 }
 
 const liste = (adet: number) => ({
@@ -95,12 +113,15 @@ describe('entegrasyon sonucu uygulayıcı', () => {
     expect(k.is.statusMessage).toContain('sahte GİB');
     expect(k.firmalar.size).toBe(3);
     expect(k.girisler).toEqual(['ok']);
+    expect(k.girisZamani).toEqual(['2026-10-27T09:00:00.000Z']);
   });
 
   it('hatalı şifre: hesap işaretlenir, iş "hatalı şifre" ile biter; ikinci kez gelen sonuç etkisizdir', async () => {
     const k = kur();
     expect(await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'wrong_password' }, k.d)).toBe('hatali_sifre');
     expect(k.girisler).toEqual(['wrong_password']);
+    // İşin başladığı an iletilir: iş sırasında kaydedilen yeni bilgi eski işin sonucuyla işaretlenmez
+    expect(k.girisZamani).toEqual(['2026-10-27T09:00:00.000Z']);
     expect(k.is.status).toBe('wrong_password');
     k.nesneler.set(anahtar, liste(1));
     await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'ok', resultKey: anahtar }, k.d);
@@ -182,5 +203,65 @@ describe('entegrasyon sonucu uygulayıcı', () => {
     expect(sgkYazilan).toEqual(['sg1']);
     expect(k.belgeler).toEqual([`org/${ORG}/belgeler/${sha}.pdf`]);
     expect(k.is.statusMessage).toContain('1 SGK bildirimi (1 belge)');
+  });
+});
+
+const takvimSonucu = (o: Record<string, unknown> = {}) => ({
+  schema: 'eworks.calendar.sources.v1',
+  jobId: JOB,
+  year: 2027,
+  observedAt: '2026-10-27T10:00:00Z',
+  sourceType: 'sahte_gib',
+  gib: {
+    schema: 'eworks.gib.tax-calendar.v1',
+    year: 2027,
+    checkedAt: '2026-10-27',
+    sourceUrl: 'https://gib.gov.tr/vergi-takvimi',
+    count: 1,
+    records: [{ id: 1, title: 'Katma Değer Vergisinin Beyan ve Ödemesi', description: 'Açıklama', stopdate: '2027-01-28T00:00:00', periodDescription: 'Aralık 2026 Dönemi', subject: 'Beyan ve Ödeme' }],
+  },
+  gibError: null,
+  religious: { ramazan: '2027-03-10', kurban: '2027-05-16', certain: false, sourceUrl: 'https://date.nager.at', checkedAt: '2026-10-27' },
+  religiousError: null,
+  ...o,
+});
+
+describe('takvim kaynakları sonucu', () => {
+  it('[F:genel_bakis.takvim.sync] GİB takvimi ve bayramlar yılın takvimine uygulanır; iş özetle biter; ham sonuç silinir', async () => {
+    const k = kur({ kind: 'takvim.kaynaklar' });
+    k.nesneler.set(anahtar, takvimSonucu());
+    expect(await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'ok', resultKey: anahtar }, k.d)).toBe('uygulandi');
+    expect(k.takvimYazilan).toHaveLength(1);
+    const y = k.takvimYazilan[0]!;
+    expect(y.year).toBe(2027);
+    expect([...y.sources].sort()).toEqual(['gib', 'kural', 'tatil']);
+    expect(y.entries.some((e) => e.key === 'gib:1')).toBe(true);
+    expect(y.entries.find((e) => e.date === '2027-03-10')?.certainty).toBe('kesinlesmedi');
+    expect(k.is.status).toBe('succeeded');
+    expect(k.is.statusMessage).toContain('1 GİB kaydı');
+    expect(k.silinen).toEqual([anahtar]);
+    expect(k.girisler).toEqual([]);
+    // Doğrulanmış kamuya açık sonuç diğer ofislere kuruma gitmeden uygulanmak üzere ortak anahtara yazılır
+    expect(k.ortak).toEqual([{ year: 2027, observedAt: '2026-10-27T10:00:00Z', gib: takvimSonucu().gib, religious: takvimSonucu().religious }]);
+  });
+
+  it('GİB doğrulanamadıysa yalnız tatiller uygulanır, GİB kayıtlarına dokunulmaz ve kullanıcıya söylenir', async () => {
+    const k = kur({ kind: 'takvim.kaynaklar' });
+    k.nesneler.set(anahtar, takvimSonucu({ gib: null, gibError: 'tekrar' }));
+    expect(await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'ok', resultKey: anahtar }, k.d)).toBe('uygulandi');
+    expect([...k.takvimYazilan[0]!.sources].sort()).toEqual(['kural', 'tatil']);
+    expect(k.is.statusMessage).toContain('GİB vergi takvimi doğrulanamadı');
+  });
+
+  it('şemaya uymayan ya da fail-closed kuralına takılan sonuç hiç yazılmaz', async () => {
+    const k = kur({ kind: 'takvim.kaynaklar' });
+    k.nesneler.set(anahtar, takvimSonucu({ year: 'iki bin' }));
+    expect(await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'ok', resultKey: anahtar }, k.d)).toBe('gecersiz_sonuc');
+    const t = kur({ kind: 'takvim.kaynaklar' });
+    t.nesneler.set(anahtar, takvimSonucu({ gib: { ...(takvimSonucu().gib as object), count: 5 } }));
+    expect(await sonucuIsle({ orgId: ORG, jobId: JOB, outcome: 'ok', resultKey: anahtar }, t.d)).toBe('kaynak_hatasi');
+    expect([...k.takvimYazilan, ...t.takvimYazilan]).toEqual([]);
+    expect([...k.ortak, ...t.ortak]).toEqual([]);
+    expect(t.is.status).toBe('failed');
   });
 });

@@ -31,6 +31,7 @@ const V = { view: 'Görüntüle' };
 export const LIVE_ACTIONS = [
   'firmalar.gib_sozlesmeler.sync',
   'beyanname.senkron.start',
+  'genel_bakis.takvim.sync',
   'tebligat.liste.sync',
   'sgk.ebildirge.sync',
   'sgk.ise_giris_cikis.sync',
@@ -47,7 +48,7 @@ const tree: Tree = {
   ),
   ...mod('genel_bakis', 'Ana Sayfa', 'workspace', 'portal',
     page('genel_bakis.panel', 'Genel bakış', { ...V }, 'portal'),
-    page('genel_bakis.takvim', 'Takvim', { ...V }, 'portal'),
+    page('genel_bakis.takvim', 'Takvim', { ...V, edit: 'Tarihi düzelt', remind: 'Hatırlatma ekle', sync: 'Takvimi kaynaklardan güncelle' }, 'portal'),
   ),
   ...mod('firmalar', 'Firmalarım', 'portfolio', 'portal',
     page('firmalar.liste', 'Firma listesi', { ...V, export: 'Dışa aktar' }, 'portal'),

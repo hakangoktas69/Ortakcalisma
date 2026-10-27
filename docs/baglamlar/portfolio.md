@@ -14,6 +14,8 @@
 | Özellik anahtarları | `firmalar.liste.*`, `firmalar.kart.*`, `yonetim.mukellef_kullanicilari.*` |
 | Veritabanı şeması | `portfolio` (shard); VKN dizini `directory.taxpayer_registry` (kontrol düzlemi) |
 
+> **2026-10-27:** firma araması Türkçe/ASCII harf farkını yok sayar, çok kelimelidir, unvanla başlayan önce gelir (`normalizeSearch`, `matchesSearch`, `searchRank`); listede yazarken arama.
+
 ## Kurallar
 
 - Kart alanları ve seçenekleri eski portalın firma formundandır (`domain/firm.ts`): unvan, tür, VKN/TCKN, vergi dairesi, il, yetkili, iletişim, faaliyet, vergilendirme usulü, onay durumu, grup. Sermaye şirketi (Limited/Anonim) VKN ister.

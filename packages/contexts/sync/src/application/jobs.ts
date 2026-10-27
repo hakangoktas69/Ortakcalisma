@@ -9,7 +9,8 @@ export type Ctx = { readonly sub?: string; readonly org: string };
 export type Job = {
   id: string;
   kind: JobKind;
-  accountId: string;
+  /** Kamuya açık kaynak işinde (takvim.kaynaklar) yok. */
+  accountId: string | null;
   status: JobStatus;
   statusMessage: string | null;
   resultSummary: Record<string, unknown> | null;
@@ -19,9 +20,10 @@ export type Job = {
 };
 
 export interface JobRepository {
-  activeFor(ctx: Ctx, kind: JobKind, accountId: string): Promise<Job | null>;
+  /** Süren iş; params verilirse iş parametreleri onları içermeli (takvim işinde yıl). */
+  activeFor(ctx: Ctx, kind: JobKind, accountId: string | null, params?: Record<string, string | number>): Promise<Job | null>;
   /** İş + outbox (topic robot.<kurum>) tek işlemde. */
-  insertWithOutbox(ctx: Ctx, job: { id: string; kind: JobKind; accountId: string; requestedBy: string; params: Record<string, unknown> }): Promise<void>;
+  insertWithOutbox(ctx: Ctx, job: { id: string; kind: JobKind; accountId: string | null; requestedBy: string | null; params: Record<string, unknown> }): Promise<void>;
   get(ctx: Ctx, id: string): Promise<Job | null>;
   latest(ctx: Ctx, kind: JobKind, limit: number): Promise<Job[]>;
   setStatus(ctx: Ctx, id: string, from: JobStatus[], to: JobStatus, message: string | null, summary?: Record<string, unknown>): Promise<boolean>;
@@ -29,6 +31,8 @@ export interface JobRepository {
   /** İşin kurum hesabının sahibi (müşavir/firma) — sonuç uygulanırken portföy bağlamı için. */
   accountOwner(ctx: Ctx, id: string): Promise<{ accountId: string; ownerKind: 'advisor' | 'firm'; ownerId: string } | null>;
   staleRunning(ctx: Ctx, olderThanMinutes: number): Promise<string[]>;
+  /** Verilen andan sonra açılmış, parametreleri eşleşen iş sayısı (işçinin günlük tekrar sınırı). */
+  countSince(ctx: Ctx, kind: JobKind, sinceIso: string, params: Record<string, string | number>): Promise<number>;
 }
 
 /** İşin kullanacağı kurum hesabı (müşavirin ya da firmanın) — credentials/portfolio bağlamlarından gelir. */
@@ -49,6 +53,25 @@ export async function requestJob(
   if (active) return ok({ jobId: active.id, existing: true });
   const id = d.newId();
   await d.jobs.insertWithOutbox(ctx, { id, kind: input.kind, accountId: input.account.id, requestedBy: ctx.sub, params: input.params ?? {} });
+  return ok({ jobId: id, existing: false });
+}
+
+/**
+ * Takvim kaynakları işi (kamuya açık GİB vergi takvimi + Nager.Date): kurum hesabı kullanmaz. Kullanıcı ister (genel_bakis.takvim.sync)
+ * ya da işçi, GİB verisi eksik yıl için kendiliğinden ister (sistem bağlamı; aynı yıl için günde en çok bir kez). Süren iş varsa aynısı döner.
+ */
+export async function requestCalendarJob(
+  ctx: Ctx,
+  year: number,
+  d: { jobs: JobRepository; newId: () => string },
+  now: Date,
+): Promise<Result<{ jobId: string; existing: boolean }, 'gecersiz_yil' | 'yakin_zamanda'>> {
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) return err('gecersiz_yil');
+  const active = await d.jobs.activeFor(ctx, 'takvim.kaynaklar', null, { year });
+  if (active) return ok({ jobId: active.id, existing: true });
+  if (!ctx.sub && (await d.jobs.countSince(ctx, 'takvim.kaynaklar', new Date(now.getTime() - 86_400_000).toISOString(), { year })) > 0) return err('yakin_zamanda');
+  const id = d.newId();
+  await d.jobs.insertWithOutbox(ctx, { id, kind: 'takvim.kaynaklar', accountId: null, requestedBy: ctx.sub ?? null, params: { year } });
   return ok({ jobId: id, existing: false });
 }
 

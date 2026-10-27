@@ -16,3 +16,11 @@ export function liveStatus(a: AccountLike | undefined): LiveStatus {
 }
 
 export const liveStatusLabel = (s: LiveState) => (s === 'active' ? 'Aktif' : s === 'inactive' ? 'Aktif değil' : 'Doğrulanmadı');
+
+/** Birden çok hesabın tek kutuda gösterimi (SGK işyerleri): en kötü durum kazanır; hepsi aktifse en eski kontrol tarihi. */
+export function combineLiveStatus(list: readonly LiveStatus[]): LiveStatus {
+  const kotu = list.find((s) => s.state === 'inactive');
+  if (kotu) return kotu;
+  if (list.length === 0 || list.some((s) => s.state !== 'active')) return { state: 'unknown', checkedAt: null };
+  return { state: 'active', checkedAt: [...list].map((s) => s.checkedAt ?? '').sort()[0] || null };
+}

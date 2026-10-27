@@ -1,7 +1,7 @@
 // Kurum işi (SyncJob, 02 §5): tür, durum makinesi, kullanıcıya gösterilen sabit metinler.
 // Durum geçişleri: queued → running → succeeded | failed | wrong_password; queued → cancelled. Sonuç durumları kesindir.
 
-export const JOB_KINDS = ['gib.sozlesmeler', 'gib.beyannameler', 'gib.muhsgk'] as const;
+export const JOB_KINDS = ['gib.sozlesmeler', 'gib.beyannameler', 'gib.muhsgk', 'takvim.kaynaklar'] as const;
 export type JobKind = (typeof JOB_KINDS)[number];
 export type JobStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'wrong_password' | 'cancelled';
 
@@ -11,6 +11,8 @@ export const JOB_PERMISSION: Readonly<Record<JobKind, string>> = {
   'gib.beyannameler': 'beyanname.senkron.start',
   // MUHSGK + SGK bildirimleri (SGK tahakkuk, hizmet listesi) — e-Bildirge toplu güncelleme
   'gib.muhsgk': 'sgk.ebildirge.sync',
+  // Takvim kaynakları: kamuya açık GİB vergi takvimi + Nager.Date tatilleri; kurum hesabı kullanmaz
+  'takvim.kaynaklar': 'genel_bakis.takvim.sync',
 };
 
 export const isFinal = (s: JobStatus) => s === 'succeeded' || s === 'failed' || s === 'wrong_password' || s === 'cancelled';

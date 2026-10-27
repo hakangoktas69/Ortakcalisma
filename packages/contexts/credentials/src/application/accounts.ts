@@ -28,8 +28,12 @@ export type SaveError = 'gecersiz' | 'yetki_yok' | 'bulunamadi';
 export interface CredentialRepository {
   save(ctx: Ctx, input: StoredSecret): Promise<Result<{ accountId: string }, SaveError>>;
   statuses(ctx: Ctx): Promise<AccountStatus[]>;
-  /** Kurum girişi sonucu (işçi, sistem bağlamı): hatalı şifre hesabı durdurur, başarı sayacı sıfırlar (05 §4). */
-  recordLogin(ctx: Ctx, accountId: string, outcome: 'ok' | 'wrong_password'): Promise<void>;
+  /**
+   * Kurum girişi sonucu (işçi, sistem bağlamı): hatalı şifre hesabı durdurur, başarı sayacı sıfırlar (05 §4). jobStartedAt
+   * verilirse yalnız bilgiler işin başlangıcından sonra değişmediyse uygulanır: eski bilgiyle başlamış işin sonucu, iş
+   * sırasında girilen yeni bilgiyi "doğrulandı" ya da "hatalı" yapmaz.
+   */
+  recordLogin(ctx: Ctx, accountId: string, outcome: 'ok' | 'wrong_password', jobStartedAt?: string | null): Promise<void>;
 }
 
 export async function saveAccount(
@@ -53,4 +57,5 @@ export const statusLabel = (a: AccountStatus | undefined) =>
 
 
 /** Hatalı şifreli hesap bir daha denenmez (kilitlenmeyi önlemek için); kullanıcı yeni bilgi girene dek durur. */
-export const recordLoginResult = (ctx: Ctx, accountId: string, outcome: 'ok' | 'wrong_password', repo: CredentialRepository) => repo.recordLogin(ctx, accountId, outcome);
+export const recordLoginResult = (ctx: Ctx, accountId: string, outcome: 'ok' | 'wrong_password', repo: CredentialRepository, jobStartedAt?: string | null) =>
+  repo.recordLogin(ctx, accountId, outcome, jobStartedAt);

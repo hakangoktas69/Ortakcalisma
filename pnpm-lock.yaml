@@ -202,6 +202,9 @@ importers:
       '@eworks/tax-filing':
         specifier: workspace:*
         version: link:../../packages/contexts/tax-filing
+      '@eworks/workspace':
+        specifier: workspace:*
+        version: link:../../packages/contexts/workspace
       ajv:
         specifier: ^8.17.1
         version: 8.20.0

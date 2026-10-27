@@ -14,6 +14,8 @@
 | Özellik anahtarları | `firmalar.kurum_hesaplari.*` |
 | Veritabanı şeması | `credentials` (shard) + `vault` |
 
+> **2026-10-27 (D42):** kurum türleri GİB, SGK (işyeri başına, `label` = işyeri adı), UETS; alanların hepsi Vault'ta (`credentials.save_account_secret`, kuruma göre tam alan listesi). e-Devlet şifresi saklanmaz. `liveStatus`: kurumda bilgi değişikliğinden sonra başarılı giriş → aktif; hatalı şifre/kilit/devre dışı → aktif değil; diğer → doğrulanmadı. Form alanları kapalı başlar (otomatik doldurma kilidi).
+
 ## Kurallar
 
 - Kimlik bilgisi (kullanıcı kodu + şifre) **yalnız Vault'tadır**. Tabloda sır kimliği ve durum durur; sır kimliği sütunu ve `vault` şeması web rolüne kapalıdır. Şifre yanıtta, günlükte, hata mesajında, denetim kaydında yer almaz; form gönderildikten sonra temizlenir.

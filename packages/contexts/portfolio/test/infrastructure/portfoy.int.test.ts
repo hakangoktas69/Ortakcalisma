@@ -126,6 +126,25 @@ describe('kurum hesabı (Vault)', () => {
     expect(await saveAccount(a.admin, { ...sgk('Merkez'), ownerKind: 'advisor', ownerId: musavir! }, creds)).toMatchObject({ ok: false, error: 'gecersiz' });
   });
 
+  it('[F:firmalar.kurum_hesaplari.view_status] eski bilgiyle başlamış işin sonucu, iş sırasında kaydedilen yeni bilgiyi doğrulandı ya da hatalı yapmaz', async () => {
+    const a = await ofis();
+    const f = await createFirm(a.admin, { title: 'Yarış Ltd', kind: 'Limited', taxId: fakeVkn() }, deps);
+    if (!f.ok) throw new Error();
+    const isci = new PgCredentialRepository(sistem);
+    const kaydet = () => saveAccount(a.admin, { ownerKind: 'firm', ownerId: f.value.id, institution: 'GIB', fields: { username: '1234567', password: `S-${randomUUID()}` } }, creds);
+    const h = await kaydet();
+    if (!h.ok) throw new Error();
+    const isBasladi = new Date(Date.now() - 60_000).toISOString();
+    await isci.recordLogin({ org: a.admin.org }, h.value.accountId, 'ok', isBasladi);
+    await isci.recordLogin({ org: a.admin.org }, h.value.accountId, 'wrong_password', isBasladi);
+    let d = (await accountStatuses(a.admin, creds, { kind: 'firm', id: f.value.id }))[0]!;
+    expect(d).toMatchObject({ status: 'active', lastSuccessAt: null });
+    // Bilgi kaydedildikten sonra başlamış iş uygulanır
+    await isci.recordLogin({ org: a.admin.org }, h.value.accountId, 'ok', new Date(Date.now() + 1000).toISOString());
+    d = (await accountStatuses(a.admin, creds, { kind: 'firm', id: f.value.id }))[0]!;
+    expect(d.lastSuccessAt).not.toBeNull();
+  });
+
   it('personel ve başka müşavir firmanın hesabını giremez; kayıt yetkisi DB\'de de denetlenir', async () => {
     const a = await ofis();
     const m1 = await a.uye('musavir');

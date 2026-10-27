@@ -294,6 +294,11 @@ class Isleyici(BaseHTTPRequestHandler):
             else:
                 return self._yanit(404, b'')
             return self._yanit(200, govde, 'application/pdf')
+        if u.path.startswith('/nager/api/v3/PublicHolidays/') and u.path.endswith('/TR'):
+            yil = u.path.split('/')[-2]
+            if not yil.isdigit():
+                return self._yanit(404, b'')
+            return self._yanit(200, json.dumps(_nager(int(yil)), ensure_ascii=False).encode('utf-8'), 'application/json; charset=utf-8')
         return self._yanit(404, _sayfa('Bulunamadı', '<p>Sayfa bulunamadı.</p>'))
 
     def do_POST(self):  # noqa: N802
@@ -328,6 +333,8 @@ class Isleyici(BaseHTTPRequestHandler):
             return self._json({'belirtec': belirtec})
         if u.path == '/ebeyanname/dispatch':
             return _ebyn_sorgu_isle(self, govde)
+        if u.path == '/gib/api/gibportal/vergiTakvimi/specification/listAll':
+            return self._json(_vergi_takvimi(govde))
         if u.path == '/dijital/portal/api/ivd':
             kullanici = _dvd_oturum.get(self._cerez('DVD') or '')
             if kullanici is None:
@@ -337,6 +344,44 @@ class Isleyici(BaseHTTPRequestHandler):
                 _ivd_belirtec[belirtec] = kullanici
             return self._json({'belirtec': belirtec})
         return self._yanit(404, b'')
+
+
+AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+
+
+def _vergi_takvimi(govde: bytes) -> dict:
+    """GİB vergi takvimi listAll (2026-10-27'de gözlenen zarf ve süzgeç): stopdate yıl aralığındaki kayıtlar tek yanıtta.
+    Veri sentetiktir (her ay KDV 28, muhtasar ve prim hizmet 26, e-defter beratı); canlı takvim değildir."""
+    try:
+        suzgec = json.loads(govde or b'{}').get('searchRequestListDTOS') or []
+        alt = next(f['value'] for f in suzgec if f.get('column') == 'stopdate' and f.get('operation') == 'GREATER_THAN')
+        yil = int(alt[:4]) + 1
+    except (ValueError, StopIteration, TypeError, KeyError, AttributeError):
+        return {'status': 400, 'statusMessage': 'Hatalı istek', 'messages': [], 'resultContainer': []}
+    kayitlar = []
+    for ay in range(1, 13):
+        onceki = f'Aralık {yil - 1}' if ay == 1 else f'{AYLAR[ay - 2]} {yil}'
+        for no, (gun, baslik, konu, aciklama) in enumerate([
+            (28, 'Katma Değer Vergisinin Beyan ve Ödemesi', 'Beyan ve Ödeme', f'{onceki} Dönemine Ait Katma Değer Vergisinin Beyanı ve Ödemesi'),
+            (26, 'Gelir ve Kurumlar Vergisi Tevkifatlarının Beyan ve Ödemesi', 'Beyan ve Ödeme', f'{onceki} Dönemine Ait Tevkifatların Muhtasar ve Prim Hizmet Beyannamesi ile Beyanı ve Ödemesi'),
+            (27, 'Elektronik Defter Beratları', 'Berat', f'{onceki} Dönemine Ait Elektronik Defter Beratlarının Yüklenmesi'),
+        ]):
+            kayitlar.append({'id': yil * 1000 + ay * 10 + no, 'title': baslik, 'description': aciklama, 'startdate': f'{yil}-{ay:02d}-01T00:00:00',
+                             'stopdate': f'{yil}-{ay:02d}-{gun:02d}T00:00:00', 'priority': 1, 'taxType': 'SAHTE', 'periodDescription': f'{onceki} Dönemi',
+                             'subject': konu, 'startDateBeforeStopDate': True})
+    return {'status': 200, 'statusMessage': 'İşlem başarılı', 'messages': [], 'resultContainer': sorted(kayitlar, key=lambda k: k['stopdate'])}
+
+
+def _nager(yil: int) -> list:
+    """Nager.Date (2026-10-27'de gözlenen biçim): sentetik tarihler; dinî bayramlar "(Tentative Date)" ekli."""
+    sabit = [('01-01', 'Yılbaşı'), ('04-23', 'Ulusal Egemenlik ve Çocuk Bayramı'), ('05-01', 'İşçi Bayramı'), ('05-19', 'Gençlik ve Spor Bayramı'),
+             ('07-15', 'Demokrasi ve Millî Birlik Günü'), ('08-30', 'Zafer Bayramı'), ('10-29', 'Cumhuriyet Bayramı')]
+    out = [{'date': f'{yil}-{g}', 'localName': ad, 'name': ad, 'countryCode': 'TR', 'types': ['Public']} for g, ad in sabit]
+    out += [{'date': f'{yil}-03-{10 + i:02d}', 'localName': f'Ramazan Bayramı {i + 1}. Gün (Tentative Date)', 'name': 'Eid al-Fitr (Tentative Date)',
+             'countryCode': 'TR', 'types': ['Public']} for i in range(3)]
+    out += [{'date': f'{yil}-05-{16 + i:02d}', 'localName': f'Kurban Bayramı {i + 1}. Gün (Tentative Date)', 'name': 'Eid al-Adha (Tentative Date)',
+             'countryCode': 'TR', 'types': ['Public']} for i in range(4)]
+    return sorted(out, key=lambda x: x['date'])
 
 
 def _tarih_parcasi(deger: str) -> list[str]:

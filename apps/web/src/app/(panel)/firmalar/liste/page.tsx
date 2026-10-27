@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { accountStatuses, liveStatus, liveStatusLabel, type AccountStatus, type LiveStatus } from '@eworks/credentials';
+import { accountStatuses, combineLiveStatus, liveStatus, liveStatusLabel, type LiveStatus } from '@eworks/credentials';
 import { isAllowed } from '@eworks/identity-access';
 import { FIRM_KINDS, FIRM_STATUSES, firmCategory, isApproved, listFirms, type Segment } from '@eworks/portfolio';
 import { konteyner } from '@/bff/konteyner.ts';
@@ -47,7 +47,7 @@ export default async function FirmaListesi({ searchParams }: { searchParams: Pro
   const tumu = await listFirms(ctx, {}, k.firmalar);
   const firmalar = await listFirms(ctx, { q: a.q ?? '', status: a.durum ?? '', kind: a.tur ?? '', segment }, k.firmalar);
   const hesaplar = await accountStatuses(ctx, k.kurumHesaplari);
-  const hesap = (id: string, kurum: AccountStatus['institution']) => hesaplar.find((h) => h.ownerKind === 'firm' && h.ownerId === id && h.institution === kurum);
+  const hesap = (id: string, kurum: 'GIB' | 'SGK') => hesaplar.filter((h) => h.ownerKind === 'firm' && h.ownerId === id && h.institution === kurum);
   const duzenler = isAllowed(oturum.grants, 'firmalar.kart.edit');
   const sorgu = new URLSearchParams(Object.entries({ q: a.q ?? '', durum: a.durum ?? '', tur: a.tur ?? '', segment }).filter(([, v]) => v && v !== 'all'));
   const sayac = (s: Segment) =>
@@ -149,8 +149,8 @@ export default async function FirmaListesi({ searchParams }: { searchParams: Pro
                   </td>
                   <td>
                     <div className="durum-kutulari">
-                      <DurumKutusu harf="G" ad="GİB erişimi" durum={liveStatus(hesap(f.id, 'GIB'))} />
-                      <DurumKutusu harf="S" ad="SGK erişimi" durum={liveStatus(hesap(f.id, 'SGK'))} />
+                      <DurumKutusu harf="G" ad="GİB erişimi" durum={liveStatus(hesap(f.id, 'GIB')[0])} />
+                      <DurumKutusu harf="S" ad="SGK erişimi" durum={combineLiveStatus(hesap(f.id, 'SGK').map(liveStatus))} />
                       <DurumKutusu harf="Vergi levhası" ad="Vergi levhası" durum={{ state: 'unknown', checkedAt: null }} />
                     </div>
                   </td>

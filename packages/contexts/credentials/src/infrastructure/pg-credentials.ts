@@ -25,11 +25,11 @@ export class PgCredentialRepository implements CredentialRepository {
       throw new Error('Kurum hesabı kaydedilemedi');
     }
   }
-  async recordLogin(ctx: Ctx, accountId: string, outcome: 'ok' | 'wrong_password') {
+  async recordLogin(ctx: Ctx, accountId: string, outcome: 'ok' | 'wrong_password', jobStartedAt?: string | null) {
     await withCtx(await this.router.poolFor(ctx.org), ctx, (c) =>
       outcome === 'ok'
-        ? c.query(`update credentials.institution_accounts set last_success_at = now(), consecutive_failures = 0 where org_id = $1 and id = $2`, [ctx.org, accountId])
-        : c.query(`update credentials.institution_accounts set status = 'wrong_password', consecutive_failures = consecutive_failures + 1 where org_id = $1 and id = $2`, [ctx.org, accountId]),
+        ? c.query(`update credentials.institution_accounts set last_success_at = now(), consecutive_failures = 0 where org_id = $1 and id = $2 and ($3::timestamptz is null or updated_at <= $3::timestamptz)`, [ctx.org, accountId, jobStartedAt ?? null])
+        : c.query(`update credentials.institution_accounts set status = 'wrong_password', consecutive_failures = consecutive_failures + 1 where org_id = $1 and id = $2 and ($3::timestamptz is null or updated_at <= $3::timestamptz)`, [ctx.org, accountId, jobStartedAt ?? null]),
     );
   }
   async statuses(ctx: Ctx) {

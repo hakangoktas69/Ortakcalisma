@@ -17,5 +17,5 @@ export {
   type StoredSecret,
 } from './application/accounts.ts';
 export { INSTITUTION_FORMS, LABEL_MAX, validateCredential, type CredentialFieldError, type FieldDef, type InstitutionForm } from './domain/credential-fields.ts';
-export { liveStatus, liveStatusLabel, type LiveState, type LiveStatus } from './domain/live-status.ts';
+export { combineLiveStatus, liveStatus, liveStatusLabel, type LiveState, type LiveStatus } from './domain/live-status.ts';
 export { PgCredentialRepository } from './infrastructure/pg-credentials.ts';

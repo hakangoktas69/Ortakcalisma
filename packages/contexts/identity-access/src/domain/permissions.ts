@@ -16,12 +16,12 @@ export const ROLE_TEMPLATES: Readonly<Record<Role, Grants>> = {
   // Tümü, sistem yönetimi (kurum hız politikası) ve satış portalı hariç
   ofis_admin: { allow: [...BUSINESS, 'yonetim'], deny: ['yonetim.hiz_politikasi'] },
   // İş yetkilerinin tümü + kendi personelini yönetme
-  musavir: { allow: [...BUSINESS, 'yonetim.kullanicilar', 'yonetim.mukellef_kullanicilari', 'yonetim.zamanlama.view'], deny: [] },
+  musavir: { allow: [...BUSINESS, 'yonetim.kullanicilar', 'yonetim.mukellef_kullanicilari', 'yonetim.zamanlama.view'], deny: ['genel_bakis.takvim.edit'] },
   // Görüntüleme + görev/not. Senkron başlatma ve kurum bilgisi girme kapalı (müşavir izin verebilir)
   personel: {
     allow: ['oturum', 'genel_bakis', 'firmalar.liste', 'firmalar.kart.view', 'firmalar.kurum_hesaplari.view_status', 'firmalar.gib_sozlesmeler.view',
       'beyanname.liste', 'beyanname.kontrol', 'beyanname.belge', 'sgk.kontrol', 'sgk.ebildirge.view', 'sgk.ebildirge.download', 'gorevler', 'notlar', 'kisayollar', 'bildirimler', 'ayarlar.profil'],
-    deny: [],
+    deny: ['genel_bakis.takvim.edit', 'genel_bakis.takvim.sync'],
   },
   // Kendi firmasında görüntüleme, belge indirme, kendi hesap bilgisini girme ve onay
   mukellef: {

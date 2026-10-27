@@ -1,0 +1,12 @@
+{
+  "aciklama": "Dinî bayramların ilk günleri. Yalnız resmî kaynakla doğrulanmış yıllar burada durur; diğer yıllar açık kaynaktan (kesinleşmedi işaretiyle) çekilir.",
+  "yillar": {
+    "2026": {
+      "ramazan": "2026-03-20",
+      "kurban": "2026-05-27",
+      "certain": true,
+      "sourceUrl": "https://vakithesaplama.diyanet.gov.tr/icerik.php?icerik=153",
+      "checkedAt": "2026-10-26"
+    }
+  }
+}

@@ -5,8 +5,8 @@ import type { Ctx, Job, JobRepository } from '../application/jobs.ts';
 const KOLON = `id, kind, account_id as "accountId", status, status_message as "statusMessage", result_summary as "resultSummary",
   created_at as "createdAt", started_at as "startedAt", finished_at as "finishedAt"`;
 
-/** Kuruma göre kuyruk konusu: robot.gib (Python ACL tüketir). */
-const konu = (kind: JobKind) => `robot.${kind.split('.')[0]}`;
+/** Kuyruk konusu: robot.gib (Python ACL tüketir). Takvim kaynakları da (kamuya açık GİB vergi takvimi) aynı kuyruktan. */
+const konu = (kind: JobKind) => (kind === 'takvim.kaynaklar' ? 'robot.gib' : `robot.${kind.split('.')[0]}`);
 
 export class PgJobRepository implements JobRepository {
   private readonly router: ShardRouter;
@@ -16,12 +16,26 @@ export class PgJobRepository implements JobRepository {
   private async tx<T>(ctx: Ctx, fn: (c: Client) => Promise<T>) {
     return withCtx(await this.router.poolFor(ctx.org), ctx, fn);
   }
-  activeFor(ctx: Ctx, kind: JobKind, accountId: string) {
+  activeFor(ctx: Ctx, kind: JobKind, accountId: string | null, params?: Record<string, string | number>) {
     return this.tx(ctx, async (c) =>
-      (await c.query<Job>(`select ${KOLON} from sync.jobs where org_id = $1 and kind = $2 and account_id = $3 and status in ('queued', 'running') order by created_at desc limit 1`, [ctx.org, kind, accountId])).rows[0] ?? null,
+      (
+        await c.query<Job>(
+          `select ${KOLON} from sync.jobs where org_id = $1 and kind = $2 and account_id is not distinct from $3::uuid and status in ('queued', 'running')
+             and ($4::jsonb is null or params @> $4::jsonb) order by created_at desc limit 1`,
+          [ctx.org, kind, accountId, params ?? null],
+        )
+      ).rows[0] ?? null,
     );
   }
-  async insertWithOutbox(ctx: Ctx, j: { id: string; kind: JobKind; accountId: string; requestedBy: string; params: Record<string, unknown> }) {
+  countSince(ctx: Ctx, kind: JobKind, sinceIso: string, params: Record<string, string | number>) {
+    return this.tx(ctx, async (c) =>
+      Number(
+        (await c.query<{ n: number }>(`select count(*)::int as n from sync.jobs where org_id = $1 and kind = $2 and created_at > $3::timestamptz and params @> $4::jsonb`, [ctx.org, kind, sinceIso, params]))
+          .rows[0]?.n ?? 0,
+      ),
+    );
+  }
+  async insertWithOutbox(ctx: Ctx, j: { id: string; kind: JobKind; accountId: string | null; requestedBy: string | null; params: Record<string, unknown> }) {
     await this.tx(ctx, async (c) => {
       await c.query('insert into sync.jobs(org_id, id, kind, account_id, requested_by, params) values ($1, $2, $3, $4, $5, $6)', [ctx.org, j.id, j.kind, j.accountId, j.requestedBy, j.params]);
       await c.query('insert into sync.outbox(org_id, topic, payload) values ($1, $2, $3)', [ctx.org, konu(j.kind), { orgId: ctx.org, jobId: j.id, kind: j.kind }]);

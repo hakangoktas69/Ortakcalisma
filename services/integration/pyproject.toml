@@ -31,7 +31,7 @@ root_package = "eworks_integration"
 [[tool.importlinter.contracts]]
 name = "Kurumlar birbirinden bağımsız"
 type = "independence"
-modules = ["eworks_integration.institutions.gib", "eworks_integration.institutions.sgk"]
+modules = ["eworks_integration.institutions.gib", "eworks_integration.institutions.sgk", "eworks_integration.institutions.acik_kaynak"]
 
 [[tool.importlinter.contracts]]
 name = "Taşıma katmanı kurumlara bağımlı değil"

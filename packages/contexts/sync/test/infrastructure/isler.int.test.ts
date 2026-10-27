@@ -8,7 +8,7 @@ import { createPool, ShardRouter, withSystem } from '@eworks/platform';
 import { myAdvisorId, PgFirmRepository } from '@eworks/portfolio';
 import { openOffice, PgDirectory, PgTenantProvisioner } from '@eworks/sales';
 import { yigin } from '@eworks/testing';
-import { finishJob, getJob, PgJobRepository, requestJob } from '../../src/index.ts';
+import { finishJob, getJob, PgJobRepository, requestCalendarJob, requestJob } from '../../src/index.ts';
 
 const sistem = ShardRouter.fromUrls(yigin.controlUrl(), yigin.shardUrls('eworks_worker'));
 const web = ShardRouter.fromUrls(yigin.controlUrl(), yigin.shardUrls('eworks_app'));
@@ -86,5 +86,28 @@ describe('kurum işi (sync)', () => {
     if (!r.ok) throw new Error(r.error);
     expect(await finishJob(ctx, r.value.jobId, 'failed', 'kullanıcı', webIsler)).toBe(false);
     expect((await getJob(ctx, r.value.jobId, webIsler))?.status).toBe('queued');
+  });
+});
+
+describe('takvim kaynakları işi (hesapsız)', () => {
+  it('[F:genel_bakis.takvim.sync] kullanıcı hesapsız iş açar, outbox robot.gib; işçi aynı yıl için 24 saatte ikinci işi açmaz', async () => {
+    const o = await openOffice({ officeName: `Takvim işi ${randomUUID().slice(0, 8)}`, admin: { email: `y-${randomUUID()}@eworks.test`, password: `Parola-${randomUUID()}`, name: 'Yönetici' } }, prov);
+    if (!o.ok) throw new Error(o.error);
+    const ctx = { sub: o.value.userId, org: o.value.orgId };
+    const r = await requestCalendarJob(ctx, 2027, webIsler, new Date());
+    expect(r.ok && r.value.existing).toBe(false);
+    if (!r.ok) return;
+    const is = await getJob(ctx, r.value.jobId, webIsler);
+    expect(is).toMatchObject({ kind: 'takvim.kaynaklar', accountId: null, status: 'queued' });
+    const tekrar = await requestCalendarJob(ctx, 2027, webIsler, new Date());
+    expect(tekrar.ok && tekrar.value.jobId).toBe(r.value.jobId);
+    const outbox = await withSystem(await sistem.poolFor(ctx.org), ctx.org, async (c) => (await c.query(`select topic, payload from sync.outbox where org_id = $1`, [ctx.org])).rows);
+    expect(outbox).toEqual([{ topic: 'robot.gib', payload: { orgId: ctx.org, jobId: r.value.jobId, kind: 'takvim.kaynaklar' } }]);
+    await finishJob({ org: ctx.org }, r.value.jobId, 'failed', 'deneme', isciIsler);
+    // İşçi (sistem bağlamı): son 24 saatte aynı yıl için iş var → yenisi açılmaz; başka yıl açılır
+    const isci = { jobs: new PgJobRepository(sistem), newId: randomUUID };
+    expect(await requestCalendarJob({ org: ctx.org }, 2027, isci, new Date())).toEqual({ ok: false, error: 'yakin_zamanda' });
+    const yeni = await requestCalendarJob({ org: ctx.org }, 2028, isci, new Date());
+    expect(yeni.ok && yeni.value.existing).toBe(false);
   });
 });

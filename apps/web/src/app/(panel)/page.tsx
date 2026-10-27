@@ -5,7 +5,7 @@ import { isApproved, listFirms } from '@eworks/portfolio';
 import { listFilings } from '@eworks/social-security';
 import { latestJobs, STATUS_LABEL, type JobKind } from '@eworks/sync';
 import { listDeclarations, recentPeriods } from '@eworks/tax-filing';
-import { listTasks, taskCounters } from '@eworks/workspace';
+import { listTasks, taskCounters, upcomingReminders } from '@eworks/workspace';
 import { bugun } from '@/bff/beyanname.ts';
 import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
@@ -19,9 +19,9 @@ import { Kartlar } from '@/shared/ui/Sayfa.tsx';
 
 type Sayac = { etiket: string; deger: number | string; href: string; uyari?: boolean };
 
-const IS_ADI: Record<JobKind, string> = { 'gib.sozlesmeler': 'GİB sözleşmeleri', 'gib.beyannameler': 'e-Beyanname', 'gib.muhsgk': 'SGK bildirimleri' };
-const IS_SAYFASI: Record<JobKind, string> = { 'gib.sozlesmeler': '/firmalar/gib_sozlesmeler', 'gib.beyannameler': '/beyanname/senkron', 'gib.muhsgk': '/sgk/ebildirge' };
-const IS_YETKISI: Record<JobKind, string> = { 'gib.sozlesmeler': 'firmalar.gib_sozlesmeler.view', 'gib.beyannameler': 'beyanname.liste.view', 'gib.muhsgk': 'sgk.ebildirge.view' };
+const IS_ADI: Record<JobKind, string> = { 'gib.sozlesmeler': 'GİB sözleşmeleri', 'gib.beyannameler': 'e-Beyanname', 'gib.muhsgk': 'SGK bildirimleri', 'takvim.kaynaklar': 'Takvim kaynakları' };
+const IS_SAYFASI: Record<JobKind, string> = { 'gib.sozlesmeler': '/firmalar/gib_sozlesmeler', 'gib.beyannameler': '/beyanname/senkron', 'gib.muhsgk': '/sgk/ebildirge', 'takvim.kaynaklar': '/genel_bakis/takvim' };
+const IS_YETKISI: Record<JobKind, string> = { 'gib.sozlesmeler': 'firmalar.gib_sozlesmeler.view', 'gib.beyannameler': 'beyanname.liste.view', 'gib.muhsgk': 'sgk.ebildirge.view', 'takvim.kaynaklar': 'genel_bakis.takvim.sync' };
 
 /** Kategori kartları: gezinmedir, içerik göstermez; ana sayfa yetkisi kapatılmış kullanıcı da izinli modüllerine buradan ulaşır. */
 function Merkez({ oturum }: { oturum: Session }) {
@@ -58,13 +58,16 @@ export default async function AnaSayfa() {
   const sonDonem = recentPeriods(gun, 1)[0]!;
   const sayaclar: Sayac[] = [];
 
-  const [firmalar, gorevler, beyannameler, sgk, hesaplar] = await Promise.all([
+  const [firmalar, gorevler, beyannameler, sgk, hesaplar, hatirlatmalar] = await Promise.all([
     can('firmalar.liste.view') ? listFirms(ctx, {}, k.firmalar) : null,
     can('gorevler.view') ? listTasks(ctx, k.gorevler) : null,
     can('beyanname.liste.view') ? listDeclarations(ctx, { limit: 5000 }, k.beyannameler) : null,
     can('sgk.ebildirge.view') ? listFilings(ctx, { limit: 5000 }, k.sgk) : null,
     can('firmalar.kurum_hesaplari.view_status') ? accountStatuses(ctx, k.kurumHesaplari) : null,
+    can('genel_bakis.takvim.remind') ? upcomingReminders(ctx, gun, k.hatirlatmalar) : null,
   ]);
+  // Uygulama içi hatırlatma (takvim): uyarı zamanı gelmiş kişisel hatırlatmalar
+  if (hatirlatmalar) sayaclar.push({ etiket: 'Yaklaşan hatırlatma', deger: hatirlatmalar.length, href: '/genel_bakis/takvim', uyari: hatirlatmalar.length > 0 });
   if (firmalar) {
     sayaclar.push({ etiket: 'Firma', deger: firmalar.length, href: '/firmalar/liste' });
     const bekleyen = firmalar.filter((f) => !isApproved(f.status)).length;
