@@ -3,6 +3,7 @@
 export const CONTEXT = 'workspace' as const;
 
 export { DONE, isOverdue, statusPermission, TASK_STATUSES, taskCounters, validateTask, validDay, validNote, type TaskInput, type TaskStatus } from './domain/task.ts';
+export { PORTAL_GROUPS, PORTAL_LINKS, type PortalGroup, type PortalLink } from './domain/portal-links.ts';
 export {
   addNote,
   assignTask,

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { accountStatuses, statusLabel } from '@eworks/credentials';
+import { accountStatuses, INSTITUTION_FORMS, statusLabel } from '@eworks/credentials';
 import { isAllowed } from '@eworks/identity-access';
 import { listFirms, myAdvisorId } from '@eworks/portfolio';
 import { konteyner } from '@/bff/konteyner.ts';
@@ -34,6 +34,8 @@ export default async function KurumHesaplari() {
                 sahipId={musavir}
                 baslik="Müşavir GİB hesabı"
                 aciklama="E-Beyanname sözleşme listesi bu hesapla okunur. GİB şifrenizi Eworks girişinde kullanmayın."
+                kayitli={!!benim}
+                form={INSTITUTION_FORMS.find((x) => x.institution === 'GIB')!}
               />
             </FeatureGate>
           ) : null}

@@ -76,25 +76,29 @@ export function FirmaFormu({ csrf, id, version, ilk }: { csrf: string; id?: stri
           {hata}
         </p>
       ) : null}
-      <div className="form-satir">
-        {alan('title', 'Firma / mükellef unvanı', { required: true, maxLength: 300 })}
-        {secim('kind', 'Firma türü', TURLER)}
-        {alan('taxId', 'VKN / TCKN', { required: true, inputMode: 'numeric', maxLength: 11 })}
-        {alan('taxOffice', 'Vergi dairesi', { maxLength: 120 })}
-      </div>
-      <div className="form-satir">
-        {alan('city', 'İl', { maxLength: 80 })}
-        {alan('representative', 'Yetkili', { maxLength: 160 })}
-        {alan('phone', 'Telefon', { type: 'tel', maxLength: 40 })}
-        {alan('email', 'E-posta', { type: 'email', maxLength: 160 })}
-      </div>
-      <div className="form-satir">
-        {alan('activityCode', 'Faaliyet / NACE kodu', { maxLength: 20 })}
-        {alan('activityName', 'Faaliyet adı', { maxLength: 300 })}
-        {secim('taxRegime', 'Vergilendirme usulü', USULLER)}
-        {secim('status', 'Firma onay durumu', DURUMLAR)}
-      </div>
-      <div className="form-satir">{alan('groupName', 'Mükellef grubu', { maxLength: 120 })}</div>
+      <fieldset className="form-bolumu">
+        <legend>Temel bilgiler</legend>
+        <div className="form-satir">
+          {alan('title', 'Firma / mükellef unvanı', { required: true, maxLength: 300 })}
+          {alan('taxId', 'VKN / TCKN', { required: true, inputMode: 'numeric', maxLength: 11 })}
+          {alan('taxOffice', 'Vergi dairesi', { maxLength: 120 })}
+          {alan('email', 'E-posta', { type: 'email', maxLength: 160 })}
+          {alan('phone', 'Telefon', { type: 'tel', maxLength: 40 })}
+        </div>
+      </fieldset>
+      <fieldset className="form-bolumu">
+        <legend>Firma ve sorumlu bilgileri</legend>
+        <div className="form-satir">
+          {secim('kind', 'Firma türü', TURLER)}
+          {secim('taxRegime', 'Vergilendirme usulü', USULLER)}
+          {alan('city', 'İl', { maxLength: 80 })}
+          {alan('representative', 'Yetkili', { maxLength: 160 })}
+          {alan('activityCode', 'Faaliyet / NACE kodu', { maxLength: 20 })}
+          {alan('activityName', 'Faaliyet adı', { maxLength: 300 })}
+          {alan('groupName', 'Mükellef grubu', { maxLength: 120 })}
+          {secim('status', 'Firma onay durumu', DURUMLAR)}
+        </div>
+      </fieldset>
       <div className="eylemler">
         <button type="submit" className="dugme birincil" disabled={bekliyor}>
           {bekliyor ? 'Kaydediliyor…' : 'Kaydet'}

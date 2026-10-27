@@ -1,14 +1,16 @@
 import Link from 'next/link';
-import { accountStatuses, statusLabel } from '@eworks/credentials';
+import { accountStatuses, liveStatus, liveStatusLabel, type AccountStatus, type LiveStatus } from '@eworks/credentials';
 import { isAllowed } from '@eworks/identity-access';
 import { FIRM_KINDS, FIRM_STATUSES, firmCategory, isApproved, listFirms, type Segment } from '@eworks/portfolio';
 import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
+import { FirmaArama } from '@/features/portfolio/FirmaArama.tsx';
 import { FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
 import { TabloKap } from '@/shared/ui/TabloKap.tsx';
 
-// Firmalarım (firmalar.liste): eski portalın firma listesi — sayaçlar, süzgeçler, CSV, GİB hesabı durumu.
+// Firmalarım (firmalar.liste): eski portalın firma listesi — sayaçlar, süzgeçler, CSV, kurum durumu (G/S/V), Düzenle.
+// G/S/V kutuları yalnız kurumda doğrulanmış girişi "aktif" gösterir (Mert 26.10); vergi levhasının kaynağı henüz yok, gri kalır.
 const SEGMENTLER: [Segment, string][] = [
   ['all', 'Toplam'],
   ['approved', 'Onaylanmış'],
@@ -20,6 +22,21 @@ const SEGMENTLER: [Segment, string][] = [
 
 type Ara = { q?: string; durum?: string; tur?: string; segment?: string; ok?: string };
 
+const SINIF = { active: 'iyi', inactive: 'kotu', unknown: '' } as const;
+
+function DurumKutusu({ harf, ad, durum }: { harf: string; ad: string; durum: LiveStatus }) {
+  const metin = liveStatusLabel(durum.state);
+  const tarih = durum.checkedAt ? ` · son kontrol ${new Date(durum.checkedAt).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul' })}` : '';
+  return (
+    <span className={`etiket durum-kutusu ${SINIF[durum.state]}`} data-durum={durum.state} title={`${ad}: ${metin}${tarih}`}>
+      <b aria-hidden="true">{harf}</b>
+      <span className="gorunmez">{ad}: </span>
+      {metin}
+      {tarih ? <span className="gorunmez">{tarih}</span> : null}
+    </span>
+  );
+}
+
 export default async function FirmaListesi({ searchParams }: { searchParams: Promise<Ara> }) {
   const { oturum, izinli } = await sayfaIzni('firmalar.liste.view');
   if (!izinli) return <Yasak />;
@@ -30,7 +47,8 @@ export default async function FirmaListesi({ searchParams }: { searchParams: Pro
   const tumu = await listFirms(ctx, {}, k.firmalar);
   const firmalar = await listFirms(ctx, { q: a.q ?? '', status: a.durum ?? '', kind: a.tur ?? '', segment }, k.firmalar);
   const hesaplar = await accountStatuses(ctx, k.kurumHesaplari);
-  const gib = (id: string) => hesaplar.find((h) => h.ownerKind === 'firm' && h.ownerId === id && h.institution === 'GIB');
+  const hesap = (id: string, kurum: AccountStatus['institution']) => hesaplar.find((h) => h.ownerKind === 'firm' && h.ownerId === id && h.institution === kurum);
+  const duzenler = isAllowed(oturum.grants, 'firmalar.kart.edit');
   const sorgu = new URLSearchParams(Object.entries({ q: a.q ?? '', durum: a.durum ?? '', tur: a.tur ?? '', segment }).filter(([, v]) => v && v !== 'all'));
   const sayac = (s: Segment) =>
     s === 'all' ? tumu.length : tumu.filter((f) => (s === 'approved' ? isApproved(f.status) : s === 'pending' ? !isApproved(f.status) : s === 'simple' ? f.taxRegime === 'Basit Usul' : firmCategory(f.kind) === s)).length;
@@ -66,10 +84,7 @@ export default async function FirmaListesi({ searchParams }: { searchParams: Pro
         ))}
       </div>
       <form className="filtre" method="get">
-        <label>
-          Ara
-          <input name="q" type="search" defaultValue={a.q ?? ''} placeholder="Unvan, VKN/TCKN, il, grup…" />
-        </label>
+        <FirmaArama ilk={a.q ?? ''} />
         <label>
           Onay durumu
           <select name="durum" defaultValue={a.durum ?? ''}>
@@ -93,6 +108,10 @@ export default async function FirmaListesi({ searchParams }: { searchParams: Pro
           Süz
         </button>
       </form>
+      <p className="alt durum-aciklama">
+        Kurum durumu: <span className="etiket iyi">Aktif</span> kurumda son girişle doğrulandı, <span className="etiket kotu">Aktif değil</span> giriş başarısız ya da
+        hesap durduruldu, <span className="etiket">Doğrulanmadı</span> henüz kurumda denenmedi. Bilgilerin kayıtlı olması tek başına doğrulama sayılmaz.
+      </p>
       <TabloKap etiket="Firma listesi">
         <table>
           <caption className="gorunmez">Firmalar</caption>
@@ -104,13 +123,16 @@ export default async function FirmaListesi({ searchParams }: { searchParams: Pro
               <th>Vergi dairesi</th>
               <th>İl</th>
               <th>Onay</th>
-              <th>GİB hesabı</th>
+              <th>Kurum durumu</th>
+              <th>
+                <span className="gorunmez">İşlem</span>
+              </th>
             </tr>
           </thead>
           <tbody>
             {firmalar.length === 0 ? (
               <tr>
-                <td colSpan={7}>Kayıt bulunamadı.</td>
+                <td colSpan={8}>Kayıt bulunamadı.</td>
               </tr>
             ) : (
               firmalar.map((f) => (
@@ -126,7 +148,16 @@ export default async function FirmaListesi({ searchParams }: { searchParams: Pro
                     <span className={`etiket ${isApproved(f.status) ? 'iyi' : f.status === 'Pasif' ? '' : 'bekliyor'}`}>{f.status}</span>
                   </td>
                   <td>
-                    <span className={`etiket ${gib(f.id)?.status === 'active' ? 'iyi' : gib(f.id) ? 'kotu' : ''}`}>{statusLabel(gib(f.id))}</span>
+                    <div className="durum-kutulari">
+                      <DurumKutusu harf="G" ad="GİB erişimi" durum={liveStatus(hesap(f.id, 'GIB'))} />
+                      <DurumKutusu harf="S" ad="SGK erişimi" durum={liveStatus(hesap(f.id, 'SGK'))} />
+                      <DurumKutusu harf="Vergi levhası" ad="Vergi levhası" durum={{ state: 'unknown', checkedAt: null }} />
+                    </div>
+                  </td>
+                  <td>
+                    <Link className="dugme ikincil kucuk" href={`/firmalar/kart/${f.id}`} aria-label={`${f.title} ${duzenler ? 'düzenle' : 'görüntüle'}`}>
+                      {duzenler ? 'Düzenle' : 'Görüntüle'}
+                    </Link>
                   </td>
                 </tr>
               ))

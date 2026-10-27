@@ -73,6 +73,9 @@ textarea { resize: vertical; }
 .rozet.yesil { color: var(--yesil); background: var(--yesil-zemin); }
 .kapi { display: inline-flex; align-items: center; gap: .35rem; }
 .kapi.kirmizi { outline: 2px solid var(--kirmizi); outline-offset: 2px; border-radius: 10px; }
+/* Kapı bir formu sarıyorsa (firma formu, kurum hesabı formu) form içerik kadar daralmasın, satırı doldursun */
+.kapi:has(> form) { display: flex; flex-wrap: wrap; align-items: flex-start; }
+.kapi > form { flex: 1 1 100%; min-width: 0; }
 
 /* Giriş: lacivert zemin, yörüngeler, beyaz kart, altın düğme */
 .giris { position: relative; min-height: 100vh; min-height: 100svh; overflow: hidden; display: flex; flex-direction: column; background: radial-gradient(ellipse at 50% 35%, rgba(22, 76, 150, .56), transparent 50%), radial-gradient(ellipse at 95% 100%, rgba(21, 61, 114, .38), transparent 55%), #061328; }
@@ -182,6 +185,39 @@ td.sayi { text-align: right; font-variant-numeric: tabular-nums; }
 .etiket.iyi { background: var(--yesil-zemin); color: var(--yesil); }
 .etiket.kotu { background: var(--kirmizi-zemin); color: var(--kirmizi); }
 .etiket.bekliyor { background: var(--uyari-zemin); color: var(--uyari); }
+/* Firma listesi: G/S/V kurum durumu kutuları (yeşil doğrulandı, kırmızı aktif değil, gri doğrulanmadı) */
+.durum-kutulari { display: flex; flex-wrap: wrap; gap: .3rem; }
+.durum-kutusu::before { display: none; }
+.durum-kutusu b { display: inline-grid; place-items: center; min-width: 1.25rem; height: 1.25rem; padding: 0 .3rem; border-radius: 5px; background: #dfe5ee; color: #364b66; font-size: .68rem; }
+.durum-kutusu.iyi b { background: var(--yesil); color: #fff; }
+.durum-kutusu.kotu b { background: var(--kirmizi); color: #fff; }
+.durum-aciklama .etiket { margin: 0 .1rem; }
+.dugme.kucuk { min-height: 32px; padding: .25rem .7rem; font-size: .8rem; }
+/* Firma formu bölümleri (Mert'in firm-form-section'ı) */
+.form-bolumu { margin: 0; padding: 0; border: 1px solid var(--cizgi); border-radius: var(--yaricap); overflow: hidden; min-width: 0; }
+.form-bolumu legend { float: left; width: 100%; margin: 0; padding: .85rem 1.1rem; background: #f8fbff; border-bottom: 1px solid #eaf0f8; font-weight: 750; color: #173858; }
+.form-bolumu > .form-satir { clear: both; padding: 1rem 1.1rem 1.1rem; }
+/* Firma kartı: kurum ve mükellef bilgi kartları (Mert'in firm-account-grid'i) */
+.kurum-kartlari-bolumu { display: grid; gap: .7rem; }
+.kurum-kartlari-bolumu h2 { margin: .4rem 0 0; font-size: 1.1rem; }
+.kurum-kartlari { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.kurum-karti { display: grid; gap: .6rem; align-content: start; }
+.kurum-karti h3 { margin: 0; font-size: 1rem; color: #193b60; }
+.kurum-karti p { margin: 0; }
+.kurum-karti .form-satir { grid-template-columns: 1fr; }
+.kurum-alt { border-top: 1px solid var(--cizgi); padding-top: .6rem; display: grid; gap: .4rem; }
+.bilgi-listesi { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .35rem .9rem; font-size: .9rem; }
+.bilgi-listesi dt { color: var(--soluk); }
+.bilgi-listesi dd { margin: 0; }
+.kirilir { overflow-wrap: anywhere; }
+/* Portal kısayolları */
+.kisayol-grubu { display: grid; gap: .8rem; }
+.kisayol-grubu h2 { margin: .4rem 0 0; font-size: 1.05rem; }
+.kisayollar-listesi { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
+.kisayol { display: grid; gap: .5rem; align-content: start; }
+.kisayol h3 { margin: 0; font-size: .98rem; }
+.kisayol p { margin: 0; }
+.kisayol .dugme { justify-self: start; white-space: normal; text-align: left; }
 .kurum-isi { display: grid; gap: .5rem; justify-items: start; margin: .6rem 0; }
 .is-durumu { margin: 0; overflow-wrap: anywhere; }
 .belgeler { display: flex; flex-wrap: wrap; gap: .25rem .6rem; }

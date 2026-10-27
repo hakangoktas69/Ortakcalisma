@@ -10,7 +10,7 @@ export type Override = { readonly key: string; readonly effect: 'allow' | 'deny'
 export type Grants = { readonly allow: readonly string[]; readonly deny: readonly string[] };
 
 // Rol şablonları (05 §3.2). Anahtarlar feature-registry düğümleridir; modül anahtarı tüm alt ağacı kapsar.
-const BUSINESS = ['oturum', 'genel_bakis', 'firmalar', 'beyanname', 'tebligat', 'sgk', 'edefter', 'dilekceler', 'faturalar', 'gorevler', 'notlar', 'bildirimler', 'raporlar', 'odeme', 'ayarlar', 'destek'];
+const BUSINESS = ['oturum', 'genel_bakis', 'firmalar', 'beyanname', 'tebligat', 'sgk', 'edefter', 'dilekceler', 'faturalar', 'gorevler', 'notlar', 'kisayollar', 'bildirimler', 'raporlar', 'odeme', 'ayarlar', 'destek'];
 
 export const ROLE_TEMPLATES: Readonly<Record<Role, Grants>> = {
   // Tümü, sistem yönetimi (kurum hız politikası) ve satış portalı hariç
@@ -20,7 +20,7 @@ export const ROLE_TEMPLATES: Readonly<Record<Role, Grants>> = {
   // Görüntüleme + görev/not. Senkron başlatma ve kurum bilgisi girme kapalı (müşavir izin verebilir)
   personel: {
     allow: ['oturum', 'genel_bakis', 'firmalar.liste', 'firmalar.kart.view', 'firmalar.kurum_hesaplari.view_status', 'firmalar.gib_sozlesmeler.view',
-      'beyanname.liste', 'beyanname.kontrol', 'beyanname.belge', 'sgk.kontrol', 'sgk.ebildirge.view', 'sgk.ebildirge.download', 'gorevler', 'notlar', 'bildirimler', 'ayarlar.profil'],
+      'beyanname.liste', 'beyanname.kontrol', 'beyanname.belge', 'sgk.kontrol', 'sgk.ebildirge.view', 'sgk.ebildirge.download', 'gorevler', 'notlar', 'kisayollar', 'bildirimler', 'ayarlar.profil'],
     deny: [],
   },
   // Kendi firmasında görüntüleme, belge indirme, kendi hesap bilgisini girme ve onay

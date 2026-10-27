@@ -90,6 +90,7 @@ const YOLLAR = {
     </>
   ),
   arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
+  link: <path d="M14 3h7v7M21 3l-9 9M10 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />,
   right: <path d="m9 5 7 7-7 7" />,
   left: <path d="m15 5-7 7 7 7" />,
   check: <path d="m5 12 4 4L19 6" />,

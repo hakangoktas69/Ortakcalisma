@@ -28,7 +28,7 @@ async function ofisVeHesap() {
   const ctx = { sub: o.value.userId, org: o.value.orgId };
   const musavir = await myAdvisorId(ctx, { repo: new PgFirmRepository(web) });
   if (!musavir) throw new Error('müşavir yok');
-  const h = await saveAccount(ctx, { ownerKind: 'advisor', ownerId: musavir, institution: 'GIB', username: '55500001', password: 'sahte-sifre' }, creds);
+  const h = await saveAccount(ctx, { ownerKind: 'advisor', ownerId: musavir, institution: 'GIB', fields: { username: '55500001', password: 'sahte-sifre' } }, creds);
   if (!h.ok) throw new Error(h.error);
   const [hesap] = await accountStatuses(ctx, creds);
   return { ctx, hesap: hesap! };

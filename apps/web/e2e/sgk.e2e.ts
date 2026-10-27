@@ -2,7 +2,7 @@ import { randomInt } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { ofisAc } from './genel-kurulum.ts';
-import { ekranDenetle, girisYap, hataTopla } from './yardim.ts';
+import { ekranDenetle, gibBilgileriniAc, girisYap, hataTopla } from './yardim.ts';
 
 // SGK e-Bildirge: MUHSGK'ların SGK bildirimleri uçtan uca — robot e-Beyanname içinde SGK penceresini açar, SGK tahakkuk ve hizmet
 // listesi PDF'lerini indirir, hizmet listesinden çalışan sayısını çıkarır (kişi bilgisi ACL'den çıkmaz). Sahte GİB canlı
@@ -18,6 +18,7 @@ test.describe('SGK', () => {
     const o = await ofisAc();
     await girisYap(page, o.yonetici);
     await page.goto('/firmalar/kurum_hesaplari');
+    await gibBilgileriniAc(page);
     await page.getByLabel('GİB kullanıcı kodu').fill(String(randomInt(10_000_000, 99_999_999)));
     await page.getByLabel('GİB şifresi').fill(SAHTE_GIB_SIFRE);
     await page.getByRole('button', { name: 'GİB hesabını kaydet' }).click();

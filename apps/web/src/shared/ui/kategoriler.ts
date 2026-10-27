@@ -20,7 +20,7 @@ export const KATEGORILER: readonly Kategori[] = [
     baslik: 'Günlük Yönetim',
     aciklama: 'Mükellefler, beyannameler ve günlük işler',
     simge: 'home',
-    moduller: ['firmalar', 'beyanname', 'tebligat', 'sgk', 'edefter', 'raporlar', 'dilekceler', 'faturalar', 'gorevler', 'notlar'],
+    moduller: ['firmalar', 'kisayollar', 'beyanname', 'tebligat', 'sgk', 'edefter', 'raporlar', 'dilekceler', 'faturalar', 'gorevler', 'notlar'],
   },
   { id: 'takvim', baslik: 'Takvim', aciklama: 'Vergi takvimi, önemli günler ve kişisel hatırlatmalar', simge: 'calendar', moduller: [], hedef: 'genel_bakis.takvim' },
   {
@@ -35,6 +35,7 @@ export const KATEGORILER: readonly Kategori[] = [
 
 export const MODUL_SIMGESI: Record<string, SimgeAdi> = {
   firmalar: 'firms',
+  kisayollar: 'link',
   beyanname: 'file',
   tebligat: 'mail',
   sgk: 'shield',

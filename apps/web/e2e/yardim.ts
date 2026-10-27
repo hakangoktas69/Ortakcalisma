@@ -53,3 +53,8 @@ export function hataTopla(page: Page) {
   });
   return hatalar;
 }
+
+/** Kurum hesabı formunun alanları kapalı başlar (otomatik doldurma kilidi); "GİB bilgilerini gir/değiştir" ile açılır. */
+export async function gibBilgileriniAc(page: Page) {
+  await page.getByRole('button', { name: /^GİB bilgilerini (gir|değiştir)$/ }).click();
+}

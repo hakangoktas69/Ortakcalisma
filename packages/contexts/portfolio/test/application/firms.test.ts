@@ -105,4 +105,14 @@ describe('firma use-case\'leri', () => {
     expect(csv).toContain(`"'=CMD()"`);
     expect(f.audit).toEqual([2]);
   });
+
+  it('[F:firmalar.liste.view] arama Türkçe harf farkını yok sayar, çok kelimeli çalışır, unvanla başlayanı öne alır', async () => {
+    const f = fakes();
+    await createFirm(ctx, { title: 'Yeni Çağ Gıda Ltd', kind: 'Limited', taxId: fakeVkn(rnd), city: 'İzmir' }, f.d);
+    await createFirm(ctx, { title: 'Çağ Lojistik Ltd', kind: 'Limited', taxId: fakeVkn(rnd), city: 'Ankara' }, f.d);
+    await createFirm(ctx, { title: 'Deniz Ltd', kind: 'Limited', taxId: fakeVkn(rnd), activityName: 'Çağrı merkezi' }, f.d);
+    expect((await listFirms(ctx, { q: 'cag' }, f.d)).map((x) => x.title)).toEqual(['Çağ Lojistik Ltd', 'Yeni Çağ Gıda Ltd', 'Deniz Ltd']);
+    expect((await listFirms(ctx, { q: 'gida izmir' }, f.d)).map((x) => x.title)).toEqual(['Yeni Çağ Gıda Ltd']);
+    expect((await listFirms(ctx, { q: 'gida ankara' }, f.d)).map((x) => x.title)).toEqual([]);
+  });
 });

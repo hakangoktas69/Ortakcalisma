@@ -1,38 +1,46 @@
 import { err, type Result } from '@eworks/kernel';
+import { validateCredential, type CredentialFieldError, type Institution, type OwnerKind } from '../domain/credential-fields.ts';
 
 // Kurum hesabı use-case'leri (05 §4). Kimlik bilgisi yalnız Vault'a gider; uygulama katmanı şifreyi saklamaz, döndürmez,
-// günlüğe yazmaz. Okunabilen tek şey durumdur (kayıtlı mı, ne zaman, hatalı şifre/kilit).
+// günlüğe yazmaz. Okunabilen tek şey durumdur (kayıtlı mı, ne zaman, hatalı şifre/kilit) ve SGK hesabının işyeri adıdır.
 
 export type Ctx = { readonly sub?: string; readonly org: string };
-export type OwnerKind = 'advisor' | 'firm';
-export type Institution = 'GIB' | 'SGK';
+export type { Institution, OwnerKind };
 
 export type AccountStatus = {
   id: string;
   ownerKind: OwnerKind;
   ownerId: string;
   institution: Institution;
+  /** SGK işyeri adı; GİB/UETS'te boş. */
+  label: string;
   status: 'active' | 'wrong_password' | 'locked' | 'disabled';
+  /** ISO 8601 */
   updatedAt: string;
   lastSuccessAt: string | null;
 };
 
-export type SaveInput = { ownerKind: OwnerKind; ownerId: string; institution: Institution; username: string; password: string };
+/** `fields` kurumun alanlarıdır (GİB: username + password; SGK: username, workplaceCode, systemPassword, workplacePassword; UETS: address + password). */
+export type SaveInput = { ownerKind: string; ownerId: string; institution: string; label?: string; fields: Record<string, unknown> };
+export type StoredSecret = { ownerKind: OwnerKind; ownerId: string; institution: Institution; label: string; secret: Record<string, string> };
 export type SaveError = 'gecersiz' | 'yetki_yok' | 'bulunamadi';
 
 export interface CredentialRepository {
-  save(ctx: Ctx, input: SaveInput): Promise<Result<{ accountId: string }, SaveError>>;
+  save(ctx: Ctx, input: StoredSecret): Promise<Result<{ accountId: string }, SaveError>>;
   statuses(ctx: Ctx): Promise<AccountStatus[]>;
   /** Kurum girişi sonucu (işçi, sistem bağlamı): hatalı şifre hesabı durdurur, başarı sayacı sıfırlar (05 §4). */
   recordLogin(ctx: Ctx, accountId: string, outcome: 'ok' | 'wrong_password'): Promise<void>;
 }
 
-export async function saveAccount(ctx: Ctx, input: SaveInput, repo: CredentialRepository): Promise<Result<{ accountId: string }, SaveError>> {
-  const username = input.username.trim();
-  if (!username || username.length > 256 || !input.password || input.password.length > 1024) return err('gecersiz');
-  if (input.ownerKind !== 'advisor' && input.ownerKind !== 'firm') return err('gecersiz');
-  if (input.institution !== 'GIB' && input.institution !== 'SGK') return err('gecersiz');
-  return repo.save(ctx, { ...input, username });
+export async function saveAccount(
+  ctx: Ctx,
+  input: SaveInput,
+  repo: CredentialRepository,
+): Promise<Result<{ accountId: string }, SaveError> & { errors?: CredentialFieldError[] }> {
+  if (!input.ownerId) return err('gecersiz');
+  const v = validateCredential(input);
+  if (!v.ok) return { ok: false, error: 'gecersiz', errors: v.errors };
+  return repo.save(ctx, { ownerId: input.ownerId, ...v.value });
 }
 
 export async function accountStatuses(ctx: Ctx, repo: CredentialRepository, owner?: { kind: OwnerKind; id: string }) {

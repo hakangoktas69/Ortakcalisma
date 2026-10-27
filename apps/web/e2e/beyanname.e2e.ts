@@ -2,7 +2,7 @@ import { randomInt } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { ofisAc } from './genel-kurulum.ts';
-import { ekranDenetle, girisYap, hataTopla } from './yardim.ts';
+import { ekranDenetle, gibBilgileriniAc, girisYap, hataTopla } from './yardim.ts';
 
 // e-Beyanname: uçtan uca gerçek akış — web → kuyruk → Python robotu (aynı oturumda sözleşme listesi + e-Beyanname, PDF'ler)
 // → sahte GİB → S3 → işçi (tax-filing + documents). Sahte GİB canlı doğrulama sayılmaz (D33): "Senkron başlat" canlı kayıt
@@ -12,6 +12,7 @@ const SAHTE_GIB_SIFRE = process.env['SAHTE_GIB_SIFRE'] ?? 'demo-gib-sifre';
 
 async function gibHesabiVeSozlesmeler(page: Page) {
   await page.goto('/firmalar/kurum_hesaplari');
+  await gibBilgileriniAc(page);
   await page.getByLabel('GİB kullanıcı kodu').fill(String(randomInt(10_000_000, 99_999_999)));
   await page.getByLabel('GİB şifresi').fill(SAHTE_GIB_SIFRE);
   await page.getByRole('button', { name: 'GİB hesabını kaydet' }).click();

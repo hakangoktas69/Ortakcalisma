@@ -3,6 +3,7 @@
 export const CONTEXT = 'portfolio' as const;
 
 export { FIRM_KINDS, FIRM_STATUSES, firmCategory, inSegment, isApproved, TAX_REGIMES, validateFirm, type FirmFieldError, type ValidFirm } from './domain/firm.ts';
+export { matchesSearch, normalizeSearch, searchRank } from './domain/search.ts';
 export {
   archiveFirm,
   createFirm,

@@ -39,6 +39,12 @@ describe('hiyerarşik yetki', () => {
     expect(isAllowed(g, 'firmalar.kurum_hesaplari.grant_use')).toBe(false);
     expect(isAllowed(g, 'beyanname.senkron.start')).toBe(false);
     expect(isAllowed(g, 'firmalar.liste.view')).toBe(false);
+    expect(isAllowed(g, 'kisayollar.view')).toBe(false);
+  });
+
+  it('[F:kisayollar.view] portal kısayolları ofis kullanıcılarına açık, mükellefe kapalı', () => {
+    for (const r of ['ofis_admin', 'musavir', 'personel'] as const) expect(isAllowed(effectiveGrants(r), 'kisayollar.view'), r).toBe(true);
+    expect(isAllowed(effectiveGrants('mukellef'), 'kisayollar.view')).toBe(false);
   });
 
   it('yetki yükseltme yasak: sahip olunmayan yetki verilemez; personel/mükellef yetki veremez', () => {

@@ -6,7 +6,7 @@ import { GoTrueAuthProvider } from '@eworks/identity-access';
 import { createPool, ShardRouter, withUser } from '@eworks/platform';
 import { addMember, openOffice, PgDirectory, PgTenantProvisioner } from '@eworks/sales';
 import { fakeVkn, yigin } from '@eworks/testing';
-import { archiveFirm, createFirm, getFirm, listFirms, PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '../../src/index.ts';
+import { archiveFirm, createFirm, getFirm, listFirms, myAdvisorId, PgFirmRepository, PgTaxpayerRegistry, taxIdHasher } from '../../src/index.ts';
 
 const sistem = ShardRouter.fromUrls(yigin.controlUrl(), yigin.shardUrls('eworks_worker'));
 const web = ShardRouter.fromUrls(yigin.controlUrl(), yigin.shardUrls('eworks_app'));
@@ -94,8 +94,8 @@ describe('kurum hesabı (Vault)', () => {
     const f = await createFirm(a.admin, { title: 'Hesaplı Ltd', kind: 'Limited', taxId: fakeVkn() }, deps);
     if (!f.ok) throw new Error();
     const sifre = `Gizli-${randomUUID()}`;
-    expect((await saveAccount(a.admin, { ownerKind: 'firm', ownerId: f.value.id, institution: 'GIB', username: '1234567', password: sifre }, creds)).ok).toBe(true);
-    expect((await saveAccount(a.admin, { ownerKind: 'firm', ownerId: f.value.id, institution: 'GIB', username: '1234567', password: `${sifre}-2` }, creds)).ok).toBe(true);
+    expect((await saveAccount(a.admin, { ownerKind: 'firm', ownerId: f.value.id, institution: 'GIB', fields: { username: '1234567', password: sifre } }, creds)).ok).toBe(true);
+    expect((await saveAccount(a.admin, { ownerKind: 'firm', ownerId: f.value.id, institution: 'GIB', fields: { username: '1234567', password: `${sifre}-2` } }, creds)).ok).toBe(true);
     const durum = await accountStatuses(a.admin, creds, { kind: 'firm', id: f.value.id });
     expect(durum).toHaveLength(1);
     expect(durum[0]).toMatchObject({ status: 'active', institution: 'GIB' });
@@ -110,6 +110,22 @@ describe('kurum hesabı (Vault)', () => {
     expect(JSON.stringify(kayitlar)).not.toContain(sifre);
   });
 
+  it('[F:firmalar.kurum_hesaplari.edit_credentials] SGK hesabı işyeri başına; durumda yalnız işyeri adı, sır yok; müşavire SGK hesabı açılmaz', async () => {
+    const a = await ofis();
+    const f = await createFirm(a.admin, { title: 'SGK Ltd', kind: 'Limited', taxId: fakeVkn() }, deps);
+    if (!f.ok) throw new Error();
+    const sir = `Isyeri-${randomUUID()}`;
+    const sgk = (label: string) => ({ ownerKind: 'firm', ownerId: f.value.id, institution: 'SGK', label, fields: { username: '1', workplaceCode: '2', systemPassword: sir, workplacePassword: sir } });
+    expect((await saveAccount(a.admin, sgk('Merkez'), creds)).ok).toBe(true);
+    expect((await saveAccount(a.admin, sgk('Şube'), creds)).ok).toBe(true);
+    const durum = await accountStatuses(a.admin, creds, { kind: 'firm', id: f.value.id });
+    expect(durum.map((d) => [d.institution, d.label])).toEqual([['SGK', 'Merkez'], ['SGK', 'Şube']]);
+    expect(Number.isFinite(Date.parse(durum[0]!.updatedAt))).toBe(true);
+    expect(JSON.stringify(durum)).not.toContain(sir);
+    const musavir = await myAdvisorId(a.admin, deps);
+    expect(await saveAccount(a.admin, { ...sgk('Merkez'), ownerKind: 'advisor', ownerId: musavir! }, creds)).toMatchObject({ ok: false, error: 'gecersiz' });
+  });
+
   it('personel ve başka müşavir firmanın hesabını giremez; kayıt yetkisi DB\'de de denetlenir', async () => {
     const a = await ofis();
     const m1 = await a.uye('musavir');
@@ -117,7 +133,7 @@ describe('kurum hesabı (Vault)', () => {
     const p = await a.uye('personel');
     const f = await createFirm(m1, { title: 'M1 Ltd', kind: 'Limited', taxId: fakeVkn() }, deps);
     if (!f.ok) throw new Error();
-    const g = { ownerKind: 'firm' as const, ownerId: f.value.id, institution: 'GIB' as const, username: 'k', password: 'p' };
+    const g = { ownerKind: 'firm' as const, ownerId: f.value.id, institution: 'GIB', fields: { username: 'k', password: 'p' } };
     expect(await saveAccount(m2, g, creds)).toEqual({ ok: false, error: 'yetki_yok' });
     expect(await saveAccount(p, g, creds)).toEqual({ ok: false, error: 'yetki_yok' });
     expect((await saveAccount(m1, g, creds)).ok).toBe(true);

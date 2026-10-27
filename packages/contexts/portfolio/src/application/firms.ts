@@ -1,5 +1,6 @@
 import { toCsv, type Result } from '@eworks/kernel';
 import { inSegment, validateFirm, type FirmFieldError, type FirmInput, type FirmKind, type FirmStatus, type Segment, type TaxRegime, type ValidFirm } from '../domain/firm.ts';
+import { matchesSearch, searchRank } from '../domain/search.ts';
 
 // Firma use-case'leri. Yetki anahtarı BFF'te denetlenir (firmalar.*); görünürlük ve yazma sınırı RLS'tedir (app.can_see_firm).
 // VKN tekilliği iki aşamalı (07 §2.2): kontrol düzleminde rezervasyon → shard'da kayıt → rezervasyon onayı.
@@ -43,17 +44,17 @@ export type FirmDeps = { repo: FirmRepository; registry: TaxpayerRegistry; hashT
 
 export type FirmError = { kind: 'gecersiz'; errors: FirmFieldError[] } | { kind: 'vkn_kayitli' } | { kind: 'musavir_yok' } | { kind: 'bulunamadi' } | { kind: 'catisma' };
 
-const kucuk = (s: string) => s.toLocaleLowerCase('tr-TR');
-
+/** Süzgeçler; sorgu varsa unvan eşleşmesi önce gelir (eşit sırada deponun sırası korunur). */
 export async function listFirms(ctx: Ctx, filter: FirmFilter, d: Pick<FirmDeps, 'repo'>): Promise<Firm[]> {
-  const q = kucuk(filter.q?.trim() ?? '');
-  return (await d.repo.list(ctx, filter.includeArchived ?? false)).filter(
+  const q = filter.q?.trim() ?? '';
+  const out = (await d.repo.list(ctx, filter.includeArchived ?? false)).filter(
     (f) =>
       (!filter.status || f.status === filter.status) &&
       (!filter.kind || f.kind === filter.kind) &&
       inSegment(f, filter.segment ?? 'all') &&
-      (!q || [f.title, f.taxId, f.taxOffice, f.city, f.representative, f.groupName, f.activityName].some((v) => v && kucuk(v).includes(q))),
+      matchesSearch([f.title, f.taxId, f.taxOffice, f.city, f.representative, f.groupName, f.activityName], q),
   );
+  return q ? out.sort((a, b) => searchRank(a.title, q) - searchRank(b.title, q)) : out;
 }
 
 export const getFirm = (ctx: Ctx, id: string, d: Pick<FirmDeps, 'repo'>) => d.repo.get(ctx, id);
