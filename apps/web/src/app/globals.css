@@ -180,6 +180,9 @@ th { background: #f7f9fd; color: var(--soluk); font-size: .72rem; font-weight: 7
 tr:last-child td { border-bottom: 0; }
 tbody tr:hover td { background: #fafcff; }
 td.sayi { text-align: right; font-variant-numeric: tabular-nums; }
+/* Kap zaten yatay kayar: kurum/birim gibi uzun ama bölünmemesi gereken metin dar ekranda satır satır kırılıp
+   satır yüksekliğini şişirmesin (firma unvanı bilinçli olarak kırılmaya devam eder). */
+td.tek-satir { white-space: nowrap; }
 .etiket { display: inline-flex; align-items: center; gap: .35rem; font-size: .75rem; font-weight: 700; border-radius: 6px; padding: .15rem .5rem; background: #f1f4f8; color: var(--soluk); white-space: nowrap; }
 .etiket::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 .etiket.iyi { background: var(--yesil-zemin); color: var(--yesil); }

@@ -88,7 +88,7 @@ export default async function TebligatListesi({ searchParams }: { searchParams: 
                   <td>{n.firmTitle ?? '—'}</td>
                   <td>{n.reference}</td>
                   <td>{n.documentType}</td>
-                  <td>
+                  <td className="tek-satir">
                     {n.sender}
                     {n.department ? <span className="alt"> · {n.department}</span> : null}
                   </td>
