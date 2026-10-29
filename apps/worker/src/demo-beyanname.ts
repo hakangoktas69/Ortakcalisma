@@ -5,8 +5,8 @@
 // kurumdan gelmiş gibi `importFilingContracts` / `importDeclarations` üzerinden, aynı fail-closed doğrulamalardan
 // (erişim kanıtı, dönem/yükleme tutarlılığı, SGK satır denetimi) geçerek uygulanır. Bağlam sistem bağlamıdır.
 //
-// Belge (PDF) üretilmez: belgeler S3'te gerçek nesne ister, demo için uydurulmuş bir belge indirilemez olurdu.
-// Bu yüzden /beyanname/belge ekranı bu dilimde boş kalır (docs/ai/durum.md açık konu 32).
+// Belgeler: `belgeDepo` verilirse her beyannameye ve SGK satırına gerçek bir PDF üretilip demo S3'e yazılır
+// (bkz. demo-belge.ts), böylece /beyanname/belge ekranı dolar ve indirme de çalışır. Depo verilmezse belge üretilmez.
 import { randomUUID } from 'node:crypto';
 import { importFilings, type FilingRepository, type SgkFilingRecord } from '@eworks/social-security';
 import {
@@ -22,6 +22,7 @@ import {
   type DocumentPort,
   type FirmPort,
 } from '@eworks/tax-filing';
+import { belgeleriEkle, type BelgeDepo } from './demo-belge.ts';
 import { VARSAYILAN_TOHUM, adTohumu, sec, tohumluRastgele } from './demo-rastgele.ts';
 
 export type DemoFirma = { id: string; taxId: string; title: string; taxOffice: string | null };
@@ -160,9 +161,11 @@ export async function demoBeyannameleriAc(
     bugun?: Date;
     jobId?: string;
     sorguUreteci?: (f: readonly DemoFirma[], l: ContractList, t: number, g: Date) => DeclarationQuery[];
+    /** Verilirse beyanname ve SGK belgeleri gerçek PDF olarak üretilip buraya yazılır. */
+    belgeDepo?: BelgeDepo;
   },
-): Promise<{ sozlesme: number; beyanname: number; yeni: number; sgk: number; hatalar: string[] }> {
-  const bos = { sozlesme: 0, beyanname: 0, yeni: 0, sgk: 0, hatalar: [] as string[] };
+): Promise<{ sozlesme: number; beyanname: number; yeni: number; sgk: number; belge: number; hatalar: string[] }> {
+  const bos = { sozlesme: 0, beyanname: 0, yeni: 0, sgk: 0, belge: 0, hatalar: [] as string[] };
   if (firmalar.length === 0) return bos;
   const tohum = ayar.tohum ?? VARSAYILAN_TOHUM;
   const bugun = ayar.bugun ?? new Date();
@@ -172,7 +175,9 @@ export async function demoBeyannameleriAc(
   const s = await importFilingContracts(ctx, { jobId, advisorId: ayar.advisorId, source: KAYNAK, list: liste }, { firms: d.firms, contracts: d.contracts });
   if (!s.ok) return { ...bos, hatalar: [s.error] };
 
-  const sorgular = (ayar.sorguUreteci ?? demoSorgular)(firmalar, liste, tohum, bugun);
+  const uretilen = (ayar.sorguUreteci ?? demoSorgular)(firmalar, liste, tohum, bugun);
+  // Belgeler içe aktarmadan ÖNCE depoya yazılır: kayıt göründüğü anda indirilebilir olmalı
+  const sorgular = ayar.belgeDepo ? await belgeleriEkle(ctx.org, uretilen, ayar.belgeDepo) : uretilen;
   let sgk = 0;
   const ozet = await importDeclarations(
     ctx,
@@ -199,5 +204,5 @@ export async function demoBeyannameleriAc(
   if (ozet.erisim_yok > 0) hatalar.push(`erisim_yok:${ozet.erisim_yok}`);
   if (ozet.basarisiz > 0) hatalar.push(`basarisiz:${ozet.basarisiz}`);
   if (ozet.firma_yok > 0) hatalar.push(`firma_yok:${ozet.firma_yok}`);
-  return { sozlesme: s.summary.sozlesme, beyanname: ozet.beyanname, yeni: ozet.yeni, sgk, hatalar };
+  return { sozlesme: s.summary.sozlesme, beyanname: ozet.beyanname, yeni: ozet.yeni, sgk, belge: ozet.belge, hatalar };
 }

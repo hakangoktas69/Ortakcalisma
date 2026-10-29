@@ -148,6 +148,6 @@ describe('demo beyannamelerini açma', () => {
   it('firma yoksa hiçbir şey yazmaz', async () => {
     const b = bagimliliklar();
     const sonuc = await demoBeyannameleriAc(ctx, [], b.d, { tohum: 1, bugun: BUGUN, advisorId: 'musavir-1' });
-    expect(sonuc).toEqual({ sozlesme: 0, beyanname: 0, yeni: 0, sgk: 0, hatalar: [] });
+    expect(sonuc).toEqual({ sozlesme: 0, beyanname: 0, yeni: 0, sgk: 0, belge: 0, hatalar: [] });
   });
 });

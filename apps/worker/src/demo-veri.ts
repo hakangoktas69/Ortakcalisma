@@ -14,7 +14,7 @@ import { PgConsentRepository, PgCredentialRepository } from '@eworks/credentials
 import { PgDocumentRepository } from '@eworks/documents';
 import { GoTrueAuthProvider, PgMembershipReader } from '@eworks/identity-access';
 import { PgNoticeRepository } from '@eworks/notices';
-import { databaseSchema, loadConfig, ShardRouter } from '@eworks/platform';
+import { databaseSchema, Depo, loadConfig, ShardRouter, storageSchema } from '@eworks/platform';
 import { createFirm, listFirms, myAdvisorId, PgFirmRepository, PgTaxpayerRegistry, taxIdHasher, type Ctx, type FirmDeps, type FirmInput } from '@eworks/portfolio';
 import { PgDirectory } from '@eworks/sales';
 import { PgFilingRepository } from '@eworks/social-security';
@@ -128,7 +128,11 @@ export async function main(env = process.env) {
   const kip = env['YIGIN_KIPI'] ?? 'demo';
   if (kip !== 'demo') throw new Error(`Sahte veri yalnız demo kipinde üretilir; bu yığın ${kip} kipinde.`);
   const db = loadConfig(databaseSchema, env);
+  const st = loadConfig(storageSchema, env);
   const router = ShardRouter.fromUrls(db.CONTROL_DATABASE_URL, db.SHARD_DATABASE_URLS);
+  // Belgeler demo S3'e yazılır; kova yoksa açılır (işçiyle aynı depo)
+  const depo = new Depo({ endpoint: st.S3_ENDPOINT, bucket: st.S3_BUCKET, accessKey: st.S3_ACCESS_KEY, secretKey: st.S3_SECRET_KEY, region: st.S3_REGION });
+  await depo.hazirla();
   try {
     const auth = new GoTrueAuthProvider(need(env['AUTH_URL'], 'AUTH_URL'), need(env['JWT_SECRET'], 'JWT_SECRET'));
     const ofisAdi = need(env['DEMO_OFIS'], 'DEMO_OFIS');
@@ -175,9 +179,11 @@ export async function main(env = process.env) {
         filings: new PgFilingRepository(router),
         documents: belgePortu(new PgDocumentRepository(router)),
       },
-      { advisorId: musavir, tohum },
+      { advisorId: musavir, tohum, belgeDepo: depo },
     );
-    console.log(`✔ Demo beyanname: ${beyanname.sozlesme} sözleşme · ${beyanname.beyanname} beyanname (${beyanname.yeni} yeni) · ${beyanname.sgk} SGK bildirimi`);
+    console.log(
+      `✔ Demo beyanname: ${beyanname.sozlesme} sözleşme · ${beyanname.beyanname} beyanname (${beyanname.yeni} yeni) · ${beyanname.sgk} SGK bildirimi · ${beyanname.belge} belge`,
+    );
     hatasizOlmali('Demo beyanname', beyanname.hatalar);
 
     // Görev, not ve kurum hesabı kullanıcı bağlamında yazılır (RLS kapsamı kullanıcıya bağlı).
