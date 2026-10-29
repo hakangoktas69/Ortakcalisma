@@ -28,3 +28,6 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
+
+# Vault (pgsodium) kök anahtarları — sır içerir, commit edilmez
+deploy/compose/vault-anahtarlari/

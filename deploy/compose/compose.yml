@@ -35,6 +35,9 @@ services:
     volumes:
       - db-control:/var/lib/postgresql/data
       - ./db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:ro
+      # Vault (pgsodium) kök anahtarı: imajdaki betik bu dosya yoksa rastgele yenisini üretir ve dosya veri
+      # biriminde değildir — bağlanmazsa container her yeniden oluşturulduğunda saklanmış kurum şifreleri okunamaz.
+      - ./vault-anahtarlari/db-control.key:/etc/postgresql-custom/pgsodium_root.key:ro
 
   auth:
     image: supabase/gotrue:v2.180.0
@@ -66,11 +69,15 @@ services:
   # Kiracı shard'ları (16 mantıksal / 2 fiziksel önerisinin geliştirme karşılığı: 2 shard)
   db-shard-01:
     <<: *shard-db
-    volumes: [db-shard-01:/var/lib/postgresql/data]
+    volumes:
+      - db-shard-01:/var/lib/postgresql/data
+      - ./vault-anahtarlari/db-shard-01.key:/etc/postgresql-custom/pgsodium_root.key:ro
 
   db-shard-02:
     <<: *shard-db
-    volumes: [db-shard-02:/var/lib/postgresql/data]
+    volumes:
+      - db-shard-02:/var/lib/postgresql/data
+      - ./vault-anahtarlari/db-shard-02.key:/etc/postgresql-custom/pgsodium_root.key:ro
 
   redis:
     image: redis:7.4.6-alpine

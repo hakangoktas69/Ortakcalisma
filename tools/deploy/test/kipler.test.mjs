@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { composeDosyalari, kipGecisi, ozellikDurumuGoster, profil, sahteVeriKipi, webKipOrtami, testKipiDenetle, uretimDenetle } from '../yigin.mjs';
+import { composeDosyalari, kipGecisi, kurumOrtami, ozellikDurumuGoster, profil, sahteVeriKipi, VAULT_ANAHTARLI_DB, vaultAnahtarlari, webKipOrtami, testKipiDenetle, uretimDenetle } from '../yigin.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const oku = (yol) => readFileSync(join(KOK, yol), 'utf8').replace(/\r\n/g, '\n');
@@ -27,7 +27,7 @@ test('kipler compose katmanlarını belirler; eski GELISTIRME_KATMANI gelistirme
   assert.deepEqual(ad(composeDosyalari({ YIGIN_KIPI: 'uretim' })), ['compose.yml', 'compose.uretim.yml']);
   assert.throws(() => composeDosyalari({ YIGIN_KIPI: 'canli' }), /YIGIN_KIPI/);
   assert.equal(profil({ YIGIN_KIPI: 'uretim' }), 'uretim');
-  assert.equal(profil({ YIGIN_KIPI: 'debug' }), 'demo');
+  assert.equal(profil({ YIGIN_KIPI: 'debug' }), 'uretim'); // sahte GİB yalnız demo kipinde (Hakan 29.10 14:56)
 });
 
 test('hata ayıklama katmanı: işçi ve entegrasyon yalnız 127.0.0.1 üzerinden dinler; entegrasyon debug imaj hedefinden', () => {
@@ -169,4 +169,55 @@ test('sahte veri yalnız demo kipinde üretilir: diğer kiplerde gerçek veri bu
     if (eski === undefined) delete process.env.YIGIN_PROFIL;
     else process.env.YIGIN_PROFIL = eski;
   }
+});
+
+test('dış entegrasyonlar: yalnız demo kipinde sahte GİB, diğer kiplerde canlı entegrasyon', () => {
+  // Hakan (29.10, 14:56): "Demo modunda çalıştığında yalnızca demo/sahte bilgiler görülsün, canlı veri
+  // göstermesin. Diğer bütün modlarda - geliştirme, debug, uretim gibi - canlı entegrasyon ile çalışıp
+  // gerçek bilgileri göstersin."
+  assert.equal(profil({ YIGIN_KIPI: 'demo' }), 'demo');
+  assert.equal(profil({ YIGIN_KIPI: 'gelistirme' }), 'uretim');
+  assert.equal(profil({ YIGIN_KIPI: 'debug' }), 'uretim');
+
+  const demo = kurumOrtami({ YIGIN_KIPI: 'demo' });
+  assert.equal(demo.EWORKS_ORTAM, 'demo');
+  assert.match(demo.GIB_SAHTE_SUNUCU, /fake-gib/);
+
+  for (const k of ['gelistirme', 'debug']) {
+    const o = kurumOrtami({ YIGIN_KIPI: k });
+    assert.equal(o.EWORKS_ORTAM, 'gelistirme', k);
+    assert.equal(o.GIB_SAHTE_SUNUCU, '', k + ': sahte GİB kapalı olmalı');
+  }
+
+  const uretim = kurumOrtami({ YIGIN_KIPI: 'uretim' });
+  assert.equal(uretim.EWORKS_ORTAM, 'uretim');
+  assert.equal(uretim.GIB_SAHTE_SUNUCU, '');
+});
+
+test('Vault kök anahtarı kalıcıdır: üretilir, biçimi doğrudur ve ikinci çağrıda değişmez', async () => {
+  // Supabase imajındaki pgsodium_getkey.sh anahtarı container dosya sisteminde arar ve yoksa rastgele üretir.
+  // Bağlanmazsa container her yeniden oluşturulduğunda anahtar değişir ve saklanmış kurum şifreleri
+  // "invalid ciphertext" ile çözülemez hale gelir (29.10'da yaşandı).
+  const { mkdtempSync, readFileSync, readdirSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const dizin = mkdtempSync(join(tmpdir(), 'eworks-vault-'));
+
+  assert.equal(vaultAnahtarlari(dizin), VAULT_ANAHTARLI_DB.length);
+  const dosyalar = readdirSync(join(dizin, 'vault-anahtarlari')).sort();
+  assert.deepEqual(dosyalar, VAULT_ANAHTARLI_DB.map((d) => `${d}.key`).sort());
+
+  const once = {};
+  for (const d of dosyalar) {
+    const icerik = readFileSync(join(dizin, 'vault-anahtarlari', d), 'utf8');
+    assert.match(icerik, /^[0-9a-f]{64}$/, `${d}: 32 bayt, 64 haneli onaltılık, satır sonu yok olmalı`);
+    once[d] = icerik;
+  }
+
+  // İkinci çağrı var olan anahtara dokunmaz: dokunsaydı eski şifreler okunamazdı
+  assert.equal(vaultAnahtarlari(dizin), 0);
+  for (const d of dosyalar) assert.equal(readFileSync(join(dizin, 'vault-anahtarlari', d), 'utf8'), once[d], `${d} değişmemeli`);
+
+  // Her veritabanının anahtarı ayrıdır
+  assert.equal(new Set(Object.values(once)).size, dosyalar.length);
 });

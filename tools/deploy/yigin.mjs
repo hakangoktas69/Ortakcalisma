@@ -59,6 +59,30 @@ export function sirlariTamamla(yol = ENV) {
   }
   mkdirSync(dirname(yol), { recursive: true });
   writeFileSync(yol, '# Üretildi: node tools/deploy/yigin.mjs sirlar — commit etmeyin\n' + Object.entries(env).map(([k, v]) => `${k}=${v}`).join('\n') + '\n');
+  return eklenen + vaultAnahtarlari(dirname(yol));
+}
+
+/** Vault (pgsodium) kök anahtarını tutan veritabanları. Her birinin anahtarı ayrıdır. */
+export const VAULT_ANAHTARLI_DB = ['db-control', 'db-shard-01', 'db-shard-02'];
+
+/**
+ * pgsodium kök anahtarını kalıcılaştırır. Supabase imajındaki `pgsodium_getkey.sh` anahtarı
+ * `/etc/postgresql-custom/pgsodium_root.key` içinde arar ve YOKSA rastgele yenisini üretir. Bu yol veri biriminde
+ * değil container dosya sisteminde olduğu için, container her yeniden oluşturulduğunda (imaj güncellemesi, ortam
+ * değişikliği, kip geçişi) anahtar değişir ve o ana dek saklanmış bütün kurum şifreleri çözülemez hale gelir
+ * (`pgsodium_crypto_aead_det_decrypt_by_id: invalid ciphertext`). Anahtar burada üretilip bağlanarak kalıcı olur.
+ */
+export function vaultAnahtarlari(dizin) {
+  const kok = join(dizin, 'vault-anahtarlari');
+  mkdirSync(kok, { recursive: true });
+  let eklenen = 0;
+  for (const db of VAULT_ANAHTARLI_DB) {
+    const yol = join(kok, `${db}.key`);
+    if (existsSync(yol)) continue;
+    // Betiğin ürettiğiyle aynı biçim: 32 bayt, 64 haneli onaltılık, satır sonu yok
+    writeFileSync(yol, randomBytes(32).toString('hex'), { mode: 0o600 });
+    eklenen++;
+  }
   return eklenen;
 }
 
@@ -144,9 +168,30 @@ let e2eRozetleri = false;
 
 /** Compose profili: üretimde HER ZAMAN uretim (kabukta kalmış YIGIN_PROFIL=demo demo hesabını ve sahte GİB'i açamasın);
  * diğer kiplerde YIGIN_PROFIL açıkça verilirse o, yoksa demo. */
+/** Test/e2e koşusu süresince true: testler kuruma istek atmaz, sahte GİB açık kalır. */
+let testKosusu = false;
+
+/**
+ * Compose profili. Sahte GİB (ve onunla gelen demo kurum davranışı) YALNIZ demo kipinde ve test koşusunda
+ * açılır; gelistirme, debug ve uretim kipleri canlı entegrasyonla çalışır (Hakan 29.10 14:56). Üretimde profil
+ * her zaman `uretim`: kabukta kalmış YIGIN_PROFIL=demo sahte GİB'i açamaz.
+ */
 export function profil(env) {
   if (kip(env) === 'uretim') return 'uretim';
-  return process.env.YIGIN_PROFIL ?? 'demo';
+  if (process.env.YIGIN_PROFIL) return process.env.YIGIN_PROFIL;
+  return kip(env) === 'demo' || testKosusu ? 'demo' : 'uretim';
+}
+
+/**
+ * Kurum entegrasyonunun ortamı: sahte GİB yalnız demo profilinde verilir, diğer kiplerde boştur ve
+ * `*.gib.gov.tr` istekleri gerçek kuruma gider. Kipten türetilir, `.env`'e yazılmaz.
+ */
+export function kurumOrtami(env) {
+  const demo = profil(env) === 'demo';
+  return {
+    EWORKS_ORTAM: kip(env) === 'uretim' ? 'uretim' : demo ? 'demo' : 'gelistirme',
+    GIB_SAHTE_SUNUCU: demo ? 'http://fake-gib:8090' : '',
+  };
 }
 
 /**
@@ -204,7 +249,10 @@ function yiginiKaldir(ek = []) {
   }
   docker(compose('run', '--rm', 'migrate'));
   // Demo hesabı (üretim dışı): giriş yapılabilsin diye gelistirme ve debug kiplerinde de açılır.
-  if (profil(envOku()) === 'demo') docker(compose('run', '--rm', 'hesap-ac'));
+  // Veri değil, oturumdur: kurum entegrasyonu bu kiplerde canlıdır.
+  if (kip(envOku()) !== 'uretim') docker(compose('run', '--rm', 'hesap-ac'));
+  // Demo profilinden çıkıldıysa kalan sahte GİB kaldırılır: gelistirme/debug canlı entegrasyonla çalışır
+  if (profil(envOku()) !== 'demo') docker(compose('--profile', 'demo', 'rm', '-sf', 'fake-gib'));
   // Sentetik veri YALNIZ demo kipinde: diğer kiplerde ekranlar kurumdan çekilen gerçek veriyle dolar.
   if (sahteVeriKipi(envOku())) docker(compose('run', '--rm', 'demo-veri'));
   docker(compose('up', '-d', '--remove-orphans', '--wait', '--wait-timeout', '600', ...ek));
@@ -213,11 +261,20 @@ function yiginiKaldir(ek = []) {
 const compose = (...args) => {
   const env = envOku();
   // Kipten türetilir (.env'e yazılmaz), her çağrıda yeniden yazılır; docker süreci bu ortamı devralır
-  Object.assign(process.env, webKipOrtami(env, { e2e: e2eRozetleri }));
+  Object.assign(process.env, webKipOrtami(env, { e2e: e2eRozetleri }), kurumOrtami(env));
   return ['compose', '-p', PROJE, '--env-file', ENV, ...composeDosyalari(env).flatMap((d) => ['-f', d]), '--profile', profil(env), ...args];
 };
 
 function kipKur(yeni) {
+  // Kip değişince veritabanı değişmez: demo kipinde üretilmiş sentetik kayıtlar yeni kipte de durur. Canlı
+  // entegrasyonla çalışacak kipte sahte veri kalmasın diye kullanıcı uyarılır (Hakan 29.10 14:56).
+  if (kip(envOku()) === 'demo' && yeni !== 'demo') {
+    console.warn(
+      `\n⚠ Önceki kip demo'ydu: veritabanında sentetik demo verisi (mükellef, beyanname, e-Tebligat, belge …) duruyor.\n` +
+        `  ${yeni} kipi canlı entegrasyonla çalışır; ekranlarda sahte kayıt kalmasın istiyorsan önce sıfırla:\n` +
+        `    node tools/deploy/yigin.mjs down --sil\n`,
+    );
+  }
   envAyarla('GELISTIRME_KATMANI', null);
   envAyarla('YIGIN_KIPI', yeni);
 }
@@ -319,7 +376,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   } else if (komut === 'test' || komut === 'e2e') {
     sirlariTamamla();
     testKipiDenetle(envOku());
-    // Testler yalnız sahte GİB'e gider: kurum hız bütçesi test süresini uzatmasın (üretim/demo varsayılanı 60/dk)
+    // Testler yalnız sahte GİB'e gider: kipten bağımsız olarak demo profili açılır (gelistirme/debug canlı
+    // entegrasyonla çalışır, ama test koşusu hiçbir koşulda kuruma istek atmaz).
+    testKosusu = true;
+    // Kurum hız bütçesi test süresini uzatmasın (üretim/demo varsayılanı 60/dk)
     process.env.GIB_ISTEK_DK ??= '600';
     // Kabul testleri TDD rozetlerini doğrular (D39): demo kipinde de e2e süresince rozetler açılır
     e2eRozetleri = komut === 'e2e';
