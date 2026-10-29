@@ -1,0 +1,56 @@
+import { expect, test } from '@playwright/test';
+import { girisYap, ekranDenetle, hataTopla } from '../e2e/yardim.ts';
+
+test.beforeEach(async ({ page }) => {
+  const parola = process.env['DEMO_SIFRE']; if (!parola) throw new Error('Demo şifresi gerekli');
+  await girisYap(page, { eposta: 'demo@eworks.test', parola });
+});
+test('Firmalarım özetleri, hızlı filtreler, seçili onay ve dağılım birlikte çalışır', async ({ page }, info) => {
+  const errors = hataTopla(page); const writes: string[] = [];
+  page.on('request', r => { if (r.url().includes('/api/') && r.method() !== 'GET') writes.push(r.url()); });
+  await page.goto('/firmalar/liste');
+  const firms = page.getByRole('region', { name: 'Ayrıntılı mükellef yönetimi' });
+  await expect(firms.locator('.pf-row')).toHaveCount(3);
+  await expect(page.getByRole('navigation', { name: 'Bölüm sayfaları' })).toBeVisible();
+  await ekranDenetle(page);
+  await page.screenshot({ path: info.outputPath('firmalarim.png'), fullPage: true });
+  await firms.getByRole('button', { name: /^Onay Bekleyen/ }).click();
+  await expect(firms.locator('.pf-row')).toHaveCount(1);
+  await firms.getByRole('checkbox', { name: 'Demo Örnek Danışmanlık seç', exact: true }).check();
+  await firms.getByRole('button', { name: 'Temizle', exact: true }).click();
+  await firms.getByRole('button', { name: /^SGK Bilgileri Yanlış/ }).click();
+  await expect(firms.locator('.pf-row')).toHaveCount(1);
+  await expect(firms.locator('.pf-row')).toContainText('Demo Mavi İnşaat');
+  await firms.getByRole('button', { name: 'Toplu Onayla', exact: true }).click();
+  await firms.getByRole('button', { name: 'Temizle', exact: true }).click();
+  await firms.getByRole('button', { name: /^Onaylanmış/ }).click();
+  await expect(firms.locator('.pf-row')).toHaveCount(3);
+  await firms.getByRole('button', { name: /^e-Fatura.*mükellef/ }).click();
+  await expect(firms.locator('.pf-row')).toHaveCount(2);
+  await ekranDenetle(page);
+  await firms.getByRole('button', { name: 'Temizle', exact: true }).click();
+  await firms.getByRole('button', { name: /^Faaliyet Kodu Dağılımı/ }).click();
+  const distribution = firms.getByRole('region', { name: 'Dağılım ayrıntıları' });
+  await distribution.getByRole('button').first().click();
+  await expect(firms.locator('.pf-row')).toHaveCount(1);
+  const download = page.waitForEvent('download');
+  await firms.getByRole('button', { name: 'Excel / CSV', exact: true }).click();
+  expect((await download).suggestedFilename()).toBe('DEMO-Eworks-Firmalar.csv');
+  expect(writes).toEqual([]); expect(errors).toEqual([]);
+});
+test('Firma hesabı ve sözleşme önizlemeleri yalnız demo, klavye ile kapanır', async ({ page }) => {
+  const errors = hataTopla(page);
+  await page.goto('/firmalar/liste');
+  await page.getByRole('button', { name: 'GİB Bilgileri (Demo)', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('DEMO-MUSAVIR');
+  await expect(dialog.locator('input')).toHaveCount(0);
+  await ekranDenetle(page);
+  await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0);
+  await page.getByRole('button', { name: 'Aktarım önizlemesi', exact: true }).click();
+  await expect(dialog).toContainText('Demo Atlas');
+  await page.getByRole('button', { name: 'Firma formunu kapat' }).click();
+  await page.getByRole('button', { name: 'Örnek sözleşmeleri aktar', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Örnek sözleşmeler bu ekranda güncellendi' })).toBeVisible();
+  await ekranDenetle(page); expect(errors).toEqual([]);
+});
