@@ -164,6 +164,24 @@ services:
       DEMO_SIFRE: ${DEMO_SIFRE:?}
       DEMO_AD: ${DEMO_AD:-Demo Müşavir}
 
+  # Demo verisi: sentetik mükellef, e-Tebligat, beyanname, SGK, görev, not ve kurum hesabı (gerçek veri değil).
+  # YALNIZ demo kipinde çalışır — görev kendi içinde de YIGIN_KIPI'yi denetler, elle çalıştırılsa bile durur.
+  demo-veri:
+    <<: *node
+    profiles: [gorev]
+    restart: 'no'
+    command: [node, apps/worker/src/demo-veri.ts]
+    environment:
+      CONTROL_DATABASE_URL: postgres://eworks_control:${CONTROL_DB_PASSWORD}@db-control:5432/postgres
+      SHARD_DATABASE_URLS: shard-01=postgres://eworks_worker:${WORKER_DB_PASSWORD}@db-shard-01:5432/postgres,shard-02=postgres://eworks_worker:${WORKER_DB_PASSWORD}@db-shard-02:5432/postgres
+      AUTH_URL: http://auth:9999
+      JWT_SECRET: ${JWT_SECRET}
+      TAX_ID_HMAC_KEY: ${TAX_ID_HMAC_KEY}
+      YIGIN_KIPI: ${YIGIN_KIPI:-demo}
+      DEMO_OFIS: ${DEMO_OFIS:-Demo Mali Müşavirlik}
+      DEMO_EPOSTA: ${DEMO_EPOSTA:-demo@eworks.test}
+      DEMO_SIFRE: ${DEMO_SIFRE:?}
+
   # Arka plan işçisi: outbox → RabbitMQ, entegrasyon sonucunu alan bağlamlarına uygular, takılı işleri kapatır
   worker:
     <<: *node

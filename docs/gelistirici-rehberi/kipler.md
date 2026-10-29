@@ -22,6 +22,8 @@ Ortak kurallar:
 - Kip `deploy/compose/.env` içindeki `YIGIN_KIPI` satırında **hatırlanır**. Bu satırı elle yazma; betik yazar. Sonraki `up`, `test`, `e2e`, `down` aynı kiple çalışır.
 - Kipe bağlı web ayarlarını (`YIGIN_KIPI`, `OZELLIK_DURUMU_GOSTER`) betik her çalıştırmada kipten yeniden üretir. `.env`'e ya da kabuğa elle yazma; yazsan da dikkate alınmaz.
 - `demo`, `gelistirme` ve `debug` kiplerinde **sahte GİB** ve **demo hesabı** vardır (`demo@eworks.test`, parola `.env` → `DEMO_SIFRE`; [başlangıç §3](baslangic.md#demo-hesabı-ve-test-şifreleri)). Gerçek GİB'e istek gitmez.
+- **Sentetik (sahte) veri yalnız `demo` kipinde** vardır. `gelistirme`, `debug` ve `uretim` kiplerinde ekranlar kurumdan çekilen **gerçek** veriyle dolar: geliştirici firma kartından kurum hesabını girer, mükellef onayını kaydeder ve ekrandaki "güncelle" düğmesiyle çeker. Kural iki yerde denetlenir: `yigin.mjs` görevi yalnız demo kipinde çağırır, görev de kendi içinde `YIGIN_KIPI`'yi denetleyip demo dışında veritabanına dokunmadan durur.
+- Demo dışı bir kipte ekranı **gerçek GİB**'den doldurmak için `.env`'de `GIB_SAHTE_SUNUCU=` (boş) verilir; o zaman `*.gib.gov.tr` istekleri gerçek kuruma gider. Varsayılan sahte GİB'dir, çünkü geliştirme sırasında kuruma istek gitmemelidir.
 - `uretim` kipinde sahte GİB, demo hesabı ve dışarı açık altyapı portu yoktur. `test`, `e2e`, `gelistir`, `debug` komutları bu kipte reddedilir.
 
 ## 2. demo

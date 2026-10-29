@@ -149,6 +149,13 @@ export function profil(env) {
   return process.env.YIGIN_PROFIL ?? 'demo';
 }
 
+/**
+ * Sentetik (sahte) veri yalnız `demo` kipinde üretilir; gelistirme, debug ve uretim kiplerinde veri gerçektir —
+ * geliştirici kendi kurum hesabını tanımlayıp kurumdan çeker. Bu, sahte GİB ve demo hesabından ayrı bir karardır:
+ * onlar `profil`e bağlıdır ve gelistirme/debug'da açık kalır (kuruma istek gitmesin diye).
+ */
+export const sahteVeriKipi = (env) => kip(env) === 'demo';
+
 /** Kip değişikliği .env'e yazılmadan önce: değer geçerli olmalı; üretimden çıkış (sahte GİB ve demo hesabını üretim
  * veritabanına açar, portları açar) yalnız açık bayrakla. */
 export function kipGecisi(mevcut, yeni, bayraklar) {
@@ -196,7 +203,10 @@ function yiginiKaldir(ek = []) {
     docker(compose('up', '-d', '--wait', '--wait-timeout', '120', 'auth'));
   }
   docker(compose('run', '--rm', 'migrate'));
+  // Demo hesabı (üretim dışı): giriş yapılabilsin diye gelistirme ve debug kiplerinde de açılır.
   if (profil(envOku()) === 'demo') docker(compose('run', '--rm', 'hesap-ac'));
+  // Sentetik veri YALNIZ demo kipinde: diğer kiplerde ekranlar kurumdan çekilen gerçek veriyle dolar.
+  if (sahteVeriKipi(envOku())) docker(compose('run', '--rm', 'demo-veri'));
   docker(compose('up', '-d', '--remove-orphans', '--wait', '--wait-timeout', '600', ...ek));
 }
 

@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { composeDosyalari, kipGecisi, ozellikDurumuGoster, profil, webKipOrtami, testKipiDenetle, uretimDenetle } from '../yigin.mjs';
+import { composeDosyalari, kipGecisi, ozellikDurumuGoster, profil, sahteVeriKipi, webKipOrtami, testKipiDenetle, uretimDenetle } from '../yigin.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const oku = (yol) => readFileSync(join(KOK, yol), 'utf8').replace(/\r\n/g, '\n');
@@ -150,4 +150,23 @@ test("web'in kip ortamı yalnız kayıtlı kipten türer: eski GELISTIRME_KATMAN
   const kaynak = oku('tools/deploy/yigin.mjs');
   assert.match(kaynak, /Object\.assign\(process\.env, webKipOrtami\(/);
   assert.doesNotMatch(kaynak, /process\.env\.OZELLIK_DURUMU_GOSTER \?\?=/);
+});
+
+test('sahte veri yalnız demo kipinde üretilir: diğer kiplerde gerçek veri bulunur', () => {
+  // Hakan (29.10, 13:01): "sahte veriler sadece demo modunda çalışacak, diğer modlarda gerçek veriler olmalı".
+  // Sahte GİB ve demo hesabı `profil`e bağlıdır (gelistirme/debug'da da açıktır); sentetik VERİ ona bağlı değildir.
+  assert.equal(sahteVeriKipi({ YIGIN_KIPI: 'demo' }), true);
+  assert.equal(sahteVeriKipi({ YIGIN_KIPI: 'gelistirme' }), false);
+  assert.equal(sahteVeriKipi({ YIGIN_KIPI: 'debug' }), false);
+  assert.equal(sahteVeriKipi({ YIGIN_KIPI: 'uretim' }), false);
+  // Kabukta kalmış YIGIN_PROFIL=demo, demo dışı bir kipte sahte veri açamaz
+  const eski = process.env.YIGIN_PROFIL;
+  process.env.YIGIN_PROFIL = 'demo';
+  try {
+    assert.equal(sahteVeriKipi({ YIGIN_KIPI: 'gelistirme' }), false);
+    assert.equal(sahteVeriKipi({ YIGIN_KIPI: 'uretim' }), false);
+  } finally {
+    if (eski === undefined) delete process.env.YIGIN_PROFIL;
+    else process.env.YIGIN_PROFIL = eski;
+  }
 });

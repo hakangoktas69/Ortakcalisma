@@ -48,7 +48,7 @@ node tools/deploy/yigin.mjs up
 
 1. `deploy/compose/.env` yoksa güçlü rastgele sırlarla üretir (veritabanı parolaları, anahtarlar). Bu dosya **commit edilmez**.
 2. Altyapıyı başlatır: veritabanları, kimlik (GoTrue), Redis, RabbitMQ, S3.
-3. Veritabanı şemasını kurar (migration), demo ofisini ve kullanıcısını açar.
+3. Veritabanı şemasını kurar (migration), demo ofisini ve kullanıcısını açar; **yalnız `demo` kipinde** ayrıca **sentetik demo verisini** (örnek mükellef kartları, e-Tebligat kayıtları, GİB sözleşmeleri, beyannameler, SGK bildirimleri, görevler, notlar, kurum hesapları ve mükellef onayları) ekler. `gelistirme` ve `debug` kiplerinde ekranlar boş başlar ve kurumdan çekilen gerçek veriyle dolar. Veri gerçek değildir: unvan ve kişi adları üretilir, VKN/TCKN sahtedir (TCKN 99 ile başlar). Tohum ofis adından türetilir: aynı ofis her koşuda aynı listeyi alır (var olan kayıtlar atlanır), farklı ofisler çakışmayan kimlikler alır. Mükellef açılamazsa komut hata verir ve yığın kurulumu durur — sessizce boş ekranla devam etmez.
 4. Uygulamayı başlatır: web, işçi, kurum entegrasyonu ve **sahte GİB** (gerçek GİB'e hiçbir istek gitmez).
 
 Bitince `✔ Yığın ayakta (kip: demo): http://localhost:8080` yazar. Tarayıcıda aç ve demo hesabıyla gir.
