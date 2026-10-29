@@ -2,6 +2,9 @@
 // anlamı her zaman yanındaki metin ya da düğmenin erişilebilir adı taşır.
 
 const YOLLAR = {
+  refresh: <path d="M20 7v5h-5M4 17v-5h5M5.5 8a7 7 0 0 1 11.6-3L20 8M4 16l2.9 3A7 7 0 0 0 18.5 16" />,
+  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+  download: <path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4" />,
   home: (
     <>
       <rect x="3" y="3" width="18" height="18" rx="4" />
