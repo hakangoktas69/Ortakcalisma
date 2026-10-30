@@ -85,12 +85,15 @@ test.describe('e-Tebligat', () => {
     const onayli = await firmaVeHesap(page);
     await onayKaydet(page, onayli);
     await firmaVeHesap(page);
+    // Üçüncü firmada onay var ama GİB hesabı yok: atlama nedeni "hesap yok" olmalı. (Onay önce denetlenir;
+    // onayı da olmasaydı "onay yok" diye sayılırdı ve "hesap yok" yolu hiç sınanmazdı.)
     await page.goto('/firmalar/kart/yeni');
     await page.getByLabel('Firma / mükellef unvanı').fill(`Hesapsiz ${Date.now()} Ltd`);
     await page.getByLabel('Firma türü').selectOption('Limited');
     await page.getByLabel('VKN / TCKN').fill(fakeVkn());
     await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Firma eklendi.' })).toBeVisible();
+    await onayKaydet(page, page.url().match(/kart\/([0-9a-f-]{36})/)![1]!);
 
     // Firma seçilmeden toplu çekim görünür; tek firma seçilince görünmez
     await page.goto('/tebligat/liste');
@@ -101,8 +104,8 @@ test.describe('e-Tebligat', () => {
     const ozet = page.getByRole('status').filter({ hasText: 'güncelleme başlatıldı' });
     await expect(ozet).toContainText('1 mükellef için güncelleme başlatıldı');
     await expect(ozet).toContainText('2 atlandı');
-    await expect(ozet).toContainText('mükellef onayı yok');
-    await expect(ozet).toContainText('GİB hesabı yok');
+    await expect(ozet).toContainText('1 mükellef onayı yok');
+    await expect(ozet).toContainText('1 GİB hesabı yok');
 
     // Açılan iş tamamlanınca yalnız onaylı firmanın listesi dolar
     await page.goto(`/tebligat/liste?firma=${onayli}`);
