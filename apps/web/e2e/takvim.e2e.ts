@@ -74,6 +74,9 @@ test.describe('takvim', () => {
     await expect(page.getByLabel('Başlık')).toHaveValue('SGK prim ödemesi son günü');
     await expect(page.getByLabel('Tarih', { exact: true })).toHaveValue('2026-11-02');
     await page.getByLabel('Kategori').selectOption('sgk');
+    // "Kaç gün önce" belirgin verilir: varsayılan 3 gün, bugün 2026-11-02'ye 3 gün kala geldiğinde bu hatırlatma da
+    // "yaklaşan" olur ve aşağıdaki "yaklaşanlar kayboldu" denetimi koşulduğu güne göre kırılırdı (zaman bombası).
+    await page.getByRole('combobox', { name: /^Hatırlatma/ }).selectOption('0');
     await page.getByRole('textbox', { name: 'Not' }).fill('Eylül primleri');
     await page.getByRole('button', { name: 'Hatırlatmayı kaydet' }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Hatırlatma eklendi.' })).toBeVisible();

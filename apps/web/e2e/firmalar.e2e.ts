@@ -158,7 +158,7 @@ test.describe('firmalar', () => {
       await page.getByLabel('Sistem şifresi').fill(sir);
       await page.getByLabel('İşyeri şifresi').fill(`${sir}-isyeri`);
       await page.getByRole('button', { name: 'SGK hesabını kaydet' }).click();
-      await expect(page.getByText('SGK hesabı Vault’a kaydedildi.')).toBeVisible();
+      await expect(page.getByRole('status').filter({ hasText: 'SGK hesabı Vault’a kaydedildi.' }).last()).toBeVisible();
       await expect(page.locator(`[data-isyeri="${isyeri}"]`)).toBeVisible();
     }
     // Kayıtlı işyerinin bilgileri boş açılır ve yerinde güncellenir; işyeri sayısı artmaz
@@ -170,7 +170,7 @@ test.describe('firmalar', () => {
     await page.getByLabel('Sistem şifresi').fill(`${sir}-yeni`);
     await page.getByLabel('İşyeri şifresi').fill(`${sir}-isyeri`);
     await page.getByRole('button', { name: 'SGK hesabını kaydet' }).click();
-    await expect(page.getByText('SGK hesabı Vault’a kaydedildi.')).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: 'SGK hesabı Vault’a kaydedildi.' }).last()).toBeVisible();
     await expect(page.locator('[data-isyeri]')).toHaveCount(2);
     await bolum.getByRole('button', { name: 'UETS bilgilerini gir' }).click();
     await page.getByLabel('UETS adresi').fill('ornek-uets-adresi');
