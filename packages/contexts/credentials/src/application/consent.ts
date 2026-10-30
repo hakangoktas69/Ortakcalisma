@@ -21,6 +21,8 @@ export interface ConsentRepository {
   revoke(ctx: Ctx, firmId: string): Promise<Result<void, RepoError>>;
   /** Son onay kaydı (etkin ya da geri alınmış); hiç yoksa null. */
   status(ctx: Ctx, firmId: string): Promise<Consent | null>;
+  /** Etkin onayı olan firmaların kimlikleri (toplu işler için; firma başına sorgu yapılmaz). */
+  activeFirmIds(ctx: Ctx): Promise<string[]>;
 }
 
 const ANAHTAR = 'firmalar.kurum_hesaplari.consent';
@@ -43,6 +45,12 @@ export async function recordConsent(
   if (!method || !gecerliGun(i.consentedOn) || i.consentedOn > today || i.consentedOn < '2000-01-01') return err('gecersiz');
   return repo.record(ctx, i.firmId, method, i.consentedOn);
 }
+
+/**
+ * Etkin onayı olan firmalar (küme). Toplu kurum işi açılırken firma başına `hasActiveConsent` çağırmak döngü
+ * içinde sorgu demek olurdu; kapsam RLS ile zaten sınırlıdır.
+ */
+export const activeConsentFirmIds = async (ctx: Ctx, repo: ConsentRepository): Promise<ReadonlySet<string>> => new Set(await repo.activeFirmIds(ctx));
 
 export async function revokeConsent(ctx: Ctx, firmId: string, can: (key: string) => boolean, repo: ConsentRepository): Promise<Result<void, RepoError>> {
   if (!can(ANAHTAR)) return err('yetki_yok');

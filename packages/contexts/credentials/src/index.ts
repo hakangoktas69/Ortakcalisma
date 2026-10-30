@@ -17,6 +17,7 @@ export {
   type StoredSecret,
 } from './application/accounts.ts';
 export {
+  activeConsentFirmIds,
   CONSENT_METHODS,
   consentStatus,
   hasActiveConsent,

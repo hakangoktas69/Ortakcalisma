@@ -34,6 +34,16 @@ Supabase imajındaki `pgsodium_getkey.sh` anahtarı `/etc/postgresql-custom/pgso
 
 `mert/demo-ekran-tamamlama` dalı aynı işi **farklı yöntemle** yapıyor: demo kipinde `(panel)/layout.tsx` gerçek sayfaları devre dışı bırakıp yerine `DemoRouter` maket arayüzünü koyuyor (`apps/web/src/shared/demo/*`). İkisi aynı anda duramaz: ikisi de main'e girerse demo kipinde Mert'in arayüzü kazanır ve veritabanındaki sentetik veri hiç görünmez. Dosya çakışması yalnız `apps/web/src/app/globals.css`. **Hangi yöntemin seçileceği Hakan'ın kararı; sorulmayı bekliyor.**
 
+## e-Tebligat iş adımı (2026-10-30)
+
+**Demo kipinde senkron düğmesi artık gerçekten çalışıyor.** Tohumlayıcı GİB hesabına rastgele kullanıcı kodu/şifre yazıyordu; oysa sahte GİB `SAHTE_GIB_SIFRE` bekler ve ekranda kimlik olarak **kullanıcı kodunu** gösterir — ACL bunu firmanın VKN/TCKN'siyle karşılaştırır (tutmazsa liste hiç okunmaz). Artık kullanıcı kodu firmanın kendi kimliği, şifre sahte GİB'in şifresi (e2e'deki `firmaVeHesap` yardımcısıyla aynı desen). Uçtan uca doğrulandı: düğme → kuyruk → ACL → sahte GİB → işçi → `notices` → ekran; sonuç `23 tebligat · 23 yeni · belge açılmadı`.
+
+**Toplu çekim eklendi** (`POST /api/sync/etebligat/toplu`, `tebligat.liste.sync`): e-Tebligat her firmanın KENDİ hesabıyla okunduğu için (beyannamedeki tek müşavir oturumundan farklı) firma başına ayrı iş açılır. Karar saf fonksiyonda (`apps/web/src/bff/tebligat-toplu.ts`): arşivli / onaysız / hesapsız / şifresi hatalı firma atlanır ve özet içinde sayılır. **Şifresi hatalı hesap denenmez** — tek tuşla bütün kurum hesaplarının kilitlenmesini önler. Onaylı firmalar tek sorguda okunur (`activeConsentFirmIds`, credentials bağlamına eklendi), döngüde sorgu yok.
+
+**Hattın her yolu kanıtlandı:** mutlu yol (23 kayıt), hatalı şifre (hesap kendini durdurur, `wrong_password`), kimlik uyuşmazlığı (liste okunmaz). Gerçek GİB bilgisi geldiğinde kodda değişiklik gerekmez.
+
+**Düzeltilen iki kırık test** (bizim değişikliğimizden değil): `takvim.e2e.ts:67` zaman bombasıydı — hatırlatma varsayılanı 3 gün olduğu için bugün 2026-11-02'ye 3 gün kala "yaklaşanlar kayboldu" denetimi kırıldı; "kaç gün önce" artık belirgin veriliyor. `firmalar.e2e.ts:144` başarı mesajını kapsamsız arıyordu, iki SGK işyeri kaydedilince iki öğeye denk geliyordu; `getByRole('status')…last()` ile kapsandı.
+
 ## Kalan işler
 
 - **Tebligat'ta gerçek veri** (Hakan 13:01): mükellefin GİB hesabı + mükellef onayı + canlı doğrulama kaydı (D33) gerekiyor; ajan kurum şifresi girmez, kullanıcı girer.

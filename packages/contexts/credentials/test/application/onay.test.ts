@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CONSENT_METHODS, consentStatus, recordConsent, revokeConsent, type Consent, type ConsentRepository } from '../../src/index.ts';
+import { activeConsentFirmIds, CONSENT_METHODS, consentStatus, recordConsent, revokeConsent, type Consent, type ConsentRepository } from '../../src/index.ts';
 
 // Mükellef onayı (CredentialConsent, D18/D46): müşavir mükelleften aldığı yazılı onayı tarih ve yöntemle beyan eder; geri alınabilir.
 const ctx = { sub: 'u-1', org: 'o-1' };
@@ -20,6 +20,7 @@ function depo() {
       return { ok: true, value: undefined };
     },
     status: async (_c, firmId) => kayit.get(firmId) ?? null,
+    activeFirmIds: async () => [...kayit.values()].filter((k) => k.active).map((k) => k.firmId),
   };
   return { r, kayit };
 }
@@ -49,5 +50,21 @@ describe('mükellef onayı', () => {
 
   it('yöntemler: sözleşme, dilekçe, e-posta, diğer yazılı', () => {
     expect(CONSENT_METHODS.map((m) => m.id)).toEqual(['sozlesme', 'dilekce', 'eposta', 'diger']);
+  });
+});
+
+describe('toplu onay okuma', () => {
+  it('etkin onayı olan firmalar tek çağrıda gelir (toplu e-Tebligat çekimi için; döngüde sorgu yok)', async () => {
+    const d = depo();
+    await recordConsent(ctx, { firmId: 'f-1', method: 'sozlesme', consentedOn: '2026-10-20', attested: true }, izinli, d.r, '2026-10-27');
+    await recordConsent(ctx, { firmId: 'f-2', method: 'eposta', consentedOn: '2026-10-21', attested: true }, izinli, d.r, '2026-10-27');
+    await recordConsent(ctx, { firmId: 'f-3', method: 'dilekce', consentedOn: '2026-10-22', attested: true }, izinli, d.r, '2026-10-27');
+    await revokeConsent(ctx, 'f-2', izinli, d.r);
+    const etkin = await activeConsentFirmIds(ctx, d.r);
+    expect([...etkin].sort()).toEqual(['f-1', 'f-3']);
+  });
+
+  it('hiç onay yoksa boş küme döner', async () => {
+    expect([...(await activeConsentFirmIds(ctx, depo().r))]).toEqual([]);
   });
 });

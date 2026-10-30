@@ -41,4 +41,8 @@ export class PgConsentRepository implements ConsentRepository {
       return k ? { ...k, recordedAt: k.recordedAt.toISOString() } : null;
     });
   }
+  activeFirmIds(ctx: Ctx) {
+    // Tek sorgu: toplu kurum işinde firma başına onay sorgulanmaz. Kapsam RLS ile sınırlıdır.
+    return this.tx(ctx, async (c) => (await c.query<{ firmId: string }>('select firm_id as "firmId" from credentials.consents where org_id = $1 and revoked_at is null', [ctx.org])).rows.map((r) => r.firmId));
+  }
 }

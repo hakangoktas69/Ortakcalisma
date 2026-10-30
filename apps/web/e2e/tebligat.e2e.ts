@@ -77,6 +77,42 @@ test.describe('e-Tebligat', () => {
     await expect(page.getByRole('button', { name: "e-Tebligat'ı GİB'den güncelle" })).toHaveCount(0);
   });
 
+  test('@F:tebligat.liste.sync tüm mükelleflerin e-Tebligatı tek tuşla çekilir; onayı ya da GİB hesabı olmayan atlanır', async ({ page }) => {
+    const hatalar = hataTopla(page);
+    const o = await ofisAc(true);
+    await girisYap(page, o.yonetici);
+    // Hazır: onaylı + hesaplı (çekilir), hesaplı ama onaysız (atlanır), hesapsız (atlanır)
+    const onayli = await firmaVeHesap(page);
+    await onayKaydet(page, onayli);
+    await firmaVeHesap(page);
+    await page.goto('/firmalar/kart/yeni');
+    await page.getByLabel('Firma / mükellef unvanı').fill(`Hesapsiz ${Date.now()} Ltd`);
+    await page.getByLabel('Firma türü').selectOption('Limited');
+    await page.getByLabel('VKN / TCKN').fill(fakeVkn());
+    await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Firma eklendi.' })).toBeVisible();
+
+    // Firma seçilmeden toplu çekim görünür; tek firma seçilince görünmez
+    await page.goto('/tebligat/liste');
+    const toplu = page.getByRole('button', { name: "Tüm mükelleflerin e-Tebligatını çek" });
+    await expect(toplu).toBeVisible();
+    await ekranDenetle(page);
+    await toplu.click();
+    const ozet = page.getByRole('status').filter({ hasText: 'güncelleme başlatıldı' });
+    await expect(ozet).toContainText('1 mükellef için güncelleme başlatıldı');
+    await expect(ozet).toContainText('2 atlandı');
+    await expect(ozet).toContainText('mükellef onayı yok');
+    await expect(ozet).toContainText('GİB hesabı yok');
+
+    // Açılan iş tamamlanınca yalnız onaylı firmanın listesi dolar
+    await page.goto(`/tebligat/liste?firma=${onayli}`);
+    await expect(page.getByRole('status').filter({ hasText: 'Son iş' })).toContainText('Tamamlandı', { timeout: 200_000 });
+    await page.reload();
+    await expect(page.getByText('23 kayıt listeleniyor.')).toBeVisible();
+    await expect(page.getByRole('button', { name: "Tüm mükelleflerin e-Tebligatını çek" })).toHaveCount(0);
+    expect(hatalar).toEqual([]);
+  });
+
   test('@F:tebligat.liste.sync açılan GİB hesabının kimliği firmanın VKN\'si değilse liste okunmaz', async ({ page }) => {
     const o = await ofisAc();
     await girisYap(page, o.yonetici);

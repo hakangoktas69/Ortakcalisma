@@ -29,8 +29,9 @@
 
 ## BFF uçları ve ekranlar
 
-- `POST /api/sync/etebligat` (`tebligat.liste.sync`), `PUT|DELETE /api/kurum-hesaplari/onay` (credentials, `firmalar.kurum_hesaplari.consent`).
-- Ekran: `/tebligat/liste` (firma süzgeci, güncelleme düğmesi yalnız onay varken).
+- `POST /api/sync/etebligat` (tek firma) ve `POST /api/sync/etebligat/toplu` (tüm mükellefler) — ikisi de `tebligat.liste.sync`; `PUT|DELETE /api/kurum-hesaplari/onay` (credentials, `firmalar.kurum_hesaplari.consent`).
+- Ekran: `/tebligat/liste` — firma seçiliyken tek firma güncellemesi (yalnız onay varken), firma seçili değilken "Tüm mükelleflerin e-Tebligatını çek".
+- **Toplu çekim firma başına ayrı iştir:** liste kurumda oturuma bağlıdır ve istekte mükellef kimliği taşınmaz, bu yüzden beyannamedeki gibi tek müşavir oturumuyla okunamaz. Karar `apps/web/src/bff/tebligat-toplu.ts`: arşivli, onaysız, GİB hesabı olmayan ya da şifresi hatalı/kilitli firma atlanır ve özette sayılır. Şifresi hatalı hesap bilerek denenmez (kurum hesabının kilitlenmesini önler, 05 §4).
 
 ## Testler
 

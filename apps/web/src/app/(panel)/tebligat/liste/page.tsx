@@ -8,6 +8,7 @@ import { isGorunumu } from '@/bff/isler.ts';
 import { konteyner } from '@/bff/konteyner.ts';
 import { baglam, sayfaIzni } from '@/bff/oturum.ts';
 import { TebligatGuncelle } from '@/features/sync/TebligatGuncelle.tsx';
+import { TopluTebligatGuncelle } from '@/features/sync/TopluTebligatGuncelle.tsx';
 import { FeatureGate } from '@/shared/ui/FeatureBadge.tsx';
 import { Baslik, Yasak } from '@/shared/ui/Sayfa.tsx';
 import { TabloKap } from '@/shared/ui/TabloKap.tsx';
@@ -49,6 +50,18 @@ export default async function TebligatListesi({ searchParams }: { searchParams: 
           Göster
         </button>
       </form>
+      {!secili && gunceller ? (
+        <section className="kart" aria-label="Toplu e-Tebligat güncelleme">
+          <h2>Tüm mükellefler</h2>
+          <p className="alt">
+            Her mükellefin e-Tebligat listesi kendi GİB hesabıyla okunur, bu yüzden mükellef başına ayrı iş açılır. Mükellef onayı ya da GİB hesabı olmayan, şifresi hatalı
+            olan mükellefler atlanır ve özet içinde sayılır.
+          </p>
+          <FeatureGate k="tebligat.liste.sync">
+            <TopluTebligatGuncelle csrf={oturum.csrf} />
+          </FeatureGate>
+        </section>
+      ) : null}
       {secili && gunceller ? (
         <section className="kart" aria-label="e-Tebligat güncelleme">
           {onay ? (
