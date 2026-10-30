@@ -18,25 +18,28 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;İki adımlı doğrulama | `oturum.mfa` | identity-access | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kur | `oturum.mfa.setup` | identity-access | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Doğrula | `oturum.mfa.verify` | identity-access | 🔴 | 0 |
-| **Ana Sayfa** | `genel_bakis` | workspace | 🔴 1/2 | 4 |
+| **Ana Sayfa** | `genel_bakis` | workspace | 🔴 4/5 | 56 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Genel bakış | `genel_bakis.panel` | workspace | 🟢 1/1 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `genel_bakis.panel.view` | workspace | 🟢 | 4 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Takvim | `genel_bakis.takvim` | workspace | 🔴 0/1 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `genel_bakis.takvim.view` | workspace | 🔴 | 0 |
-| **Firmalarım** | `firmalar` | portfolio | 🔴 10/15 | 57 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Firma listesi | `firmalar.liste` | portfolio | 🟢 2/2 | 9 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `firmalar.liste.view` | portfolio | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Takvim | `genel_bakis.takvim` | workspace | 🔴 3/4 | 52 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `genel_bakis.takvim.view` | workspace | 🟢 | 20 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tarihi düzelt | `genel_bakis.takvim.edit` | workspace | 🟢 | 6 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hatırlatma ekle | `genel_bakis.takvim.remind` | workspace | 🟢 | 13 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Takvimi kaynaklardan güncelle | `genel_bakis.takvim.sync` | workspace | 🔴 canlı | 13 |
+| **Firmalarım** | `firmalar` | portfolio | 🔴 10/15 | 100 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Firma listesi | `firmalar.liste` | portfolio | 🟢 2/2 | 14 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `firmalar.liste.view` | portfolio | 🟢 | 9 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dışa aktar | `firmalar.liste.export` | portfolio | 🟢 | 5 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Firma kartı | `firmalar.kart` | portfolio | 🟢 4/4 | 24 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `firmalar.kart.view` | portfolio | 🟢 | 8 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yeni firma | `firmalar.kart.create` | portfolio | 🟢 | 8 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Düzenle | `firmalar.kart.edit` | portfolio | 🟢 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Arşivle | `firmalar.kart.archive` | portfolio | 🟢 | 4 |
-| &nbsp;&nbsp;&nbsp;&nbsp;Kurum hesapları | `firmalar.kurum_hesaplari` | credentials | 🔴 2/4 | 8 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Durumu gör | `firmalar.kurum_hesaplari.view_status` | credentials | 🟢 | 4 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bilgileri gir | `firmalar.kurum_hesaplari.edit_credentials` | credentials | 🟢 | 4 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Kurum hesapları | `firmalar.kurum_hesaplari` | credentials | 🔴 2/4 | 46 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Durumu gör | `firmalar.kurum_hesaplari.view_status` | credentials | 🟢 | 5 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bilgileri gir | `firmalar.kurum_hesaplari.edit_credentials` | credentials | 🔴 | 24 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kullanım izni ver | `firmalar.kurum_hesaplari.grant_use` | credentials | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mükellef onayı | `firmalar.kurum_hesaplari.consent` | credentials | 🔴 | 0 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mükellef onayı | `firmalar.kurum_hesaplari.consent` | credentials | 🟢 | 17 |
 | &nbsp;&nbsp;&nbsp;&nbsp;GİB e-Beyanname sözleşmeleri | `firmalar.gib_sozlesmeler` | tax-filing | 🔴 2/3 | 16 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `firmalar.gib_sozlesmeler.view` | tax-filing | 🟢 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GİB'den güncelle | `firmalar.gib_sozlesmeler.sync` | tax-filing | 🔴 canlı | 8 |
@@ -59,10 +62,10 @@
 | &nbsp;&nbsp;&nbsp;&nbsp;Pilot bölge ayarları | `beyanname.pilot_bolge` | tax-filing | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `beyanname.pilot_bolge.view` | tax-filing | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Düzenle | `beyanname.pilot_bolge.edit` | tax-filing | 🔴 | 0 |
-| **e-Tebligat** | `tebligat` | — (atanmadı) | 🔴 0/2 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;e-Tebligat listesi | `tebligat.liste` | — (atanmadı) | 🔴 0/2 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `tebligat.liste.view` | — (atanmadı) | 🔴 | 0 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Güncelle | `tebligat.liste.sync` | — (atanmadı) | 🔴 canlı | 0 |
+| **e-Tebligat** | `tebligat` | notices | 🔴 1/2 | 21 |
+| &nbsp;&nbsp;&nbsp;&nbsp;e-Tebligat listesi | `tebligat.liste` | notices | 🔴 1/2 | 21 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `tebligat.liste.view` | notices | 🟢 | 11 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Güncelle | `tebligat.liste.sync` | notices | 🔴 canlı | 10 |
 | **SGK** | `sgk` | social-security | 🔴 3/11 | 17 |
 | &nbsp;&nbsp;&nbsp;&nbsp;SGK kontrol listesi | `sgk.kontrol` | social-security | 🟢 1/1 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `sgk.kontrol.view` | social-security | 🟢 | 4 |
@@ -108,6 +111,8 @@
 | **Notlar** | `notlar` | workspace | 🟢 2/2 | 8 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `notlar.view` | workspace | 🟢 | 4 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Oluştur | `notlar.create` | workspace | 🟢 | 4 |
+| **Portal kısayolları** | `kisayollar` | workspace | 🟢 1/1 | 5 |
+| &nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `kisayollar.view` | workspace | 🟢 | 5 |
 | **Uyarılar ve bildirimler** | `bildirimler` | notifications | 🔴 0/2 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Görüntüle | `bildirimler.view` | notifications | 🔴 | 0 |
 | &nbsp;&nbsp;&nbsp;&nbsp;Okundu işaretle | `bildirimler.mark_read` | notifications | 🔴 | 0 |

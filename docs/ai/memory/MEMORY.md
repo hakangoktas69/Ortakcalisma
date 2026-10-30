@@ -8,3 +8,4 @@
 - [Eworks dokümantasyonu](eworks-dokumantasyonu.md) — hedef mimari docs/hedef-mimari, DDD/TDD ve diğer rehberler docs/gelistirici-rehberi, eski pilot analizi docs/arsiv/mevcut-durum, karar kaydı docs/adr
 - [Paralel oturumlar](paralel-oturumlar.md) — aynı çalışma ağacında birden çok ajan oturumu; başkasının değişikliğini geri alma, commit'leri iş başına ayır, karışık dosyayı satır bazında böl
 - [Eworks e-Tebligat kararları](eworks-etebligat-kararlari.md) — D45 notices bağlamı, D46 mükellef onayı beyanı (firma hesabıyla iş onaysız açılmaz), belge açılmaz, okuma tarihi boşsa tebliğ edilmedi denmez; etkileri
+- [Eworks demo verisi](eworks-demo-verisi.md) — demo-veri işçi görevi ve dilimleri, sahte veri yalnız demo kipinde, Vault kök anahtarı düzeltmesi, Mert'in paralel çözümüyle çakışma

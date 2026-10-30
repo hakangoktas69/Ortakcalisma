@@ -70,31 +70,52 @@
     "context": "workspace"
   },
   "genel_bakis.takvim.view": {
+    "status": "green",
+    "green": 1,
+    "total": 1,
+    "tests": 20,
+    "context": "workspace"
+  },
+  "genel_bakis.takvim.edit": {
+    "status": "green",
+    "green": 1,
+    "total": 1,
+    "tests": 6,
+    "context": "workspace"
+  },
+  "genel_bakis.takvim.remind": {
+    "status": "green",
+    "green": 1,
+    "total": 1,
+    "tests": 13,
+    "context": "workspace"
+  },
+  "genel_bakis.takvim.sync": {
     "status": "red",
     "green": 0,
     "total": 1,
-    "tests": 0,
+    "tests": 13,
     "context": "workspace"
   },
   "genel_bakis.takvim": {
     "status": "red",
-    "green": 0,
-    "total": 1,
-    "tests": 0,
+    "green": 3,
+    "total": 4,
+    "tests": 52,
     "context": "workspace"
   },
   "genel_bakis": {
     "status": "red",
-    "green": 1,
-    "total": 2,
-    "tests": 4,
+    "green": 4,
+    "total": 5,
+    "tests": 56,
     "context": "workspace"
   },
   "firmalar.liste.view": {
     "status": "green",
     "green": 1,
     "total": 1,
-    "tests": 4,
+    "tests": 9,
     "context": "portfolio"
   },
   "firmalar.liste.export": {
@@ -108,7 +129,7 @@
     "status": "green",
     "green": 2,
     "total": 2,
-    "tests": 9,
+    "tests": 14,
     "context": "portfolio"
   },
   "firmalar.kart.view": {
@@ -150,14 +171,14 @@
     "status": "green",
     "green": 1,
     "total": 1,
-    "tests": 4,
+    "tests": 5,
     "context": "credentials"
   },
   "firmalar.kurum_hesaplari.edit_credentials": {
-    "status": "green",
-    "green": 1,
+    "status": "red",
+    "green": 0,
     "total": 1,
-    "tests": 4,
+    "tests": 24,
     "context": "credentials"
   },
   "firmalar.kurum_hesaplari.grant_use": {
@@ -168,17 +189,17 @@
     "context": "credentials"
   },
   "firmalar.kurum_hesaplari.consent": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
+    "tests": 17,
     "context": "credentials"
   },
   "firmalar.kurum_hesaplari": {
     "status": "red",
     "green": 2,
     "total": 4,
-    "tests": 8,
+    "tests": 46,
     "context": "credentials"
   },
   "firmalar.gib_sozlesmeler.view": {
@@ -234,7 +255,7 @@
     "status": "red",
     "green": 10,
     "total": 15,
-    "tests": 57,
+    "tests": 100,
     "context": "portfolio"
   },
   "beyanname.liste.view": {
@@ -343,32 +364,32 @@
     "context": "tax-filing"
   },
   "tebligat.liste.view": {
-    "status": "red",
-    "green": 0,
+    "status": "green",
+    "green": 1,
     "total": 1,
-    "tests": 0,
-    "context": null
+    "tests": 11,
+    "context": "notices"
   },
   "tebligat.liste.sync": {
     "status": "red",
     "green": 0,
     "total": 1,
-    "tests": 0,
-    "context": null
+    "tests": 10,
+    "context": "notices"
   },
   "tebligat.liste": {
     "status": "red",
-    "green": 0,
+    "green": 1,
     "total": 2,
-    "tests": 0,
-    "context": null
+    "tests": 21,
+    "context": "notices"
   },
   "tebligat": {
     "status": "red",
-    "green": 0,
+    "green": 1,
     "total": 2,
-    "tests": 0,
-    "context": null
+    "tests": 21,
+    "context": "notices"
   },
   "sgk.kontrol.view": {
     "status": "green",
@@ -683,6 +704,20 @@
     "green": 2,
     "total": 2,
     "tests": 8,
+    "context": "workspace"
+  },
+  "kisayollar.view": {
+    "status": "green",
+    "green": 1,
+    "total": 1,
+    "tests": 5,
+    "context": "workspace"
+  },
+  "kisayollar": {
+    "status": "green",
+    "green": 1,
+    "total": 1,
+    "tests": 5,
     "context": "workspace"
   },
   "bildirimler.view": {

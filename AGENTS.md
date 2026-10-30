@@ -46,6 +46,7 @@ Güncel dizin (`MEMORY.md`):
 - [Eworks dokümantasyonu](docs/ai/memory/eworks-dokumantasyonu.md) — hedef mimari docs/hedef-mimari, DDD/TDD ve diğer rehberler docs/gelistirici-rehberi, eski pilot analizi docs/arsiv/mevcut-durum, karar kaydı docs/adr
 - [Paralel oturumlar](docs/ai/memory/paralel-oturumlar.md) — aynı çalışma ağacında birden çok ajan oturumu; başkasının değişikliğini geri alma, commit'leri iş başına ayır, karışık dosyayı satır bazında böl
 - [Eworks e-Tebligat kararları](docs/ai/memory/eworks-etebligat-kararlari.md) — D45 notices bağlamı, D46 mükellef onayı beyanı (firma hesabıyla iş onaysız açılmaz), belge açılmaz, okuma tarihi boşsa tebliğ edilmedi denmez; etkileri
+- [Eworks demo verisi](docs/ai/memory/eworks-demo-verisi.md) — demo-veri işçi görevi ve dilimleri, sahte veri yalnız demo kipinde, Vault kök anahtarı düzeltmesi, Mert'in paralel çözümüyle çakışma
 <!-- senkron:bitis hafiza -->
 
 <!-- senkron:baslangic beceriler -->
