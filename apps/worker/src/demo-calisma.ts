@@ -10,7 +10,10 @@ import { CONSENT_METHODS, recordConsent, saveAccount, type ConsentRepository, ty
 import { changeStatus, createTask, listNotes, listTasks, addNote, type Can, type Ctx, type MemberPort, type NoteRepository, type TaskInput, type TaskRepository, type TaskStatus } from '@eworks/workspace';
 import { VARSAYILAN_TOHUM, adTohumu, gunEkle, sec, tohumluRastgele } from './demo-rastgele.ts';
 
-export type DemoFirma = { id: string; title: string };
+export type DemoFirma = { id: string; taxId: string; title: string };
+
+/** Sahte GİB'in beklediği şifre (`SAHTE_GIB_SIFRE`, compose varsayılanı). Gerçek bir kuruma yaramaz. */
+export const SAHTE_GIB_SIFRE = 'demo-gib-sifre';
 
 /** Mali müşavir bürosunun gerçekten tuttuğu türden işler. */
 const GOREV = [
@@ -131,10 +134,19 @@ export async function demoNotlariAc(
   return { eklenen, atlanan, hatalar };
 }
 
-/** Sahte ama biçimi geçerli kurum bilgileri. Gerçek bir hesaba karşılık gelmez; sahte GİB dışında hiçbir yerde işe yaramaz. */
-const sahteAlanlar = (kurum: Institution, rnd: () => number): Record<string, string> => {
+/**
+ * Sahte ama biçimi geçerli kurum bilgileri. Gerçek bir hesaba karşılık gelmez.
+ *
+ * GİB hesabı demo kipinde **gerçekten çalışır**: sahte GİB her kullanıcı kodunu kabul eder ama şifre
+ * `SAHTE_GIB_SIFRE` olmalıdır; ayrıca açılan hesabın ekranda görünen kimliğini ACL firmanın VKN/TCKN'siyle
+ * karşılaştırır (tutmazsa liste hiç okunmaz). Bu yüzden kullanıcı kodu firmanın kendi kimliğidir. Böylece
+ * demo kipinde "e-Tebligat'ı GİB'den güncelle" düğmesi gerçek hattı çalıştırıp liste getirir.
+ *
+ * SGK ve UETS'in sahte sunucusu yok; onların bilgileri rastgeledir ve hiçbir yere bağlanmaz.
+ */
+const sahteAlanlar = (kurum: Institution, rnd: () => number, kimlik: string, gibSifre: string): Record<string, string> => {
   const sifre = `demo-${Math.floor(rnd() * 1e9)}`;
-  if (kurum === 'GIB') return { username: `demo${Math.floor(rnd() * 1e7)}`, password: sifre };
+  if (kurum === 'GIB') return { username: kimlik, password: gibSifre };
   if (kurum === 'UETS') return { address: `demo-uets-${Math.floor(rnd() * 1e6)}`, password: sifre };
   return { username: String(10000000000 + Math.floor(rnd() * 8e10)).slice(0, 11), workplaceCode: '0001', systemPassword: sifre, workplacePassword: `${sifre}-isyeri` };
 };
@@ -149,11 +161,12 @@ export async function demoKurumHesaplariniAc(
   firmalar: readonly DemoFirma[],
   can: Can,
   d: { credentials: CredentialRepository; consents: ConsentRepository },
-  ayar: { tohum?: number; bugun?: Date; musavirId?: string } = {},
+  ayar: { tohum?: number; bugun?: Date; musavirId?: string; gibSifre?: string } = {},
 ): Promise<{ hesap: number; onay: number; hatalar: string[] }> {
   const tohum = ayar.tohum ?? VARSAYILAN_TOHUM;
   const bugun = ayar.bugun ?? new Date();
   const bugunGun = bugun.toISOString().slice(0, 10);
+  const gibSifre = ayar.gibSifre ?? SAHTE_GIB_SIFRE;
   let hesap = 0;
   let onay = 0;
   const hatalar: string[] = [];
@@ -161,7 +174,8 @@ export async function demoKurumHesaplariniAc(
   // Müşavirin kendi GİB hesabı: e-Beyanname sözleşme listesi bununla okunur, ekranda ayrı bir kart olarak görünür
   if (ayar.musavirId) {
     const rnd = tohumluRastgele((tohum ^ adTohumu(`musavir:${ayar.musavirId}`)) >>> 0);
-    const r = await saveAccount(ctx, { ownerKind: 'advisor', ownerId: ayar.musavirId, institution: 'GIB', fields: sahteAlanlar('GIB', rnd) }, d.credentials);
+    // Müşavir mükellef değildir; sözleşme listesi bu hesapla okunur, kimlik karşılaştırması yapılmaz
+    const r = await saveAccount(ctx, { ownerKind: 'advisor', ownerId: ayar.musavirId, institution: 'GIB', fields: sahteAlanlar('GIB', rnd, `demo${Math.floor(rnd() * 1e7)}`, gibSifre) }, d.credentials);
     if (r.ok) hesap++;
     else hatalar.push(`musavir_GIB:${r.error}`);
   }
@@ -174,7 +188,7 @@ export async function demoKurumHesaplariniAc(
     for (const { kurum, label } of kurumlar) {
       const r = await saveAccount(
         ctx,
-        { ownerKind: 'firm', ownerId: firma.id, institution: kurum, ...(label ? { label } : {}), fields: sahteAlanlar(kurum, rnd) },
+        { ownerKind: 'firm', ownerId: firma.id, institution: kurum, ...(label ? { label } : {}), fields: sahteAlanlar(kurum, rnd, firma.taxId, gibSifre) },
         d.credentials,
       );
       if (r.ok) hesap++;

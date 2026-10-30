@@ -185,6 +185,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       TAX_ID_HMAC_KEY: ${TAX_ID_HMAC_KEY}
       YIGIN_KIPI: ${YIGIN_KIPI:-demo}
+      # Demo GİB hesapları sahte GİB ile gerçekten çalışsın (kullanıcı kodu firmanın kimliği, şifre bu)
+      SAHTE_GIB_SIFRE: ${SAHTE_GIB_SIFRE:-demo-gib-sifre}
       S3_ENDPOINT: http://s3:8333
       S3_ACCESS_KEY: ${S3_ACCESS_KEY}
       S3_SECRET_KEY: ${S3_SECRET_KEY}

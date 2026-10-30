@@ -21,7 +21,7 @@ import { PgFilingRepository } from '@eworks/social-security';
 import { PgContractRepository, PgDeclarationRepository } from '@eworks/tax-filing';
 import { PgNoteRepository, PgTaskRepository } from '@eworks/workspace';
 import { demoBeyannameleriAc } from './demo-beyanname.ts';
-import { demoGorevleriAc, demoKurumHesaplariniAc, demoNotlariAc } from './demo-calisma.ts';
+import { demoGorevleriAc, demoKurumHesaplariniAc, demoNotlariAc, SAHTE_GIB_SIFRE } from './demo-calisma.ts';
 import { VARSAYILAN_TOHUM, adTohumu, sahteTckn, sahteVkn, sec, tohumluRastgele } from './demo-rastgele.ts';
 import { demoTebligatlariniAc } from './demo-tebligat.ts';
 import { belgePortu, firmaPortu } from './uygulayici.ts';
@@ -206,7 +206,10 @@ export async function main(env = process.env) {
     console.log(`✔ Demo not: ${notlar.eklenen} eklendi, ${notlar.atlanan} zaten vardı`);
     hatasizOlmali('Demo not', notlar.hatalar);
 
-    const kurum = await demoKurumHesaplariniAc(kullaniciCtx, kayitli, yetkili, { credentials: new PgCredentialRepository(router), consents: new PgConsentRepository(router) }, { tohum, musavirId: musavir });
+    const kurum = await demoKurumHesaplariniAc(kullaniciCtx, kayitli, yetkili, { credentials: new PgCredentialRepository(router), consents: new PgConsentRepository(router) },
+      // Sahte GİB'in beklediği şifre: demo kipinde "GİB'den güncelle" düğmesi gerçekten çalışsın
+      { tohum, musavirId: musavir, gibSifre: env['SAHTE_GIB_SIFRE'] ?? SAHTE_GIB_SIFRE },
+    );
     console.log(`✔ Demo kurum hesabı: ${kurum.hesap} hesap · ${kurum.onay} mükellef onayı`);
     hatasizOlmali('Demo kurum hesabı', kurum.hatalar);
   } finally {

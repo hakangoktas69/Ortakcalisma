@@ -12,10 +12,10 @@ const BUGUN_GUN = '2026-10-29';
 const hepsineIzin = () => true;
 
 const firmalar: DemoFirma[] = [
-  { id: 'firma-1', title: 'Çınar Tekstil Ltd. Şti.' },
-  { id: 'firma-2', title: 'Deniz Güneş' },
-  { id: 'firma-3', title: 'Ege Lojistik A.Ş.' },
-  { id: 'firma-4', title: 'Lale Gıda Ltd. Şti.' },
+  { id: 'firma-1', taxId: '4970337300', title: 'Çınar Tekstil Ltd. Şti.' },
+  { id: 'firma-2', taxId: '99674843808', title: 'Deniz Güneş' },
+  { id: 'firma-3', taxId: '6030000083', title: 'Ege Lojistik A.Ş.' },
+  { id: 'firma-4', taxId: '8742143898', title: 'Lale Gıda Ltd. Şti.' },
 ];
 
 function gorevDeposu() {
@@ -126,11 +126,13 @@ describe('demo notları', () => {
 
 function kurumDeposu() {
   const hesaplar = new Map<string, AccountStatus>();
+  const sirlar = new Map<string, Record<string, string>>();
   const onaylar = new Map<string, Consent>();
   const credentials: CredentialRepository = {
     save: async (_c, i) => {
       const id = `${i.ownerKind}|${i.ownerId}|${i.institution}|${i.label}`;
       hesaplar.set(id, { id, ownerKind: i.ownerKind, ownerId: i.ownerId, institution: i.institution, label: i.label, status: 'active', updatedAt: '', lastSuccessAt: null });
+      sirlar.set(id, i.secret);
       return { ok: true as const, value: { accountId: id } };
     },
     statuses: async () => [...hesaplar.values()],
@@ -143,8 +145,9 @@ function kurumDeposu() {
     },
     revoke: async () => ({ ok: true as const, value: undefined }),
     status: async (_c, firmId) => onaylar.get(firmId) ?? null,
+    activeFirmIds: async () => [...onaylar.keys()],
   };
-  return { credentials, consents, hesaplar, onaylar };
+  return { credentials, consents, hesaplar, sirlar, onaylar };
 }
 
 describe('demo kurum hesapları ve mükellef onayı', () => {
@@ -174,6 +177,29 @@ describe('demo kurum hesapları ve mükellef onayı', () => {
     const d = kurumDeposu();
     await demoKurumHesaplariniAc(ctx, firmalar, hepsineIzin, d, { tohum: 1, bugun: BUGUN });
     expect(d.onaylar.size).toBeLessThan(firmalar.length);
+  });
+
+  it('firma GİB hesabı sahte GİB ile gerçekten çalışır: kullanıcı kodu firmanın kimliği, şifre sahte GİB şifresi', async () => {
+    // Demo kipinde "e-Tebligat'ı GİB'den güncelle" düğmesi çalışmalı. Sahte GİB her kullanıcı kodunu kabul eder ama
+    // şifre SAHTE_GIB_SIFRE olmalı; ayrıca ekranda kimlik olarak kullanıcı kodunu gösterir ve ACL bunu firmanın
+    // VKN/TCKN'siyle karşılaştırır (eşleşmezse liste hiç okunmaz). İkisi de tutmazsa demo düğmesi hata verir.
+    const d = kurumDeposu();
+    await demoKurumHesaplariniAc(ctx, firmalar, hepsineIzin, d, { tohum: 1, bugun: BUGUN, gibSifre: 'demo-gib-sifre' });
+    for (const firma of firmalar) {
+      const sir = d.sirlar.get(`firm|${firma.id}|GIB|`);
+      expect(sir, `${firma.title}: GİB hesabı yok`).toBeDefined();
+      expect(sir?.username).toBe(firma.taxId);
+      expect(sir?.password).toBe('demo-gib-sifre');
+    }
+  });
+
+  it('SGK ve UETS şifreleri sahte GİB şifresi değildir (yalnız GİB sahte sunucuya bağlanır)', async () => {
+    const d = kurumDeposu();
+    await demoKurumHesaplariniAc(ctx, firmalar, hepsineIzin, d, { tohum: 1, bugun: BUGUN, gibSifre: 'demo-gib-sifre' });
+    for (const [id, sir] of d.sirlar) {
+      if (id.includes('|GIB|')) continue;
+      expect(Object.values(sir)).not.toContain('demo-gib-sifre');
+    }
   });
 
   it('müşavirin kendi GİB hesabı da kaydedilir (sözleşme listesi bu hesapla okunur)', async () => {
